@@ -1,10 +1,13 @@
 """
-S&P 500 scanner: downloads daily + hourly prices for every S&P 500 stock,
+S&P 500 scanner: downloads daily + intraday prices for every S&P 500 stock,
 computes indicators, support/resistance levels and trend lines, runs the
 rules in rules.py and sends Telegram alerts (with a chart) for possible trades.
 
 Prices come from Alpaca (official API, free plan, full all-exchange data
 delayed 15+ minutes), with Yahoo Finance as automatic backup.
+
+Two scan modes (SCAN_MODE env): "15m" uses 15-minute candles for entries (first
+3 hours after the open), "1h" uses hourly candles (rest of the day).
 
 Runs on GitHub Actions (see .github/workflows/scan.yml) or locally:
     pip install -r requirements.txt
@@ -34,9 +37,17 @@ TICKERS_URL = ("https://raw.githubusercontent.com/datasets/"
 ALPACA_URL = "https://data.alpaca.markets/v2/stocks/bars"
 DATA_DELAY_MINUTES = 16            # Alpaca free plan: full-market data must be 15+ min old
 STATE_FILE = "state.json"          # remembers sent alerts so you never get duplicates
-FRESH_MINUTES = 90                 # only alert on an hourly bar that closed recently
 DAILY_LOOKBACK = 120               # daily bars used for levels / trend lines (~6 months)
-HOURLY_LOOKBACK = 200              # hourly bars used for levels / trend lines (~1 month)
+INTRADAY_LOOKBACK = 200            # entry-chart candles used for levels / trend lines
+
+# Entry-chart settings per mode. "first"/"last" = earliest/latest candle START time (ET)
+# this mode handles; "fresh" = how recently the candle must have closed to alert on it.
+MODES = {
+    "15m": {"minutes": 15, "alpaca": "15Min", "days": 12, "yahoo": ("14d", "15m"),
+            "first": (9, 30), "last": (12, 15), "fresh": 35, "name": "15-min"},
+    "1h":  {"minutes": 60, "alpaca": "30Min", "days": 45, "yahoo": ("60d", "1h"),
+            "first": (11, 30), "last": (15, 30), "fresh": 75, "name": "hourly"},
+}
 PIVOT_WINDOW = 5                   # a swing high/low must be the extreme of +-5 bars
 MAX_CHART_ALERTS = 10              # full chart alerts per run; any extra setups go in one summary
 TELEGRAM_PAUSE = 1.5               # seconds between Telegram messages (avoids rate limits)
@@ -94,37 +105,38 @@ def alpaca_bars(tickers, timeframe, start, end, chunk=25, workers=8):
     return out
 
 
-def to_hourly(df30):
-    """30-minute bars -> regular-session hourly bars starting at :30 (9:30, 10:30 ... 15:30)."""
-    mins = df30.index.hour * 60 + df30.index.minute
-    df30 = df30[(mins >= 570) & (mins < 960)]               # 9:30-16:00 ET only
-    return (df30.resample("60min", offset="30min")
+def to_session(df, minutes):
+    """Keep regular-session prices (9:30-16:00 ET) and build candles of `minutes` length
+    starting at 9:30 (15-min: 9:30, 9:45 ...; hourly: 9:30, 10:30 ... 15:30)."""
+    mins = df.index.hour * 60 + df.index.minute
+    df = df[(mins >= 570) & (mins < 960)]
+    return (df.resample(f"{minutes}min", offset="30min")
             .agg({"Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"})
             .dropna())
 
 
-def get_prices(tickers, cutoff):
+def get_prices(tickers, cutoff, mode):
     """Alpaca first; any ticker Alpaca can't deliver is fetched from Yahoo instead."""
+    m = MODES[mode]
     end = cutoff.astimezone(dt.timezone.utc)
     t0 = time.time()
     daily = alpaca_bars(tickers, "1Day", end - dt.timedelta(days=400), end)
     print(f"Daily bars from Alpaca: {time.time() - t0:.0f}s", flush=True)
     t0 = time.time()
-    # 45 days ~ 31 trading days ~ 215 hourly candles, enough for the 200-candle lookback
-    hourly = {t: to_hourly(df) for t, df in
-              alpaca_bars(tickers, "30Min", end - dt.timedelta(days=45), end).items()}
-    print(f"30-minute bars from Alpaca: {time.time() - t0:.0f}s", flush=True)
+    intraday = {t: to_session(df, m["minutes"]) for t, df in
+                alpaca_bars(tickers, m["alpaca"], end - dt.timedelta(days=m["days"]), end).items()}
+    print(f"{m['name']} bars from Alpaca: {time.time() - t0:.0f}s", flush=True)
     daily = {t: d for t, d in daily.items() if len(d) > 60}
-    hourly = {t: h for t, h in hourly.items() if len(h) > 60}
-    good = [t for t in tickers if t in daily and t in hourly]
+    intraday = {t: h for t, h in intraday.items() if len(h) > 60}
+    good = [t for t in tickers if t in daily and t in intraday]
     missing = [t for t in tickers if t not in good]
     print(f"Alpaca: {len(good)} tickers OK, {len(missing)} via Yahoo backup", flush=True)
     if missing:
-        yd, yh = download(missing, "1y", "1d"), download(missing, "60d", "1h")
+        yd, yi = download(missing, "1y", "1d"), download(missing, *m["yahoo"])
         for t in missing:
-            if t in yd and t in yh:             # both timeframes from the same source
-                daily[t], hourly[t] = yd[t], yh[t]
-    return daily, hourly
+            if t in yd and t in yi:             # both timeframes from the same source
+                daily[t], intraday[t] = yd[t], yi[t]
+    return daily, intraday
 
 
 def download(tickers, period, interval, chunk=100):
@@ -145,17 +157,22 @@ def download(tickers, period, interval, chunk=100):
     return out
 
 
-def bar_end(ts):
-    """Hourly US bars start at :30 and the last one closes at 16:00 ET."""
-    return min(ts + dt.timedelta(hours=1), ts.replace(hour=16, minute=0))
+def bar_end(ts, minutes):
+    """When a candle closes. US candles start at :30/:45/:00/:15; the last one ends at 16:00 ET."""
+    return min(ts + dt.timedelta(minutes=minutes), ts.replace(hour=16, minute=0))
 
 
-def completed_hourly(df, cutoff):
+def completed_bars(df, cutoff, minutes):
     df = df.copy()
     df.index = df.index.tz_convert(ET) if df.index.tz else df.index.tz_localize(ET)
-    if bar_end(df.index[-1]) > cutoff:       # drop a bar that wasn't finished at the cutoff
+    if bar_end(df.index[-1], minutes) > cutoff:     # drop a candle that wasn't finished at the cutoff
         df = df.iloc[:-1]
     return df
+
+
+def in_window(ts, m):
+    """Is this candle (by its start time) one this mode is responsible for?"""
+    return m["first"] <= (ts.hour, ts.minute) <= m["last"]
 
 
 # ---------------------------------------------------------------- indicators
@@ -304,15 +321,17 @@ def send_telegram(text, image=None):
     return False
 
 
-def format_alert(ticker, signals, da, ha):
+def format_alert(ticker, signals, da, ha, mode):
     last = ha["df"].iloc[-1]
+    tf = mode
     longs = [s for s in signals if s[0] == "LONG"]
     side = "🟢 LONG" if longs else "🔴 SHORT"
     sup = da["support"][0][0] if da["support"] else None
     res = da["resistance"][0][0] if da["resistance"] else None
-    lines = [f"<b>{side} setup: {ticker}</b>  ${last.Close:.2f}"]
+    lines = [f"<b>{side} setup: {ticker}</b>  ${last.Close:.2f}",
+             f"<i>{MODES[mode]['name']} candle closed {bar_end(ha['df'].index[-1], MODES[mode]['minutes']):%H:%M} New York</i>"]
     lines += [f"• {desc}" for _, desc in signals]
-    lines.append(f"RSI(1h) {last.RSI:.0f} | ATR(1h) {last.ATR:.2f}")
+    lines.append(f"RSI({tf}) {last.RSI:.0f} | ATR({tf}) {last.ATR:.2f}")
     lines.append(f"Daily support {sup:.2f}" if sup else "Daily support: none nearby")
     lines.append(f"Daily resistance {res:.2f}" if res else "Daily resistance: none nearby")
     lines.append(f'<a href="https://www.tradingview.com/chart/?symbol={ticker.replace("-", ".")}">Open chart</a>')
@@ -344,13 +363,15 @@ def main():
     t0 = time.time()
     now = dt.datetime.now(ET)
     force = os.environ.get("ALERT_ANY_TIME") == "1"
+    mode = os.environ.get("SCAN_MODE", "1h")
+    m = MODES[mode]
     state = load_state()
 
     tickers = get_tickers()
-    log(f"{now:%Y-%m-%d %H:%M} ET: scanning {len(tickers)} tickers"
+    log(f"{now:%Y-%m-%d %H:%M} ET: {m['name']} scan of {len(tickers)} tickers"
         + (" (test mode)" if force else ""), t0)
     cutoff = now - dt.timedelta(minutes=DATA_DELAY_MINUTES)
-    daily, hourly = get_prices(tickers, cutoff)
+    daily, intraday = get_prices(tickers, cutoff, mode)
     log(f"Prices downloaded for {len(daily)} tickers", t0)
 
     # 1) analyze everything first
@@ -358,21 +379,25 @@ def main():
     for n, t in enumerate(tickers, 1):
         if n % 100 == 0:
             log(f"Analyzed {n}/{len(tickers)}", t0)
-        if t not in daily or t not in hourly:
+        if t not in daily or t not in intraday:
             continue
         try:
-            h = completed_hourly(hourly[t], cutoff)
+            h = completed_bars(intraday[t], cutoff, m["minutes"])
             if len(h) < 60:
                 continue
-            if not force and now - bar_end(h.index[-1]) > dt.timedelta(minutes=FRESH_MINUTES):
-                continue
+            if not force:
+                if not in_window(h.index[-1], m):
+                    continue
+                if now - bar_end(h.index[-1], m["minutes"]) > dt.timedelta(minutes=m["fresh"]):
+                    continue
             scanned += 1
             da = analyze(add_indicators(daily[t].copy()), DAILY_LOOKBACK)
-            ha = analyze(add_indicators(h), HOURLY_LOOKBACK)
+            ha = analyze(add_indicators(h), INTRADAY_LOOKBACK)
             trend = rules.trend_filter(da)
             signals = rules.entry_signals(da, ha, trend)
-            bar_key = h.index[-1].isoformat()
-            signals = [s for s in signals if f"{t}|{s[1]}|{bar_key}" not in state]
+            bar_key = f"{mode}|{h.index[-1].isoformat()}"
+            # one alert per stock, direction and candle (even if a level shifts by a few cents)
+            signals = [s for s in signals if f"{t}|{s[0]}|{bar_key}" not in state]
             if signals:
                 last = ha["df"].iloc[-1]
                 vol_ratio = float(last.Volume / last.VolAvg20) if last.VolAvg20 else 0.0
@@ -388,19 +413,19 @@ def main():
 
     def mark(item):
         for s in item["signals"]:
-            state[f"{item['t']}|{s[1]}|{item['bar_key']}"] = now.isoformat()
+            state[f"{item['t']}|{s[0]}|{item['bar_key']}"] = now.isoformat()
 
     sent = 0
     for item in top:
         try:
             chart = make_chart(item["t"], item["da"])
-            if send_telegram(format_alert(item["t"], item["signals"], item["da"], item["ha"]), chart):
+            if send_telegram(format_alert(item["t"], item["signals"], item["da"], item["ha"], mode), chart):
                 mark(item)
                 sent += 1
         except Exception as e:
             print(f"{item['t']}: alert failed: {e}", flush=True)
     if rest:
-        lines = [f"<b>+{len(rest)} more setups this hour</b> (strongest first)"]
+        lines = [f"<b>+{len(rest)} more setups</b> ({m['name']} candles, strongest first)"]
         for item in rest:
             side = "🟢" if any(s[0] == "LONG" for s in item["signals"]) else "🔴"
             price = item["ha"]["df"]["Close"].iat[-1]
@@ -421,7 +446,7 @@ def main():
     save_state(state, now)
     log(f"Done: {sent} chart alerts sent" + (f", {len(rest)} more in the summary" if rest else ""), t0)
     if scanned == 0 and not force:
-        print("No fresh hourly bar (market closed?). Use test mode to scan anyway.")
+        print(f"No fresh {m['name']} candle in this mode's window. Use test mode to scan anyway.")
 
 
 if __name__ == "__main__":
