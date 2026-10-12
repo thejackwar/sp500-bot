@@ -43,6 +43,17 @@ It takes about 3–5 minutes. The log's first lines show `Alpaca: 50X tickers OK
 - **Trend lines:** a rising line from the lowest swing low to the latest one, and a falling line from the highest swing high to the latest one. A line is discarded if price broke through it too often.
 - **No duplicates:** each signal on each bar is sent only once.
 
+## Chart patterns (`patterns.py`)
+Recognised automatically on the **daily and hourly** charts:
+- **Reversal:** double top/bottom, triple top/bottom, head & shoulders (and inverse), rising/falling wedge, rounding bottom, bump & run
+- **Continuation:** ascending/descending/symmetrical triangle, rectangle, bull/bear flag, bull/bear pennant
+- **Harmonic:** ABCD, Gartley, Butterfly
+
+How it works: swing highs/lows are found with a zigzag that ignores moves smaller than 2× ATR, and each pattern is checked against those swings.
+- **Forming:** listed in one 👀 watchlist message per check (each pattern only once).
+- **Breakout:** a chart alert with the pattern drawn, plus entry, stop and target (target = the pattern's height, the usual "measured move"). Breakouts need the candle's volume at least 1.3× its 20-candle average and a clear close beyond the line. Harmonics alert when price reaches the completion zone and turns.
+- Diamond patterns are not detected (too rare and loosely shaped to recognise reliably).
+
 Indicators already computed and available in `rules.py`: EMA 20/50/200, RSI(14), MACD(12,26,9), ATR(14), 20-bar average volume.
 
 ## Notes
