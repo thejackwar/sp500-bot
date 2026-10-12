@@ -1,13 +1,14 @@
-# S&P 500 Trade Alert Bot
+# S&P 100 Trade Alert Bot
 
-Scans all ~500 S&P 500 stocks during US market hours: **every 15 minutes on 15-minute candles for the first 3 hours after the open** (about 16:00–18:45 Milan time), then **every hour on hourly candles** until the close (about 18:50–22:50 Milan time).
-It computes indicators, support/resistance levels and trend lines, then sends a Telegram
-message with a chart whenever a setup appears. It **never places trades**. It only alerts you.
+Scans the S&P 100 (list refreshed from Wikipedia every run, built-in backup copy; GOOGL only, not GOOG) during US market hours: **every 15 minutes on 15-minute candles for the first 3 hours after the open** (about 16:00–18:45 Milan time), then **every hour on hourly candles** until the close (about 18:50–22:50 Milan time).
+It runs the strategy in `rules.py` (200-day moving average, Bollinger Bands, Donchian channel) and sends a Telegram
+message with a chart whenever a signal appears. It **never places trades**. It only alerts you.
 
 | File | What it does |
 |---|---|
 | `scanner.py` | Downloads prices, computes indicators, levels and trend lines, sends alerts |
-| `rules.py` | **Your trading rules.** The only file you normally edit |
+| `rules.py` | **Your strategy** (200-day MA, Bollinger, Donchian). Settings at the top |
+| `patterns.py` | Chart-pattern recognition (switch: `PATTERNS_ENABLED` in `scanner.py`) |
 | `.github/workflows/scan.yml` | The schedule that runs it on GitHub for free |
 
 ## 1. Create your Telegram bot (5 min)
@@ -34,14 +35,27 @@ message with a chart whenever a setup appears. It **never places trades**. It on
 
 ## 4. Test it
 **Actions** tab → **S&P 500 scan** → **Run workflow** → pick 15m or 1h → tick *Test mode* → **Run**.
-It takes about 3–5 minutes. The log's first lines show `Alpaca: 50X tickers OK` when the keys work. Any current setups arrive on Telegram. After that it runs automatically every weekday.
+It takes about 3–5 minutes. The log shows `Alpaca: 100 tickers OK` when the keys work. Any current setups arrive on Telegram. After that it runs automatically every weekday.
 
-## How it works
-- **Daily chart (trend):** decides whether longs or shorts are allowed (placeholder rule: price above EMA50 above EMA200 = long).
-- **Entry chart:** 15-minute candles from 9:30 to 12:30 New York time, hourly candles after that. Each check looks at the candle that just closed.
-- **Support/resistance:** swing highs and lows that cluster within half an ATR, with at least 2 touches.
-- **Trend lines:** a rising line from the lowest swing low to the latest one, and a falling line from the highest swing high to the latest one. A line is discarded if price broke through it too often.
-- **No duplicates:** each signal on each bar is sent only once.
+## The strategy (`rules.py`)
+**Daily chart** (checked during the day with the latest price; each alert once per day):
+- 🟢/🔴 Price crosses above/below the **200-day moving average**
+- 🟢/🔴 Price breaks above/below the **Bollinger Bands** (20 days, 2 std dev)
+- ⚪ **Bollinger squeeze:** bands at their narrowest in ~6 months, a big move often follows
+- 🟢/🔴 **Donchian breakout:** new 20-day high/low
+
+**⭐ STRONG** when it all lines up: price on the right side of the 200-day MA + Donchian breakout in that direction + Bollinger confirmation (price beyond the band, or a squeeze in the last 10 candles).
+
+**Intraday chart** (15-minute candles 9:30–12:30 New York, hourly after): slower settings (Donchian 55, Bollinger 2.5 std) and **only ⭐ strong setups** are sent. Short candles break 20-candle highs/lows constantly (about 240 alerts a day in testing). Expect roughly **25–30 alerts a day** in total.
+
+Up to 10 stocks per check get a chart alert (strongest first); any others are listed in one summary message. Every alert shows the 200-day MA (and distance from it), the daily Bollinger and Donchian levels, and a TradingView link.
+
+## Charts
+Every alert comes with a **candlestick chart on a black background** (green = up candle, red = down candle):
+- **Strategy alert:** Bollinger Bands (shaded), Donchian channel, 200-day MA (daily), squeeze markers.
+- **Pattern breakout:** the chart switches to the pattern's timeframe (daily or hourly) and draws the pattern in yellow: lines, labelled swing points (LS/Head/RS, 1-2-3, X-A-B-C-D…), plus entry, stop and target.
+- If a stock gets a strategy alert while a pattern is still **forming** on that chart, the forming pattern is drawn too.
+
 
 ## Chart patterns (`patterns.py`)
 Recognised automatically on the **daily and hourly** charts:
@@ -54,11 +68,10 @@ How it works: swing highs/lows are found with a zigzag that ignores moves smalle
 - **Breakout:** a chart alert with the pattern drawn, plus entry, stop and target (target = the pattern's height, the usual "measured move"). Breakouts need the candle's volume at least 1.3× its 20-candle average and a clear close beyond the line. Harmonics alert when price reaches the completion zone and turns.
 - Diamond patterns are not detected (too rare and loosely shaped to recognise reliably).
 
-Indicators already computed and available in `rules.py`: EMA 20/50/200, RSI(14), MACD(12,26,9), ATR(14), 20-bar average volume.
 
 ## Notes
 - **Prices:** Alpaca's official API on the free plan. Data covers all US exchanges (accurate prices and volume) but must be 15+ minutes old, so each check runs about 17–20 minutes after its candle closes. A setup reaches you about 20 minutes after its candle closes. Good for swing trades, not for scalping.
 - **Backup:** if Alpaca fails for some tickers or the whole run, those tickers come from Yahoo Finance automatically. Without Alpaca keys, the bot uses Yahoo for everything.
-- A private repo gets 2,000 free minutes a month. This bot uses roughly 1,100–1,300. Runs outside the trading window stop after a few seconds without downloading anything.
+- A private repo gets 2,000 free minutes a month. This bot uses roughly 800–1,100. Runs outside the trading window stop after a few seconds without downloading anything.
 - GitHub pauses schedules after 60 days with no commits. Any small edit restarts them.
 - Signals are possible setups, not advice. Backtest your rules before trading real money.
