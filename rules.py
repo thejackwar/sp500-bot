@@ -1,59 +1,119 @@
 """
-YOUR TRADING RULES: this is the only file you need to change.
+YOUR STRATEGY: 200-day moving average, Bollinger Bands and Donchian channel.
 
-The three rules below are PLACEHOLDERS so the bot works end to end.
-They will be replaced with Giacomo's own indicators and conditions.
+Individual alerts (each sent once per candle / per day):
+    200-day MA   price crosses above / below the 200-day simple moving average (daily chart)
+    Bollinger    price breaks above the upper band / below the lower band (20 candles, 2 std dev)
+    Squeeze      Bollinger bands at their narrowest in ~6 months (daily) / 120 candles (intraday)
+    Donchian     new 20-candle high / low (price breaks the Donchian channel)
+These individual alerts come from the DAILY chart (checked with the latest price during the day).
 
-What each function receives (da = daily analysis, ha = hourly analysis):
-    x["df"]          price table with Open/High/Low/Close/Volume plus
-                     EMA20, EMA50, EMA200, RSI, MACD, MACD_signal, ATR, VolAvg20
-    x["support"]     list of (price, touches) below current price, nearest first
-    x["resistance"]  list of (price, touches) above current price, nearest first
-    x["up_line"]     rising trend line or None  -> ["now"] = its value on the last bar
-    x["down_line"]   falling trend line or None -> ["now"] = its value on the last bar
+The intraday chart (15-minute candles for the first 3 hours, hourly after that) uses slower
+settings (Donchian 55, Bollinger 2.5 std) and only sends STRONG setups, because short candles
+break 20-candle highs/lows far too often (~240 alerts a day across the S&P 100 in testing).
+
+STRONG alert (marked with a star) when everything lines up:
+    LONG  = price above the 200-day MA + new Donchian high + Bollinger confirms
+    SHORT = price below the 200-day MA + new Donchian low  + Bollinger confirms
+    "Bollinger confirms" = price beyond the band on that chart, or a squeeze in the last few candles.
+
+Change the numbers below to tune the strategy.
 """
+import pandas as pd
+
+SMA_LONG = 200                   # the 200-day moving average
+BB_PERIOD = 20                   # Bollinger Bands length
+SETTINGS = {                     # per chart: Bollinger width (std devs) and Donchian length
+    "daily":    {"bb_std": 2.0, "donchian": 20},
+    "intraday": {"bb_std": 2.5, "donchian": 55},
+}
+INTRADAY_STRONG_ONLY = True      # intraday chart: only send STRONG setups (False = every event)
+SQUEEZE_LOOKBACK = {"daily": 125, "intraday": 120}   # "narrowest in N candles" (125 days = ~6 months)
+SQUEEZE_RECENT = 10              # a squeeze in the last N candles counts as Bollinger confirmation
 
 
-def trend_filter(da):
-    """Daily chart decides the direction we're allowed to trade."""
-    last = da["df"].iloc[-1]
-    return {
-        "long": last.Close > last.EMA50 > last.EMA200,
-        "short": last.Close < last.EMA50 < last.EMA200,
+def add_strategy_indicators(df, squeeze_lookback, bb_std=2.0, donchian=20):
+    df = df.copy()
+    c = df["Close"]
+    df["SMA200"] = c.rolling(SMA_LONG).mean()
+    mid = c.rolling(BB_PERIOD).mean()
+    sd = c.rolling(BB_PERIOD).std(ddof=0)
+    df["BB_mid"], df["BB_up"], df["BB_lo"] = mid, mid + bb_std * sd, mid - bb_std * sd
+    df["BB_width"] = (df["BB_up"] - df["BB_lo"]) / mid
+    # Donchian channel = highest high / lowest low of the PREVIOUS N candles
+    df["DC_high"] = df["High"].rolling(donchian).max().shift(1)
+    df["DC_low"] = df["Low"].rolling(donchian).min().shift(1)
+    df.attrs["donchian"] = donchian
+    df["Squeeze"] = df["BB_width"] <= df["BB_width"].rolling(squeeze_lookback).min().shift(1)
+    return df
+
+
+def _timeframe_events(df, tf):
+    """Events on one chart. Each event: (direction, code, text). Direction LONG/SHORT/WATCH."""
+    cur, prev = df.iloc[-1], df.iloc[-2]
+    ev = []
+    if pd.notna(cur.BB_up) and pd.notna(prev.BB_up):
+        if prev.Close <= prev.BB_up and cur.Close > cur.BB_up:
+            ev.append(("LONG", "bb_up", f"Broke above upper Bollinger band {cur.BB_up:.2f} ({tf})"))
+        if prev.Close >= prev.BB_lo and cur.Close < cur.BB_lo:
+            ev.append(("SHORT", "bb_lo", f"Broke below lower Bollinger band {cur.BB_lo:.2f} ({tf})"))
+    if pd.notna(cur.DC_high) and pd.notna(prev.DC_high):
+        unit = "day" if tf == "daily" else "candle"
+        n = df.attrs.get("donchian", 20)
+        if prev.Close <= prev.DC_high and cur.Close > cur.DC_high:
+            ev.append(("LONG", "dc_up", f"New {n}-{unit} high: broke Donchian high {cur.DC_high:.2f} ({tf})"))
+        if prev.Close >= prev.DC_low and cur.Close < cur.DC_low:
+            ev.append(("SHORT", "dc_lo", f"New {n}-{unit} low: broke Donchian low {cur.DC_low:.2f} ({tf})"))
+    if bool(cur.Squeeze) and not bool(prev.Squeeze):
+        span = "~6 months" if tf == "daily" else f"{SQUEEZE_LOOKBACK['intraday']} candles"
+        ev.append(("WATCH", "squeeze", f"Bollinger squeeze: bands narrowest in {span}, a big move often follows ({tf})"))
+    return ev
+
+
+def _confirms(df, direction):
+    cur = df.iloc[-1]
+    beyond = cur.Close > cur.BB_up if direction == "LONG" else cur.Close < cur.BB_lo
+    recent_squeeze = bool(df["Squeeze"].iloc[-SQUEEZE_RECENT - 1:].any())
+    return bool(beyond) or recent_squeeze
+
+
+def evaluate(daily, intraday, tf_name):
+    """daily: daily candles incl. today's candle so far. intraday: completed 15-min/hourly candles.
+    Returns (events, context, daily_df, intraday_df). Each event is a dict with
+    dir, code, text, tf ("daily" or the intraday name), strong (bool)."""
+    d = add_strategy_indicators(daily, SQUEEZE_LOOKBACK["daily"], **SETTINGS["daily"])
+    h = add_strategy_indicators(intraday, SQUEEZE_LOOKBACK["intraday"], **SETTINGS["intraday"])
+    cur, prev = d.iloc[-1], d.iloc[-2]
+    events = []
+    if pd.notna(cur.SMA200) and pd.notna(prev.SMA200):
+        if prev.Close <= prev.SMA200 and cur.Close > cur.SMA200:
+            events.append({"dir": "LONG", "code": "sma_up", "tf": "daily",
+                           "text": f"Crossed above the 200-day moving average {cur.SMA200:.2f}"})
+        if prev.Close >= prev.SMA200 and cur.Close < cur.SMA200:
+            events.append({"dir": "SHORT", "code": "sma_dn", "tf": "daily",
+                           "text": f"Crossed below the 200-day moving average {cur.SMA200:.2f}"})
+    for frame, tf in ((d, "daily"), (h, tf_name)):
+        for direction, code, text in _timeframe_events(frame, tf):
+            events.append({"dir": direction, "code": code, "tf": tf, "text": text})
+
+    # STRONG: trend (200-day MA) + Donchian breakout + Bollinger confirmation on the same chart
+    above = pd.notna(cur.SMA200) and cur.Close > cur.SMA200
+    below = pd.notna(cur.SMA200) and cur.Close < cur.SMA200
+    for e in events:
+        e["strong"] = False
+        frame = d if e["tf"] == "daily" else h
+        if e["code"] == "dc_up" and above and _confirms(frame, "LONG"):
+            e["strong"] = True
+        if e["code"] == "dc_lo" and below and _confirms(frame, "SHORT"):
+            e["strong"] = True
+
+    if INTRADAY_STRONG_ONLY:
+        events = [e for e in events if e["tf"] == "daily" or e["strong"]]
+
+    context = {
+        "price": float(h["Close"].iat[-1]),
+        "sma200": float(cur.SMA200) if pd.notna(cur.SMA200) else None,
+        "bb": (float(cur.BB_lo), float(cur.BB_up)) if pd.notna(cur.BB_up) else None,
+        "dc": (float(cur.DC_low), float(cur.DC_high)) if pd.notna(cur.DC_high) else None,
     }
-
-
-def entry_signals(da, ha, trend):
-    """Hourly chart decides the entry. Return a list of (direction, description)."""
-    h = ha["df"]
-    last, prev = h.iloc[-1], h.iloc[-2]
-    atr = last.ATR
-    levels_below = da["support"][:3] + ha["support"][:3]
-    levels_above = da["resistance"][:3] + ha["resistance"][:3]
-    out = []
-
-    if trend["long"]:
-        # 1) Bounce off support: previous bar dipped to a level, this bar closed higher, RSI not hot
-        for lvl, touches in levels_below:
-            if abs(prev.Low - lvl) <= 0.5 * atr and last.Close > prev.Close and last.RSI < 50:
-                out.append(("LONG", f"Bounce off support {lvl:.2f} ({touches} touches)"))
-                break
-        # 2) Breakout above resistance on strong volume
-        #    (a level just broken now sits *below* price, so it's in the support list)
-        for lvl, touches in levels_below:
-            if prev.Close < lvl < last.Close and last.Volume > 1.5 * last.VolAvg20:
-                out.append(("LONG", f"Breakout above {lvl:.2f} on {last.Volume / last.VolAvg20:.1f}x volume"))
-                break
-        # 3) Touch of the rising trend line on the daily chart
-        ln = da["up_line"]
-        if ln and abs(last.Low - ln["now"]) <= 0.3 * da["df"]["ATR"].iat[-1] and last.Close > ln["now"]:
-            out.append(("LONG", f"Holding the daily uptrend line ({ln['now']:.2f})"))
-
-    if trend["short"]:
-        # 4) Breakdown: a support just broken now sits *above* price
-        for lvl, touches in levels_above:
-            if prev.Close > lvl > last.Close and last.Volume > 1.5 * last.VolAvg20:
-                out.append(("SHORT", f"Breakdown below support {lvl:.2f} on strong volume"))
-                break
-
-    return out
+    return events, context, d, h
