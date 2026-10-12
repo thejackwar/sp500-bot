@@ -29,6 +29,7 @@ import pandas as pd
 import requests
 import yfinance as yf
 
+import patterns
 import rules
 
 ET = ZoneInfo("America/New_York")
@@ -43,13 +44,14 @@ INTRADAY_LOOKBACK = 200            # entry-chart candles used for levels / trend
 # Entry-chart settings per mode. "first"/"last" = earliest/latest candle START time (ET)
 # this mode handles; "fresh" = how recently the candle must have closed to alert on it.
 MODES = {
-    "15m": {"minutes": 15, "alpaca": "15Min", "days": 12, "yahoo": ("14d", "15m"),
+    "15m": {"minutes": 15, "alpaca": "15Min", "days": 21, "yahoo": ("14d", "15m"),
             "first": (9, 30), "last": (12, 15), "fresh": 35, "name": "15-min"},
     "1h":  {"minutes": 60, "alpaca": "30Min", "days": 45, "yahoo": ("60d", "1h"),
             "first": (11, 30), "last": (15, 30), "fresh": 75, "name": "hourly"},
 }
 PIVOT_WINDOW = 5                   # a swing high/low must be the extreme of +-5 bars
 MAX_CHART_ALERTS = 10              # full chart alerts per run; any extra setups go in one summary
+MAX_WATCHLIST = 40                 # forming patterns listed per check (the rest are counted)
 TELEGRAM_PAUSE = 1.5               # seconds between Telegram messages (avoids rate limits)
 
 
@@ -175,6 +177,36 @@ def in_window(ts, m):
     return m["first"] <= (ts.hour, ts.minute) <= m["last"]
 
 
+def with_today(daily, h):
+    """Daily candles with today's candle rebuilt from the intraday candles seen so far,
+    so daily trend and daily patterns react during the day."""
+    d = daily.copy()
+    idx = d.index
+    if idx.tz is not None:
+        idx = idx.tz_convert(ET).tz_localize(None)
+    d.index = idx.normalize()
+    today = h.index[-1].date()
+    t = h[h.index.date == today]
+    if t.empty:
+        return d[["Open", "High", "Low", "Close", "Volume"]]
+    d = d[d.index.date != today][["Open", "High", "Low", "Close", "Volume"]]
+    row = pd.DataFrame({"Open": [t["Open"].iat[0]], "High": [t["High"].max()], "Low": [t["Low"].min()],
+                        "Close": [t["Close"].iat[-1]], "Volume": [t["Volume"].sum()]},
+                       index=[pd.Timestamp(today)])
+    return pd.concat([d, row])
+
+
+def hourly_from(h, mode, cutoff):
+    """Completed hourly candles for pattern detection (built from 15-min candles in 15m mode)."""
+    if mode == "1h":
+        return h
+    hr = (h.resample("60min", offset="30min")
+          .agg({"Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"}).dropna())
+    if len(hr) and bar_end(hr.index[-1], 60) > cutoff:
+        hr = hr.iloc[:-1]
+    return hr
+
+
 # ---------------------------------------------------------------- indicators
 def add_indicators(df):
     c, h, l = df["Close"], df["High"], df["Low"]
@@ -286,6 +318,43 @@ def make_chart(ticker, da):
     return buf.getvalue()
 
 
+def make_pattern_chart(ticker, d, p):
+    """Chart of the pattern on its own timeframe: lines, swing points, entry/stop/target."""
+    fig, ax = plt.subplots(figsize=(10, 5.5), dpi=110)
+    x = np.arange(len(d))
+    start = max(0, min(k[0] for k in p["keys"]) - 25)
+    ax.vlines(x, d["Low"].values, d["High"].values, color="#bbbbbb", lw=0.7)
+    ax.plot(x, d["Close"].values, color="#222", lw=1.2)
+    for (x1, y1), (x2, y2) in p["lines"]:
+        ax.plot([x1, x2], [y1, y2], color="#ff7f0e", lw=1.8)
+    for i, price, label in p["points"]:
+        ax.scatter([i], [price], color="#ff7f0e", s=18, zorder=3)
+        if label:
+            ax.annotate(label, (i, price), textcoords="offset points", xytext=(0, 7), ha="center", fontsize=8)
+    levels = ((p["level"], "#1f77b4", "entry"), (p["stop"], "#d62728", "stop"), (p["target"], "#2ca02c", "target"))
+    for val, col, lab in levels:
+        ax.axhline(val, color=col, ls="--", lw=0.9)
+        ax.text(len(d) - 0.5, val, f" {lab} {val:.2f}", color=col, va="center", fontsize=8,
+                bbox=dict(facecolor="white", edgecolor="none", pad=1))
+    seen = d.iloc[start:]
+    lo = min(seen["Low"].min(), *(v for v, _, _ in levels))
+    hi = max(seen["High"].max(), *(v for v, _, _ in levels))
+    ax.set_xlim(start, len(d) + 8)
+    ax.set_ylim(lo - 0.03 * (hi - lo), hi + 0.03 * (hi - lo))
+    ts = d[d.columns[0]]
+    step = max(1, (len(d) - start) // 6)
+    ticks = list(range(start, len(d), step))
+    ax.set_xticks(ticks)
+    ax.set_xticklabels([pd.Timestamp(ts.iat[i]).strftime("%d %b") for i in ticks])
+    ax.set_title(f"{ticker} {p['timeframe']}: {p['name']} ({p['stage']})")
+    ax.grid(alpha=0.25)
+    buf = io.BytesIO()
+    fig.tight_layout()
+    fig.savefig(buf, format="png")
+    plt.close(fig)
+    return buf.getvalue()
+
+
 def send_telegram(text, image=None):
     """Send one message, pacing requests and retrying when Telegram says "slow down".
     Returns True if the message was delivered."""
@@ -340,6 +409,19 @@ def format_alert(ticker, signals, da, ha, mode):
 
 
 # ---------------------------------------------------------------- main
+def send_long(lines):
+    """Send a list of lines as one or more Telegram messages (max 4096 characters each)."""
+    ok, chunk = True, ""
+    for line in lines:
+        if len(chunk) + len(line) > 3900:
+            ok &= send_telegram(chunk)
+            chunk = ""
+        chunk += line + "\n"
+    if chunk:
+        ok &= send_telegram(chunk)
+    return ok
+
+
 def load_state():
     try:
         with open(STATE_FILE) as f:
@@ -375,7 +457,7 @@ def main():
     log(f"Prices downloaded for {len(daily)} tickers", t0)
 
     # 1) analyze everything first
-    found, scanned = [], 0
+    found, watch, scanned = [], [], 0
     for n, t in enumerate(tickers, 1):
         if n % 100 == 0:
             log(f"Analyzed {n}/{len(tickers)}", t0)
@@ -391,34 +473,61 @@ def main():
                 if now - bar_end(h.index[-1], m["minutes"]) > dt.timedelta(minutes=m["fresh"]):
                     continue
             scanned += 1
-            da = analyze(add_indicators(daily[t].copy()), DAILY_LOOKBACK)
+            dd = add_indicators(with_today(daily[t], h))
+            da = analyze(dd, DAILY_LOOKBACK)
             ha = analyze(add_indicators(h), INTRADAY_LOOKBACK)
             trend = rules.trend_filter(da)
             signals = rules.entry_signals(da, ha, trend)
             bar_key = f"{mode}|{h.index[-1].isoformat()}"
             # one alert per stock, direction and candle (even if a level shifts by a few cents)
             signals = [s for s in signals if f"{t}|{s[0]}|{bar_key}" not in state]
+            rule_keys = [f"{t}|{s[0]}|{bar_key}" for s in signals]
+
+            # chart patterns on the daily and hourly charts
+            price, prev = float(h["Close"].iat[-1]), float(h["Close"].iat[-2])
+            hv = ha["df"].iloc[-1]
+            vol_now = float(hv.Volume / hv.VolAvg20) if hv.VolAvg20 else None
+            pat_hits, pat_keys = [], []
+            for tf, frame in (("daily", dd), ("hourly", add_indicators(hourly_from(h, mode, cutoff)))):
+                pats, pdf = patterns.find_patterns(frame, tf, price, prev, vol_now)
+                for pt in pats:
+                    key = f"{t}|PAT|{pt['id']}|{pt['stage']}"
+                    if key in state:
+                        continue
+                    if pt["stage"] == "breakout":
+                        verb = "completed" if pt["name"] in patterns.HARMONICS else "breakout"
+                        signals.append((pt["dir"], f"{pt['name']} {verb} ({tf}): entry {pt['level']:.2f}, "
+                                                   f"stop {pt['stop']:.2f}, target {pt['target']:.2f}"))
+                        pat_hits.append((pt, pdf))
+                        pat_keys.append(key)
+                    else:
+                        watch.append({"t": t, "p": pt, "price": price, "key": key})
             if signals:
                 last = ha["df"].iloc[-1]
                 vol_ratio = float(last.Volume / last.VolAvg20) if last.VolAvg20 else 0.0
-                found.append({"t": t, "signals": signals, "da": da, "ha": ha,
-                              "bar_key": bar_key, "score": (len(signals), vol_ratio)})
+                found.append({"t": t, "signals": signals, "da": da, "ha": ha, "pats": pat_hits,
+                              "keys": rule_keys + pat_keys, "score": (len(signals), vol_ratio)})
         except Exception as e:                       # one bad ticker never stops the scan
             print(f"{t}: {e}", flush=True)
-    log(f"Checked {scanned} tickers with a fresh bar, {len(found)} setups found", t0)
+    log(f"Checked {scanned} tickers with a fresh bar, {len(found)} setups found, "
+        f"{len(watch)} new patterns forming", t0)
 
     # 2) send the strongest setups with charts, the rest in one summary
     found.sort(key=lambda x: x["score"], reverse=True)
     top, rest = found[:MAX_CHART_ALERTS], found[MAX_CHART_ALERTS:]
 
     def mark(item):
-        for s in item["signals"]:
-            state[f"{item['t']}|{s[0]}|{item['bar_key']}"] = now.isoformat()
+        for k in item["keys"]:
+            state[k] = now.isoformat()
 
     sent = 0
     for item in top:
         try:
-            chart = make_chart(item["t"], item["da"])
+            if item["pats"]:
+                pt, pdf = item["pats"][0]
+                chart = make_pattern_chart(item["t"], pdf, pt)
+            else:
+                chart = make_chart(item["t"], item["da"])
             if send_telegram(format_alert(item["t"], item["signals"], item["da"], item["ha"], mode), chart):
                 mark(item)
                 sent += 1
@@ -430,18 +539,29 @@ def main():
             side = "🟢" if any(s[0] == "LONG" for s in item["signals"]) else "🔴"
             price = item["ha"]["df"]["Close"].iat[-1]
             lines.append(f"{side} <b>{item['t']}</b> ${price:.2f}: {item['signals'][0][1]}")
-        text, chunk = "\n".join(lines), ""
-        ok = True
-        for line in text.split("\n"):              # Telegram messages max 4096 characters
-            if len(chunk) + len(line) > 3900:
-                ok &= send_telegram(chunk)
-                chunk = ""
-            chunk += line + "\n"
-        if chunk:
-            ok &= send_telegram(chunk)
-        if ok:
+        if send_long(lines):
             for item in rest:
                 mark(item)
+
+    # 3) one watchlist message for patterns that are forming (no breakout yet)
+    if watch:
+        icon = {"LONG": "🟢", "SHORT": "🔴", "BOTH": "⚪"}
+        lines = [f"<b>👀 Patterns forming</b> (watchlist, {len(watch)} new)"]
+        for w in watch[:MAX_WATCHLIST]:
+            p = w["p"]
+            if p["dir"] == "BOTH":
+                b1, b2 = p["breaks"]
+                where = f"breaks above {b1['level']:.2f} or below {b2['level']:.2f}"
+            elif p["name"] in patterns.HARMONICS:
+                where = f"completion zone near {p['level']:.2f}"
+            else:
+                where = f"breakout {'above' if p['dir'] == 'LONG' else 'below'} {p['level']:.2f}"
+            lines.append(f"{icon[p['dir']]} <b>{w['t']}</b> ${w['price']:.2f}: {p['name']} ({p['timeframe']}), {where}")
+        if len(watch) > MAX_WATCHLIST:
+            lines.append(f"…and {len(watch) - MAX_WATCHLIST} more")
+        if send_long(lines):
+            for w in watch:
+                state[w["key"]] = now.isoformat()
 
     save_state(state, now)
     log(f"Done: {sent} chart alerts sent" + (f", {len(rest)} more in the summary" if rest else ""), t0)
