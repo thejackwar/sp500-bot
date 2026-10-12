@@ -15,6 +15,7 @@ import io
 import json
 import os
 import time
+from concurrent.futures import ThreadPoolExecutor
 from zoneinfo import ZoneInfo
 
 import matplotlib
@@ -47,43 +48,49 @@ def get_tickers():
     return [s.replace(".", "-") for s in df["Symbol"]]   # BRK.B -> BRK-B for Yahoo
 
 
-def alpaca_bars(tickers, timeframe, start, end, chunk=100):
-    """Bars from Alpaca's official API. The free plan gives full all-exchange (SIP)
-    data as long as `end` is at least 15 minutes in the past."""
+def _alpaca_chunk(part, timeframe, start, end, headers):
+    """Download one group of symbols, following Alpaca's pages until done."""
+    fmt = "%Y-%m-%dT%H:%M:%SZ"
+    params = {"symbols": ",".join(t.replace("-", ".") for t in part),   # BRK-B -> BRK.B
+              "timeframe": timeframe, "start": start.strftime(fmt), "end": end.strftime(fmt),
+              "limit": 10000, "adjustment": "all", "feed": "sip"}
+    rows = {}
+    try:
+        while True:
+            for _ in range(5):
+                r = requests.get(ALPACA_URL, headers=headers, params=params, timeout=60)
+                if r.status_code != 429:              # 429 = too many requests, wait and retry
+                    break
+                time.sleep(10)
+            r.raise_for_status()
+            js = r.json()
+            for sym, bars in (js.get("bars") or {}).items():
+                rows.setdefault(sym, []).extend(bars)
+            if not js.get("next_page_token"):
+                break
+            params["page_token"] = js["next_page_token"]
+    except Exception as e:
+        print(f"Alpaca error ({timeframe}, {part[0]}..{part[-1]}): {e}", flush=True)
+    return rows
+
+
+def alpaca_bars(tickers, timeframe, start, end, chunk=25, workers=8):
+    """Bars from Alpaca's official API, several groups downloaded at the same time.
+    The free plan gives full all-exchange (SIP) data as long as `end` is 15+ minutes old."""
     key, secret = os.environ.get("ALPACA_KEY_ID"), os.environ.get("ALPACA_SECRET_KEY")
     if not key or not secret:
         print("No Alpaca keys set, using Yahoo for everything.")
         return {}
     headers = {"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": secret}
-    fmt = "%Y-%m-%dT%H:%M:%SZ"
+    parts = [tickers[i:i + chunk] for i in range(0, len(tickers), chunk)]
     out = {}
-    for i in range(0, len(tickers), chunk):
-        part = tickers[i:i + chunk]
-        params = {"symbols": ",".join(t.replace("-", ".") for t in part),   # BRK-B -> BRK.B
-                  "timeframe": timeframe, "start": start.strftime(fmt), "end": end.strftime(fmt),
-                  "limit": 10000, "adjustment": "all", "feed": "sip"}
-        rows = {}
-        try:
-            while True:
-                for _ in range(5):
-                    r = requests.get(ALPACA_URL, headers=headers, params=params, timeout=60)
-                    if r.status_code != 429:          # 429 = too many requests, wait and retry
-                        break
-                    time.sleep(10)
-                r.raise_for_status()
-                js = r.json()
-                for sym, bars in (js.get("bars") or {}).items():
-                    rows.setdefault(sym, []).extend(bars)
-                if not js.get("next_page_token"):
-                    break
-                params["page_token"] = js["next_page_token"]
-        except Exception as e:
-            print(f"Alpaca error ({timeframe}, tickers {i}-{i + len(part)}): {e}")
-        for sym, bars in rows.items():
-            df = pd.DataFrame(bars)
-            df.index = pd.DatetimeIndex(pd.to_datetime(df["t"], utc=True)).tz_convert(ET)
-            df = df.rename(columns={"o": "Open", "h": "High", "l": "Low", "c": "Close", "v": "Volume"})
-            out[sym.replace(".", "-")] = df[["Open", "High", "Low", "Close", "Volume"]].astype(float)
+    with ThreadPoolExecutor(max_workers=workers) as pool:
+        for rows in pool.map(lambda p: _alpaca_chunk(p, timeframe, start, end, headers), parts):
+            for sym, bars in rows.items():
+                df = pd.DataFrame(bars)
+                df.index = pd.DatetimeIndex(pd.to_datetime(df["t"], utc=True)).tz_convert(ET)
+                df = df.rename(columns={"o": "Open", "h": "High", "l": "Low", "c": "Close", "v": "Volume"})
+                out[sym.replace(".", "-")] = df[["Open", "High", "Low", "Close", "Volume"]].astype(float)
     return out
 
 
@@ -99,11 +106,14 @@ def to_hourly(df30):
 def get_prices(tickers, cutoff):
     """Alpaca first; any ticker Alpaca can't deliver is fetched from Yahoo instead."""
     end = cutoff.astimezone(dt.timezone.utc)
-    print("Downloading daily bars from Alpaca...", flush=True)
+    t0 = time.time()
     daily = alpaca_bars(tickers, "1Day", end - dt.timedelta(days=400), end)
-    print("Downloading 30-minute bars from Alpaca...", flush=True)
+    print(f"Daily bars from Alpaca: {time.time() - t0:.0f}s", flush=True)
+    t0 = time.time()
+    # 45 days ~ 31 trading days ~ 215 hourly candles, enough for the 200-candle lookback
     hourly = {t: to_hourly(df) for t, df in
-              alpaca_bars(tickers, "30Min", end - dt.timedelta(days=60), end).items()}
+              alpaca_bars(tickers, "30Min", end - dt.timedelta(days=45), end).items()}
+    print(f"30-minute bars from Alpaca: {time.time() - t0:.0f}s", flush=True)
     daily = {t: d for t, d in daily.items() if len(d) > 60}
     hourly = {t: h for t, h in hourly.items() if len(h) > 60}
     good = [t for t in tickers if t in daily and t in hourly]
