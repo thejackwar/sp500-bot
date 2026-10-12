@@ -1,7 +1,7 @@
 """
-S&P 500 scanner: downloads daily + intraday prices for every S&P 500 stock,
-computes indicators, support/resistance levels and trend lines, runs the
-rules in rules.py and sends Telegram alerts (with a chart) for possible trades.
+S&P 100 scanner: downloads daily + intraday prices for every S&P 100 stock, runs the
+strategy in rules.py (200-day MA, Bollinger Bands, Donchian channel) and sends Telegram
+alerts with a chart for each signal.
 
 Prices come from Alpaca (official API, free plan, full all-exchange data
 delayed 15+ minutes), with Yahoo Finance as automatic backup.
@@ -33,8 +33,15 @@ import patterns
 import rules
 
 ET = ZoneInfo("America/New_York")
-TICKERS_URL = ("https://raw.githubusercontent.com/datasets/"
-               "s-and-p-500-companies/main/data/constituents.csv")
+TICKERS_URL = "https://en.wikipedia.org/wiki/S%26P_100"
+# Backup copy of the S&P 100 (October 2026), used if Wikipedia can't be read.
+# GOOG is left out on purpose: GOOGL is the same company (Alphabet).
+SP100_BACKUP = """AAPL ABBV ABT ACN ADBE AMAT AMD AMGN AMT AMZN ANET AVGO AXP BA BAC BKNG BLK BMY BNY BRK.B
+C CAT CMCSA COF COP COST CRM CSCO CVS CVX DE DELL DHR DIS DUK EMR FDX GD GE GEV GILD GM GOOGL GS HD
+IBM INTC INTU ISRG JNJ JPM KO LIN LLY LMT LOW LRCX MA MCD MDLZ MDT META MMM MO MRK MS MSFT MU NEE
+NFLX NOW NVDA ORCL PANW PEP PFE PG PLTR PM QCOM RTX SBUX SCHW SNDK SO T TMO TMUS TSLA TXN UBER UNH
+UNP UPS USB V VZ WFC WMT XOM""".split()
+PATTERNS_ENABLED = True            # chart-pattern alerts (patterns.py); set False to turn them off
 ALPACA_URL = "https://data.alpaca.markets/v2/stocks/bars"
 DATA_DELAY_MINUTES = 16            # Alpaca free plan: full-market data must be 15+ min old
 STATE_FILE = "state.json"          # remembers sent alerts so you never get duplicates
@@ -44,7 +51,7 @@ INTRADAY_LOOKBACK = 200            # entry-chart candles used for levels / trend
 # Entry-chart settings per mode. "first"/"last" = earliest/latest candle START time (ET)
 # this mode handles; "fresh" = how recently the candle must have closed to alert on it.
 MODES = {
-    "15m": {"minutes": 15, "alpaca": "15Min", "days": 21, "yahoo": ("14d", "15m"),
+    "15m": {"minutes": 15, "alpaca": "15Min", "days": 12, "yahoo": ("14d", "15m"),
             "first": (9, 30), "last": (12, 15), "fresh": 35, "name": "15-min"},
     "1h":  {"minutes": 60, "alpaca": "30Min", "days": 45, "yahoo": ("60d", "1h"),
             "first": (11, 30), "last": (15, 30), "fresh": 75, "name": "hourly"},
@@ -57,8 +64,20 @@ TELEGRAM_PAUSE = 1.5               # seconds between Telegram messages (avoids r
 
 # ---------------------------------------------------------------- data
 def get_tickers():
-    df = pd.read_csv(TICKERS_URL)
-    return [s.replace(".", "-") for s in df["Symbol"]]   # BRK.B -> BRK-B for Yahoo
+    """Current S&P 100 from Wikipedia (falls back to the built-in list). Yahoo-style symbols."""
+    syms = []
+    try:
+        html = requests.get(TICKERS_URL, timeout=20, headers={"User-Agent": "Mozilla/5.0 (sp100-alert-bot)"}).text
+        for table in pd.read_html(io.StringIO(html)):
+            if "Symbol" in table.columns and 90 <= len(table) <= 110:
+                syms = [str(x).strip() for x in table["Symbol"]]
+                break
+    except Exception as e:
+        print(f"Couldn't read the S&P 100 list from Wikipedia ({e}); using the built-in list.", flush=True)
+    if not syms:
+        syms = SP100_BACKUP
+    syms = [x for x in syms if x != "GOOG"]                  # Alphabet: keep GOOGL only
+    return [x.replace(".", "-") for x in syms]               # BRK.B -> BRK-B
 
 
 def _alpaca_chunk(part, timeframe, start, end, headers):
@@ -289,68 +308,88 @@ def analyze(df, lookback):
 
 
 # ---------------------------------------------------------------- chart & telegram
-def make_chart(ticker, da):
-    d = da["df"]
-    fig, ax = plt.subplots(figsize=(10, 5.5), dpi=110)
-    x = np.arange(len(d))
-    ax.plot(x, d["Close"].values, color="#222", lw=1.3, label="Close")
-    ax.plot(x, d["EMA50"].values, color="#1f77b4", lw=0.9, label="EMA50")
-    ax.plot(x, d["EMA200"].values, color="#9467bd", lw=0.9, label="EMA200")
-    for lvl, _ in da["support"][:3]:
-        ax.axhline(lvl, color="#2ca02c", lw=0.9, ls="--")
-    for lvl, _ in da["resistance"][:3]:
-        ax.axhline(lvl, color="#d62728", lw=0.9, ls="--")
-    for key, col in (("up_line", "#2ca02c"), ("down_line", "#d62728")):
-        ln = da[key]
-        if ln:
-            xs = np.arange(ln["a"], len(d))
-            ax.plot(xs, ln["intercept"] + ln["slope"] * xs, color=col, lw=1.4)
-    step = max(1, len(d) // 6)
-    ax.set_xticks(x[::step])
-    ax.set_xticklabels([ts.strftime("%d %b") for ts in d.index[::step]])
-    ax.set_title(f"{ticker} daily: support (green) / resistance (red) / trend lines")
-    ax.legend(loc="upper left", fontsize=8)
-    ax.grid(alpha=0.25)
-    buf = io.BytesIO()
-    fig.tight_layout()
-    fig.savefig(buf, format="png")
-    plt.close(fig)
-    return buf.getvalue()
+# ---------------------------------------------------------------- charts (candles, black background)
+UP_COL, DOWN_COL, PAT_COL = "#26a69a", "#ef5350", "#ffd54f"
 
 
-def make_pattern_chart(ticker, d, p):
-    """Chart of the pattern on its own timeframe: lines, swing points, entry/stop/target."""
-    fig, ax = plt.subplots(figsize=(10, 5.5), dpi=110)
-    x = np.arange(len(d))
-    start = max(0, min(k[0] for k in p["keys"]) - 25)
-    ax.vlines(x, d["Low"].values, d["High"].values, color="#bbbbbb", lw=0.7)
-    ax.plot(x, d["Close"].values, color="#222", lw=1.2)
-    for (x1, y1), (x2, y2) in p["lines"]:
-        ax.plot([x1, x2], [y1, y2], color="#ff7f0e", lw=1.8)
-    for i, price, label in p["points"]:
-        ax.scatter([i], [price], color="#ff7f0e", s=18, zorder=3)
-        if label:
-            ax.annotate(label, (i, price), textcoords="offset points", xytext=(0, 7), ha="center", fontsize=8)
-    levels = ((p["level"], "#1f77b4", "entry"), (p["stop"], "#d62728", "stop"), (p["target"], "#2ca02c", "target"))
-    for val, col, lab in levels:
-        ax.axhline(val, color=col, ls="--", lw=0.9)
-        ax.text(len(d) - 0.5, val, f" {lab} {val:.2f}", color=col, va="center", fontsize=8,
-                bbox=dict(facecolor="white", edgecolor="none", pad=1))
-    seen = d.iloc[start:]
-    lo = min(seen["Low"].min(), *(v for v, _, _ in levels))
-    hi = max(seen["High"].max(), *(v for v, _, _ in levels))
-    ax.set_xlim(start, len(d) + 8)
-    ax.set_ylim(lo - 0.03 * (hi - lo), hi + 0.03 * (hi - lo))
-    ts = d[d.columns[0]]
-    step = max(1, (len(d) - start) // 6)
-    ticks = list(range(start, len(d), step))
+def draw_chart(ticker, df, title, show_sma=False, pattern=None, n_show=120):
+    """Candlestick chart on black. df: candles with a DatetimeIndex; optional strategy columns
+    (BB_*, DC_*, SMA200, Squeeze) are drawn when present. pattern: positions refer to df rows."""
+    n = len(df)
+    start = max(0, n - n_show)
+    if pattern:
+        start = min(start, max(0, min(k[0] for k in pattern["keys"]) - 10))
+    d = df.iloc[start:]
+    x = np.arange(start, n)
+    o, h, l, c = (d[k].values.astype(float) for k in ("Open", "High", "Low", "Close"))
+
+    fig, ax = plt.subplots(figsize=(11, 6), dpi=110)
+    fig.patch.set_facecolor("black")
+    ax.set_facecolor("black")
+    for side in ax.spines.values():
+        side.set_color("#444")
+    ax.tick_params(colors="#bbbbbb", labelsize=8)
+    ax.grid(color="#262626", lw=0.6)
+
+    if "BB_up" in d:                                   # strategy overlays
+        ax.fill_between(x, d["BB_lo"].values, d["BB_up"].values, color="#42a5f5", alpha=0.10, label="Bollinger Bands")
+        ax.plot(x, d["BB_mid"].values, color="#42a5f5", lw=0.7, ls=":")
+    if "DC_high" in d and not pattern:
+        ax.plot(x, d["DC_high"].values, color="#66bb6a", lw=0.9, drawstyle="steps-post", label="Donchian high")
+        ax.plot(x, d["DC_low"].values, color="#e57373", lw=0.9, drawstyle="steps-post", label="Donchian low")
+    if show_sma and "SMA200" in d:
+        ax.plot(x, d["SMA200"].values, color="#ba68c8", lw=1.6, label="200-day MA")
+
+    up = c >= o                                        # candles
+    col = np.where(up, UP_COL, DOWN_COL)
+    ax.vlines(x, l, h, color=col, lw=0.8, zorder=2)
+    span = float(np.nanmax(h) - np.nanmin(l)) or 1.0
+    body = np.maximum(np.abs(c - o), span * 0.002)
+    ax.bar(x, body, 0.6, bottom=np.minimum(o, c), color=col, edgecolor=col, lw=0.4, zorder=3)
+
+    if "Squeeze" in d:
+        sq = np.where(d["Squeeze"].fillna(False).values)[0]
+        if len(sq):
+            ax.scatter(x[sq], d["BB_mid"].values[sq], marker="s", s=9, color="#ffa726", label="Squeeze", zorder=4)
+
+    lo_y, hi_y = float(np.nanmin(l)), float(np.nanmax(h))
+    if pattern:                                        # pattern lines, swing points, levels
+        for (x1, y1), (x2, y2) in pattern["lines"]:
+            ax.plot([x1, x2], [y1, y2], color=PAT_COL, lw=1.8, zorder=5)
+        if pattern["name"] in patterns.HARMONICS:       # connect the legs X-A-B-C and on to D
+            px = [pt[0] for pt in pattern["points"]] + [n - 1]
+            py = [pt[1] for pt in pattern["points"]] + [pattern["level"]]
+            ax.plot(px, py, color=PAT_COL, lw=1.2, alpha=0.8, zorder=5)
+            ax.annotate("D", (n - 1, pattern["level"]), textcoords="offset points", xytext=(-10, 0),
+                        ha="right", va="center", fontsize=8, color="white", zorder=6)
+        for i, price, label in pattern["points"]:
+            ax.scatter([i], [price], color=PAT_COL, s=22, zorder=6)
+            if label:
+                low = price <= float(df["Low"].iat[i]) + 1e-9 or price < float(df["Close"].iat[i])
+                ax.annotate(label, (i, price), textcoords="offset points", xytext=(0, -14 if low else 8),
+                            ha="center", fontsize=8, color="white", zorder=6)
+        for val, colr, lab in ((pattern["level"], "#42a5f5", "entry"), (pattern["stop"], "#ef5350", "stop"),
+                               (pattern["target"], "#66bb6a", "target")):
+            ax.axhline(val, color=colr, ls="--", lw=0.9, zorder=4)
+            ax.text(n - 0.3, val, f" {lab} {val:.2f}", color=colr, va="center", fontsize=8,
+                    bbox=dict(facecolor="black", edgecolor="none", pad=1), zorder=7)
+            lo_y, hi_y = min(lo_y, val), max(hi_y, val)
+    pad = 0.04 * (hi_y - lo_y or 1)
+    ax.set_ylim(lo_y - pad, hi_y + pad)
+    ax.set_xlim(start - 1, n + (9 if pattern else 2))
+
+    step = max(1, len(d) // 7)
+    ticks = list(range(start, n, step))
+    fmt = "%d %b" if (d.index[-1] - d.index[0]).days > 20 else "%d %b %H:%M"
     ax.set_xticks(ticks)
-    ax.set_xticklabels([pd.Timestamp(ts.iat[i]).strftime("%d %b") for i in ticks])
-    ax.set_title(f"{ticker} {p['timeframe']}: {p['name']} ({p['stage']})")
-    ax.grid(alpha=0.25)
+    ax.set_xticklabels([pd.Timestamp(df.index[i]).strftime(fmt) for i in ticks])
+    ax.set_title(title, color="white", fontsize=11)
+    leg = ax.legend(loc="upper left", fontsize=7, ncol=4, facecolor="black", edgecolor="#444")
+    for t in leg.get_texts():
+        t.set_color("#dddddd")
     buf = io.BytesIO()
     fig.tight_layout()
-    fig.savefig(buf, format="png")
+    fig.savefig(buf, format="png", facecolor="black")
     plt.close(fig)
     return buf.getvalue()
 
@@ -390,25 +429,58 @@ def send_telegram(text, image=None):
     return False
 
 
-def format_alert(ticker, signals, da, ha, mode):
-    last = ha["df"].iloc[-1]
-    tf = mode
-    longs = [s for s in signals if s[0] == "LONG"]
-    side = "🟢 LONG" if longs else "🔴 SHORT"
-    sup = da["support"][0][0] if da["support"] else None
-    res = da["resistance"][0][0] if da["resistance"] else None
-    lines = [f"<b>{side} setup: {ticker}</b>  ${last.Close:.2f}",
-             f"<i>{MODES[mode]['name']} candle closed {bar_end(ha['df'].index[-1], MODES[mode]['minutes']):%H:%M} New York</i>"]
-    lines += [f"• {desc}" for _, desc in signals]
-    lines.append(f"RSI({tf}) {last.RSI:.0f} | ATR({tf}) {last.ATR:.2f}")
-    lines.append(f"Daily support {sup:.2f}" if sup else "Daily support: none nearby")
-    lines.append(f"Daily resistance {res:.2f}" if res else "Daily resistance: none nearby")
+def alert_chart(item, m):
+    """Pick the chart for an alert: a pattern breakout is drawn on its own timeframe; otherwise the
+    daily (or intraday) strategy chart, with any pattern still forming on that chart drawn on top."""
+    t = item["t"]
+    if item["pats"]:
+        pt, frame = item["pats"][0]
+        return draw_chart(t, frame, f"{t} {pt['timeframe']}: {pt['name']} (breakout)",
+                          show_sma=pt["timeframe"] == "daily", pattern=pt)
+    daily = any(e["tf"] == "daily" for e in item["events"])
+    tf = "daily" if daily else "hourly"
+    forming = [(p, f) for p, f in item.get("forming", []) if p["timeframe"] == tf]
+    if forming:
+        p, frame = forming[0]
+        return draw_chart(t, frame, f"{t} {tf}: {p['name']} (forming)", show_sma=daily, pattern=p)
+    if daily:
+        return draw_chart(t, item["sd"], f"{t} daily", show_sma=True)
+    return draw_chart(t, item["sh"], f"{t} {m['name']}")
+
+
+def headline(events):
+    """Overall direction of a stock's alert: STRONG LONG/SHORT, LONG, SHORT or WATCH."""
+    strong = [e["dir"] for e in events if e["strong"]]
+    if strong:
+        return "⭐ STRONG " + ("LONG" if strong[0] == "LONG" else "SHORT"), strong[0]
+    dirs = {e["dir"] for e in events} - {"WATCH"}
+    if dirs == {"LONG"}:
+        return "🟢 LONG", "LONG"
+    if dirs == {"SHORT"}:
+        return "🔴 SHORT", "SHORT"
+    return ("⚪ MIXED" if dirs else "⚪ WATCH"), "WATCH"
+
+
+def format_alert(ticker, events, ctx, mode):
+    title, _ = headline(events)
+    icon = {"LONG": "🟢", "SHORT": "🔴", "WATCH": "⚪"}
+    lines = [f"<b>{title}: {ticker}</b>  ${ctx['price']:.2f}"]
+    if any(e["strong"] for e in events):
+        lines.append("<i>Trend (200-day MA) + Donchian breakout + Bollinger confirmation</i>")
+    lines += [f"{'⭐' if e['strong'] else icon[e['dir']]} {e['text']}" for e in events]
+    if ctx["sma200"]:
+        side = "above" if ctx["price"] > ctx["sma200"] else "below"
+        pct = (ctx["price"] / ctx["sma200"] - 1) * 100
+        lines.append(f"200-day MA {ctx['sma200']:.2f}: price {side} ({pct:+.1f}%)")
+    if ctx["bb"]:
+        lines.append(f"Daily Bollinger {ctx['bb'][0]:.2f} – {ctx['bb'][1]:.2f}")
+    if ctx["dc"]:
+        lines.append(f"Daily Donchian {ctx['dc'][0]:.2f} – {ctx['dc'][1]:.2f}")
     lines.append(f'<a href="https://www.tradingview.com/chart/?symbol={ticker.replace("-", ".")}">Open chart</a>')
     lines.append("<i>Possible setup only. Check it yourself before trading.</i>")
     return "\n".join(lines)
 
 
-# ---------------------------------------------------------------- main
 def send_long(lines):
     """Send a list of lines as one or more Telegram messages (max 4096 characters each)."""
     ok, chunk = True, ""
@@ -459,7 +531,7 @@ def main():
     # 1) analyze everything first
     found, watch, scanned = [], [], 0
     for n, t in enumerate(tickers, 1):
-        if n % 100 == 0:
+        if n % 25 == 0:
             log(f"Analyzed {n}/{len(tickers)}", t0)
         if t not in daily or t not in intraday:
             continue
@@ -474,43 +546,51 @@ def main():
                     continue
             scanned += 1
             dd = add_indicators(with_today(daily[t], h))
-            da = analyze(dd, DAILY_LOOKBACK)
-            ha = analyze(add_indicators(h), INTRADAY_LOOKBACK)
-            trend = rules.trend_filter(da)
-            signals = rules.entry_signals(da, ha, trend)
-            bar_key = f"{mode}|{h.index[-1].isoformat()}"
-            # one alert per stock, direction and candle (even if a level shifts by a few cents)
-            signals = [s for s in signals if f"{t}|{s[0]}|{bar_key}" not in state]
-            rule_keys = [f"{t}|{s[0]}|{bar_key}" for s in signals]
+            events, ctx, sd, sh = rules.evaluate(dd, add_indicators(h), m["name"])
+            # each event once per day (daily chart) or once per candle (intraday chart)
+            day_key, bar_key = str(dd.index[-1].date()), f"{mode}|{h.index[-1].isoformat()}"
+            for e in events:
+                e["key"] = f"{t}|{e['code']}|{e['tf']}|{day_key if e['tf'] == 'daily' else bar_key}"
+            events = [e for e in events if e["key"] not in state]
+            keys = [e["key"] for e in events]
+            pat_hits, forming_any = [], []
 
-            # chart patterns on the daily and hourly charts
-            price, prev = float(h["Close"].iat[-1]), float(h["Close"].iat[-2])
-            hv = ha["df"].iloc[-1]
-            vol_now = float(hv.Volume / hv.VolAvg20) if hv.VolAvg20 else None
-            pat_hits, pat_keys = [], []
-            for tf, frame in (("daily", dd), ("hourly", add_indicators(hourly_from(h, mode, cutoff)))):
-                pats, pdf = patterns.find_patterns(frame, tf, price, prev, vol_now)
-                for pt in pats:
-                    key = f"{t}|PAT|{pt['id']}|{pt['stage']}"
-                    if key in state:
+            if PATTERNS_ENABLED:                 # chart patterns on the daily and hourly charts
+                price, prev = float(h["Close"].iat[-1]), float(h["Close"].iat[-2])
+                hv = add_indicators(h).iloc[-1]
+                vol_now = float(hv.Volume / hv.VolAvg20) if hv.VolAvg20 else None
+                for tf, frame in (("daily", dd), ("hourly", add_indicators(hourly_from(h, mode, cutoff)))):
+                    pats, pdf = patterns.find_patterns(frame, tf, price, prev, vol_now)
+                    if not pats:
                         continue
-                    if pt["stage"] == "breakout":
-                        verb = "completed" if pt["name"] in patterns.HARMONICS else "breakout"
-                        signals.append((pt["dir"], f"{pt['name']} {verb} ({tf}): entry {pt['level']:.2f}, "
-                                                   f"stop {pt['stop']:.2f}, target {pt['target']:.2f}"))
-                        pat_hits.append((pt, pdf))
-                        pat_keys.append(key)
-                    else:
-                        watch.append({"t": t, "p": pt, "price": price, "key": key})
-            if signals:
-                last = ha["df"].iloc[-1]
-                vol_ratio = float(last.Volume / last.VolAvg20) if last.VolAvg20 else 0.0
-                found.append({"t": t, "signals": signals, "da": da, "ha": ha, "pats": pat_hits,
-                              "keys": rule_keys + pat_keys, "score": (len(signals), vol_ratio)})
+                    cfg = rules.SETTINGS["daily" if tf == "daily" else "intraday"]
+                    lb = rules.SQUEEZE_LOOKBACK["daily" if tf == "daily" else "intraday"]
+                    cframe = rules.add_strategy_indicators(frame, lb, **cfg).tail(patterns.SETTINGS[tf]["lookback"])
+                    for pt in pats:
+                        if pt["stage"] == "forming":
+                            forming_any.append((pt, cframe))    # drawn on this stock's alert chart, if any
+                        key = f"{t}|PAT|{pt['id']}|{pt['stage']}"
+                        if key in state:
+                            continue
+                        if pt["stage"] == "breakout":
+                            verb = "completed" if pt["name"] in patterns.HARMONICS else "breakout"
+                            events.append({"dir": pt["dir"], "code": "pattern", "tf": tf, "strong": False, "key": key,
+                                           "text": f"{pt['name']} {verb} ({tf}): entry {pt['level']:.2f}, "
+                                                   f"stop {pt['stop']:.2f}, target {pt['target']:.2f}"})
+                            pat_hits.append((pt, cframe))
+                            keys.append(key)
+                        else:
+                            watch.append({"t": t, "p": pt, "price": ctx["price"], "key": key})
+
+            if events:
+                n_strong = sum(e["strong"] for e in events)
+                found.append({"t": t, "events": events, "ctx": ctx, "sd": sd, "sh": sh, "pats": pat_hits,
+                              "forming": forming_any,
+                              "keys": keys, "score": (n_strong, len(events))})
         except Exception as e:                       # one bad ticker never stops the scan
             print(f"{t}: {e}", flush=True)
-    log(f"Checked {scanned} tickers with a fresh bar, {len(found)} setups found, "
-        f"{len(watch)} new patterns forming", t0)
+    log(f"Checked {scanned} tickers with a fresh bar, {len(found)} stocks with new signals"
+        + (f", {len(watch)} new patterns forming" if PATTERNS_ENABLED else ""), t0)
 
     # 2) send the strongest setups with charts, the rest in one summary
     found.sort(key=lambda x: x["score"], reverse=True)
@@ -523,12 +603,8 @@ def main():
     sent = 0
     for item in top:
         try:
-            if item["pats"]:
-                pt, pdf = item["pats"][0]
-                chart = make_pattern_chart(item["t"], pdf, pt)
-            else:
-                chart = make_chart(item["t"], item["da"])
-            if send_telegram(format_alert(item["t"], item["signals"], item["da"], item["ha"], mode), chart):
+            chart = alert_chart(item, m)
+            if send_telegram(format_alert(item["t"], item["events"], item["ctx"], mode), chart):
                 mark(item)
                 sent += 1
         except Exception as e:
@@ -536,9 +612,10 @@ def main():
     if rest:
         lines = [f"<b>+{len(rest)} more setups</b> ({m['name']} candles, strongest first)"]
         for item in rest:
-            side = "🟢" if any(s[0] == "LONG" for s in item["signals"]) else "🔴"
-            price = item["ha"]["df"]["Close"].iat[-1]
-            lines.append(f"{side} <b>{item['t']}</b> ${price:.2f}: {item['signals'][0][1]}")
+            title, _ = headline(item["events"])
+            first = next((e for e in item["events"] if e["strong"]), item["events"][0])
+            more = f" (+{len(item['events']) - 1} more)" if len(item["events"]) > 1 else ""
+            lines.append(f"{title.split()[0]} <b>{item['t']}</b> ${item['ctx']['price']:.2f}: {first['text']}{more}")
         if send_long(lines):
             for item in rest:
                 mark(item)
