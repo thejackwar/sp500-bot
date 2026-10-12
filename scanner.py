@@ -37,6 +37,8 @@ FRESH_MINUTES = 90                 # only alert on an hourly bar that closed rec
 DAILY_LOOKBACK = 120               # daily bars used for levels / trend lines (~6 months)
 HOURLY_LOOKBACK = 200              # hourly bars used for levels / trend lines (~1 month)
 PIVOT_WINDOW = 5                   # a swing high/low must be the extreme of +-5 bars
+MAX_CHART_ALERTS = 10              # full chart alerts per run; any extra setups go in one summary
+TELEGRAM_PAUSE = 1.5               # seconds between Telegram messages (avoids rate limits)
 
 
 # ---------------------------------------------------------------- data
@@ -97,14 +99,16 @@ def to_hourly(df30):
 def get_prices(tickers, cutoff):
     """Alpaca first; any ticker Alpaca can't deliver is fetched from Yahoo instead."""
     end = cutoff.astimezone(dt.timezone.utc)
+    print("Downloading daily bars from Alpaca...", flush=True)
     daily = alpaca_bars(tickers, "1Day", end - dt.timedelta(days=400), end)
+    print("Downloading 30-minute bars from Alpaca...", flush=True)
     hourly = {t: to_hourly(df) for t, df in
               alpaca_bars(tickers, "30Min", end - dt.timedelta(days=60), end).items()}
     daily = {t: d for t, d in daily.items() if len(d) > 60}
     hourly = {t: h for t, h in hourly.items() if len(h) > 60}
     good = [t for t in tickers if t in daily and t in hourly]
     missing = [t for t in tickers if t not in good]
-    print(f"Alpaca: {len(good)} tickers OK, {len(missing)} via Yahoo backup")
+    print(f"Alpaca: {len(good)} tickers OK, {len(missing)} via Yahoo backup", flush=True)
     if missing:
         yd, yh = download(missing, "1y", "1d"), download(missing, "60d", "1h")
         for t in missing:
@@ -256,20 +260,38 @@ def make_chart(ticker, da):
 
 
 def send_telegram(text, image=None):
+    """Send one message, pacing requests and retrying when Telegram says "slow down".
+    Returns True if the message was delivered."""
     token, chat = os.environ.get("TELEGRAM_TOKEN"), os.environ.get("TELEGRAM_CHAT_ID")
     if not token or not chat:
         print("\n[no Telegram secrets set, printing instead]\n" + text)
-        return
+        return True
     base = f"https://api.telegram.org/bot{token}"
-    if image:
-        r = requests.post(f"{base}/sendPhoto", timeout=30,
-                          data={"chat_id": chat, "caption": text[:1024], "parse_mode": "HTML"},
-                          files={"photo": ("chart.png", image)})
-    else:
-        r = requests.post(f"{base}/sendMessage", timeout=30,
-                          data={"chat_id": chat, "text": text, "parse_mode": "HTML"})
-    if not r.ok:
-        print("Telegram error:", r.text)
+    for attempt in range(4):
+        try:
+            if image:
+                r = requests.post(f"{base}/sendPhoto", timeout=(10, 30),
+                                  data={"chat_id": chat, "caption": text[:1024], "parse_mode": "HTML"},
+                                  files={"photo": ("chart.png", image)})
+            else:
+                r = requests.post(f"{base}/sendMessage", timeout=(10, 30),
+                                  data={"chat_id": chat, "text": text[:4096], "parse_mode": "HTML",
+                                        "disable_web_page_preview": "true"})
+        except requests.RequestException as e:
+            print(f"Telegram connection problem (attempt {attempt + 1}): {e}")
+            time.sleep(5)
+            continue
+        if r.ok:
+            time.sleep(TELEGRAM_PAUSE)
+            return True
+        if r.status_code == 429:                      # rate limited: wait as long as Telegram asks
+            wait = r.json().get("parameters", {}).get("retry_after", 5)
+            print(f"Telegram asked to slow down, waiting {wait}s")
+            time.sleep(min(wait, 60) + 1)
+            continue
+        print("Telegram error:", r.status_code, r.text[:300])
+        return False
+    return False
 
 
 def format_alert(ticker, signals, da, ha):
@@ -304,18 +326,28 @@ def save_state(state, now):
         json.dump(state, f)
 
 
+def log(msg, t0):
+    print(f"[{time.time() - t0:6.1f}s] {msg}", flush=True)
+
+
 def main():
+    t0 = time.time()
     now = dt.datetime.now(ET)
     force = os.environ.get("ALERT_ANY_TIME") == "1"
     state = load_state()
 
     tickers = get_tickers()
-    print(f"{now:%Y-%m-%d %H:%M} ET: scanning {len(tickers)} tickers")
+    log(f"{now:%Y-%m-%d %H:%M} ET: scanning {len(tickers)} tickers"
+        + (" (test mode)" if force else ""), t0)
     cutoff = now - dt.timedelta(minutes=DATA_DELAY_MINUTES)
     daily, hourly = get_prices(tickers, cutoff)
+    log(f"Prices downloaded for {len(daily)} tickers", t0)
 
-    sent = scanned = 0
-    for t in tickers:
+    # 1) analyze everything first
+    found, scanned = [], 0
+    for n, t in enumerate(tickers, 1):
+        if n % 100 == 0:
+            log(f"Analyzed {n}/{len(tickers)}", t0)
         if t not in daily or t not in hourly:
             continue
         try:
@@ -331,19 +363,55 @@ def main():
             signals = rules.entry_signals(da, ha, trend)
             bar_key = h.index[-1].isoformat()
             signals = [s for s in signals if f"{t}|{s[1]}|{bar_key}" not in state]
-            if not signals:
-                continue
-            send_telegram(format_alert(t, signals, da, ha), make_chart(t, da))
-            for s in signals:
-                state[f"{t}|{s[1]}|{bar_key}"] = now.isoformat()
-            sent += 1
+            if signals:
+                last = ha["df"].iloc[-1]
+                vol_ratio = float(last.Volume / last.VolAvg20) if last.VolAvg20 else 0.0
+                found.append({"t": t, "signals": signals, "da": da, "ha": ha,
+                              "bar_key": bar_key, "score": (len(signals), vol_ratio)})
         except Exception as e:                       # one bad ticker never stops the scan
-            print(f"{t}: {e}")
+            print(f"{t}: {e}", flush=True)
+    log(f"Checked {scanned} tickers with a fresh bar, {len(found)} setups found", t0)
+
+    # 2) send the strongest setups with charts, the rest in one summary
+    found.sort(key=lambda x: x["score"], reverse=True)
+    top, rest = found[:MAX_CHART_ALERTS], found[MAX_CHART_ALERTS:]
+
+    def mark(item):
+        for s in item["signals"]:
+            state[f"{item['t']}|{s[1]}|{item['bar_key']}"] = now.isoformat()
+
+    sent = 0
+    for item in top:
+        try:
+            chart = make_chart(item["t"], item["da"])
+            if send_telegram(format_alert(item["t"], item["signals"], item["da"], item["ha"]), chart):
+                mark(item)
+                sent += 1
+        except Exception as e:
+            print(f"{item['t']}: alert failed: {e}", flush=True)
+    if rest:
+        lines = [f"<b>+{len(rest)} more setups this hour</b> (strongest first)"]
+        for item in rest:
+            side = "🟢" if any(s[0] == "LONG" for s in item["signals"]) else "🔴"
+            price = item["ha"]["df"]["Close"].iat[-1]
+            lines.append(f"{side} <b>{item['t']}</b> ${price:.2f}: {item['signals'][0][1]}")
+        text, chunk = "\n".join(lines), ""
+        ok = True
+        for line in text.split("\n"):              # Telegram messages max 4096 characters
+            if len(chunk) + len(line) > 3900:
+                ok &= send_telegram(chunk)
+                chunk = ""
+            chunk += line + "\n"
+        if chunk:
+            ok &= send_telegram(chunk)
+        if ok:
+            for item in rest:
+                mark(item)
 
     save_state(state, now)
-    print(f"Checked {scanned} tickers with a fresh bar, sent {sent} alerts.")
+    log(f"Done: {sent} chart alerts sent" + (f", {len(rest)} more in the summary" if rest else ""), t0)
     if scanned == 0 and not force:
-        print("No fresh hourly bar (market closed?). Use ALERT_ANY_TIME=1 to test anyway.")
+        print("No fresh hourly bar (market closed?). Use test mode to scan anyway.")
 
 
 if __name__ == "__main__":
