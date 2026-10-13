@@ -31,6 +31,7 @@ import yfinance as yf
 
 import patterns
 import rules
+import trader
 
 ET = ZoneInfo("America/New_York")
 TICKERS_URL = "https://en.wikipedia.org/wiki/S%26P_100"
@@ -310,15 +311,30 @@ def analyze(df, lookback):
 # ---------------------------------------------------------------- chart & telegram
 # ---------------------------------------------------------------- charts (candles, black background)
 UP_COL, DOWN_COL, PAT_COL = "#26a69a", "#ef5350", "#ffd54f"
+SR_COL, FIB_COL = "#26c6da", "#ffb74d"
 
 
-def draw_chart(ticker, df, title, show_sma=False, pattern=None, n_show=120):
+def _pos(df, ts):
+    """Row position of a timestamp in df (None if it isn't there)."""
+    try:
+        return int(df.index.get_indexer([pd.Timestamp(ts)], method="nearest")[0])
+    except Exception:
+        return None
+
+
+def draw_chart(ticker, df, title, show_sma=False, pattern=None, n_show=120, extra=None):
     """Candlestick chart on black. df: candles with a DatetimeIndex; optional strategy columns
-    (BB_*, DC_*, SMA200, Squeeze) are drawn when present. pattern: positions refer to df rows."""
+    (BB_*, DC_*, SMA200, Squeeze) are drawn when present. pattern: positions refer to df rows.
+    extra: {"levels": [(price, "sup"/"res")], "fib": swing} from levels.py."""
+    extra = extra or {}
     n = len(df)
     start = max(0, n - n_show)
     if pattern:
         start = min(start, max(0, min(k[0] for k in pattern["keys"]) - 10))
+    fib = extra.get("fib")
+    fa = _pos(df, fib["a"][0]) if fib else None
+    if fa is not None:
+        start = min(start, max(0, fa - 5))
     d = df.iloc[start:]
     x = np.arange(start, n)
     o, h, l, c = (d[k].values.astype(float) for k in ("Open", "High", "Low", "Close"))
@@ -374,9 +390,28 @@ def draw_chart(ticker, df, title, show_sma=False, pattern=None, n_show=120):
             ax.text(n - 0.3, val, f" {lab} {val:.2f}", color=colr, va="center", fontsize=8,
                     bbox=dict(facecolor="black", edgecolor="none", pad=1), zorder=7)
             lo_y, hi_y = min(lo_y, val), max(hi_y, val)
+    def right_label(val, text, colr):
+        ax.text(n - 0.3, val, f" {text}", color=colr, va="center", fontsize=8,
+                bbox=dict(facecolor="black", edgecolor="none", pad=1), zorder=7)
+
+    for val, kind in extra.get("levels", []):          # major support / resistance
+        ax.axhline(val, color=SR_COL, lw=1.6, zorder=4)
+        right_label(val, f"major {'resistance' if kind == 'res' else 'support'} {val:.2f}", SR_COL)
+        lo_y, hi_y = min(lo_y, val), max(hi_y, val)
+    if fib:                                            # Fibonacci swing and retracement levels
+        fb = _pos(df, fib["b"][0])
+        x0 = fa if fa is not None else start
+        if fa is not None and fb is not None:
+            ax.plot([fa, fb], [fib["a"][1], fib["b"][1]], color=FIB_COL, lw=1.2, ls="--", zorder=5)
+        for r, val in [(0.0, fib["b"][1])] + sorted(fib["levels"].items()) + [(1.0, fib["a"][1])]:
+            ax.plot([x0, n - 1], [val, val], color=FIB_COL, lw=1.0 if r in (0.0, 1.0) else 1.2,
+                    alpha=0.6 if r in (0.0, 1.0) else 0.95, zorder=4)
+            right_label(val, f"{r * 100:.1f}%  {val:.2f}", FIB_COL)
+            lo_y, hi_y = min(lo_y, val), max(hi_y, val)
     pad = 0.04 * (hi_y - lo_y or 1)
     ax.set_ylim(lo_y - pad, hi_y + pad)
-    ax.set_xlim(start - 1, n + (9 if pattern else 2))
+    labels = pattern or extra.get("levels") or fib
+    ax.set_xlim(start - 1, n + (16 if labels else 2))
 
     step = max(1, len(d) // 7)
     ticks = list(range(start, n, step))
@@ -439,12 +474,21 @@ def alert_chart(item, m):
                           show_sma=pt["timeframe"] == "daily", pattern=pt)
     daily = any(e["tf"] == "daily" for e in item["events"])
     tf = "daily" if daily else "hourly"
+    extra = {"levels": []}
+    for e in item["events"]:                          # major S/R and Fibonacci overlays
+        draw = e.get("draw", {})
+        extra["levels"] += draw.get("levels", [])
+        if "fib" in draw:
+            extra["fib"] = draw["fib"]
     forming = [(p, f) for p, f in item.get("forming", []) if p["timeframe"] == tf]
     if forming:
         p, frame = forming[0]
-        return draw_chart(t, frame, f"{t} {tf}: {p['name']} (forming)", show_sma=daily, pattern=p)
+        return draw_chart(t, frame, f"{t} {tf}: {p['name']} (forming)", show_sma=daily, pattern=p,
+                          extra=extra if daily else None)
     if daily:
-        return draw_chart(t, item["sd"], f"{t} daily", show_sma=True)
+        what = " + ".join(x for x, k in (("major S/R", extra["levels"]), ("Fibonacci", extra.get("fib"))) if k)
+        return draw_chart(t, item["sd"], f"{t} daily" + (f": {what}" if what else ""), show_sma=True,
+                          extra=extra)
     return draw_chart(t, item["sh"], f"{t} {m['name']}")
 
 
@@ -476,6 +520,14 @@ def format_alert(ticker, events, ctx, mode):
         lines.append(f"Daily Bollinger {ctx['bb'][0]:.2f} – {ctx['bb'][1]:.2f}")
     if ctx["dc"]:
         lines.append(f"Daily Donchian {ctx['dc'][0]:.2f} – {ctx['dc'][1]:.2f}")
+    if ctx.get("major_sup") or ctx.get("major_res"):
+        sup = f"{ctx['major_sup']:.2f}" if ctx.get("major_sup") else "none"
+        res = f"{ctx['major_res']:.2f}" if ctx.get("major_res") else "none"
+        lines.append(f"Major support {sup} | major resistance {res}")
+    if ctx.get("fib"):
+        f = ctx["fib"]
+        zone = " / ".join(f"{v:.2f}" for _, v in sorted(f["levels"].items()))
+        lines.append(f"Fibonacci 38.2/50/61.8% of the last {'rise' if f['up'] else 'drop'}: {zone}")
     lines.append(f'<a href="https://www.tradingview.com/chart/?symbol={ticker.replace("-", ".")}">Open chart</a>')
     lines.append("<i>Possible setup only. Check it yourself before trading.</i>")
     return "\n".join(lines)
@@ -504,7 +556,8 @@ def load_state():
 
 def save_state(state, now):
     cutoff = (now - dt.timedelta(days=5)).isoformat()
-    state = {k: v for k, v in state.items() if v >= cutoff}
+    # sent-alert keys expire after 5 days; the paper-trade book ("_trades") is kept
+    state = {k: v for k, v in state.items() if not isinstance(v, str) or v >= cutoff}
     with open(STATE_FILE, "w") as f:
         json.dump(state, f)
 
@@ -639,6 +692,10 @@ def main():
         if send_long(lines):
             for w in watch:
                 state[w["key"]] = now.isoformat()
+
+    # 4) paper trading: STRONG signals become bracket orders in the Alpaca paper account
+    for line in trader.run(found, state, send_telegram, test_mode=force):
+        print(line, flush=True)
 
     save_state(state, now)
     log(f"Done: {sent} chart alerts sent" + (f", {len(rest)} more in the summary" if rest else ""), t0)
