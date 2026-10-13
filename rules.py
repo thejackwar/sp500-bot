@@ -1,11 +1,14 @@
 """
-YOUR STRATEGY: 200-day moving average, Bollinger Bands and Donchian channel.
+YOUR STRATEGY: 200-day moving average, Bollinger Bands, Donchian channel,
+major support/resistance and Fibonacci retracements (the last two live in levels.py).
 
 Individual alerts (each sent once per candle / per day):
     200-day MA   price crosses above / below the 200-day simple moving average (daily chart)
     Bollinger    price breaks above the upper band / below the lower band (20 candles, 2 std dev)
     Squeeze      Bollinger bands at their narrowest in ~6 months (daily) / 120 candles (intraday)
     Donchian     new 20-candle high / low (price breaks the Donchian channel)
+    Major S/R    price breaks a support/resistance level touched 3+ times in the last year
+    Fibonacci    price pulls back to the 38.2% / 50% / 61.8% retracement of the latest major swing
 These individual alerts come from the DAILY chart (checked with the latest price during the day).
 
 The intraday chart (15-minute candles for the first 3 hours, hourly after that) uses slower
@@ -20,6 +23,8 @@ STRONG alert (marked with a star) when everything lines up:
 Change the numbers below to tune the strategy.
 """
 import pandas as pd
+
+import levels
 
 SMA_LONG = 200                   # the 200-day moving average
 BB_PERIOD = 20                   # Bollinger Bands length
@@ -96,6 +101,9 @@ def evaluate(daily, intraday, tf_name):
         for direction, code, text in _timeframe_events(frame, tf):
             events.append({"dir": direction, "code": code, "tf": tf, "text": text})
 
+    lv_events, lv_ctx = levels.events(daily)          # major support/resistance + Fibonacci
+    events += lv_events
+
     # STRONG: trend (200-day MA) + Donchian breakout + Bollinger confirmation on the same chart
     above = pd.notna(cur.SMA200) and cur.Close > cur.SMA200
     below = pd.notna(cur.SMA200) and cur.Close < cur.SMA200
@@ -115,5 +123,6 @@ def evaluate(daily, intraday, tf_name):
         "sma200": float(cur.SMA200) if pd.notna(cur.SMA200) else None,
         "bb": (float(cur.BB_lo), float(cur.BB_up)) if pd.notna(cur.BB_up) else None,
         "dc": (float(cur.DC_low), float(cur.DC_high)) if pd.notna(cur.DC_high) else None,
+        **lv_ctx,
     }
     return events, context, d, h
