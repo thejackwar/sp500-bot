@@ -18,6 +18,7 @@ Runs on GitHub Actions (see .github/workflows/scan.yml) or locally:
 """
 import datetime as dt
 import io
+import textwrap
 import json
 import os
 import time
@@ -372,7 +373,7 @@ def _pos(df, ts):
         return None
 
 
-def draw_chart(ticker, df, title, show_sma=False, pattern=None, n_show=120, extra=None):
+def draw_chart(ticker, df, title, show_sma=False, pattern=None, n_show=120, extra=None, trade=None):
     """Candlestick chart on black. df: candles with a DatetimeIndex; optional strategy columns
     (BB_*, DC_*, SMA200, Squeeze) are drawn when present. pattern: positions refer to df rows.
     extra: {"levels": [(price, "sup"/"res")], "fib": swing} from levels.py."""
@@ -460,8 +461,34 @@ def draw_chart(ticker, df, title, show_sma=False, pattern=None, n_show=120, extr
             lo_y, hi_y = min(lo_y, val), max(hi_y, val)
     pad = 0.04 * (hi_y - lo_y or 1)
     ax.set_ylim(lo_y - pad, hi_y + pad)
+    if trade:                                          # TradingView-style long/short position tool
+        e, tp, sl = trade["entry"], trade["target"], trade["stop"]
+        long = trade["dir"] == "LONG"
+        x0, x1 = n - 1.5, n + 14
+        ax.fill_between([x0, x1], e, tp, color="#26a69a", alpha=0.28, lw=0, zorder=4)
+        ax.fill_between([x0, x1], e, sl, color="#ef5350", alpha=0.28, lw=0, zorder=4)
+        for val, colr in ((tp, "#26a69a"), (e, "#e0e0e0"), (sl, "#ef5350")):
+            ax.plot([x0, x1], [val, val], color=colr, lw=1.3, zorder=5)
+        pct = lambda v: (v / e - 1) * 100 * (1 if long else -1)     # + = gain, − = loss
+        side = "BUY" if long else "SELL SHORT"
+        ax.text(x0 + 0.5, tp, f" Take profit {tp:.2f} ({pct(tp):+.1f}%)", color="white", fontsize=8,
+                va="bottom" if long else "top", zorder=7)
+        ax.text(x0 + 0.5, sl, f" Stop loss {sl:.2f} ({pct(sl):+.1f}%)", color="white", fontsize=8,
+                va="top" if long else "bottom", zorder=7)
+        ax.text(x0 + 0.5, e, f" {side} {trade['qty']} @ {e:.2f}   R:R {abs(tp - e) / abs(e - sl):.1f}",
+                color="white", fontsize=8, va="center", fontweight="bold",
+                bbox=dict(facecolor="#1e222d", edgecolor="#555", pad=2), zorder=8)
+        ax.annotate("", xy=(n - 1, e), xytext=(n - 1, e - (1 if long else -1) * 0.06 * (hi_y - lo_y or 1)),
+                    arrowprops=dict(arrowstyle="-|>", color="#26a69a" if long else "#ef5350", lw=2), zorder=8)
+        lo_y, hi_y = min(lo_y, tp, sl), max(hi_y, tp, sl)
+        why = ["Why this trade:"] + [textwrap.shorten(r, 78, placeholder="…") for r in trade.get("why", [])]
+        ax.text(0.01, 0.98, "\n".join(why[:1] + [f"• {w}" for w in why[1:]]), transform=ax.transAxes,
+                va="top", ha="left", fontsize=8, color="#e0e0e0", linespacing=1.5, zorder=9,
+                bbox=dict(facecolor="#131722", edgecolor="#555", alpha=0.92, pad=6))
+        pad = 0.04 * (hi_y - lo_y or 1)
+        ax.set_ylim(lo_y - pad, hi_y + pad)
     labels = pattern or extra.get("levels") or fib
-    ax.set_xlim(start - 1, n + (16 if labels else 2))
+    ax.set_xlim(start - 1, n + (16 if labels or trade else 2))
 
     step = max(1, len(d) // 7)
     ticks = list(range(start, n, step))
@@ -469,7 +496,7 @@ def draw_chart(ticker, df, title, show_sma=False, pattern=None, n_show=120, extr
     ax.set_xticks(ticks)
     ax.set_xticklabels([pd.Timestamp(df.index[i]).strftime(fmt) for i in ticks])
     ax.set_title(title, color="white", fontsize=11)
-    leg = ax.legend(loc="upper left", fontsize=7, ncol=4, facecolor="black", edgecolor="#444")
+    leg = ax.legend(loc="lower left" if trade else "upper left", fontsize=7, ncol=4, facecolor="black", edgecolor="#444")
     for t in leg.get_texts():
         t.set_color("#dddddd")
     buf = io.BytesIO()
@@ -540,6 +567,17 @@ def alert_chart(item, m):
         return draw_chart(t, item["sd"], f"{t} daily" + (f": {what}" if what else ""), show_sma=True,
                           extra=extra)
     return draw_chart(t, item["sh"], f"{t} {m['name']}")
+
+
+def trade_chart(item, trade):
+    """Chart of a paper trade on the timeframe of its signal, with entry/stop/target and reasons."""
+    t = item["t"]
+    daily = trade["tf"] == "daily"
+    frame = item["sd"] if daily else item["sh"]
+    name = "daily" if daily else "15-min"
+    head = "LONG" if trade["dir"] == "LONG" else "SHORT"
+    return draw_chart(t, frame, f"{t} {name}: paper trade {head}", show_sma=daily,
+                      n_show=90 if daily else 100, trade=trade)
 
 
 def headline(events):
@@ -752,7 +790,7 @@ def main():
                 state[w["key"]] = now.isoformat()
 
     # 4) paper trading: STRONG signals become bracket orders in the Alpaca paper account
-    for line in trader.run(found, state, send_telegram, test_mode=force):
+    for line in trader.run(found, state, send_telegram, test_mode=force, chart_fn=trade_chart):
         print(line, flush=True)
 
     save_state(state, now)

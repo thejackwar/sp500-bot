@@ -10,6 +10,7 @@ message with a chart whenever a signal appears. ⭐ Strong signals are also trad
 | `rules.py` | **Your strategy** (200-day MA, Bollinger, Donchian). Settings at the top |
 | `levels.py` | Major support/resistance and Fibonacci retracements |
 | `trader.py` | Paper trading with Alpaca (switch: `TRADING_ENABLED`) |
+| `pine.py` | Writes the TradingView Pine Script for each trade |
 | `patterns.py` | Chart-pattern recognition (switch: `PATTERNS_ENABLED` in `scanner.py`) |
 | `.github/workflows/scan.yml` | The schedule that runs it on GitHub for free |
 
@@ -60,7 +61,8 @@ Every **⭐ STRONG** signal (long or short) becomes a **bracket order** in your 
 - **Stop-loss:** 2 × daily ATR from the entry. **Target:** 2 × the stop distance (2:1 reward/risk). Both are sent with the entry and stay active until hit (good-till-cancelled), so Alpaca closes the trade even when the bot isn't running.
 - **Size:** each trade risks **1% of equity** between entry and stop, capped at 20% of equity per stock.
 - **Limits:** max 10 open positions, max 3 new trades per check, one trade per stock per day, no new trade if you already hold the stock. Shorts only on easy-to-borrow stocks.
-- **Telegram:** 🤖 when a trade is placed, 🎯/🛑 with the profit or loss when the target or stop is hit.
+- **Telegram:** 🤖 when a trade is placed, with a **trade chart** in TradingView style: candles, a green take-profit box and a red stop-loss box from the entry (prices, % and R:R), an arrow on the entry candle, and the **reasons for the trade** written on the chart. The message repeats the reasons and has a TradingView link that opens the stock on the same timeframe (TradingView links can't carry drawings, so the levels are on the image). 🎯/🛑 follow with the profit or loss when the target or stop is hit.
+- **TradingView (Pine Script):** after each trade a 📋 message carries a ready-made **Pine Script** with the trade built in. On TradingView: open the stock on the timeframe named in the message → **Pine Editor** → paste → **Add to chart**. It draws the 200-day MA, Bollinger Bands and Donchian channel, green take-profit and red stop-loss boxes from the entry candle, an entry label with R:R, and a table with the reasons. (Pine can't download data from outside TradingView, so each trade gets its own script.) Turn off with `SEND_PINE_SCRIPT = False` in `trader.py`.
 - **Test mode and market closed:** no orders; you get a 🧪 message showing what it *would* have traded.
 - It only uses Alpaca's paper-trading address, so it cannot touch real money. Settings are at the top of `trader.py`; set `TRADING_ENABLED = False` to go back to alerts only.
 

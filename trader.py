@@ -12,12 +12,16 @@ capped at MAX_POSITION_PCT of equity per stock.
 Safety: this file ONLY talks to Alpaca's paper-trading address. It cannot place real-money trades.
 """
 import datetime as dt
+import html
 import math
 import os
 
 import requests
 
+import pine
+
 TRADING_ENABLED = True       # False = alerts only, no paper trades
+SEND_PINE_SCRIPT = True      # also send a TradingView Pine script that draws the trade
 ALLOW_SHORTS = True          # also sell short on STRONG SHORT signals
 RISK_PER_TRADE = 0.01        # risk 1% of equity per trade
 STOP_ATR = 2.0               # stop-loss distance = 2 x daily ATR
@@ -72,6 +76,41 @@ def plan_trade(direction, price, atr, equity, buying_power):
     return {"qty": qty, "stop": stop, "target": target, "risk": qty * stop_dist}
 
 
+def trade_timeframe(item):
+    """Chart the trade on the timeframe of its strong signal: 'daily' or the intraday chart."""
+    strong = [e for e in item.get("events", []) if e.get("strong")]
+    return "daily" if any(e.get("tf") == "daily" for e in strong) else "intraday"
+
+
+def reasons(item, direction):
+    """Plain-language reasons for the trade, strongest first (also written on the chart)."""
+    ev = sorted(item.get("events", []), key=lambda e: not e.get("strong"))
+    out = [e["text"] for e in ev if e.get("text") and e.get("dir") in (direction, "WATCH")]
+    ctx = item.get("ctx", {})
+    if ctx.get("sma200"):
+        side = "above" if ctx["price"] > ctx["sma200"] else "below"
+        pct = (ctx["price"] / ctx["sma200"] - 1) * 100
+        out.append(f"Trend: price {side} the 200-day MA {ctx['sma200']:.2f} ({pct:+.1f}%)")
+    return out[:6]
+
+
+def tradingview_link(sym, tf):
+    interval = "D" if tf == "daily" else "15"
+    return f"https://www.tradingview.com/chart/?symbol={sym}&interval={interval}"
+
+
+def trade_message(head, sym, direction, price, plan, why, tf):
+    sign = 1 if direction == "LONG" else -1
+    reward = abs(plan["target"] - price) * plan["qty"]
+    lines = [f"{head}: <b>{'BUY' if direction == 'LONG' else 'SELL SHORT'} {plan['qty']} {sym}</b> @ ~{price:.2f}",
+             f"🎯 Take profit {plan['target']:.2f} ({sign * (plan['target'] / price - 1) * 100:+.1f}%, +${reward:,.0f})",
+             f"🛑 Stop loss {plan['stop']:.2f} ({sign * (plan['stop'] / price - 1) * 100:+.1f}%, −${plan['risk']:,.0f} "
+             f"= {RISK_PER_TRADE:.0%} of equity)",
+             "<b>Why:</b>"] + [f"• {r}" for r in why]
+    lines.append(f'<a href="{tradingview_link(sym, tf)}">Open {sym} on TradingView ({"daily" if tf == "daily" else "15-min"})</a>')
+    return "\n".join(lines)
+
+
 def _strong_direction(item):
     dirs = {e["dir"] for e in item["events"] if e.get("strong")}
     return dirs.pop() if len(dirs) == 1 else None      # skip if signals disagree
@@ -122,9 +161,10 @@ def check_closed(api, book, send):
         del book[sym]
 
 
-def run(found, state, send, test_mode=False):
+def run(found, state, send, test_mode=False, chart_fn=None):
     """found: the scanner's list of stocks with signals. state: persisted dict (book under '_trades').
-    send: function that sends a Telegram message. Returns a list of log lines."""
+    send(text, image=None): sends a Telegram message. chart_fn(item, trade) -> PNG of the trade.
+    Returns a list of log lines."""
     log = []
     if not TRADING_ENABLED:
         return log
@@ -185,10 +225,44 @@ def run(found, state, send, test_mode=False):
             desc = (f"{'BUY' if side == 'buy' else 'SELL SHORT'} {plan['qty']} {sym} @ ~{price:.2f}, "
                     f"stop {plan['stop']:.2f}, target {plan['target']:.2f} "
                     f"(risk ${plan['risk']:,.0f} = {RISK_PER_TRADE:.0%} of equity)")
+            try:                                     # explaining the trade must never block it
+                tf, why = trade_timeframe(it), reasons(it, direction)
+            except Exception:
+                tf, why = "daily", []
+            trade = {"sym": sym, "dir": direction, "entry": price, "tf": tf, "why": why, **plan}
+
+            def notify(head):
+                try:
+                    text = trade_message(head, sym, direction, price, plan, why, tf)
+                except Exception:
+                    text = f"{head}: {desc}"
+                image = None
+                if chart_fn:
+                    try:
+                        image = chart_fn(it, trade)
+                    except Exception as e:
+                        print(f"{sym}: trade chart failed: {e}", flush=True)
+                send(text, image) if image else send(text)
+                if SEND_PINE_SCRIPT:
+                    try:
+                        tf_name = "daily (1D)" if tf == "daily" else "15-minute"
+                        head = (f"📋 <b>Draw it on TradingView</b>: open {sym} on the {tf_name} chart → "
+                                f"Pine Editor → paste this → <b>Add to chart</b>\n")
+                        t2 = dict(trade)
+                        while True:                  # Telegram messages max 4096 characters
+                            code = html.escape(pine.trade_script(sym, t2), quote=False)
+                            msg = f'{head}<pre><code class="language-pine">{code}</code></pre>'
+                            if len(msg) <= 4000 or not t2["why"]:
+                                break
+                            t2["why"] = t2["why"][:-1]
+                        send(msg)
+                    except Exception as e:
+                        print(f"{sym}: Pine script failed: {e}", flush=True)
+
             if test_mode or not clock["is_open"]:
-                why = "test mode" if test_mode else "market closed"
-                send(f"🧪 <b>Paper trade NOT placed ({why})</b>, it would be:\n{desc}")
-                log.append(f"{sym}: dry run ({why}): {desc}")
+                reason = "test mode" if test_mode else "market closed"
+                notify(f"🧪 NOT placed ({reason}), it would be")
+                log.append(f"{sym}: dry run ({reason}): {desc}")
                 continue
             order = api.post("/orders", {
                 "symbol": sym, "qty": str(plan["qty"]), "side": side, "type": "market",
@@ -201,7 +275,7 @@ def run(found, state, send, test_mode=False):
                          "filled": False, "opened": dt.datetime.utcnow().isoformat()}
             placed += 1
             slots -= 1
-            send(f"🤖 <b>Paper trade placed</b>: {desc}")
+            notify("🤖 Paper trade placed")
             log.append(f"{sym}: placed {desc}")
         except Exception as e:
             send(f"⚠️ Paper trade for {sym} failed: {e}")
