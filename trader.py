@@ -13,6 +13,7 @@ Safety: this file ONLY talks to Alpaca's paper-trading address. It cannot place 
 """
 import datetime as dt
 import html
+import re
 import math
 import os
 
@@ -86,6 +87,9 @@ def reasons(item, direction):
     """Plain-language reasons for the trade, strongest first (also written on the chart)."""
     ev = sorted(item.get("events", []), key=lambda e: not e.get("strong"))
     out = [e["text"] for e in ev if e.get("text") and e.get("dir") in (direction, "WATCH")]
+    # pattern lines carry the pattern's own entry/stop/target; keep only the breakout level so
+    # they can't be confused with the trade's levels
+    out = [re.sub(r": entry ([\d.]+), stop [\d.]+, target [\d.]+", r" through \1", r) for r in out]
     ctx = item.get("ctx", {})
     if ctx.get("sma200"):
         side = "above" if ctx["price"] > ctx["sma200"] else "below"

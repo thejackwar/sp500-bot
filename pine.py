@@ -60,14 +60,15 @@ fill(pUp, pLo, color = color.new(color.blue, 92))
 plot(dcHigh, "Donchian high", color = color.new(color.green, 20), style = plot.style_stepline)
 plot(dcLow, "Donchian low", color = color.new(color.red, 20), style = plot.style_stepline)
 
-// The trade
+// The trade (only drawn on the right stock's chart)
+rightStock = syminfo.ticker == {_s(sym)}
 entryTime = timestamp("America/New_York", {t0.year}, {t0.month}, {t0.day}, {t0.hour}, {t0.minute})
 rightTime = entryTime + 30 * timeframe.in_seconds() * 1000
 entry  = {e:.2f}
 stop   = {sl:.2f}
 target = {tp:.2f}
 
-if barstate.isfirst
+if barstate.isfirst and rightStock
     box.new(entryTime, target, rightTime, entry, xloc = xloc.bar_time, border_color = color.teal,
          bgcolor = color.new(color.teal, 75), text = {_s(f"Take profit {tp:.2f} ({tp_pct:+.1f}%)")},
          text_color = color.white, text_size = size.small, text_halign = text.align_left,
@@ -83,8 +84,11 @@ if barstate.isfirst
 
 var table t = table.new(position.top_right, 1, {len(why) + 1}, bgcolor = color.new(#131722, 10),
      border_color = color.gray, border_width = 1)
-if barstate.islast
+if barstate.islast and rightStock
     table.cell(t, 0, 0, {_s(f"Why this trade ({side} {sym})")}, text_color = color.yellow,
          text_halign = text.align_left, text_size = size.small)
 {rows}
+if barstate.islast and not rightStock
+    table.cell(t, 0, 0, {_s(f"This script is for {sym}: open the {sym} chart ({tf_name})")},
+         text_color = color.orange, text_halign = text.align_left, text_size = size.normal)
 '''
