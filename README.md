@@ -1,6 +1,6 @@
 # S&P 100 Trade Alert Bot
 
-Scans the S&P 100 (list refreshed from Wikipedia every run, built-in backup copy; GOOGL only, not GOOG) during US market hours: **every 15 minutes on 15-minute candles for the first 3 hours after the open** (about 16:00–18:45 Milan time), then **every hour on hourly candles** until the close (about 18:50–22:50 Milan time).
+Scans the S&P 100 (list refreshed from Wikipedia every run, built-in backup copy; GOOGL only, not GOOG) **every 15 minutes during US market hours**, from 9:30 to 16:00 New York time (**15:30 → 22:00 Milan**), on real-time 15-minute candles. The opening check catches opening gaps; every later check analyzes the 15-minute candle that has just closed. GitHub usually starts scheduled runs a minute or two late (more at the top of the hour, when its servers are busiest).
 It runs the strategy in `rules.py` (200-day moving average, Bollinger Bands, Donchian channel) and sends a Telegram
 message with a chart whenever a signal appears. ⭐ Strong signals are also traded automatically in your **Alpaca paper account** (no real money).
 
@@ -36,7 +36,7 @@ message with a chart whenever a signal appears. ⭐ Strong signals are also trad
    - `ALPACA_SECRET_KEY` = your Alpaca Secret Key
 
 ## 4. Test it
-**Actions** tab → **S&P 500 scan** → **Run workflow** → pick 15m or 1h → tick *Test mode* → **Run**.
+**Actions** tab → **S&P 500 scan** → **Run workflow** → keep 15m → tick *Test mode* → **Run**.
 It takes about 3–5 minutes. The log shows `Alpaca: 100 tickers OK` when the keys work. Any current setups arrive on Telegram. After that it runs automatically every weekday.
 
 ## The strategy (`rules.py`)
@@ -50,7 +50,7 @@ It takes about 3–5 minutes. The log shows `Alpaca: 100 tickers OK` when the ke
 
 **⭐ STRONG** when it all lines up: price on the right side of the 200-day MA + Donchian breakout in that direction + Bollinger confirmation (price beyond the band, or a squeeze in the last 10 candles).
 
-**Intraday chart** (15-minute candles 9:30–12:30 New York, hourly after): slower settings (Donchian 55, Bollinger 2.5 std) and **only ⭐ strong setups** are sent. Short candles break 20-candle highs/lows constantly (about 240 alerts a day in testing). Expect roughly **30 alerts a day** in total (major S/R and Fibonacci add about 5).
+**Intraday chart** (15-minute candles all day): slower settings (Donchian 55, Bollinger 2.5 std) and **only ⭐ strong setups** are sent. Short candles break 20-candle highs/lows constantly (about 240 alerts a day in testing). Expect roughly **30 alerts a day** in total (major S/R and Fibonacci add about 5).
 
 Up to 10 stocks per check get a chart alert (strongest first); any others are listed in one summary message. Every alert shows the 200-day MA (and distance from it), the daily Bollinger and Donchian levels, the nearest major support and resistance, the current Fibonacci levels, and a TradingView link.
 
@@ -85,8 +85,10 @@ How it works: swing highs/lows are found with a zigzag that ignores moves smalle
 
 
 ## Notes
-- **Prices:** Alpaca's official API on the free plan. Data covers all US exchanges (accurate prices and volume) but must be 15+ minutes old, so each check runs about 17–20 minutes after its candle closes. A setup reaches you about 20 minutes after its candle closes. Good for swing trades, not for scalping.
+- **Prices:** Alpaca's official API on the free plan, two feeds:
+  - **15-minute candles and live prices:** the **real-time IEX feed**, so each check sees the candle that has just closed. IEX is one exchange: its prices match the full market closely for S&P 100 stocks, but its volume is only IEX's share. Volume is only ever compared with IEX's own recent average, so the comparison stays fair.
+  - **Daily history:** the complete all-exchange feed (15+ minutes delayed on the free plan, which doesn't matter for past days). Today's daily candle is built from the live IEX snapshot.
 - **Backup:** if Alpaca fails for some tickers or the whole run, those tickers come from Yahoo Finance automatically. Without Alpaca keys, the bot uses Yahoo for everything.
-- A private repo gets 2,000 free minutes a month. This bot uses roughly 800–1,100. Runs outside the trading window stop after a few seconds without downloading anything.
+- A private repo gets 2,000 free minutes a month. This bot uses roughly 1,300–1,500 (27 scans per weekday). Runs outside the trading window stop after a few seconds without downloading anything.
 - GitHub pauses schedules after 60 days with no commits. Any small edit restarts them.
 - Signals are possible setups, not advice. Use the paper account's results to judge the strategy before ever trading real money.
