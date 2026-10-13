@@ -2,12 +2,14 @@
 
 Scans the S&P 100 (list refreshed from Wikipedia every run, built-in backup copy; GOOGL only, not GOOG) during US market hours: **every 15 minutes on 15-minute candles for the first 3 hours after the open** (about 16:00–18:45 Milan time), then **every hour on hourly candles** until the close (about 18:50–22:50 Milan time).
 It runs the strategy in `rules.py` (200-day moving average, Bollinger Bands, Donchian channel) and sends a Telegram
-message with a chart whenever a signal appears. It **never places trades**. It only alerts you.
+message with a chart whenever a signal appears. ⭐ Strong signals are also traded automatically in your **Alpaca paper account** (no real money).
 
 | File | What it does |
 |---|---|
 | `scanner.py` | Downloads prices, computes indicators, levels and trend lines, sends alerts |
 | `rules.py` | **Your strategy** (200-day MA, Bollinger, Donchian). Settings at the top |
+| `levels.py` | Major support/resistance and Fibonacci retracements |
+| `trader.py` | Paper trading with Alpaca (switch: `TRADING_ENABLED`) |
 | `patterns.py` | Chart-pattern recognition (switch: `PATTERNS_ENABLED` in `scanner.py`) |
 | `.github/workflows/scan.yml` | The schedule that runs it on GitHub for free |
 
@@ -43,16 +45,29 @@ It takes about 3–5 minutes. The log shows `Alpaca: 100 tickers OK` when the ke
 - 🟢/🔴 Price breaks above/below the **Bollinger Bands** (20 days, 2 std dev)
 - ⚪ **Bollinger squeeze:** bands at their narrowest in ~6 months, a big move often follows
 - 🟢/🔴 **Donchian breakout:** new 20-day high/low
+- 🟢/🔴 **Major support/resistance break:** price clears (by ¼ ATR) a level touched by 3+ significant swings in the last year
+- 🟢/🔴 **Fibonacci retracement:** price pulls back to the 38.2%, 50% or 61.8% level of the latest major swing (a move of 6+ ATR) for the first time. Pullback in a rise = watch for a bounce (long); bounce in a drop = watch for a rejection (short)
 
 **⭐ STRONG** when it all lines up: price on the right side of the 200-day MA + Donchian breakout in that direction + Bollinger confirmation (price beyond the band, or a squeeze in the last 10 candles).
 
-**Intraday chart** (15-minute candles 9:30–12:30 New York, hourly after): slower settings (Donchian 55, Bollinger 2.5 std) and **only ⭐ strong setups** are sent. Short candles break 20-candle highs/lows constantly (about 240 alerts a day in testing). Expect roughly **25–30 alerts a day** in total.
+**Intraday chart** (15-minute candles 9:30–12:30 New York, hourly after): slower settings (Donchian 55, Bollinger 2.5 std) and **only ⭐ strong setups** are sent. Short candles break 20-candle highs/lows constantly (about 240 alerts a day in testing). Expect roughly **30 alerts a day** in total (major S/R and Fibonacci add about 5).
 
-Up to 10 stocks per check get a chart alert (strongest first); any others are listed in one summary message. Every alert shows the 200-day MA (and distance from it), the daily Bollinger and Donchian levels, and a TradingView link.
+Up to 10 stocks per check get a chart alert (strongest first); any others are listed in one summary message. Every alert shows the 200-day MA (and distance from it), the daily Bollinger and Donchian levels, the nearest major support and resistance, the current Fibonacci levels, and a TradingView link.
+
+## Paper trading (`trader.py`)
+Every **⭐ STRONG** signal (long or short) becomes a **bracket order** in your Alpaca **paper** account:
+- **Entry:** market order, whole shares, priced from Alpaca's real-time IEX feed at the moment of the order.
+- **Stop-loss:** 2 × daily ATR from the entry. **Target:** 2 × the stop distance (2:1 reward/risk). Both are sent with the entry and stay active until hit (good-till-cancelled), so Alpaca closes the trade even when the bot isn't running.
+- **Size:** each trade risks **1% of equity** between entry and stop, capped at 20% of equity per stock.
+- **Limits:** max 10 open positions, max 3 new trades per check, one trade per stock per day, no new trade if you already hold the stock. Shorts only on easy-to-borrow stocks.
+- **Telegram:** 🤖 when a trade is placed, 🎯/🛑 with the profit or loss when the target or stop is hit.
+- **Test mode and market closed:** no orders; you get a 🧪 message showing what it *would* have traded.
+- It only uses Alpaca's paper-trading address, so it cannot touch real money. Settings are at the top of `trader.py`; set `TRADING_ENABLED = False` to go back to alerts only.
 
 ## Charts
 Every alert comes with a **candlestick chart on a black background** (green = up candle, red = down candle):
 - **Strategy alert:** Bollinger Bands (shaded), Donchian channel, 200-day MA (daily), squeeze markers.
+- **Major S/R break:** the broken level as a thick cyan line. **Fibonacci:** the swing (dashed) and the 0 / 38.2 / 50 / 61.8 / 100% levels in orange.
 - **Pattern breakout:** the chart switches to the pattern's timeframe (daily or hourly) and draws the pattern in yellow: lines, labelled swing points (LS/Head/RS, 1-2-3, X-A-B-C-D…), plus entry, stop and target.
 - If a stock gets a strategy alert while a pattern is still **forming** on that chart, the forming pattern is drawn too.
 
@@ -74,4 +89,4 @@ How it works: swing highs/lows are found with a zigzag that ignores moves smalle
 - **Backup:** if Alpaca fails for some tickers or the whole run, those tickers come from Yahoo Finance automatically. Without Alpaca keys, the bot uses Yahoo for everything.
 - A private repo gets 2,000 free minutes a month. This bot uses roughly 800–1,100. Runs outside the trading window stop after a few seconds without downloading anything.
 - GitHub pauses schedules after 60 days with no commits. Any small edit restarts them.
-- Signals are possible setups, not advice. Backtest your rules before trading real money.
+- Signals are possible setups, not advice. Use the paper account's results to judge the strategy before ever trading real money.
