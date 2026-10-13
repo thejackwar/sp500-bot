@@ -2,11 +2,9 @@ name: S&P 500 scan
 
 on:
   schedule:
-    # Times are UTC; each run checks New York time itself, so summer/winter time changes are handled.
-    # 15-minute checks for the first 3 hours after the open (Milan ~15:30-18:30)
-    - cron: "2,17,32,47 13-17 * * 1-5"
-    # Hourly checks for the rest of the trading day (Milan ~18:50-22:50)
-    - cron: "50 15-21 * * 1-5"
+    # Every 15 minutes at :00 :15 :30 :45 (UTC). Each run checks New York time itself and only
+    # scans between 9:30 and 16:15 New York (Milan 15:30-22:15), so clock changes are handled.
+    - cron: "0,15,30,45 13-21 * * 1-5"
   workflow_dispatch:          # "Run workflow" button for manual tests
     inputs:
       mode:
@@ -24,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 14
     env:
-      SCAN_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || (github.event.schedule == '50 15-21 * * 1-5' && '1h' || '15m') }}
+      SCAN_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || '15m' }}
     steps:
       # Skip quickly (no downloads) when this run falls outside its window in New York time.
       - name: Check market window
@@ -34,8 +32,7 @@ jobs:
           dow=$(TZ=America/New_York date +%u)
           run=false
           if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then run=true
-          elif [ "$dow" -le 5 ] && [ "$SCAN_MODE" = "15m" ] && [ $now -ge 1000 ] && [ $now -le 1310 ]; then run=true
-          elif [ "$dow" -le 5 ] && [ "$SCAN_MODE" = "1h" ] && [ $now -ge 1245 ] && [ $now -le 1730 ]; then run=true
+          elif [ "$dow" -le 5 ] && [ $now -ge 930 ] && [ $now -le 1612 ]; then run=true
           fi
           echo "New York time $now, mode $SCAN_MODE, run=$run"
           echo "run=$run" >> "$GITHUB_OUTPUT"
