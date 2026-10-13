@@ -6,8 +6,11 @@ alerts with a chart for each signal.
 Prices come from Alpaca (official API, free plan, full all-exchange data
 delayed 15+ minutes), with Yahoo Finance as automatic backup.
 
-Two scan modes (SCAN_MODE env): "15m" uses 15-minute candles for entries (first
-3 hours after the open), "1h" uses hourly candles (rest of the day).
+Runs every 15 minutes from 9:30 to 16:00 New York time on 15-minute candles (SCAN_MODE "15m";
+"1h" = hourly candles, for manual runs). Intraday candles come from Alpaca's REAL-TIME IEX feed,
+so each check analyzes the candle that has just closed; daily history comes from the complete
+(15-minute delayed) all-exchange feed. The 9:30 check has no closed candle yet and checks the
+daily-chart signals against the live opening price.
 
 Runs on GitHub Actions (see .github/workflows/scan.yml) or locally:
     pip install -r requirements.txt
@@ -44,7 +47,9 @@ NFLX NOW NVDA ORCL PANW PEP PFE PG PLTR PM QCOM RTX SBUX SCHW SNDK SO T TMO TMUS
 UNP UPS USB V VZ WFC WMT XOM""".split()
 PATTERNS_ENABLED = True            # chart-pattern alerts (patterns.py); set False to turn them off
 ALPACA_URL = "https://data.alpaca.markets/v2/stocks/bars"
-DATA_DELAY_MINUTES = 16            # Alpaca free plan: full-market data must be 15+ min old
+DATA_DELAY_MINUTES = 16            # Alpaca free plan: full-market (SIP) data must be 15+ min old
+INTRADAY_FEED = "iex"              # real-time on the free plan ("sip" = complete but 15+ min late)
+SNAPSHOT_URL = "https://data.alpaca.markets/v2/stocks/snapshots"
 STATE_FILE = "state.json"          # remembers sent alerts so you never get duplicates
 DAILY_LOOKBACK = 120               # daily bars used for levels / trend lines (~6 months)
 INTRADAY_LOOKBACK = 200            # entry-chart candles used for levels / trend lines
@@ -53,9 +58,9 @@ INTRADAY_LOOKBACK = 200            # entry-chart candles used for levels / trend
 # this mode handles; "fresh" = how recently the candle must have closed to alert on it.
 MODES = {
     "15m": {"minutes": 15, "alpaca": "15Min", "days": 12, "yahoo": ("14d", "15m"),
-            "first": (9, 30), "last": (12, 15), "fresh": 35, "name": "15-min"},
+            "first": (9, 30), "last": (15, 45), "fresh": 30, "name": "15-min"},
     "1h":  {"minutes": 60, "alpaca": "30Min", "days": 45, "yahoo": ("60d", "1h"),
-            "first": (11, 30), "last": (15, 30), "fresh": 75, "name": "hourly"},
+            "first": (9, 30), "last": (15, 30), "fresh": 75, "name": "hourly"},
 }
 PIVOT_WINDOW = 5                   # a swing high/low must be the extreme of +-5 bars
 MAX_CHART_ALERTS = 10              # full chart alerts per run; any extra setups go in one summary
@@ -81,12 +86,12 @@ def get_tickers():
     return [x.replace(".", "-") for x in syms]               # BRK.B -> BRK-B
 
 
-def _alpaca_chunk(part, timeframe, start, end, headers):
+def _alpaca_chunk(part, timeframe, start, end, headers, feed="sip"):
     """Download one group of symbols, following Alpaca's pages until done."""
     fmt = "%Y-%m-%dT%H:%M:%SZ"
     params = {"symbols": ",".join(t.replace("-", ".") for t in part),   # BRK-B -> BRK.B
               "timeframe": timeframe, "start": start.strftime(fmt), "end": end.strftime(fmt),
-              "limit": 10000, "adjustment": "all", "feed": "sip"}
+              "limit": 10000, "adjustment": "all", "feed": feed}
     rows = {}
     try:
         while True:
@@ -107,9 +112,10 @@ def _alpaca_chunk(part, timeframe, start, end, headers):
     return rows
 
 
-def alpaca_bars(tickers, timeframe, start, end, chunk=25, workers=8):
+def alpaca_bars(tickers, timeframe, start, end, chunk=25, workers=8, feed="sip"):
     """Bars from Alpaca's official API, several groups downloaded at the same time.
-    The free plan gives full all-exchange (SIP) data as long as `end` is 15+ minutes old."""
+    feed "sip": all exchanges, `end` must be 15+ minutes old on the free plan.
+    feed "iex": one exchange, real-time (prices match the market closely; volume is IEX's share)."""
     key, secret = os.environ.get("ALPACA_KEY_ID"), os.environ.get("ALPACA_SECRET_KEY")
     if not key or not secret:
         print("No Alpaca keys set, using Yahoo for everything.")
@@ -118,7 +124,7 @@ def alpaca_bars(tickers, timeframe, start, end, chunk=25, workers=8):
     parts = [tickers[i:i + chunk] for i in range(0, len(tickers), chunk)]
     out = {}
     with ThreadPoolExecutor(max_workers=workers) as pool:
-        for rows in pool.map(lambda p: _alpaca_chunk(p, timeframe, start, end, headers), parts):
+        for rows in pool.map(lambda p: _alpaca_chunk(p, timeframe, start, end, headers, feed), parts):
             for sym, bars in rows.items():
                 df = pd.DataFrame(bars)
                 df.index = pd.DatetimeIndex(pd.to_datetime(df["t"], utc=True)).tz_convert(ET)
@@ -137,17 +143,43 @@ def to_session(df, minutes):
             .dropna())
 
 
-def get_prices(tickers, cutoff, mode):
-    """Alpaca first; any ticker Alpaca can't deliver is fetched from Yahoo instead."""
+def snapshots(tickers):
+    """Live (IEX) snapshot per stock: today's daily bar so far and the latest trade."""
+    key, secret = os.environ.get("ALPACA_KEY_ID"), os.environ.get("ALPACA_SECRET_KEY")
+    if not key or not secret:
+        return {}
+    headers = {"APCA-API-KEY-ID": key, "APCA-API-SECRET-KEY": secret}
+    out = {}
+    for i in range(0, len(tickers), 50):
+        part = [t.replace("-", ".") for t in tickers[i:i + 50]]
+        try:
+            r = requests.get(SNAPSHOT_URL, headers=headers, timeout=30,
+                             params={"symbols": ",".join(part), "feed": INTRADAY_FEED})
+            r.raise_for_status()
+            js = r.json()
+            js = js.get("snapshots", js)
+            for sym, snap in js.items():
+                if snap:
+                    out[sym.replace(".", "-")] = snap
+        except Exception as e:
+            print(f"Alpaca snapshot error: {e}", flush=True)
+    return out
+
+
+def get_prices(tickers, cutoff, mode, now=None):
+    """Alpaca first; any ticker Alpaca can't deliver is fetched from Yahoo instead.
+    Daily history: complete feed up to `cutoff`. Intraday: real-time IEX feed up to `now`."""
     m = MODES[mode]
     end = cutoff.astimezone(dt.timezone.utc)
+    end_rt = (now or cutoff).astimezone(dt.timezone.utc)
     t0 = time.time()
     daily = alpaca_bars(tickers, "1Day", end - dt.timedelta(days=400), end)
     print(f"Daily bars from Alpaca: {time.time() - t0:.0f}s", flush=True)
     t0 = time.time()
     intraday = {t: to_session(df, m["minutes"]) for t, df in
-                alpaca_bars(tickers, m["alpaca"], end - dt.timedelta(days=m["days"]), end).items()}
-    print(f"{m['name']} bars from Alpaca: {time.time() - t0:.0f}s", flush=True)
+                alpaca_bars(tickers, m["alpaca"], end_rt - dt.timedelta(days=m["days"]), end_rt,
+                            feed=INTRADAY_FEED).items()}
+    print(f"{m['name']} bars from Alpaca ({INTRADAY_FEED}, real-time): {time.time() - t0:.0f}s", flush=True)
     daily = {t: d for t, d in daily.items() if len(d) > 60}
     intraday = {t: h for t, h in intraday.items() if len(h) > 60}
     good = [t for t in tickers if t in daily and t in intraday]
@@ -212,6 +244,24 @@ def with_today(daily, h):
     d = d[d.index.date != today][["Open", "High", "Low", "Close", "Volume"]]
     row = pd.DataFrame({"Open": [t["Open"].iat[0]], "High": [t["High"].max()], "Low": [t["Low"].min()],
                         "Close": [t["Close"].iat[-1]], "Volume": [t["Volume"].sum()]},
+                       index=[pd.Timestamp(today)])
+    return pd.concat([d, row])
+
+
+def with_snapshot(daily, snap, today):
+    """Daily candles with today's candle taken from the live snapshot (None if no data for today)."""
+    bar = (snap or {}).get("dailyBar")
+    if not bar:
+        return None
+    if pd.Timestamp(bar["t"]).tz_convert(ET).date() != today:
+        return None
+    px = float((snap.get("latestTrade") or {}).get("p") or bar["c"])
+    d = daily.copy()
+    idx = d.index.tz_convert(ET).tz_localize(None) if d.index.tz is not None else d.index
+    d.index = idx.normalize()
+    d = d[d.index.date != today][["Open", "High", "Low", "Close", "Volume"]]
+    row = pd.DataFrame({"Open": [float(bar["o"])], "High": [max(float(bar["h"]), px)],
+                        "Low": [min(float(bar["l"]), px)], "Close": [px], "Volume": [float(bar["v"])]},
                        index=[pd.Timestamp(today)])
     return pd.concat([d, row])
 
@@ -577,9 +627,11 @@ def main():
     tickers = get_tickers()
     log(f"{now:%Y-%m-%d %H:%M} ET: {m['name']} scan of {len(tickers)} tickers"
         + (" (test mode)" if force else ""), t0)
-    cutoff = now - dt.timedelta(minutes=DATA_DELAY_MINUTES)
-    daily, intraday = get_prices(tickers, cutoff, mode)
-    log(f"Prices downloaded for {len(daily)} tickers", t0)
+    daily_cutoff = now - dt.timedelta(minutes=DATA_DELAY_MINUTES)
+    cutoff = now if INTRADAY_FEED == "iex" else daily_cutoff     # intraday candles are real-time
+    daily, intraday = get_prices(tickers, daily_cutoff, mode, now=cutoff)
+    snaps = snapshots(tickers)
+    log(f"Prices downloaded for {len(daily)} tickers, {len(snaps)} live snapshots", t0)
 
     # 1) analyze everything first
     found, watch, scanned = [], [], 0
@@ -592,14 +644,20 @@ def main():
             h = completed_bars(intraday[t], cutoff, m["minutes"])
             if len(h) < 60:
                 continue
-            if not force:
-                if not in_window(h.index[-1], m):
-                    continue
-                if now - bar_end(h.index[-1], m["minutes"]) > dt.timedelta(minutes=m["fresh"]):
-                    continue
+            fresh = (in_window(h.index[-1], m) and
+                     now - bar_end(h.index[-1], m["minutes"]) <= dt.timedelta(minutes=m["fresh"]))
+            live = with_snapshot(daily[t], snaps.get(t), now.date())
+            # opening check (9:32): no closed candle today yet -> daily-chart signals with the live price
+            opening = not fresh and live is not None and (9, 30) <= (now.hour, now.minute) < (10, 0)
+            if not (fresh or opening or force):
+                continue
             scanned += 1
-            dd = add_indicators(with_today(daily[t], h))
+            dd = add_indicators(live if live is not None else with_today(daily[t], h))
             events, ctx, sd, sh = rules.evaluate(dd, add_indicators(h), m["name"])
+            if live is not None:
+                ctx["price"] = float(dd["Close"].iat[-1])
+            if opening and not force:
+                events = [e for e in events if e["tf"] == "daily"]       # no new candle to judge yet
             # each event once per day (daily chart) or once per candle (intraday chart)
             day_key, bar_key = str(dd.index[-1].date()), f"{mode}|{h.index[-1].isoformat()}"
             for e in events:
@@ -608,7 +666,7 @@ def main():
             keys = [e["key"] for e in events]
             pat_hits, forming_any = [], []
 
-            if PATTERNS_ENABLED:                 # chart patterns on the daily and hourly charts
+            if PATTERNS_ENABLED and (fresh or force):   # chart patterns on the daily and hourly charts
                 price, prev = float(h["Close"].iat[-1]), float(h["Close"].iat[-2])
                 hv = add_indicators(h).iloc[-1]
                 vol_now = float(hv.Volume / hv.VolAvg20) if hv.VolAvg20 else None
@@ -642,7 +700,7 @@ def main():
                               "keys": keys, "score": (n_strong, len(events))})
         except Exception as e:                       # one bad ticker never stops the scan
             print(f"{t}: {e}", flush=True)
-    log(f"Checked {scanned} tickers with a fresh bar, {len(found)} stocks with new signals"
+    log(f"Checked {scanned} tickers, {len(found)} stocks with new signals"
         + (f", {len(watch)} new patterns forming" if PATTERNS_ENABLED else ""), t0)
 
     # 2) send the strongest setups with charts, the rest in one summary
