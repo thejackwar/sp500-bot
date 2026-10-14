@@ -1,11 +1,13 @@
 name: S&P 500 scan
 
 on:
-  schedule:
-    # Every 15 minutes at :00 :15 :30 :45 (UTC). Each run checks New York time itself and only
-    # scans between 9:30 and 16:15 New York (Milan 15:30-22:15), so clock changes are handled.
-    - cron: "0,15,30,45 13-21 * * 1-5"
-  workflow_dispatch:          # "Run workflow" button for manual tests
+  # Started every 15 minutes by an outside timer (cron-job.org, see README), because GitHub's own
+  # schedule often starts runs 5-30 minutes late or skips them. The timer sends source = "timer";
+  # those runs still check New York time and only scan between 9:30 and 16:12.
+  # Backup: to go back to GitHub's schedule, put these 3 lines back under "on:":
+  #   schedule:
+  #     - cron: "0,15,30,45 13-21 * * 1-5"
+  workflow_dispatch:          # "Run workflow" button (manual tests) and the outside timer
     inputs:
       mode:
         description: "Which candles to scan"
@@ -16,6 +18,15 @@ on:
         description: "Test mode: alert even if the market is closed"
         type: boolean
         default: false
+      source:
+        description: "Who started it (leave 'manual')"
+        type: string
+        default: "manual"
+
+# one scan at a time: a late run waits for the previous one instead of overlapping it
+concurrency:
+  group: scan
+  cancel-in-progress: false
 
 jobs:
   scan:
@@ -27,14 +38,16 @@ jobs:
       # Skip quickly (no downloads) when this run falls outside its window in New York time.
       - name: Check market window
         id: window
+        env:
+          SOURCE: ${{ inputs.source }}
         run: |
           now=$((10#$(TZ=America/New_York date +%H%M)))
           dow=$(TZ=America/New_York date +%u)
           run=false
-          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ]; then run=true
+          if [ "$GITHUB_EVENT_NAME" = "workflow_dispatch" ] && [ "$SOURCE" != "timer" ]; then run=true
           elif [ "$dow" -le 5 ] && [ $now -ge 930 ] && [ $now -le 1612 ]; then run=true
           fi
-          echo "New York time $now, mode $SCAN_MODE, run=$run"
+          echo "New York time $now, mode $SCAN_MODE, started by ${SOURCE:-schedule}, run=$run"
           echo "run=$run" >> "$GITHUB_OUTPUT"
 
       - uses: actions/checkout@v4
