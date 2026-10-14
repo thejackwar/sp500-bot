@@ -272,21 +272,36 @@ def stock_signals(h, D, debug=False):
 
 # ---------------------------------------------------------------- portfolio simulation
 def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
-    """Replays the trader's rules (trader.py) over time. sig: all signals with 'slot' and 'col'.
-    cfg (all optional; the defaults are the bot's current rules):
+    """Replays the trader's rules (trader.py) over time. sig: all signals with 'slot' and 'col'
+    (optional 'score': higher = preferred when several signals arrive together).
+    cfg (all optional; the defaults are the bot's rules):
         kinds       ("daily", "intraday"): which signals open trades
         shorts      trader.ALLOW_SHORTS
-        exit        "target" = 2:1 bracket target; "trail" = no target, close the trade when a daily
-                    trend ends: at the last check of the day (15:45) the price is below the 20-day low
-                    (shorts: above the 20-day high); the 2 x ATR starting stop stays
+        exit        "target" = 2:1 target; "trail" = no target, sell at the last check of the day
+                    (~15:45) when the price is below the 20-day low; "custom" = use the keys below
+        stop_atr    trader.STOP_ATR: stop distance in daily ATRs (also sizes the trade: 1% risk)
+        target_r    take profit at this many times the stop distance (None = no target)
+        trail_days  sell at ~15:45 when the price is below the lowest low of this many days (None = off)
+        max_days    sell at the open after this many trading days (None = off)
+        exit_matrix bool [day, stock]: True at a day's close = sell at the next day's open
         margin      MARGIN: total invested can reach margin x equity (1.0 = no borrowing, like SPY)
         spy_filter  False; True = longs only while SPY closed above its 200-day average the day
                     before, shorts only while it closed below
-    extra: day index per slot, 20-day low/high per day and stock, SPY trend per day (from run())."""
+    extra: day index per slot, N-day lows/highs per day and stock, SPY trend per day (from run())."""
     if isinstance(cfg, (tuple, list)):
         cfg = {"kinds": tuple(cfg)}
     cfg = {"kinds": ("daily", "intraday"), "shorts": trader.ALLOW_SHORTS, "exit": "target",
-           "spy_filter": False, "margin": MARGIN, **(cfg or {})}
+           "spy_filter": False, "margin": MARGIN, "stop_atr": trader.STOP_ATR, "max_days": None,
+           "exit_matrix": None, **(cfg or {})}
+    if cfg["exit"] == "trail":
+        cfg.setdefault("target_r", None)
+        cfg.setdefault("trail_days", rules.SETTINGS["daily"]["donchian"])
+    elif cfg["exit"] == "target":
+        cfg.setdefault("target_r", trader.REWARD_RISK)
+        cfg.setdefault("trail_days", None)
+    else:
+        cfg.setdefault("target_r", None)
+        cfg.setdefault("trail_days", None)
     kinds = cfg["kinds"]
     use = sig.copy()
     long_ = np.zeros(len(use), int)
@@ -302,16 +317,26 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
     use = use[(use["n"] > 0) & ~((long_ > 0) & (short > 0))]   # skip if the signals disagree
     if not cfg["shorts"]:
         use = use[use["dir"] == "LONG"]
-    trail = cfg["exit"] == "trail"
+    if "score" not in use:
+        use["score"] = 0.0
     di = extra["day_idx"] if extra else None
     spy_up = extra.get("spy_up") if extra and cfg["spy_filter"] else None
+    trail_n = cfg["trail_days"]
+    if trail_n:
+        lows = (extra.get("low") or {}).get(trail_n)
+        highs = (extra.get("high") or {}).get(trail_n)
+        if lows is None and trail_n == rules.SETTINGS["daily"]["donchian"]:
+            lows, highs = extra["dcl"], extra["dch"]
+    exit_m, max_days = cfg["exit_matrix"], cfg["max_days"]
     use["kind"] = np.where((use["dl"] | use["ds"]) & ("daily" in kinds), "daily", "15-min")
-    use = use.sort_values(["slot", "n", "sym"], ascending=[True, False, True])
+    use = use.sort_values(["slot", "n", "score", "sym"], ascending=[True, False, False, True])
     by_slot = {s: g for s, g in use.groupby("slot", sort=False)}
+    stop_scale = cfg["stop_atr"] / trader.STOP_ATR
 
     Cf = pd.DataFrame(C).ffill().values
     day = slots.tz_localize(None).normalize()
     last_of_day = np.r_[day[1:] != day[:-1], True]
+    first_of_day = np.r_[True, day[1:] != day[:-1]]
     cash, pos, trades, curve, traded_on = float(START_EQUITY), {}, [], [], {}
     skipped = 0
     interest, prev_day = 0.0, None
@@ -324,22 +349,33 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
         pnl = sign * p["qty"] * (px - p["fill"])
         trades.append({"symbol": syms[col], "direction": p["dir"], "signal": p["kind"],
                        "entry_time": slots[p["slot"]], "exit_time": slots[s] + pd.Timedelta(minutes=15),
-                       "entry": round(p["fill"], 2), "stop": p["stop"], "target": None if trail else p["target"],
+                       "entry": round(p["fill"], 2), "stop": p["stop"], "target": p["target"],
                        "exit": round(px, 2), "qty": p["qty"], "result": why,
                        "pnl": round(pnl, 2), "R": round(pnl / p["risk"], 2),
                        "days_held": (day[s] - day[p["slot"]]).days})
 
     for s in range(len(slots)):
+        # exits decided at yesterday's close (strategy exit signal, time limit): sell at today's open
+        if first_of_day[s] and (exit_m is not None or max_days) and di is not None and di[s] > 0:
+            for col in list(pos):
+                p, o = pos[col], O[s, col]
+                if not np.isfinite(o) or p["slot"] == s:
+                    continue
+                sign = 1 if p["dir"] == "LONG" else -1
+                if exit_m is not None and exit_m[di[s] - 1, col]:
+                    close(col, o * (1 - sign * SLIPPAGE), s, "exit signal")
+                elif max_days and di[s] - di[p["slot"]] >= max_days:
+                    close(col, o * (1 - sign * SLIPPAGE), s, "time exit")
         # trailing exit: last candle of the day, judged on the price at its start (~15:45)
-        if trail and last_of_day[s] and s and day[s - 1] == day[s]:
-            lo20, hi20 = extra["dcl"][di[s]], extra["dch"][di[s]]
+        if trail_n and last_of_day[s] and s and day[s - 1] == day[s]:
+            lo, hi = lows[di[s]], highs[di[s]]
             for col in list(pos):
                 p, px, o = pos[col], C[s - 1, col], O[s, col]
                 if p["slot"] == s or not np.isfinite(px) or not np.isfinite(o):
                     continue
-                if p["dir"] == "LONG" and px < lo20[col]:
+                if p["dir"] == "LONG" and px < lo[col]:
                     close(col, o * (1 - SLIPPAGE), s, "trend exit")
-                elif p["dir"] == "SHORT" and px > hi20[col]:
+                elif p["dir"] == "SHORT" and px > hi[col]:
                     close(col, o * (1 + SLIPPAGE), s, "trend exit")
         if s in by_slot and len(pos) <= trader.MAX_OPEN_POSITIONS:
             px = Cf[s - 1] if s else Cf[0]
@@ -358,14 +394,14 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
                     skipped += 1
                     continue
                 price = O[s, col]
-                if not np.isfinite(price):
+                if not np.isfinite(price) or not np.isfinite(r.atr):
                     continue
-                plan = trader.plan_trade(r.dir, price, r.atr, equity, bp)
+                plan = trader.plan_trade(r.dir, price, r.atr * stop_scale, equity, bp)
                 if not plan:
                     continue
                 sign = 1 if r.dir == "LONG" else -1
-                if plan["target"] is None:              # trader.py is in trailing mode: add the 2:1 target here
-                    plan["target"] = trader._r2(price + sign * trader.REWARD_RISK * trader.STOP_ATR * r.atr)
+                dist = cfg["stop_atr"] * r.atr
+                plan["target"] = trader._r2(price + sign * cfg["target_r"] * dist) if cfg["target_r"] else None
                 fill = price * (1 + sign * SLIPPAGE)
                 cash -= sign * plan["qty"] * fill
                 pos[col] = {"dir": r.dir, "kind": r.kind, "slot": s, "fill": fill, **plan}
@@ -380,24 +416,25 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
             if not np.isfinite(o):
                 continue
             new = p["slot"] == s                       # entered at this candle's open
+            tgt = p["target"]
             if p["dir"] == "LONG":
                 if not new and o <= p["stop"]:
                     close(col, o * (1 - SLIPPAGE), s, "stop (gap)")
-                elif not trail and not new and o >= p["target"]:
+                elif tgt is not None and not new and o >= tgt:
                     close(col, o, s, "target (gap)")
                 elif ll <= p["stop"]:
                     close(col, p["stop"] * (1 - SLIPPAGE), s, "stop")
-                elif not trail and hh >= p["target"]:
-                    close(col, p["target"], s, "target")
+                elif tgt is not None and hh >= tgt:
+                    close(col, tgt, s, "target")
             else:
                 if not new and o >= p["stop"]:
                     close(col, o * (1 + SLIPPAGE), s, "stop (gap)")
-                elif not trail and not new and o <= p["target"]:
+                elif tgt is not None and not new and o <= tgt:
                     close(col, o, s, "target (gap)")
                 elif hh >= p["stop"]:
                     close(col, p["stop"] * (1 + SLIPPAGE), s, "stop")
-                elif not trail and ll <= p["target"]:
-                    close(col, p["target"], s, "target")
+                elif tgt is not None and ll <= tgt:
+                    close(col, tgt, s, "target")
         if last_of_day[s]:
             if cash < 0:                               # borrowed money pays interest every calendar day
                 n_days = (day[s] - prev_day).days if prev_day is not None else 1
@@ -475,17 +512,22 @@ def yearly(eq):
     return out
 
 
-def summary_text(res, bench, start, end, n_stocks):
+def summary_text(res, bench, start, end, n_stocks, mode="bot versions"):
     eq0 = next(iter(res.values()))["equity"]["equity"]
     years = (eq0.index[-1] - eq0.index[0]).days / 365.25
-    lines = ["📊 <b>Backtest: S&amp;P 100 strategy</b>",
-             f"{start:%d %b %Y} → {end:%d %b %Y} ({years:.1f} years), {n_stocks} stocks, $100,000 start. "
-             f"All versions: ⭐ STRONG signals (daily + 15-min), stop 2×ATR, risk "
-             f"{trader.RISK_PER_TRADE:.0%}/trade, max {trader.MAX_OPEN_POSITIONS} positions of max "
-             f"{trader.MAX_POSITION_PCT:.0%} each; target 2:1 unless trailing. 'Invested' = average money "
-             f"in the market as % of the account (SPY = 100%). Borrowed money pays {MARGIN_RATE:.1%}/yr interest", ""]
-    for key, (name, _) in VARIANTS.items():
-        s = res[key]["stats"]
+    money = (f"risk {trader.RISK_PER_TRADE:.0%}/trade, max {trader.MAX_OPEN_POSITIONS} positions of max "
+             f"{trader.MAX_POSITION_PCT:.0%} each")
+    if mode == "strategies":
+        rules_txt = (f"Strategy comparison, same money rules for all: {money}, max "
+                     f"{trader.MAX_INVESTED:.0%} invested. Daily strategies buy at the next day's open.")
+    else:
+        rules_txt = (f"Bot versions: ⭐ STRONG signals (daily + 15-min), stop 2×ATR, {money}; target 2:1 "
+                     f"unless trailing. Borrowed money pays {MARGIN_RATE:.1%}/yr interest.")
+    lines = [f"📊 <b>Backtest: {'strategies' if mode == 'strategies' else 'bot versions'}</b>",
+             f"{start:%d %b %Y} → {end:%d %b %Y} ({years:.1f} years), S&amp;P 100 ({n_stocks} stocks), "
+             f"$100,000 start. {rules_txt} 'Invested' = average money in the market (SPY = 100%)", ""]
+    for key, r in res.items():
+        s, name = r["stats"], r["name"]
         lines += [f"<b>{name}</b>",
                   f"{pct(s['return'])} ({pct(s['cagr'])}/yr) · max drop {pct(s['max_dd'])} · "
                   f"profit factor {s['pf']:.2f}",
@@ -508,21 +550,21 @@ def details_text(res, bench):
     """Second message: returns by year and long/short split for every version."""
     years = sorted(set().union(*(yearly(r["equity"]).keys() for r in res.values())))
     lines = ["📅 <b>Return by year</b>", "<pre>" + "Version " + "".join(f"{y:>7}" for y in years)]
-    for key, (name, _) in VARIANTS.items():
-        yr = yearly(res[key]["equity"])
-        lines.append(f"{SHORT[key]:<8}" + "".join(f"{yr.get(y, 0) * 100:>+6.0f}%" for y in years))
+    for key, r in res.items():
+        yr = yearly(r["equity"])
+        lines.append(f"{r['short'][:7]:<8}" + "".join(f"{yr.get(y, 0) * 100:>+6.0f}%" for y in years))
     if bench is not None and len(bench) > 1:
         yr = yearly(pd.DataFrame({"equity": bench}))
         lines.append(f"{BENCHMARK:<8}" + "".join(f"{yr.get(y, 0) * 100:>+6.0f}%" for y in years))
     lines[-1] += "</pre>"
     lines += ["", "<b>Long vs short</b>"]
-    for key, (name, _) in VARIANTS.items():
-        t = res[key]["trades"]
+    for key, r in res.items():
+        t = r["trades"]
         t = t[t["result"] != "still open"]
         parts = []
         for d, g in t.groupby("direction"):
             parts.append(f"{d.lower()} {len(g)}× {g['R'].mean():+.2f}R ${g['pnl'].sum() / 1000:+,.0f}k")
-        lines.append(f"{SHORT[key]}: " + (", ".join(parts) or "no trades"))
+        lines.append(f"{r['short']}: " + (", ".join(parts) or "no trades"))
     return "\n".join(lines)
 
 
@@ -530,17 +572,18 @@ def equity_chart(res, bench):
     plt.style.use("dark_background")
     fig, (a1, a2) = plt.subplots(2, 1, figsize=(11, 7), sharex=True, gridspec_kw={"height_ratios": [3, 1]})
     fig.patch.set_facecolor("black")
-    colors = {"both": "#ef5350", "long": "#26a69a", "trail": "#ffb74d", "long1x": "#42a5f5",
-              "trail1x": "#ab47bc"}
-    for key, (name, _) in VARIANTS.items():
-        e = res[key]["equity"]["equity"]
-        a1.plot(e.index, e.values, color=colors[key], lw=2 if key == "long" else 1.1, label=name)
-        a2.plot(e.index, (e / e.cummax() - 1).values * 100, color=colors[key], lw=1)
+    palette = ["#26a69a", "#42a5f5", "#ffb74d", "#ab47bc", "#ef5350", "#ffee58", "#8d6e63", "#4dd0e1",
+               "#f06292", "#aed581"]
+    for i, (key, r) in enumerate(res.items()):
+        e = r["equity"]["equity"]
+        colr = palette[i % len(palette)]
+        a1.plot(e.index, e.values, color=colr, lw=2 if r.get("main") else 1.1, label=r["name"])
+        a2.plot(e.index, (e / e.cummax() - 1).values * 100, color=colr, lw=1)
     if bench is not None:
         a1.plot(bench.index, bench.values, color="#9e9e9e", lw=1.2, ls="--", label=f"Buy & hold {BENCHMARK}")
     a1.axhline(START_EQUITY, color="#555555", lw=0.8)
     a1.set_ylabel("Account value ($)")
-    a1.set_title("Backtest: S&P 100 strategy versions vs buy & hold", color="white")
+    a1.set_title("Backtest vs buy & hold", color="white")
     a1.legend(loc="upper left", fontsize=9, facecolor="black")
     a1.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v / 1000:,.0f}k"))
     a2.set_ylabel("Drawdown (%)")
@@ -585,8 +628,55 @@ def telegram(text=None, photo=None, document=None, caption=""):
 
 
 # ---------------------------------------------------------------- main
-def run(daily, intraday, start, end, spy=None):
-    """Signals + simulation for all variants. daily/intraday: {symbol: DataFrame}; spy: SPY daily."""
+def load_strategies(only=None):
+    """Strategy files in strategies/ (files starting with "_" and tools.py are skipped)."""
+    import glob
+    import importlib
+    folder = os.path.join(os.path.dirname(os.path.abspath(__file__)), "strategies")
+    sys.path.insert(0, os.path.dirname(folder))
+    out = {}
+    for path in sorted(glob.glob(os.path.join(folder, "*.py"))):
+        name = os.path.basename(path)[:-3]
+        if name.startswith("_") or name == "tools" or (only and name not in only):
+            continue
+        try:
+            out[name] = importlib.import_module(f"strategies.{name}")
+        except Exception as e:
+            print(f"Strategy {name} couldn't be loaded: {e}", flush=True)
+    return out
+
+
+def strategy_signals(mod, daily, syms, days, first_slot):
+    """Buy signals of one strategy file, as rows the simulator understands, plus its exit matrix.
+    A signal on a day's close buys at the next trading day's open."""
+    from strategies import tools
+    rows, exit_cols = [], []
+    for col, sym in enumerate(syms):
+        d = daily[sym][["Open", "High", "Low", "Close"]].copy()
+        ent = pd.Series(mod.entries(d), index=d.index).fillna(False).astype(bool)
+        atr = tools.atr(d)
+        score = pd.Series(mod.rank(d), index=d.index) if hasattr(mod, "rank") else pd.Series(0.0, index=d.index)
+        dates = d.index[ent.values]
+        pos = days.get_indexer(dates)
+        ok = (pos >= 0) & (pos + 1 < len(days))
+        for dte, p in zip(dates[ok], pos[ok]):
+            rows.append({"slot": first_slot[p + 1], "col": col, "sym": sym, "dl": True, "ds": False,
+                         "il": False, "is": False, "atr": float(atr.at[dte]),
+                         "score": float(score.at[dte]) if pd.notna(score.at[dte]) else 0.0})
+        if hasattr(mod, "exits"):
+            ex = pd.Series(mod.exits(d), index=d.index).reindex(days).fillna(False).astype(bool)
+            exit_cols.append(ex.values)
+    sig = pd.DataFrame(rows, columns=["slot", "col", "sym", "dl", "ds", "il", "is", "atr", "score"])
+    return sig, (np.column_stack(exit_cols) if exit_cols else None)
+
+
+BOT_NOW = {"shorts": False, "exit": "trail", "margin": 1.0}     # the paper bot's current rules
+
+
+def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=None):
+    """Signals + simulation. daily/intraday: {symbol: DataFrame}; spy: SPY daily.
+    mode "bot versions": the VARIANTS of the bot's own strategy.
+    mode "strategies": the bot now vs every strategy file in strategies/."""
     syms = sorted(intraday)
     t0 = time.time()
     sig = []
@@ -622,10 +712,40 @@ def run(daily, intraday, start, end, spy=None):
     else:
         print("No SPY prices: the SPY filter is switched off", flush=True)
 
+    def lows_highs(n):
+        lo = np.column_stack([daily[s]["Low"].rolling(n).min().shift(1).reindex(days).values for s in syms])
+        hi = np.column_stack([daily[s]["High"].rolling(n).max().shift(1).reindex(days).values for s in syms])
+        return lo, hi
+
+    # what to simulate: (key, name, short label, signals, settings)
+    jobs = []
+    if mode == "strategies":
+        jobs.append(("bot", "Bot now: breakout, trailing exit", "Bot", sig, BOT_NOW))
+        first_slot = np.flatnonzero(np.r_[True, slot_day[1:] != slot_day[:-1]])
+        for name, mod in (strategies if strategies is not None else load_strategies()).items():
+            try:
+                s_sig, s_exit = strategy_signals(mod, daily, syms, days, first_slot)
+            except Exception as e:
+                print(f"Strategy {name} failed: {e}", flush=True)
+                continue
+            ex = {"stop_atr": trader.STOP_ATR, "target_r": None, "trail_days": None, "max_days": None,
+                  **getattr(mod, "EXIT", {})}
+            cfg = {"kinds": ("daily",), "shorts": False, "exit": "custom", "margin": trader.MAX_INVESTED,
+                   "exit_matrix": s_exit, **ex}
+            if ex["trail_days"]:
+                extra.setdefault("low", {})[ex["trail_days"]], extra.setdefault("high", {})[ex["trail_days"]] = \
+                    lows_highs(ex["trail_days"])
+            jobs.append((name, getattr(mod, "NAME", name), getattr(mod, "SHORT", name[:7]), s_sig, cfg))
+            print(f"Strategy {name}: {len(s_sig)} buy signals", flush=True)
+    else:
+        for key, (name, cfg) in VARIANTS.items():
+            jobs.append((key, name, SHORT[key], sig, cfg))
+
     res = {}
-    for key, (name, cfg) in VARIANTS.items():
-        trades, eq, info = simulate(sig, O, H, L, C, slots, syms, cfg, extra)
-        res[key] = {"trades": trades, "equity": eq, "info": info, "stats": {**stats(trades, eq), "interest": info["interest"]}}
+    for key, name, short, jsig, cfg in jobs:
+        trades, eq, info = simulate(jsig, O, H, L, C, slots, syms, cfg, extra)
+        res[key] = {"name": name, "short": short, "main": key in ("bot", "trail1x"), "trades": trades,
+                    "equity": eq, "info": info, "stats": {**stats(trades, eq), "interest": info["interest"]}}
         print(f"{name}: {res[key]['stats']['trades']} trades, return {pct(res[key]['stats']['return'])}, "
               f"{info['skipped']} signals skipped (limits)", flush=True)
     return res, sig
@@ -633,6 +753,7 @@ def run(daily, intraday, start, end, spy=None):
 
 def main():
     years = float(os.environ.get("YEARS", "5"))
+    mode = os.environ.get("TEST", "strategies")
     end = dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=20)
     start = end - dt.timedelta(days=round(365.25 * years))
     start = max(start, dt.datetime(2016, 3, 1, tzinfo=dt.timezone.utc))      # Alpaca history starts 2016
@@ -646,13 +767,13 @@ def main():
     intraday.pop(BENCHMARK, None)
     print(f"Prices for {len(intraday)} stocks", flush=True)
 
-    res, sig = run(daily, intraday, start, end, spy=bench_d)
+    res, sig = run(daily, intraday, start, end, spy=bench_d, mode=mode)
     bench = benchmark(bench_d, pd.Timestamp(start.date())) if bench_d is not None else None
 
-    text = summary_text(res, bench, start, end, len(intraday))
+    text = summary_text(res, bench, start, end, len(intraday), mode)
     print("\n" + html.unescape(text.replace("<b>", "").replace("</b>", "").replace("<i>", "").replace("</i>", "")))
     chart = equity_chart(res, bench)
-    t = pd.concat([r["trades"].assign(version=VARIANTS[k][0]) for k, r in res.items()], ignore_index=True)
+    t = pd.concat([r["trades"].assign(version=r["name"]) for r in res.values()], ignore_index=True)
     t = t[["version"] + [c for c in t.columns if c != "version"]]
     for c in ("entry_time", "exit_time"):
         t[c] = pd.to_datetime(t[c]).dt.strftime("%Y-%m-%d %H:%M")

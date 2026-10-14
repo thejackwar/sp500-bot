@@ -14,6 +14,7 @@ message with a chart whenever a signal appears. ⭐ Strong LONG signals are also
 | `patterns.py` | Chart-pattern recognition (switch: `PATTERNS_ENABLED` in `scanner.py`) |
 | `.github/workflows/scan.yml` | The schedule that runs it on GitHub for free |
 | `backtest.py` + `.github/workflows/backtest.yml` | Tests the strategy on past years (run by hand) |
+| `strategies/` | Other strategies to compare in the backtest (one file each, `_template.py` to start) |
 
 ## 1. Create your Telegram bot (5 min)
 1. In Telegram, open **@BotFather** and send `/newbot`. Pick a name. It replies with a **token** like `123456:ABC-xyz`.
@@ -86,6 +87,13 @@ Replays the past years check by check (every 15 minutes, like the live bot) with
 - **Results on Telegram:** a summary per version (return, yearly return, max drawdown, profit factor, trades, win rate, average R, worst losing streak, holding time) against buying and holding SPY; a table of returns by year and the long/short split; the equity-curve chart; and `trades.csv` with every trade of every version (column `version`). The same files are attached to the run as **backtest-results**.
 - **Assumptions:** $100,000 start; borrowed money (more than 100% invested) pays 6.5% a year interest (`MARGIN_RATE`); fills at the next 15-minute candle's open with 0.02% slippage; a stop or target the price gaps through fills at the opening price; if one candle touches both stop and target, the stop counts (cautious).
 - **Limits:** it uses today's S&P 100 members (stocks that left the index aren't tested, which flatters the results); no short-borrow fees; major S/R, Fibonacci and patterns don't open trades so they aren't tested.
+
+## Testing new strategies (`strategies/` folder)
+The live bot stays as it is; new ideas are tested in the backtest first. Each file in `strategies/` is one strategy, compared side by side with the bot and with buying and holding SPY, using the same money rules (1% risk per trade, max 20% per stock, max 10 positions, never more than 100% invested).
+- **Run:** Actions → **Backtest** → Run workflow → *What to compare*: **strategies** (or **bot versions** for the bot's own variants).
+- **Included examples:** `rsi2_pullback.py` (buy short dips in up-trends, sell on the bounce), `golden_cross.py` (50/200-day average cross), `momentum_52w.py` (buy new 1-year highs, sell below the 50-day low).
+- **Add your own:** copy `_template.py` to a new name (e.g. `my_idea.py`), change `entries()` (when to buy, judged on the daily close; it buys at the next day's open) and `EXIT` (stop in ATRs, target, trailing N-day low, max days) and optionally `exits()` and `rank()`. Indicator helpers are in `strategies/tools.py` (sma, ema, rsi, atr, highest, lowest, bollinger, crossed_above/below). Files starting with `_` are ignored.
+- **Be careful with the results:** the more ideas you try, the more likely one looks good by luck. Check a winner on years it wasn't tuned on before changing the live bot.
 
 ## Charts
 Every alert comes with a **candlestick chart on a black background** (green = up candle, red = down candle):
