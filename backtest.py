@@ -46,11 +46,15 @@ BARS_URL = "https://data.alpaca.markets/v2/stocks/{}/bars"
 OUT = "backtest-results"
 CACHE_DIR = "price-cache"           # saved prices (kept between runs by the workflow)
 
-VARIANTS = {                # which signals open trades
-    "bot": ("As the bot trades (daily + 15-min)", ("daily", "intraday")),
-    "daily": ("Daily signals only", ("daily",)),
-    "intraday": ("15-min signals only", ("intraday",)),
+VARIANTS = {                # each one changes the bot's current rules (see simulate() for the options)
+    "bot":   ("1. As the bot trades now", {}),
+    "long":  ("2. Longs only", {"shorts": False}),
+    "trail": ("3. Trailing exit (20-day low/high)", {"exit": "trail"}),
+    "spy":   ("4. SPY 200-day trend filter", {"spy_filter": True}),
+    "daily": ("5. Daily signals only", {"kinds": ("daily",)}),
+    "all":   ("6. All four changes", {"shorts": False, "exit": "trail", "spy_filter": True, "kinds": ("daily",)}),
 }
+SHORT = {"bot": "1 Now", "long": "2 Long", "trail": "3 Trail", "spy": "4 SPY", "daily": "5 Daily", "all": "6 All"}
 
 
 # ---------------------------------------------------------------- data
@@ -267,8 +271,22 @@ def stock_signals(h, D, debug=False):
 
 
 # ---------------------------------------------------------------- portfolio simulation
-def simulate(sig, O, H, L, C, slots, syms, kinds):
-    """Replays the trader's rules (trader.py) over time. sig: all signals with 'slot' and 'col'."""
+def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
+    """Replays the trader's rules (trader.py) over time. sig: all signals with 'slot' and 'col'.
+    cfg (all optional; the defaults are the bot's current rules):
+        kinds       ("daily", "intraday"): which signals open trades
+        shorts      trader.ALLOW_SHORTS
+        exit        "target" = 2:1 bracket target; "trail" = no target, close the trade when a daily
+                    trend ends: at the last check of the day (15:45) the price is below the 20-day low
+                    (shorts: above the 20-day high); the 2 x ATR starting stop stays
+        spy_filter  False; True = longs only while SPY closed above its 200-day average the day
+                    before, shorts only while it closed below
+    extra: day index per slot, 20-day low/high per day and stock, SPY trend per day (from run())."""
+    if isinstance(cfg, (tuple, list)):
+        cfg = {"kinds": tuple(cfg)}
+    cfg = {"kinds": ("daily", "intraday"), "shorts": trader.ALLOW_SHORTS, "exit": "target",
+           "spy_filter": False, **(cfg or {})}
+    kinds = cfg["kinds"]
     use = sig.copy()
     long_ = np.zeros(len(use), int)
     short = np.zeros(len(use), int)
@@ -281,8 +299,11 @@ def simulate(sig, O, H, L, C, slots, syms, kinds):
     use["n"] = long_ + short
     use["dir"] = np.where(long_ > 0, "LONG", "SHORT")
     use = use[(use["n"] > 0) & ~((long_ > 0) & (short > 0))]   # skip if the signals disagree
-    if not trader.ALLOW_SHORTS:
+    if not cfg["shorts"]:
         use = use[use["dir"] == "LONG"]
+    trail = cfg["exit"] == "trail"
+    di = extra["day_idx"] if extra else None
+    spy_up = extra.get("spy_up") if extra and cfg["spy_filter"] else None
     use["kind"] = np.where((use["dl"] | use["ds"]) & ("daily" in kinds), "daily", "15-min")
     use = use.sort_values(["slot", "n", "sym"], ascending=[True, False, True])
     by_slot = {s: g for s, g in use.groupby("slot", sort=False)}
@@ -301,12 +322,23 @@ def simulate(sig, O, H, L, C, slots, syms, kinds):
         pnl = sign * p["qty"] * (px - p["fill"])
         trades.append({"symbol": syms[col], "direction": p["dir"], "signal": p["kind"],
                        "entry_time": slots[p["slot"]], "exit_time": slots[s] + pd.Timedelta(minutes=15),
-                       "entry": round(p["fill"], 2), "stop": p["stop"], "target": p["target"],
+                       "entry": round(p["fill"], 2), "stop": p["stop"], "target": None if trail else p["target"],
                        "exit": round(px, 2), "qty": p["qty"], "result": why,
                        "pnl": round(pnl, 2), "R": round(pnl / p["risk"], 2),
                        "days_held": (day[s] - day[p["slot"]]).days})
 
     for s in range(len(slots)):
+        # trailing exit: last candle of the day, judged on the price at its start (~15:45)
+        if trail and last_of_day[s] and s and day[s - 1] == day[s]:
+            lo20, hi20 = extra["dcl"][di[s]], extra["dch"][di[s]]
+            for col in list(pos):
+                p, px, o = pos[col], C[s - 1, col], O[s, col]
+                if p["slot"] == s or not np.isfinite(px) or not np.isfinite(o):
+                    continue
+                if p["dir"] == "LONG" and px < lo20[col]:
+                    close(col, o * (1 - SLIPPAGE), s, "trend exit")
+                elif p["dir"] == "SHORT" and px > hi20[col]:
+                    close(col, o * (1 + SLIPPAGE), s, "trend exit")
         if s in by_slot and len(pos) <= trader.MAX_OPEN_POSITIONS:
             px = Cf[s - 1] if s else Cf[0]
             value = sum((1 if p["dir"] == "LONG" else -1) * p["qty"] * px[c] for c, p in pos.items())
@@ -318,6 +350,8 @@ def simulate(sig, O, H, L, C, slots, syms, kinds):
                 col = r.col
                 if col in pos or traded_on.get(col) == day[s]:
                     continue
+                if spy_up is not None and spy_up[di[s]] != (r.dir == "LONG"):
+                    continue                           # against the market's trend
                 if placed >= trader.MAX_NEW_PER_RUN or free <= 0:
                     skipped += 1
                     continue
@@ -345,20 +379,20 @@ def simulate(sig, O, H, L, C, slots, syms, kinds):
             if p["dir"] == "LONG":
                 if not new and o <= p["stop"]:
                     close(col, o * (1 - SLIPPAGE), s, "stop (gap)")
-                elif not new and o >= p["target"]:
+                elif not trail and not new and o >= p["target"]:
                     close(col, o, s, "target (gap)")
                 elif ll <= p["stop"]:
                     close(col, p["stop"] * (1 - SLIPPAGE), s, "stop")
-                elif hh >= p["target"]:
+                elif not trail and hh >= p["target"]:
                     close(col, p["target"], s, "target")
             else:
                 if not new and o >= p["stop"]:
                     close(col, o * (1 + SLIPPAGE), s, "stop (gap)")
-                elif not new and o <= p["target"]:
+                elif not trail and not new and o <= p["target"]:
                     close(col, o, s, "target (gap)")
                 elif hh >= p["stop"]:
                     close(col, p["stop"] * (1 + SLIPPAGE), s, "stop")
-                elif ll <= p["target"]:
+                elif not trail and ll <= p["target"]:
                     close(col, p["target"], s, "target")
         if last_of_day[s]:
             value = sum((1 if p["dir"] == "LONG" else -1) * p["qty"] * Cf[s, c] for c, p in pos.items())
@@ -420,48 +454,60 @@ def pct(x):
     return f"{x * 100:+.1f}%"
 
 
+def yearly(eq):
+    e = eq["equity"]
+    out, prev = {}, START_EQUITY
+    for y, v in e.groupby(e.index.year).last().items():
+        out[y] = v / prev - 1
+        prev = v
+    return out
+
+
 def summary_text(res, bench, start, end, n_stocks):
     eq0 = res["bot"]["equity"]["equity"]
     years = (eq0.index[-1] - eq0.index[0]).days / 365.25
     lines = ["📊 <b>Backtest: S&amp;P 100 strategy</b>",
-             f"{start:%d %b %Y} → {end:%d %b %Y} ({years:.1f} years), {n_stocks} stocks, $100,000 start",
-             f"Rules as the bot trades now: ⭐ STRONG signals, stop 2×ATR, target 2:1, risk "
-             f"{trader.RISK_PER_TRADE:.0%}/trade, max {trader.MAX_OPEN_POSITIONS} positions", ""]
+             f"{start:%d %b %Y} → {end:%d %b %Y} ({years:.1f} years), {n_stocks} stocks, $100,000 start. "
+             f"Bot now: ⭐ STRONG signals (daily + 15-min, longs + shorts), stop 2×ATR, target 2:1, "
+             f"risk {trader.RISK_PER_TRADE:.0%}/trade, max {trader.MAX_OPEN_POSITIONS} positions", ""]
     for key, (name, _) in VARIANTS.items():
         s = res[key]["stats"]
         lines += [f"<b>{name}</b>",
-                  f"Return {pct(s['return'])} ({pct(s['cagr'])}/yr), final ${s['final']:,.0f}",
-                  f"Max drawdown {pct(s['max_dd'])} ({s['dd_date']:%b %Y})",
-                  f"Trades {s['trades']} (~{s['per_month']:.1f}/month), win rate {s['win_rate']:.0%}",
-                  f"Avg win ${s['avg_win']:,.0f}, avg loss ${s['avg_loss']:,.0f}, avg {s['avg_R']:+.2f}R per trade",
-                  f"Profit factor {s['pf']:.2f}, worst losing streak {s['streak']}, "
-                  f"avg hold {s['days_held']:.1f} days", ""]
+                  f"{pct(s['return'])} ({pct(s['cagr'])}/yr) · max drop {pct(s['max_dd'])} · "
+                  f"profit factor {s['pf']:.2f}",
+                  f"{s['trades']} trades, win {s['win_rate']:.0%}, avg {s['avg_R']:+.2f}R, "
+                  f"worst streak {s['streak']}, hold {s['days_held']:.0f}d", ""]
     if bench is not None and len(bench) > 1:
         b = bench
         b_years = max((b.index[-1] - b.index[0]).days / 365.25, 1e-9)
         b_cagr = (b.iat[-1] / START_EQUITY) ** (1 / b_years) - 1
         lines += [f"<b>Buy &amp; hold {BENCHMARK}</b>",
-                  f"Return {pct(b.iat[-1] / START_EQUITY - 1)} ({pct(b_cagr)}/yr), "
-                  f"max drawdown {pct((b / b.cummax() - 1).min())}", ""]
-    t = res["bot"]["trades"]
-    if len(t):
-        done = t[t["result"] != "still open"]
-        lines.append("<b>Breakdown (as the bot trades)</b>")
-        for col, label in (("direction", None), ("signal", None)):
-            for k, g in done.groupby(col):
-                lines.append(f"{k}: {len(g)} trades, win {(g['pnl'] > 0).mean():.0%}, "
-                             f"avg {g['R'].mean():+.2f}R, total ${g['pnl'].sum():,.0f}")
-        eq = res["bot"]["equity"]["equity"]
-        yearly = eq.groupby(eq.index.year).last()
-        prev = START_EQUITY
+                  f"{pct(b.iat[-1] / START_EQUITY - 1)} ({pct(b_cagr)}/yr) · "
+                  f"max drop {pct((b / b.cummax() - 1).min())}", ""]
+    lines += ["<i>Today's S&amp;P 100 members only (flatters results); no short-borrow fees; fills at the "
+              "next 15-min open with 0.02% slippage. Past results don't guarantee future ones.</i>"]
+    return "\n".join(lines)
+
+
+def details_text(res, bench):
+    """Second message: returns by year and long/short split for every version."""
+    years = sorted(set().union(*(yearly(r["equity"]).keys() for r in res.values())))
+    lines = ["📅 <b>Return by year</b>", "<pre>" + "Version " + "".join(f"{y:>7}" for y in years)]
+    for key, (name, _) in VARIANTS.items():
+        yr = yearly(res[key]["equity"])
+        lines.append(f"{SHORT[key]:<8}" + "".join(f"{yr.get(y, 0) * 100:>+6.0f}%" for y in years))
+    if bench is not None and len(bench) > 1:
+        yr = yearly(pd.DataFrame({"equity": bench}))
+        lines.append(f"{BENCHMARK:<8}" + "".join(f"{yr.get(y, 0) * 100:>+6.0f}%" for y in years))
+    lines[-1] += "</pre>"
+    lines += ["", "<b>Long vs short</b>"]
+    for key, (name, _) in VARIANTS.items():
+        t = res[key]["trades"]
+        t = t[t["result"] != "still open"]
         parts = []
-        for y, v in yearly.items():
-            parts.append(f"{y} {pct(v / prev - 1)}")
-            prev = v
-        lines.append("By year: " + ", ".join(parts))
-    lines += ["", "<i>Caveats: today's S&amp;P 100 members only (stocks that dropped out aren't tested, "
-                  "which flatters results); no borrow fees on shorts; fills at the next 15-min open with "
-                  "0.02% slippage. Past results don't guarantee future ones.</i>"]
+        for d, g in t.groupby("direction"):
+            parts.append(f"{d.lower()} {len(g)}× {g['R'].mean():+.2f}R ${g['pnl'].sum() / 1000:+,.0f}k")
+        lines.append(f"{SHORT[key]}: " + (", ".join(parts) or "no trades"))
     return "\n".join(lines)
 
 
@@ -469,16 +515,17 @@ def equity_chart(res, bench):
     plt.style.use("dark_background")
     fig, (a1, a2) = plt.subplots(2, 1, figsize=(11, 7), sharex=True, gridspec_kw={"height_ratios": [3, 1]})
     fig.patch.set_facecolor("black")
-    colors = {"bot": "#26a69a", "daily": "#42a5f5", "intraday": "#ffb74d"}
+    colors = {"bot": "#26a69a", "long": "#42a5f5", "trail": "#ffb74d", "spy": "#ab47bc",
+              "daily": "#ef5350", "all": "#ffee58"}
     for key, (name, _) in VARIANTS.items():
         e = res[key]["equity"]["equity"]
-        a1.plot(e.index, e.values, color=colors[key], lw=2 if key == "bot" else 1.2, label=name)
+        a1.plot(e.index, e.values, color=colors[key], lw=2 if key in ("bot", "all") else 1.1, label=name)
         a2.plot(e.index, (e / e.cummax() - 1).values * 100, color=colors[key], lw=1)
     if bench is not None:
         a1.plot(bench.index, bench.values, color="#9e9e9e", lw=1.2, ls="--", label=f"Buy & hold {BENCHMARK}")
     a1.axhline(START_EQUITY, color="#555555", lw=0.8)
     a1.set_ylabel("Account value ($)")
-    a1.set_title("Backtest: S&P 100 strategy vs buy & hold", color="white")
+    a1.set_title("Backtest: S&P 100 strategy versions vs buy & hold", color="white")
     a1.legend(loc="upper left", fontsize=9, facecolor="black")
     a1.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"{v / 1000:,.0f}k"))
     a2.set_ylabel("Drawdown (%)")
@@ -523,8 +570,8 @@ def telegram(text=None, photo=None, document=None, caption=""):
 
 
 # ---------------------------------------------------------------- main
-def run(daily, intraday, start, end):
-    """Signals + simulation for all variants. daily/intraday: {symbol: DataFrame}."""
+def run(daily, intraday, start, end, spy=None):
+    """Signals + simulation for all variants. daily/intraday: {symbol: DataFrame}; spy: SPY daily."""
     syms = sorted(intraday)
     t0 = time.time()
     sig = []
@@ -545,9 +592,24 @@ def run(daily, intraday, start, end):
     def matrix(field):
         return np.column_stack([intraday[s][field].reindex(slots).values for s in syms])
     O, H, L, C = (matrix(f) for f in ("Open", "High", "Low", "Close"))
+
+    # per day: 20-day low/high of every stock (for the trailing exit) and SPY's trend (for the filter)
+    slot_day = slots.tz_localize(None).normalize()
+    days = slot_day.unique()
+    extra = {"day_idx": days.get_indexer(slot_day)}
+    ctx = {sym: daily_context(daily[sym]).reindex(days) for sym in syms}
+    extra["dcl"] = np.column_stack([ctx[sym]["dcl"].values for sym in syms])
+    extra["dch"] = np.column_stack([ctx[sym]["dch"].values for sym in syms])
+    if spy is not None:
+        c = spy["Close"]
+        up = (c > c.rolling(rules.SMA_LONG).mean()).shift(1)       # yesterday's close vs its 200-day MA
+        extra["spy_up"] = up.reindex(days).fillna(True).astype(bool).values
+    else:
+        print("No SPY prices: the SPY filter is switched off", flush=True)
+
     res = {}
-    for key, (name, kinds) in VARIANTS.items():
-        trades, eq, info = simulate(sig, O, H, L, C, slots, syms, kinds)
+    for key, (name, cfg) in VARIANTS.items():
+        trades, eq, info = simulate(sig, O, H, L, C, slots, syms, cfg, extra)
         res[key] = {"trades": trades, "equity": eq, "info": info, "stats": stats(trades, eq)}
         print(f"{name}: {res[key]['stats']['trades']} trades, return {pct(res[key]['stats']['return'])}, "
               f"{info['skipped']} signals skipped (limits)", flush=True)
@@ -569,13 +631,14 @@ def main():
     intraday.pop(BENCHMARK, None)
     print(f"Prices for {len(intraday)} stocks", flush=True)
 
-    res, sig = run(daily, intraday, start, end)
+    res, sig = run(daily, intraday, start, end, spy=bench_d)
     bench = benchmark(bench_d, pd.Timestamp(start.date())) if bench_d is not None else None
 
     text = summary_text(res, bench, start, end, len(intraday))
     print("\n" + html.unescape(text.replace("<b>", "").replace("</b>", "").replace("<i>", "").replace("</i>", "")))
     chart = equity_chart(res, bench)
-    t = res["bot"]["trades"].copy()
+    t = pd.concat([r["trades"].assign(version=VARIANTS[k][0]) for k, r in res.items()], ignore_index=True)
+    t = t[["version"] + [c for c in t.columns if c != "version"]]
     for c in ("entry_time", "exit_time"):
         t[c] = pd.to_datetime(t[c]).dt.strftime("%Y-%m-%d %H:%M")
     csv = os.path.join(OUT, "trades.csv")
@@ -586,9 +649,12 @@ def main():
         with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
             f.write("```\n" + html.unescape(text.replace("<b>", "").replace("</b>", "")
                                             .replace("<i>", "").replace("</i>", "")) + "\n```\n")
+    details = details_text(res, bench)
+    print("\n" + html.unescape(details.replace("<b>", "").replace("</b>", "").replace("<pre>", "").replace("</pre>", "")))
     telegram(text)
-    telegram(photo=chart, caption="Equity curves and drawdowns")
-    telegram(document=csv, caption="Every trade (as the bot trades). Open in Excel / Google Sheets.")
+    telegram(details)
+    telegram(photo=chart, caption="Account value and drawdowns of each version")
+    telegram(document=csv, caption="Every trade of every version (column 'version'). Open in Excel / Google Sheets.")
 
 
 if __name__ == "__main__":
