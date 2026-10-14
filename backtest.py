@@ -50,9 +50,9 @@ CACHE_DIR = "price-cache"           # saved prices (kept between runs by the wor
 VARIANTS = {                # each one changes the bot's rules (see simulate() for the options)
     "both":    ("1. Longs + shorts (old rules)", {"shorts": True}),
     "long":    ("2. Longs only, 2:1 target", {"shorts": False}),
-    "trail":   ("3. Longs only + trailing exit (bot now)", {"shorts": False, "exit": "trail"}),
+    "trail":   ("3. Longs only + trailing exit", {"shorts": False, "exit": "trail"}),
     "long1x":  ("4. Longs only, no leverage", {"shorts": False, "margin": 1.0}),
-    "trail1x": ("5. Longs + trailing exit, no leverage", {"shorts": False, "exit": "trail", "margin": 1.0}),
+    "trail1x": ("5. Longs + trailing exit, no leverage (bot now)", {"shorts": False, "exit": "trail", "margin": 1.0}),
 }
 SHORT = {"both": "1 L+S", "long": "2 Long", "trail": "3 Trail", "long1x": "4 L 1x", "trail1x": "5 T 1x"}
 

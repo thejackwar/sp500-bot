@@ -37,6 +37,7 @@ EXIT_CHECK_MINUTES = 20      # trailing exits are checked by the scan in the las
 REWARD_RISK = 2.0            # target = 2 x the stop distance (EXIT_MODE "target" only)
 MAX_POSITION_PCT = 0.20      # never put more than 20% of equity in one stock
 MAX_OPEN_POSITIONS = 10      # don't open new trades beyond this
+MAX_INVESTED = 1.0           # total in positions at most 1.0 x equity = no borrowing (2.0 = up to 2x leverage)
 MAX_NEW_PER_RUN = 3          # at most 3 new trades per check
 
 PAPER_URL = "https://paper-api.alpaca.markets/v2"     # paper trading only
@@ -88,7 +89,8 @@ def plan_trade(direction, price, atr, equity, buying_power):
     sign = 1 if direction == "LONG" else -1
     stop = _r2(price - sign * stop_dist)
     target = _r2(price + sign * REWARD_RISK * stop_dist) if EXIT_MODE == "target" else None
-    return {"qty": qty, "stop": stop, "target": target, "risk": qty * stop_dist}
+    return {"qty": qty, "stop": stop, "target": target, "risk": qty * stop_dist,
+            "risk_pct": qty * stop_dist / equity}
 
 
 def trade_timeframe(item):
@@ -139,7 +141,7 @@ def trade_message(head, sym, direction, price, plan, why, tf):
     lines = [f"{head}: <b>{'BUY' if direction == 'LONG' else 'SELL SHORT'} {plan['qty']} {sym}</b> @ ~{price:.2f}",
              exit_line(plan, price, sign),
              f"🛑 Stop loss {plan['stop']:.2f} ({sign * (plan['stop'] / price - 1) * 100:+.1f}%, −${plan['risk']:,.0f} "
-             f"= {RISK_PER_TRADE:.0%} of equity)",
+             f"= {plan.get('risk_pct', RISK_PER_TRADE):.1%} of equity)",
              "<b>Why:</b>"] + [f"• {r}" for r in why]
     lines.append(f'<a href="{tradingview_link(sym, tf)}">Open {sym} on TradingView ({"daily" if tf == "daily" else "15-min"})</a>')
     return "\n".join(lines)
@@ -281,11 +283,14 @@ def run(found, state, send, test_mode=False, chart_fn=None, daily=None):
     if not candidates:
         return log
     try:
-        held = {p["symbol"] for p in api.get("/positions")}
+        positions = api.get("/positions")
+        held = {p["symbol"] for p in positions}
+        invested = sum(abs(float(p.get("market_value") or 0)) for p in positions)
         pending = {o["symbol"] for o in api.get("/orders", status="open", limit=500)}
     except Exception as e:
         return log + [f"Paper trading: couldn't read positions/orders ({e})"]
     slots = max(0, MAX_OPEN_POSITIONS - len(held | pending))
+    room = max(0.0, MAX_INVESTED * equity - invested)      # money left before borrowing
     today = dt.datetime.utcnow().date().isoformat()
 
     placed = 0
@@ -312,16 +317,16 @@ def run(found, state, send, test_mode=False, chart_fn=None, daily=None):
             except Exception:
                 price = float(it["ctx"]["price"])
             atr = float(it["sd"]["ATR"].iat[-1])
-            plan = plan_trade(direction, price, atr, equity, bp)
+            plan = plan_trade(direction, price, atr, equity, min(bp, room))
             if plan and EXIT_MODE == "trail":
                 plan["trail"] = twenty_day_low(it["sd"], pd.Timestamp(it["sd"].index[-1]).date())
             if not plan:
-                log.append(f"{sym}: position would be under 1 share, skipped")
+                log.append(f"{sym}: position would be under 1 share (or no money left without borrowing), skipped")
                 continue
             side = "buy" if direction == "LONG" else "sell"
             desc = (f"{'BUY' if side == 'buy' else 'SELL SHORT'} {plan['qty']} {sym} @ ~{price:.2f}, "
                     f"stop {plan['stop']:.2f}, " + (f"target {plan['target']:.2f} " if plan["target"] else "trend exit ") +
-                    f"(risk ${plan['risk']:,.0f} = {RISK_PER_TRADE:.0%} of equity)")
+                    f"(risk ${plan['risk']:,.0f} = {plan['risk_pct']:.1%} of equity)")
             try:                                     # explaining the trade must never block it
                 tf, why = trade_timeframe(it), reasons(it, direction)
             except Exception:
@@ -373,6 +378,7 @@ def run(found, state, send, test_mode=False, chart_fn=None, daily=None):
                          "filled": False, "opened": dt.datetime.utcnow().isoformat()}
             placed += 1
             slots -= 1
+            room = max(0.0, room - plan["qty"] * price)
             notify("🤖 Paper trade placed")
             log.append(f"{sym}: placed {desc}")
         except Exception as e:
