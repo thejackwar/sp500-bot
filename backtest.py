@@ -46,15 +46,14 @@ BARS_URL = "https://data.alpaca.markets/v2/stocks/{}/bars"
 OUT = "backtest-results"
 CACHE_DIR = "price-cache"           # saved prices (kept between runs by the workflow)
 
-VARIANTS = {                # each one changes the bot's current rules (see simulate() for the options)
-    "bot":   ("1. As the bot trades now", {}),
-    "long":  ("2. Longs only", {"shorts": False}),
-    "trail": ("3. Trailing exit (20-day low/high)", {"exit": "trail"}),
-    "spy":   ("4. SPY 200-day trend filter", {"spy_filter": True}),
-    "daily": ("5. Daily signals only", {"kinds": ("daily",)}),
-    "all":   ("6. All four changes", {"shorts": False, "exit": "trail", "spy_filter": True, "kinds": ("daily",)}),
+VARIANTS = {                # each one changes the bot's rules (see simulate() for the options)
+    "both":    ("1. Longs + shorts (old rules)", {"shorts": True}),
+    "long":    ("2. Longs only (bot now)", {"shorts": False}),
+    "trail":   ("3. Longs only + trailing exit", {"shorts": False, "exit": "trail"}),
+    "long1x":  ("4. Longs only, no leverage", {"shorts": False, "margin": 1.0}),
+    "trail1x": ("5. Longs + trailing exit, no leverage", {"shorts": False, "exit": "trail", "margin": 1.0}),
 }
-SHORT = {"bot": "1 Now", "long": "2 Long", "trail": "3 Trail", "spy": "4 SPY", "daily": "5 Daily", "all": "6 All"}
+SHORT = {"both": "1 L+S", "long": "2 Long", "trail": "3 Trail", "long1x": "4 L 1x", "trail1x": "5 T 1x"}
 
 
 # ---------------------------------------------------------------- data
@@ -279,13 +278,14 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
         exit        "target" = 2:1 bracket target; "trail" = no target, close the trade when a daily
                     trend ends: at the last check of the day (15:45) the price is below the 20-day low
                     (shorts: above the 20-day high); the 2 x ATR starting stop stays
+        margin      MARGIN: total invested can reach margin x equity (1.0 = no borrowing, like SPY)
         spy_filter  False; True = longs only while SPY closed above its 200-day average the day
                     before, shorts only while it closed below
     extra: day index per slot, 20-day low/high per day and stock, SPY trend per day (from run())."""
     if isinstance(cfg, (tuple, list)):
         cfg = {"kinds": tuple(cfg)}
     cfg = {"kinds": ("daily", "intraday"), "shorts": trader.ALLOW_SHORTS, "exit": "target",
-           "spy_filter": False, **(cfg or {})}
+           "spy_filter": False, "margin": MARGIN, **(cfg or {})}
     kinds = cfg["kinds"]
     use = sig.copy()
     long_ = np.zeros(len(use), int)
@@ -344,7 +344,7 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
             value = sum((1 if p["dir"] == "LONG" else -1) * p["qty"] * px[c] for c, p in pos.items())
             gross = sum(p["qty"] * px[c] for c, p in pos.items())
             equity = cash + value
-            bp = max(0.0, MARGIN * equity - gross)
+            bp = max(0.0, cfg["margin"] * equity - gross)
             placed, free = 0, trader.MAX_OPEN_POSITIONS - len(pos)
             for r in by_slot[s].itertuples():
                 col = r.col
@@ -396,12 +396,13 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
                     close(col, p["target"], s, "target")
         if last_of_day[s]:
             value = sum((1 if p["dir"] == "LONG" else -1) * p["qty"] * Cf[s, c] for c, p in pos.items())
-            curve.append((day[s], cash + value, len(pos)))
+            gross = sum(p["qty"] * Cf[s, c] for c, p in pos.items())
+            curve.append((day[s], cash + value, len(pos), gross / (cash + value)))
 
     still_open = len(pos)
     for col in list(pos):                              # value what is still open at the last price
         close(col, Cf[-1, col], len(slots) - 1, "still open")
-    eq = pd.DataFrame(curve, columns=["date", "equity", "positions"]).set_index("date")
+    eq = pd.DataFrame(curve, columns=["date", "equity", "positions", "exposure"]).set_index("date")
     cols = ["symbol", "direction", "signal", "entry_time", "exit_time", "entry", "stop", "target", "exit",
             "qty", "result", "pnl", "R", "days_held"]
     return pd.DataFrame(trades, columns=cols), eq, {"skipped": skipped, "still_open": still_open}
@@ -440,6 +441,7 @@ def stats(trades, eq):
         "streak": streak(done["pnl"].values) if len(done) else 0,
         "days_held": done["days_held"].mean() if len(done) else 0.0,
         "avg_positions": eq["positions"].mean(),
+        "exposure": eq["exposure"].mean(),
         "final": e.iat[-1],
     }
 
@@ -464,19 +466,21 @@ def yearly(eq):
 
 
 def summary_text(res, bench, start, end, n_stocks):
-    eq0 = res["bot"]["equity"]["equity"]
+    eq0 = next(iter(res.values()))["equity"]["equity"]
     years = (eq0.index[-1] - eq0.index[0]).days / 365.25
     lines = ["📊 <b>Backtest: S&amp;P 100 strategy</b>",
              f"{start:%d %b %Y} → {end:%d %b %Y} ({years:.1f} years), {n_stocks} stocks, $100,000 start. "
-             f"Bot now: ⭐ STRONG signals (daily + 15-min, longs + shorts), stop 2×ATR, target 2:1, "
-             f"risk {trader.RISK_PER_TRADE:.0%}/trade, max {trader.MAX_OPEN_POSITIONS} positions", ""]
+             f"All versions: ⭐ STRONG signals (daily + 15-min), stop 2×ATR, risk "
+             f"{trader.RISK_PER_TRADE:.0%}/trade, max {trader.MAX_OPEN_POSITIONS} positions of max "
+             f"{trader.MAX_POSITION_PCT:.0%} each; target 2:1 unless trailing. 'Invested' = average money "
+             f"in the market as % of the account (SPY = 100%)", ""]
     for key, (name, _) in VARIANTS.items():
         s = res[key]["stats"]
         lines += [f"<b>{name}</b>",
                   f"{pct(s['return'])} ({pct(s['cagr'])}/yr) · max drop {pct(s['max_dd'])} · "
                   f"profit factor {s['pf']:.2f}",
                   f"{s['trades']} trades, win {s['win_rate']:.0%}, avg {s['avg_R']:+.2f}R, "
-                  f"worst streak {s['streak']}, hold {s['days_held']:.0f}d", ""]
+                  f"worst streak {s['streak']}, hold {s['days_held']:.0f}d, invested {s['exposure']:.0%}", ""]
     if bench is not None and len(bench) > 1:
         b = bench
         b_years = max((b.index[-1] - b.index[0]).days / 365.25, 1e-9)
@@ -515,11 +519,11 @@ def equity_chart(res, bench):
     plt.style.use("dark_background")
     fig, (a1, a2) = plt.subplots(2, 1, figsize=(11, 7), sharex=True, gridspec_kw={"height_ratios": [3, 1]})
     fig.patch.set_facecolor("black")
-    colors = {"bot": "#26a69a", "long": "#42a5f5", "trail": "#ffb74d", "spy": "#ab47bc",
-              "daily": "#ef5350", "all": "#ffee58"}
+    colors = {"both": "#ef5350", "long": "#26a69a", "trail": "#ffb74d", "long1x": "#42a5f5",
+              "trail1x": "#ab47bc"}
     for key, (name, _) in VARIANTS.items():
         e = res[key]["equity"]["equity"]
-        a1.plot(e.index, e.values, color=colors[key], lw=2 if key in ("bot", "all") else 1.1, label=name)
+        a1.plot(e.index, e.values, color=colors[key], lw=2 if key == "long" else 1.1, label=name)
         a2.plot(e.index, (e / e.cummax() - 1).values * 100, color=colors[key], lw=1)
     if bench is not None:
         a1.plot(bench.index, bench.values, color="#9e9e9e", lw=1.2, ls="--", label=f"Buy & hold {BENCHMARK}")
