@@ -15,6 +15,9 @@ message with a chart whenever a signal appears. ⭐ Strong LONG signals are also
 | `.github/workflows/scan.yml` | The schedule that runs it on GitHub for free |
 | `backtest.py` + `.github/workflows/backtest.yml` | Tests the strategy on past years (run by hand) |
 | `strategies/` | Other strategies to compare in the backtest (one file each, `_template.py` to start) |
+| `crypto_scanner.py` + `.github/workflows/crypto-scan.yml` | The same strategy on the top 10 cryptocurrencies, run by hand (section *Crypto*) |
+| `crypto.py` | Picks the top 10 coins and downloads their prices |
+| `crypto_trader.py` | Crypto paper trading with Alpaca (same rules, adapted to crypto) |
 
 ## 1. Create your Telegram bot (5 min)
 1. In Telegram, open **@BotFather** and send `/newbot`. Pick a name. It replies with a **token** like `123456:ABC-xyz`.
@@ -95,6 +98,23 @@ The live bot stays as it is; new ideas are tested in the backtest first. Each fi
 - **Included examples:** `rsi2_pullback.py` (buy short dips in up-trends, sell on the bounce), `golden_cross.py` (50/200-day average cross), `momentum_52w.py` (buy new 1-year highs, sell below the 50-day low).
 - **Add your own:** copy `_template.py` to a new name (e.g. `my_idea.py`), change `entries()` (when to buy, judged on the daily close; it buys at the next day's open) and `EXIT` (stop in ATRs, target, trailing N-day low, max days) and optionally `exits()` and `rank()`. Indicator helpers are in `strategies/tools.py` (sma, ema, rsi, atr, highest, lowest, bollinger, crossed_above/below). Files starting with `_` are ignored.
 - **Be careful with the results:** the more ideas you try, the more likely one looks good by luck. Check a winner on years it wasn't tuned on before changing the live bot.
+
+## Crypto (top 10 coins)
+The same strategy, alerts, charts and paper trading on the **10 biggest cryptocurrencies by market cap**. It only runs when you start it (no timer), so it uses GitHub minutes only when you want.
+- **Run it:** Actions → **Crypto scan** → **Run workflow** → pick the candles (**15m** like the stock bot, **1h** or **4h**; the daily chart is always checked) and, if you like, **Dry run** (shows what it would trade, places no orders) → **Run**. A ✅ message at the end says how many coins were checked, even when nothing was found.
+- **Which coins:** the ranking is read from CoinGecko every run (CoinPaprika, then a built-in list as backups). **Stablecoins** (USDT, USDC...) and gold tokens are skipped because their price doesn't move, and coins **Alpaca doesn't trade** (e.g. BNB, TRX) are skipped because they can't be paper traded; the next coins in the ranking take their place. Coins too new for the 200-day MA still get the other alerts.
+- **Prices:** Alpaca's crypto data (real-time, 24/7, free), Yahoo Finance as backup. Crypto never closes, so a "day" is a **UTC day** (02:00 → 02:00 Milan in summer, 01:00 → 01:00 in winter), the daily candle most crypto charts use. Every run analyzes the candle that has just closed, at any hour, weekends included.
+- **Paper trading** (`crypto_trader.py`), ⭐ STRONG LONG signals only, same rules as the stocks: 1% risk per trade, stop 2× daily ATR, trailing exit below the 20-day low. Differences:
+  - **Fractional amounts** (e.g. 0.0123 BTC). Alpaca's crypto fee is **0.25%** per buy or sell for small accounts, taken from the coin you receive; the stop order uses the amount actually in the account, so it always matches.
+  - **Stop:** Alpaca has no bracket orders for crypto, so the stop is a separate **stop-limit** sell (limit 1% below the stop) placed right after the entry fills. It stays active between runs. If the entry hasn't filled yet, the next run places the stop.
+  - **Trend exit:** checked at **every run** (the bot doesn't run on a timer), not at a fixed time.
+  - **Longs only:** Alpaca can't short crypto or lend money for it.
+  - **Limits:** max 5 coins, max 3 new per run, max 20% of equity per coin, and all crypto together at most **50% of the paper account** (`CRYPTO_BUDGET`) so the stock bot keeps the rest. Crypto positions don't take any of the stock bot's 10 position slots.
+  - Every crypto position in the paper account is treated as the bot's own: it gets the trend-exit check and a ⚠️ warning if it has no stop order.
+  - No Pine Script for crypto trades yet.
+- **Backtest:** Actions → **Backtest** → Run workflow → *Market*: **crypto**. Same versions and `strategies/` files as for stocks, on the current top 10 coins, with the 0.25% fee per buy and sell, 0.05% slippage, no borrowing, and **buy & hold BTC** as the benchmark. Start dates are a week (7 days) apart. Alpaca's crypto history is shorter than its stock history; if it doesn't reach back as far as the years you pick, the test starts where the prices start (the report shows the dates). The first run downloads the 15-minute history (a few minutes); later runs reuse the saved copy.
+- **Strategy files on crypto:** they get daily candles too, but crypto has 365 trading days a year, so "252 days" in a strategy means about 8 months for crypto instead of a year.
+- **Running it on a timer later:** the workflow file has the lines to put back (every 4 hours ≈ 180 runs a month). Running every 15 minutes, 24/7, needs about 2,900 runs a month, more than the 2,000 free minutes of a private repo.
 
 ## Charts
 Every alert comes with a **candlestick chart on a black background** (green = up candle, red = down candle):

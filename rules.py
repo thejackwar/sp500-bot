@@ -24,6 +24,8 @@ Change the numbers below to tune the strategy.
 """
 import pandas as pd
 
+from fmt import px
+
 import levels
 
 SMA_LONG = 200                   # the 200-day moving average
@@ -59,16 +61,16 @@ def _timeframe_events(df, tf):
     ev = []
     if pd.notna(cur.BB_up) and pd.notna(prev.BB_up):
         if prev.Close <= prev.BB_up and cur.Close > cur.BB_up:
-            ev.append(("LONG", "bb_up", f"Broke above upper Bollinger band {cur.BB_up:.2f} ({tf})"))
+            ev.append(("LONG", "bb_up", f"Broke above upper Bollinger band {px(cur.BB_up)} ({tf})"))
         if prev.Close >= prev.BB_lo and cur.Close < cur.BB_lo:
-            ev.append(("SHORT", "bb_lo", f"Broke below lower Bollinger band {cur.BB_lo:.2f} ({tf})"))
+            ev.append(("SHORT", "bb_lo", f"Broke below lower Bollinger band {px(cur.BB_lo)} ({tf})"))
     if pd.notna(cur.DC_high) and pd.notna(prev.DC_high):
         unit = "day" if tf == "daily" else "candle"
         n = df.attrs.get("donchian", 20)
         if prev.Close <= prev.DC_high and cur.Close > cur.DC_high:
-            ev.append(("LONG", "dc_up", f"New {n}-{unit} high: broke Donchian high {cur.DC_high:.2f} ({tf})"))
+            ev.append(("LONG", "dc_up", f"New {n}-{unit} high: broke Donchian high {px(cur.DC_high)} ({tf})"))
         if prev.Close >= prev.DC_low and cur.Close < cur.DC_low:
-            ev.append(("SHORT", "dc_lo", f"New {n}-{unit} low: broke Donchian low {cur.DC_low:.2f} ({tf})"))
+            ev.append(("SHORT", "dc_lo", f"New {n}-{unit} low: broke Donchian low {px(cur.DC_low)} ({tf})"))
     if bool(cur.Squeeze) and not bool(prev.Squeeze):
         span = "~6 months" if tf == "daily" else f"{SQUEEZE_LOOKBACK['intraday']} candles"
         ev.append(("WATCH", "squeeze", f"Bollinger squeeze: bands narrowest in {span}, a big move often follows ({tf})"))
@@ -93,10 +95,10 @@ def evaluate(daily, intraday, tf_name):
     if pd.notna(cur.SMA200) and pd.notna(prev.SMA200):
         if prev.Close <= prev.SMA200 and cur.Close > cur.SMA200:
             events.append({"dir": "LONG", "code": "sma_up", "tf": "daily",
-                           "text": f"Crossed above the 200-day moving average {cur.SMA200:.2f}"})
+                           "text": f"Crossed above the 200-day moving average {px(cur.SMA200)}"})
         if prev.Close >= prev.SMA200 and cur.Close < cur.SMA200:
             events.append({"dir": "SHORT", "code": "sma_dn", "tf": "daily",
-                           "text": f"Crossed below the 200-day moving average {cur.SMA200:.2f}"})
+                           "text": f"Crossed below the 200-day moving average {px(cur.SMA200)}"})
     for frame, tf in ((d, "daily"), (h, tf_name)):
         for direction, code, text in _timeframe_events(frame, tf):
             events.append({"dir": direction, "code": code, "tf": tf, "text": text})

@@ -211,6 +211,8 @@ def trend_exits(api, book, daily, send, test_mode=False):
     except Exception as e:
         return [f"Trend exits: couldn't read positions ({e})"]
     for p in positions:
+        if p.get("asset_class") == "crypto":
+            continue                                    # crypto positions belong to crypto_trader.py
         sym, qty = p["symbol"], int(float(p["qty"]))
         if qty <= 0:
             continue                                    # shorts keep their own stop/target
@@ -284,9 +286,12 @@ def run(found, state, send, test_mode=False, chart_fn=None, daily=None):
         return log
     try:
         positions = api.get("/positions")
-        held = {p["symbol"] for p in positions}
+        # crypto positions and their stop orders (crypto_trader.py) don't use up stock slots,
+        # but their money counts in "invested", so the two bots never borrow together
+        held = {p["symbol"] for p in positions if p.get("asset_class") != "crypto"}
         invested = sum(abs(float(p.get("market_value") or 0)) for p in positions)
-        pending = {o["symbol"] for o in api.get("/orders", status="open", limit=500)}
+        pending = {o["symbol"] for o in api.get("/orders", status="open", limit=500)
+                   if o.get("asset_class") != "crypto"}
     except Exception as e:
         return log + [f"Paper trading: couldn't read positions/orders ({e})"]
     slots = max(0, MAX_OPEN_POSITIONS - len(held | pending))

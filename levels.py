@@ -18,6 +18,8 @@ Fibonacci retracements
 import numpy as np
 import pandas as pd
 
+from fmt import px
+
 import patterns
 
 SR_LOOKBACK = 250        # daily candles used to find major levels (~1 year)
@@ -108,13 +110,13 @@ def events(df):
     if broken_up:
         lv = max(broken_up, key=lambda x: x[1])
         out.append({"dir": "LONG", "code": "sr_up", "tf": "daily",
-                    "text": f"Broke above MAJOR resistance {lv[0]:.2f} ({lv[1]} touches since "
+                    "text": f"Broke above MAJOR resistance {px(lv[0])} ({lv[1]} touches since "
                             f"{pd.Timestamp(lv[2]):%b %Y})",
                     "draw": {"levels": [(lv[0], "res")]}})
     if broken_dn:
         lv = max(broken_dn, key=lambda x: x[1])
         out.append({"dir": "SHORT", "code": "sr_dn", "tf": "daily",
-                    "text": f"Broke below MAJOR support {lv[0]:.2f} ({lv[1]} touches since "
+                    "text": f"Broke below MAJOR support {px(lv[0])} ({lv[1]} touches since "
                             f"{pd.Timestamp(lv[2]):%b %Y})",
                     "draw": {"levels": [(lv[0], "sup")]}})
 
@@ -141,8 +143,8 @@ def events(df):
             move = "rise" if sw["up"] else "drop"
             hint = "watch for a bounce" if sw["up"] else "watch for a rejection"
             out.append({"dir": "LONG" if sw["up"] else "SHORT", "code": "fib", "tf": "daily",
-                        "text": f"Pulled back to the {r * 100:.1f}% Fibonacci retracement {lvl:.2f} of the "
-                                f"{move} {a_price:.2f} → {sw['b'][1]:.2f} ({hint})",
+                        "text": f"Pulled back to the {r * 100:.1f}% Fibonacci retracement {px(lvl)} of the "
+                                f"{move} {px(a_price)} → {px(sw['b'][1])} ({hint})",
                         "draw": {"fib": sw}})
 
     # context for every alert: nearest major levels and the active Fibonacci zone

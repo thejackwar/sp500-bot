@@ -3,6 +3,11 @@ name: Backtest
 on:
   workflow_dispatch:          # run it by hand: Actions -> Backtest -> Run workflow
     inputs:
+      market:
+        description: "Stocks (S&P 100) or crypto (top 10 coins)"
+        type: choice
+        options: ["stocks", "crypto"]
+        default: "stocks"
       years:
         description: "How many years to test"
         type: choice
@@ -45,6 +50,7 @@ jobs:
         run: python backtest.py
         env:
           PYTHONUNBUFFERED: "1"
+          MARKET: ${{ inputs.market }}
           YEARS: ${{ inputs.years }}
           TEST: ${{ inputs.test }}
           RUNS: ${{ inputs.runs }}

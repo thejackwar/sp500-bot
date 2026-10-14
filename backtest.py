@@ -58,6 +58,43 @@ VARIANTS = {                # each one changes the bot's rules (see simulate() f
 }
 SHORT = {"both": "1 L+S", "long": "2 Long", "trail": "3 Trail", "long1x": "4 L 1x", "trail1x": "5 T 1x"}
 
+# What is tested (main() switches these to crypto when MARKET=crypto, see use_crypto())
+T = trader                  # money rules: trader.py (stocks) or crypto_trader.py (crypto)
+FEE = 0.0                   # trading fee per buy and per sell, as a share of the trade
+UNIVERSE, UNIT = "S&amp;P 100", "stocks"
+DAYS_PER_YEAR = 252
+OPENING_CHECK = True        # stocks: a check at 9:30 with the opening price
+OVERNIGHT_FILLS = False     # crypto never closes: a signal at a day's last candle fills at the next candle
+FOOTER = ("Today's S&amp;P 100 members only (flatters results); no short-borrow fees; fills at the "
+          "next 15-min open with 0.02% slippage.")
+CRYPTO_VARIANTS = {
+    "long":  ("1. Longs only, 2:1 target", {"shorts": False, "margin": 1.0}),
+    "trail": ("2. Longs + trailing exit (bot now)", {"shorts": False, "exit": "trail", "margin": 1.0}),
+    "both":  ("3. Longs + shorts, trailing (test only: Alpaca can't short crypto)",
+              {"shorts": True, "exit": "trail", "margin": 1.0}),
+}
+CRYPTO_SHORT = {"long": "1 Long", "trail": "2 Trail", "both": "3 L+S"}
+
+
+def use_crypto():
+    """Switch the backtest to the crypto bot: top 10 coins, crypto_trader.py's money rules, Alpaca's
+    0.25% fee per buy and sell, 0.05% slippage, no borrowing, BTC as the buy-and-hold benchmark,
+    UTC days, no opening check (crypto trades around the clock)."""
+    global T, FEE, SLIPPAGE, MARGIN, BENCHMARK, RUN_STEP_DAYS, UNIVERSE, UNIT, DAYS_PER_YEAR
+    global OPENING_CHECK, OVERNIGHT_FILLS, VARIANTS, SHORT, FOOTER
+    import crypto_trader
+    T, FEE, SLIPPAGE, MARGIN = crypto_trader, crypto_trader.FEE, 0.0005, 1.0
+    BENCHMARK, RUN_STEP_DAYS, DAYS_PER_YEAR = "BTC", 7, 365
+    UNIVERSE, UNIT = "top 10 crypto", "coins"
+    OPENING_CHECK, OVERNIGHT_FILLS = False, True
+    VARIANTS, SHORT = CRYPTO_VARIANTS, CRYPTO_SHORT
+    FOOTER = ("Today's top 10 coins only (coins that dropped out aren't tested, which flatters results); "
+              f"fees {crypto_trader.FEE:.2%} per buy and sell; fills at the next 15-min open with 0.05% slippage.")
+
+
+def _round(x):
+    return T.round_price(x) if hasattr(T, "round_price") else T._r2(x)
+
 
 # ---------------------------------------------------------------- data
 def _headers():
@@ -216,7 +253,7 @@ def stock_signals(h, D, debug=False):
     pos = np.arange(n)
     same_next = np.r_[day[1:] == day[:-1], False]
     first = np.r_[True, day[1:] != day[:-1]]
-    at_open = first & (h.index.hour == 9) & (h.index.minute == 30)
+    at_open = first & (h.index.hour == 9) & (h.index.minute == 30) & OPENING_CHECK
 
     # intraday chart (15-min): rules.py's own indicator code
     s = rules.SETTINGS["intraday"]
@@ -234,7 +271,7 @@ def stock_signals(h, D, debug=False):
         "p": np.r_[h["Open"].values[op], h["Close"].values],
         "H": np.r_[h["Open"].values[op], H],
         "L": np.r_[h["Open"].values[op], L],
-        "fill": np.r_[op, np.where(same_next, pos + 1, -1)],       # -1 = market already closed
+        "fill": np.r_[op, np.where(same_next | (OVERNIGHT_FILLS & (pos + 1 < n)), pos + 1, -1)],   # -1 = market closed
         "i_up": np.r_[np.zeros(len(op), bool), i_up],
         "i_dn": np.r_[np.zeros(len(op), bool), i_dn],
     }).sort_values("check", kind="stable").reset_index(drop=True)
@@ -278,10 +315,10 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
     (optional 'score': higher = preferred when several signals arrive together).
     cfg (all optional; the defaults are the bot's rules):
         kinds       ("daily", "intraday"): which signals open trades
-        shorts      trader.ALLOW_SHORTS
+        shorts      T.ALLOW_SHORTS
         exit        "target" = 2:1 target; "trail" = no target, sell at the last check of the day
                     (~15:45) when the price is below the 20-day low; "custom" = use the keys below
-        stop_atr    trader.STOP_ATR: stop distance in daily ATRs (also sizes the trade: 1% risk)
+        stop_atr    T.STOP_ATR: stop distance in daily ATRs (also sizes the trade: 1% risk)
         target_r    take profit at this many times the stop distance (None = no target)
         trail_days  sell at ~15:45 when the price is below the lowest low of this many days (None = off)
         max_days    sell at the open after this many trading days (None = off)
@@ -293,14 +330,14 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
     extra: day index per slot, N-day lows/highs per day and stock, SPY trend per day (from run())."""
     if isinstance(cfg, (tuple, list)):
         cfg = {"kinds": tuple(cfg)}
-    cfg = {"kinds": ("daily", "intraday"), "shorts": trader.ALLOW_SHORTS, "exit": "target",
-           "spy_filter": False, "margin": MARGIN, "stop_atr": trader.STOP_ATR, "max_days": None,
+    cfg = {"kinds": ("daily", "intraday"), "shorts": T.ALLOW_SHORTS, "exit": "target",
+           "spy_filter": False, "margin": MARGIN, "stop_atr": T.STOP_ATR, "max_days": None,
            "exit_matrix": None, "seed": None, **(cfg or {})}
     if cfg["exit"] == "trail":
         cfg.setdefault("target_r", None)
         cfg.setdefault("trail_days", rules.SETTINGS["daily"]["donchian"])
     elif cfg["exit"] == "target":
-        cfg.setdefault("target_r", trader.REWARD_RISK)
+        cfg.setdefault("target_r", T.REWARD_RISK)
         cfg.setdefault("trail_days", None)
     else:
         cfg.setdefault("target_r", None)
@@ -341,7 +378,7 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
     for slot, col, dr, atr, kind in zip(use["slot"].values, use["col"].values, use["dir"].values,
                                         use["atr"].values, use["kind"].values):
         by_slot.setdefault(int(slot), []).append((int(col), dr, float(atr), kind))
-    stop_scale = cfg["stop_atr"] / trader.STOP_ATR
+    stop_scale = cfg["stop_atr"] / T.STOP_ATR
 
     Cf = pd.DataFrame(C).ffill().values
     OT, HT, LT, CT = (np.ascontiguousarray(m.T) for m in (O, H, L, C))      # one row per stock (fast)
@@ -361,8 +398,8 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
         nonlocal cash
         p = pos.pop(col)
         sign = 1 if p["dir"] == "LONG" else -1
-        cash += sign * p["qty"] * px
-        pnl = sign * p["qty"] * (px - p["fill"])
+        cash += sign * p["qty"] * px - FEE * p["qty"] * px
+        pnl = sign * p["qty"] * (px - p["fill"]) - FEE * p["qty"] * (px + p["fill"])
         trades.append({"symbol": syms[col], "direction": p["dir"], "signal": p["kind"],
                        "entry_time": slots[p["slot"]], "exit_time": slots[s] + pd.Timedelta(minutes=15),
                        "entry": round(p["fill"], 2), "stop": p["stop"], "target": p["target"],
@@ -436,32 +473,32 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
     for s in range(n_slots):
         if s in exits_at:
             run_exits(s, 0)
-        if s in by_slot and len(pos) <= trader.MAX_OPEN_POSITIONS:
+        if s in by_slot and len(pos) <= T.MAX_OPEN_POSITIONS:
             px = Cf[s - 1] if s else Cf[0]
             value = sum((1 if p["dir"] == "LONG" else -1) * p["qty"] * px[c] for c, p in pos.items())
             gross = sum(p["qty"] * px[c] for c, p in pos.items())
             equity = cash + value
             bp = max(0.0, cfg["margin"] * equity - gross)
-            placed, free = 0, trader.MAX_OPEN_POSITIONS - len(pos)
+            placed, free = 0, T.MAX_OPEN_POSITIONS - len(pos)
             for col, r_dir, r_atr, r_kind in by_slot[s]:
                 if col in pos or traded_on.get(col) == day[s]:
                     continue
                 if spy_up is not None and spy_up[di[s]] != (r_dir == "LONG"):
                     continue                           # against the market's trend
-                if placed >= trader.MAX_NEW_PER_RUN or free <= 0:
+                if placed >= T.MAX_NEW_PER_RUN or free <= 0:
                     skipped += 1
                     continue
                 price = O[s, col]
                 if not np.isfinite(price) or not np.isfinite(r_atr):
                     continue
-                plan = trader.plan_trade(r_dir, price, r_atr * stop_scale, equity, bp)
+                plan = T.plan_trade(r_dir, price, r_atr * stop_scale, equity, bp)
                 if not plan:
                     continue
                 sign = 1 if r_dir == "LONG" else -1
                 dist = cfg["stop_atr"] * r_atr
-                plan["target"] = trader._r2(price + sign * cfg["target_r"] * dist) if cfg["target_r"] else None
+                plan["target"] = _round(price + sign * cfg["target_r"] * dist) if cfg["target_r"] else None
                 fill = price * (1 + sign * SLIPPAGE)
-                cash -= sign * plan["qty"] * fill
+                cash -= sign * plan["qty"] * fill + FEE * plan["qty"] * fill
                 pid = len(trades) + len(pos) + s * 1000
                 pos[col] = {"dir": r_dir, "kind": r_kind, "slot": s, "fill": fill, "id": pid, **plan}
                 ex = find_exit(col, s, pos[col])
@@ -515,7 +552,7 @@ def stats(trades, eq):
         "cagr": (e.iat[-1] / START_EQUITY) ** (1 / years) - 1,
         "max_dd": dd.min(),
         "dd_date": dd.idxmin(),
-        "sharpe": daily_ret.mean() / daily_ret.std() * np.sqrt(252) if daily_ret.std() > 0 else 0.0,
+        "sharpe": daily_ret.mean() / daily_ret.std() * np.sqrt(DAYS_PER_YEAR) if daily_ret.std() > 0 else 0.0,
         "trades": len(done),
         "per_month": len(done) / (years * 12),
         "win_rate": len(wins) / len(done) if len(done) else 0.0,
@@ -553,17 +590,17 @@ def yearly(eq):
 def summary_text(res, bench, start, end, n_stocks, mode="bot versions"):
     eq0 = next(iter(res.values()))["equity"]["equity"]
     years = (eq0.index[-1] - eq0.index[0]).days / 365.25
-    money = (f"risk {trader.RISK_PER_TRADE:.0%}/trade, max {trader.MAX_OPEN_POSITIONS} positions of max "
-             f"{trader.MAX_POSITION_PCT:.0%} each")
+    money = (f"risk {T.RISK_PER_TRADE:.0%}/trade, max {T.MAX_OPEN_POSITIONS} positions of max "
+             f"{T.MAX_POSITION_PCT:.0%} each")
     if mode == "strategies":
         rules_txt = (f"Strategy comparison, same money rules for all: {money}, max "
-                     f"{trader.MAX_INVESTED:.0%} invested. Daily strategies buy at the next day's open.")
+                     f"{T.MAX_INVESTED:.0%} invested. Daily strategies buy at the next day's open.")
     else:
         rules_txt = (f"Bot versions: ⭐ STRONG signals (daily + 15-min), stop 2×ATR, {money}; target 2:1 "
-                     f"unless trailing. Borrowed money pays {MARGIN_RATE:.1%}/yr interest.")
-    lines = [f"📊 <b>Backtest: {'strategies' if mode == 'strategies' else 'bot versions'}</b>",
-             f"{start:%d %b %Y} → {end:%d %b %Y} ({years:.1f} years), S&amp;P 100 ({n_stocks} stocks), "
-             f"$100,000 start. {rules_txt} 'Invested' = average money in the market (SPY = 100%)", ""]
+                     f"unless trailing. " + (f"Borrowed money pays {MARGIN_RATE:.1%}/yr interest." if MARGIN > 1 else "No borrowing."))
+    lines = [f"📊 <b>Backtest {UNIVERSE}: {'strategies' if mode == 'strategies' else 'bot versions'}</b>",
+             f"{start:%d %b %Y} → {end:%d %b %Y} ({years:.1f} years), {UNIVERSE} ({n_stocks} {UNIT}), "
+             f"$100,000 start. {rules_txt} 'Invested' = average money in the market ({BENCHMARK} = 100%)", ""]
     n_runs = next(iter(res.values())).get("agg", {}).get("runs", 1)
     if n_runs > 1:
         lines[-1:] = [f"Each version is tested from {n_runs} start dates a week apart (ties between signals "
@@ -571,7 +608,7 @@ def summary_text(res, bench, start, end, n_stocks, mode="bot versions"):
     for key, r in res.items():
         a, name = r.get("agg") or r["stats"], r["name"]
         if n_runs > 1:
-            spy_txt = f", beat SPY in {a['beat']}/{a['spy_runs']} runs" if a.get("spy_runs") else ""
+            spy_txt = f", beat {BENCHMARK} in {a['beat']}/{a['spy_runs']} runs" if a.get("spy_runs") else ""
             lines += [f"<b>{name}</b>",
                       f"{pct(a['cagr'])}/yr ({pct(a['cagr_min'])} to {pct(a['cagr_max'])}){spy_txt}",
                       f"max drop {pct(a['max_dd'])} (worst {pct(a['dd_worst'])}) · profit factor {a['pf']:.2f}",
@@ -593,8 +630,7 @@ def summary_text(res, bench, start, end, n_stocks, mode="bot versions"):
         lines += [f"<b>Buy &amp; hold {BENCHMARK}</b>",
                   f"{pct(b.iat[-1] / START_EQUITY - 1)} ({pct(b_cagr)}/yr) · "
                   f"max drop {pct((b / b.cummax() - 1).min())}", ""]
-    lines += ["<i>Today's S&amp;P 100 members only (flatters results); no short-borrow fees; fills at the "
-              "next 15-min open with 0.02% slippage. Past results don't guarantee future ones.</i>"]
+    lines += [f"<i>{FOOTER} Past results don't guarantee future ones.</i>"]
     return "\n".join(lines)
 
 
@@ -797,7 +833,7 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
         up = (c > c.rolling(rules.SMA_LONG).mean()).shift(1)       # yesterday's close vs its 200-day MA
         extra["spy_up"] = up.reindex(days).fillna(True).astype(bool).values
     else:
-        print("No SPY prices: the SPY filter is switched off", flush=True)
+        print(f"No {BENCHMARK} prices: the {BENCHMARK} trend filter is switched off", flush=True)
 
     def lows_highs(n):
         lo = np.column_stack([daily[s]["Low"].rolling(n).min().shift(1).reindex(days).values for s in syms])
@@ -815,9 +851,9 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
             except Exception as e:
                 print(f"Strategy {name} failed: {e}", flush=True)
                 continue
-            ex = {"stop_atr": trader.STOP_ATR, "target_r": None, "trail_days": None, "max_days": None,
+            ex = {"stop_atr": T.STOP_ATR, "target_r": None, "trail_days": None, "max_days": None,
                   **getattr(mod, "EXIT", {})}
-            cfg = {"kinds": ("daily",), "shorts": False, "exit": "custom", "margin": trader.MAX_INVESTED,
+            cfg = {"kinds": ("daily",), "shorts": False, "exit": "custom", "margin": T.MAX_INVESTED,
                    "exit_matrix": s_exit, **ex}
             if ex["trail_days"]:
                 extra.setdefault("low", {})[ex["trail_days"]], extra.setdefault("high", {})[ex["trail_days"]] = \
@@ -855,10 +891,10 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
             per.append({"trades": trades, "equity": eq, "info": info, "stats": st, "spy_cagr": spy_cagr,
                         "start": days[d0]})
         agg = aggregate(per)
-        res[key] = {"name": name, "short": short, "main": key in ("bot", "trail1x"), "runs": per, "agg": agg,
+        res[key] = {"name": name, "short": short, "main": key in ("bot", "trail1x") or (T is not trader and key == "trail"), "runs": per, "agg": agg,
                     **per[0]}
         print(f"{name}: median {pct(agg['cagr'])}/yr (runs {pct(agg['cagr_min'])} to {pct(agg['cagr_max'])}), "
-              f"beat SPY in {agg['beat']}/{agg['spy_runs']}, ~{agg['trades']:.0f} trades", flush=True)
+              f"beat {BENCHMARK} in {agg['beat']}/{agg['spy_runs']}, ~{agg['trades']:.0f} trades", flush=True)
     return res, sig
 
 
@@ -866,18 +902,34 @@ def main():
     years = float(os.environ.get("YEARS", "5"))
     mode = os.environ.get("TEST", "strategies")
     runs = int(os.environ.get("RUNS") or RUNS)
+    market = os.environ.get("MARKET", "stocks")
     end = dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=20)
     start = end - dt.timedelta(days=round(365.25 * years))
     start = max(start, dt.datetime(2016, 3, 1, tzinfo=dt.timezone.utc))      # Alpaca history starts 2016
     os.makedirs(OUT, exist_ok=True)
 
-    import scanner
-    tickers = scanner.get_tickers()
-    print(f"Backtest {start:%Y-%m-%d} → {end:%Y-%m-%d}, {len(tickers)} stocks", flush=True)
-    daily, intraday = download(tickers + [BENCHMARK], start, end)
-    bench_d = daily.pop(BENCHMARK, None)
-    intraday.pop(BENCHMARK, None)
-    print(f"Prices for {len(intraday)} stocks", flush=True)
+    if market == "crypto":
+        import crypto
+        use_crypto()
+        tickers = crypto.top_coins()
+        print(f"Crypto backtest {start:%Y-%m-%d} → {end:%Y-%m-%d}, {len(tickers)} coins", flush=True)
+        daily, intraday = crypto.history(tickers, start, end, CACHE_DIR)
+        if not intraday:
+            sys.exit("No crypto prices could be downloaded.")
+        first = min(h.index[0] for h in intraday.values())
+        if first > pd.Timestamp(start) - pd.Timedelta(days=20):     # Alpaca's crypto history is shorter
+            start = (first + pd.Timedelta(days=21)).to_pydatetime()
+            print(f"Prices only go back to {first:%Y-%m-%d}: testing from {start:%Y-%m-%d}", flush=True)
+        bench_d = daily.get("BTC/USD")
+        print(f"Prices for {len(intraday)} coins", flush=True)
+    else:
+        import scanner
+        tickers = scanner.get_tickers()
+        print(f"Backtest {start:%Y-%m-%d} → {end:%Y-%m-%d}, {len(tickers)} stocks", flush=True)
+        daily, intraday = download(tickers + [BENCHMARK], start, end)
+        bench_d = daily.pop(BENCHMARK, None)
+        intraday.pop(BENCHMARK, None)
+        print(f"Prices for {len(intraday)} stocks", flush=True)
 
     res, sig = run(daily, intraday, start, end, spy=bench_d, mode=mode, runs=runs)
     bench = benchmark(bench_d, pd.Timestamp(start.date())) if bench_d is not None else None

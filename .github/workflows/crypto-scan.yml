@@ -1,0 +1,63 @@
+name: Crypto scan
+
+on:
+  # Runs only when you start it: Actions -> Crypto scan -> Run workflow.
+  # To run it on a timer later, put these lines back under "on:" (crypto trades 24/7; mind the
+  # 2,000 free minutes a month of a private repo: every 4 hours = ~180 runs a month):
+  #   schedule:
+  #     - cron: "5 */4 * * *"
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "Intraday candles (the daily chart is always checked)"
+        type: choice
+        options: ["15m", "1h", "4h"]
+        default: "15m"
+      dry_run:
+        description: "Dry run: show what it would trade, place no orders"
+        type: boolean
+        default: false
+
+# one crypto scan at a time
+concurrency:
+  group: crypto-scan
+  cancel-in-progress: false
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 14
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Restore sent-alerts memory
+        uses: actions/cache/restore@v4
+        with:
+          path: crypto_state.json
+          key: crypto-state-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: crypto-state-
+
+      - name: Scan
+        run: python crypto_scanner.py
+        env:
+          PYTHONUNBUFFERED: "1"
+          SCAN_MODE: ${{ inputs.mode || '15m' }}
+          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+
+      - name: Save sent-alerts memory
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: crypto_state.json
+          key: crypto-state-${{ github.run_id }}-${{ github.run_attempt }}

@@ -30,6 +30,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+
+from fmt import px
 import requests
 import yfinance as yf
 
@@ -256,13 +258,13 @@ def with_snapshot(daily, snap, today):
         return None
     if pd.Timestamp(bar["t"]).tz_convert(ET).date() != today:
         return None
-    px = float((snap.get("latestTrade") or {}).get("p") or bar["c"])
+    last = float((snap.get("latestTrade") or {}).get("p") or bar["c"])
     d = daily.copy()
     idx = d.index.tz_convert(ET).tz_localize(None) if d.index.tz is not None else d.index
     d.index = idx.normalize()
     d = d[d.index.date != today][["Open", "High", "Low", "Close", "Volume"]]
-    row = pd.DataFrame({"Open": [float(bar["o"])], "High": [max(float(bar["h"]), px)],
-                        "Low": [min(float(bar["l"]), px)], "Close": [px], "Volume": [float(bar["v"])]},
+    row = pd.DataFrame({"Open": [float(bar["o"])], "High": [max(float(bar["h"]), last)],
+                        "Low": [min(float(bar["l"]), last)], "Close": [last], "Volume": [float(bar["v"])]},
                        index=[pd.Timestamp(today)])
     return pd.concat([d, row])
 
@@ -424,9 +426,9 @@ def draw_chart(ticker, df, title, show_sma=False, pattern=None, n_show=120, extr
         for (x1, y1), (x2, y2) in pattern["lines"]:
             ax.plot([x1, x2], [y1, y2], color=PAT_COL, lw=1.8, zorder=5)
         if pattern["name"] in patterns.HARMONICS:       # connect the legs X-A-B-C and on to D
-            px = [pt[0] for pt in pattern["points"]] + [n - 1]
-            py = [pt[1] for pt in pattern["points"]] + [pattern["level"]]
-            ax.plot(px, py, color=PAT_COL, lw=1.2, alpha=0.8, zorder=5)
+            xs = [pt[0] for pt in pattern["points"]] + [n - 1]
+            ys = [pt[1] for pt in pattern["points"]] + [pattern["level"]]
+            ax.plot(xs, ys, color=PAT_COL, lw=1.2, alpha=0.8, zorder=5)
             ax.annotate("D", (n - 1, pattern["level"]), textcoords="offset points", xytext=(-10, 0),
                         ha="right", va="center", fontsize=8, color="white", zorder=6)
         for i, price, label in pattern["points"]:
@@ -438,7 +440,7 @@ def draw_chart(ticker, df, title, show_sma=False, pattern=None, n_show=120, extr
         for val, colr, lab in ((pattern["level"], "#42a5f5", "entry"), (pattern["stop"], "#ef5350", "stop"),
                                (pattern["target"], "#66bb6a", "target")):
             ax.axhline(val, color=colr, ls="--", lw=0.9, zorder=4)
-            ax.text(n - 0.3, val, f" {lab} {val:.2f}", color=colr, va="center", fontsize=8,
+            ax.text(n - 0.3, val, f" {lab} {px(val)}", color=colr, va="center", fontsize=8,
                     bbox=dict(facecolor="black", edgecolor="none", pad=1), zorder=7)
             lo_y, hi_y = min(lo_y, val), max(hi_y, val)
     def right_label(val, text, colr):
@@ -447,7 +449,7 @@ def draw_chart(ticker, df, title, show_sma=False, pattern=None, n_show=120, extr
 
     for val, kind in extra.get("levels", []):          # major support / resistance
         ax.axhline(val, color=SR_COL, lw=1.6, zorder=4)
-        right_label(val, f"major {'resistance' if kind == 'res' else 'support'} {val:.2f}", SR_COL)
+        right_label(val, f"major {'resistance' if kind == 'res' else 'support'} {px(val)}", SR_COL)
         lo_y, hi_y = min(lo_y, val), max(hi_y, val)
     if fib:                                            # Fibonacci swing and retracement levels
         fb = _pos(df, fib["b"][0])
@@ -457,7 +459,7 @@ def draw_chart(ticker, df, title, show_sma=False, pattern=None, n_show=120, extr
         for r, val in [(0.0, fib["b"][1])] + sorted(fib["levels"].items()) + [(1.0, fib["a"][1])]:
             ax.plot([x0, n - 1], [val, val], color=FIB_COL, lw=1.0 if r in (0.0, 1.0) else 1.2,
                     alpha=0.6 if r in (0.0, 1.0) else 0.95, zorder=4)
-            right_label(val, f"{r * 100:.1f}%  {val:.2f}", FIB_COL)
+            right_label(val, f"{r * 100:.1f}%  {px(val)}", FIB_COL)
             lo_y, hi_y = min(lo_y, val), max(hi_y, val)
     pad = 0.04 * (hi_y - lo_y or 1)
     ax.set_ylim(lo_y - pad, hi_y + pad)
@@ -471,12 +473,12 @@ def draw_chart(ticker, df, title, show_sma=False, pattern=None, n_show=120, extr
         if tp is not None:                             # fixed take-profit target
             ax.fill_between([x0, x1], e, tp, color="#26a69a", alpha=0.28, lw=0, zorder=4)
             ax.plot([x0, x1], [tp, tp], color="#26a69a", lw=1.3, zorder=5)
-            ax.text(x0 + 0.5, tp, f" Take profit {tp:.2f} ({pct(tp):+.1f}%)", color="white", fontsize=8,
+            ax.text(x0 + 0.5, tp, f" Take profit {px(tp)} ({pct(tp):+.1f}%)", color="white", fontsize=8,
                     va="bottom" if long else "top", zorder=7)
-            entry_txt = f" {side} {trade['qty']} @ {e:.2f}   R:R {abs(tp - e) / abs(e - sl):.1f}"
+            entry_txt = f" {side} {trade['qty']} @ {px(e)}   R:R {abs(tp - e) / abs(e - sl):.1f}"
             top = tp
         else:                                          # trailing exit: no target, sells below the 20-day low
-            entry_txt = f" {side} {trade['qty']} @ {e:.2f}   no fixed target"
+            entry_txt = f" {side} {trade['qty']} @ {px(e)}   no fixed target"
             top = e + (e - sl)
             ax.annotate("", xy=(x1 - 1, top), xytext=(x1 - 1, e), zorder=6,
                         arrowprops=dict(arrowstyle="-|>", color="#26a69a", lw=1.5, ls="--"))
@@ -484,12 +486,12 @@ def draw_chart(ticker, df, title, show_sma=False, pattern=None, n_show=120, extr
             if trade.get("trail"):
                 tr = trade["trail"]
                 ax.plot([start, x1], [tr, tr], color="#ffd54f", lw=1.2, ls="--", zorder=5)
-                ax.text(x0 + 0.5, tr, f" Trend exit below {tr:.2f} (20-day low, 15:45 check)", color="#ffd54f",
+                ax.text(x0 + 0.5, tr, f" Trend exit below {px(tr)} ({trade.get('trail_note', '20-day low, 15:45 check')})", color="#ffd54f",
                         fontsize=8, va="top" if tr < sl else "bottom", zorder=7)
                 lo_y, hi_y = min(lo_y, tr), max(hi_y, tr)
         for val, colr in ((e, "#e0e0e0"), (sl, "#ef5350")):
             ax.plot([x0, x1], [val, val], color=colr, lw=1.3, zorder=5)
-        ax.text(x0 + 0.5, sl, f" Stop loss {sl:.2f} ({pct(sl):+.1f}%)", color="white", fontsize=8,
+        ax.text(x0 + 0.5, sl, f" Stop loss {px(sl)} ({pct(sl):+.1f}%)", color="white", fontsize=8,
                 va="top" if long else "bottom", zorder=7)
         ax.text(x0 + 0.5, e, entry_txt,
                 color="white", fontsize=8, va="center", fontweight="bold",
@@ -609,30 +611,31 @@ def headline(events):
     return ("⚪ MIXED" if dirs else "⚪ WATCH"), "WATCH"
 
 
-def format_alert(ticker, events, ctx, mode):
+def format_alert(ticker, events, ctx, mode, link=None):
     title, _ = headline(events)
     icon = {"LONG": "🟢", "SHORT": "🔴", "WATCH": "⚪"}
-    lines = [f"<b>{title}: {ticker}</b>  ${ctx['price']:.2f}"]
+    lines = [f"<b>{title}: {ticker}</b>  ${px(ctx['price'])}"]
     if any(e["strong"] for e in events):
         lines.append("<i>Trend (200-day MA) + Donchian breakout + Bollinger confirmation</i>")
     lines += [f"{'⭐' if e['strong'] else icon[e['dir']]} {e['text']}" for e in events]
     if ctx["sma200"]:
         side = "above" if ctx["price"] > ctx["sma200"] else "below"
         pct = (ctx["price"] / ctx["sma200"] - 1) * 100
-        lines.append(f"200-day MA {ctx['sma200']:.2f}: price {side} ({pct:+.1f}%)")
+        lines.append(f"200-day MA {px(ctx['sma200'])}: price {side} ({pct:+.1f}%)")
     if ctx["bb"]:
-        lines.append(f"Daily Bollinger {ctx['bb'][0]:.2f} – {ctx['bb'][1]:.2f}")
+        lines.append(f"Daily Bollinger {px(ctx['bb'][0])} – {px(ctx['bb'][1])}")
     if ctx["dc"]:
-        lines.append(f"Daily Donchian {ctx['dc'][0]:.2f} – {ctx['dc'][1]:.2f}")
+        lines.append(f"Daily Donchian {px(ctx['dc'][0])} – {px(ctx['dc'][1])}")
     if ctx.get("major_sup") or ctx.get("major_res"):
-        sup = f"{ctx['major_sup']:.2f}" if ctx.get("major_sup") else "none"
-        res = f"{ctx['major_res']:.2f}" if ctx.get("major_res") else "none"
+        sup = f"{px(ctx['major_sup'])}" if ctx.get("major_sup") else "none"
+        res = f"{px(ctx['major_res'])}" if ctx.get("major_res") else "none"
         lines.append(f"Major support {sup} | major resistance {res}")
     if ctx.get("fib"):
         f = ctx["fib"]
-        zone = " / ".join(f"{v:.2f}" for _, v in sorted(f["levels"].items()))
+        zone = " / ".join(f"{px(v)}" for _, v in sorted(f["levels"].items()))
         lines.append(f"Fibonacci 38.2/50/61.8% of the last {'rise' if f['up'] else 'drop'}: {zone}")
-    lines.append(f'<a href="https://www.tradingview.com/chart/?symbol={ticker.replace("-", ".")}">Open chart</a>')
+    link = link or f"https://www.tradingview.com/chart/?symbol={ticker.replace('-', '.')}"
+    lines.append(f'<a href="{link}">Open chart</a>')
     lines.append("<i>Possible setup only. Check it yourself before trading.</i>")
     return "\n".join(lines)
 
@@ -740,8 +743,8 @@ def main():
                         if pt["stage"] == "breakout":
                             verb = "completed" if pt["name"] in patterns.HARMONICS else "breakout"
                             events.append({"dir": pt["dir"], "code": "pattern", "tf": tf, "strong": False, "key": key,
-                                           "text": f"{pt['name']} {verb} ({tf}): entry {pt['level']:.2f}, "
-                                                   f"stop {pt['stop']:.2f}, target {pt['target']:.2f}"})
+                                           "text": f"{pt['name']} {verb} ({tf}): entry {px(pt['level'])}, "
+                                                   f"stop {px(pt['stop'])}, target {px(pt['target'])}"})
                             pat_hits.append((pt, cframe))
                             keys.append(key)
                         else:
@@ -780,7 +783,7 @@ def main():
             title, _ = headline(item["events"])
             first = next((e for e in item["events"] if e["strong"]), item["events"][0])
             more = f" (+{len(item['events']) - 1} more)" if len(item["events"]) > 1 else ""
-            lines.append(f"{title.split()[0]} <b>{item['t']}</b> ${item['ctx']['price']:.2f}: {first['text']}{more}")
+            lines.append(f"{title.split()[0]} <b>{item['t']}</b> ${px(item['ctx']['price'])}: {first['text']}{more}")
         if send_long(lines):
             for item in rest:
                 mark(item)
@@ -793,12 +796,12 @@ def main():
             p = w["p"]
             if p["dir"] == "BOTH":
                 b1, b2 = p["breaks"]
-                where = f"breaks above {b1['level']:.2f} or below {b2['level']:.2f}"
+                where = f"breaks above {px(b1['level'])} or below {px(b2['level'])}"
             elif p["name"] in patterns.HARMONICS:
-                where = f"completion zone near {p['level']:.2f}"
+                where = f"completion zone near {px(p['level'])}"
             else:
-                where = f"breakout {'above' if p['dir'] == 'LONG' else 'below'} {p['level']:.2f}"
-            lines.append(f"{icon[p['dir']]} <b>{w['t']}</b> ${w['price']:.2f}: {p['name']} ({p['timeframe']}), {where}")
+                where = f"breakout {'above' if p['dir'] == 'LONG' else 'below'} {px(p['level'])}"
+            lines.append(f"{icon[p['dir']]} <b>{w['t']}</b> ${px(w['price'])}: {p['name']} ({p['timeframe']}), {where}")
         if len(watch) > MAX_WATCHLIST:
             lines.append(f"…and {len(watch) - MAX_WATCHLIST} more")
         if send_long(lines):
