@@ -51,7 +51,7 @@ jobs:
           SCAN_MODE: ${{ inputs.mode || '15m' }}
           DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
-          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID_CRYPTO || secrets.TELEGRAM_CHAT_ID }}
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
 
