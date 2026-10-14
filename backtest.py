@@ -44,6 +44,7 @@ MARGIN = 2.0                # buying power = 2 x equity minus what is already in
 BENCHMARK = "SPY"
 BARS_URL = "https://data.alpaca.markets/v2/stocks/{}/bars"
 OUT = "backtest-results"
+CACHE_DIR = "price-cache"           # saved prices (kept between runs by the workflow)
 
 VARIANTS = {                # which signals open trades
     "bot": ("As the bot trades (daily + 15-min)", ("daily", "intraday")),
@@ -104,15 +105,53 @@ def fetch(sym, timeframe, start, end, headers):
     return df
 
 
-def download(tickers, start, end, workers=4):
+def _load(path):
+    try:
+        return pd.read_pickle(path)
+    except Exception:
+        return None
+
+
+def cached_fetch(sym, timeframe, start, end, headers):
+    """Bars from the saved copy, downloading only what is new since the last run.
+    The whole history is downloaded again when the saved copy doesn't reach back far enough, or when
+    Alpaca has re-adjusted old prices (after a split or dividend the last saved candle no longer matches)."""
+    path = os.path.join(CACHE_DIR, f"{sym}_{timeframe}.pkl.gz")
+    old = _load(path)
+    if old is not None and len(old) > 1 and old.attrs.get("from") and pd.Timestamp(old.attrs["from"]) <= pd.Timestamp(start):
+        last = old.index[-1]
+        since = (last.tz_localize(ET) if last.tzinfo is None else last).tz_convert("UTC").to_pydatetime()
+        new = fetch(sym, timeframe, since, end, headers)
+        same = new is not None and last in new.index and \
+            abs(new.at[last, "Close"] / old.at[last, "Close"] - 1) < 2e-4
+        if new is None or same:
+            df = old if new is None else pd.concat([old.iloc[:-1], new])   # the last saved candle may have been unfinished
+            df = df[~df.index.duplicated(keep="last")].sort_index()
+            df.attrs["from"] = old.attrs["from"]
+            df.attrs["fresh"] = False
+            df.to_pickle(path)
+            return df
+    df = fetch(sym, timeframe, start, end, headers)
+    if df is not None:
+        df.attrs["from"] = pd.Timestamp(start).isoformat()
+        df.attrs["fresh"] = True
+        df.to_pickle(path)
+    return df
+
+
+def download(tickers, start, end, workers=10):
+    """Prices for every stock. Saved in price-cache/ (kept by GitHub between runs), so only the first
+    run downloads the whole history; later runs add the days since the previous run."""
     headers = _headers()
+    os.makedirs(CACHE_DIR, exist_ok=True)
     t0 = time.time()
     daily, intraday = {}, {}
+    full = 0
 
     def one(sym):
         try:
-            d = fetch(sym, "1Day", start - dt.timedelta(days=450), end, headers)
-            h = fetch(sym, "15Min", start - dt.timedelta(days=21), end, headers)
+            d = cached_fetch(sym, "1Day", start - dt.timedelta(days=450), end, headers)
+            h = cached_fetch(sym, "15Min", start - dt.timedelta(days=21), end, headers)
             return sym, d, h, None
         except Exception as e:
             return sym, None, None, e
@@ -122,9 +161,14 @@ def download(tickers, start, end, workers=4):
             if err:
                 print(f"{sym}: download failed ({err})", flush=True)
             elif d is not None and h is not None and len(d) > 250 and len(h) > 500:
-                daily[sym], intraday[sym] = d, h
+                cut = pd.Timestamp(start).tz_convert(ET) - pd.Timedelta(days=21)
+                daily[sym] = d[d.index >= (cut - pd.Timedelta(days=430)).tz_localize(None)]
+                intraday[sym] = h[h.index >= cut]
+                full += bool(h.attrs.get("fresh"))
             if n % 10 == 0:
-                print(f"Downloaded {n}/{len(tickers)} ({time.time() - t0:.0f}s)", flush=True)
+                print(f"Prices {n}/{len(tickers)} ({time.time() - t0:.0f}s)", flush=True)
+    print(f"Prices ready in {time.time() - t0:.0f}s: {full} stocks downloaded in full, "
+          f"{len(intraday) - full} from the saved copy + new days", flush=True)
     return daily, intraday
 
 
