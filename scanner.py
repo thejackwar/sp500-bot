@@ -462,25 +462,41 @@ def draw_chart(ticker, df, title, show_sma=False, pattern=None, n_show=120, extr
     pad = 0.04 * (hi_y - lo_y or 1)
     ax.set_ylim(lo_y - pad, hi_y + pad)
     if trade:                                          # TradingView-style long/short position tool
-        e, tp, sl = trade["entry"], trade["target"], trade["stop"]
+        e, tp, sl = trade["entry"], trade.get("target"), trade["stop"]
         long = trade["dir"] == "LONG"
         x0, x1 = n - 1.5, n + 14
-        ax.fill_between([x0, x1], e, tp, color="#26a69a", alpha=0.28, lw=0, zorder=4)
-        ax.fill_between([x0, x1], e, sl, color="#ef5350", alpha=0.28, lw=0, zorder=4)
-        for val, colr in ((tp, "#26a69a"), (e, "#e0e0e0"), (sl, "#ef5350")):
-            ax.plot([x0, x1], [val, val], color=colr, lw=1.3, zorder=5)
         pct = lambda v: (v / e - 1) * 100 * (1 if long else -1)     # + = gain, − = loss
         side = "BUY" if long else "SELL SHORT"
-        ax.text(x0 + 0.5, tp, f" Take profit {tp:.2f} ({pct(tp):+.1f}%)", color="white", fontsize=8,
-                va="bottom" if long else "top", zorder=7)
+        ax.fill_between([x0, x1], e, sl, color="#ef5350", alpha=0.28, lw=0, zorder=4)
+        if tp is not None:                             # fixed take-profit target
+            ax.fill_between([x0, x1], e, tp, color="#26a69a", alpha=0.28, lw=0, zorder=4)
+            ax.plot([x0, x1], [tp, tp], color="#26a69a", lw=1.3, zorder=5)
+            ax.text(x0 + 0.5, tp, f" Take profit {tp:.2f} ({pct(tp):+.1f}%)", color="white", fontsize=8,
+                    va="bottom" if long else "top", zorder=7)
+            entry_txt = f" {side} {trade['qty']} @ {e:.2f}   R:R {abs(tp - e) / abs(e - sl):.1f}"
+            top = tp
+        else:                                          # trailing exit: no target, sells below the 20-day low
+            entry_txt = f" {side} {trade['qty']} @ {e:.2f}   no fixed target"
+            top = e + (e - sl)
+            ax.annotate("", xy=(x1 - 1, top), xytext=(x1 - 1, e), zorder=6,
+                        arrowprops=dict(arrowstyle="-|>", color="#26a69a", lw=1.5, ls="--"))
+            ax.text(x0 + 0.5, top, " Let it run: no target", color="#26a69a", fontsize=8, va="bottom", zorder=7)
+            if trade.get("trail"):
+                tr = trade["trail"]
+                ax.plot([start, x1], [tr, tr], color="#ffd54f", lw=1.2, ls="--", zorder=5)
+                ax.text(x0 + 0.5, tr, f" Trend exit below {tr:.2f} (20-day low, 15:45 check)", color="#ffd54f",
+                        fontsize=8, va="top" if tr < sl else "bottom", zorder=7)
+                lo_y, hi_y = min(lo_y, tr), max(hi_y, tr)
+        for val, colr in ((e, "#e0e0e0"), (sl, "#ef5350")):
+            ax.plot([x0, x1], [val, val], color=colr, lw=1.3, zorder=5)
         ax.text(x0 + 0.5, sl, f" Stop loss {sl:.2f} ({pct(sl):+.1f}%)", color="white", fontsize=8,
                 va="top" if long else "bottom", zorder=7)
-        ax.text(x0 + 0.5, e, f" {side} {trade['qty']} @ {e:.2f}   R:R {abs(tp - e) / abs(e - sl):.1f}",
+        ax.text(x0 + 0.5, e, entry_txt,
                 color="white", fontsize=8, va="center", fontweight="bold",
                 bbox=dict(facecolor="#1e222d", edgecolor="#555", pad=2), zorder=8)
         ax.annotate("", xy=(n - 1, e), xytext=(n - 1, e - (1 if long else -1) * 0.06 * (hi_y - lo_y or 1)),
                     arrowprops=dict(arrowstyle="-|>", color="#26a69a" if long else "#ef5350", lw=2), zorder=8)
-        lo_y, hi_y = min(lo_y, tp, sl), max(hi_y, tp, sl)
+        lo_y, hi_y = min(lo_y, top, sl), max(hi_y, top, sl)
         why = ["Why this trade:"] + [textwrap.shorten(r, 78, placeholder="…") for r in trade.get("why", [])]
         ax.text(0.01, 0.98, "\n".join(why[:1] + [f"• {w}" for w in why[1:]]), transform=ax.transAxes,
                 va="top", ha="left", fontsize=8, color="#e0e0e0", linespacing=1.5, zorder=9,
@@ -790,7 +806,7 @@ def main():
                 state[w["key"]] = now.isoformat()
 
     # 4) paper trading: STRONG signals become bracket orders in the Alpaca paper account
-    for line in trader.run(found, state, send_telegram, test_mode=force, chart_fn=trade_chart):
+    for line in trader.run(found, state, send_telegram, test_mode=force, chart_fn=trade_chart, daily=daily):
         print(line, flush=True)
 
     save_state(state, now)

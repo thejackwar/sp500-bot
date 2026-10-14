@@ -1,9 +1,12 @@
 """
-Paper trading with Alpaca. Turns STRONG (⭐) signals into bracket orders in your PAPER account:
+Paper trading with Alpaca. Turns STRONG (⭐) signals into orders in your PAPER account:
     entry  = market order (whole shares)
     stop   = entry -/+ STOP_ATR x daily ATR
-    target = entry +/- REWARD_RISK x the stop distance (2:1 by default)
-The stop and target are sent together with the entry ("bracket"), so Alpaca closes the trade by
+    exit   = EXIT_MODE "trail" (default, the best version in the backtest): no fixed target; at the
+             last check of the day (~15:45 New York) the bot sells any position whose price is below
+             its 20-day low, so winners can run as long as the trend lasts
+             EXIT_MODE "target": take profit at REWARD_RISK x the stop distance (2:1)
+The stop (and target) are sent together with the entry, so Alpaca closes the trade at the stop by
 itself even when the bot isn't running. Orders stay active until filled (good-till-cancelled).
 
 Position size: each trade risks RISK_PER_TRADE of the account equity between entry and stop,
@@ -16,17 +19,22 @@ import html
 import re
 import math
 import os
+import time
 
+import pandas as pd
 import requests
 
 import pine
 
 TRADING_ENABLED = True       # False = alerts only, no paper trades
 SEND_PINE_SCRIPT = True      # also send a TradingView Pine script that draws the trade
-ALLOW_SHORTS = True          # also sell short on STRONG SHORT signals
+ALLOW_SHORTS = False         # sell short on STRONG SHORT signals (the backtest: shorts lost money)
 RISK_PER_TRADE = 0.01        # risk 1% of equity per trade
 STOP_ATR = 2.0               # stop-loss distance = 2 x daily ATR
-REWARD_RISK = 2.0            # target = 2 x the stop distance
+EXIT_MODE = "trail"          # "trail" = sell when the price falls below the 20-day low; "target" = 2:1 target
+TRAIL_DAYS = 20              # trailing exit: the lowest low of the last 20 days
+EXIT_CHECK_MINUTES = 20      # trailing exits are checked by the scan in the last 20 minutes before the close
+REWARD_RISK = 2.0            # target = 2 x the stop distance (EXIT_MODE "target" only)
 MAX_POSITION_PCT = 0.20      # never put more than 20% of equity in one stock
 MAX_OPEN_POSITIONS = 10      # don't open new trades beyond this
 MAX_NEW_PER_RUN = 3          # at most 3 new trades per check
@@ -45,6 +53,12 @@ class Alpaca:
         r = requests.get(f"{base}{path}", headers=self.h, params=params, timeout=20)
         r.raise_for_status()
         return r.json()
+
+    def delete(self, path):
+        r = requests.delete(f"{PAPER_URL}{path}", headers=self.h, timeout=20)
+        if not r.ok and r.status_code != 404:
+            raise RuntimeError(f"{r.status_code} {r.text[:300]}")
+        return r.json() if r.content else {}
 
     def post(self, path, body):
         r = requests.post(f"{PAPER_URL}{path}", headers=self.h, json=body, timeout=20)
@@ -73,7 +87,7 @@ def plan_trade(direction, price, atr, equity, buying_power):
         return None
     sign = 1 if direction == "LONG" else -1
     stop = _r2(price - sign * stop_dist)
-    target = _r2(price + sign * REWARD_RISK * stop_dist)
+    target = _r2(price + sign * REWARD_RISK * stop_dist) if EXIT_MODE == "target" else None
     return {"qty": qty, "stop": stop, "target": target, "risk": qty * stop_dist}
 
 
@@ -103,11 +117,27 @@ def tradingview_link(sym, tf):
     return f"https://www.tradingview.com/chart/?symbol={sym}&interval={interval}"
 
 
+def twenty_day_low(daily, today):
+    """Lowest low of the last TRAIL_DAYS completed days (today's candle left out)."""
+    if daily is None or not len(daily):
+        return None
+    idx = daily.index.tz_convert("America/New_York") if daily.index.tz is not None else daily.index
+    past = daily[pd.Index(idx.date) < today]
+    return float(past["Low"].tail(TRAIL_DAYS).min()) if len(past) >= TRAIL_DAYS else None
+
+
+def exit_line(plan, price, sign):
+    if plan.get("target") is not None:
+        reward = abs(plan["target"] - price) * plan["qty"]
+        return f"🎯 Take profit {plan['target']:.2f} ({sign * (plan['target'] / price - 1) * 100:+.1f}%, +${reward:,.0f})"
+    trail = f" (now {plan['trail']:.2f})" if plan.get("trail") else ""
+    return f"🎯 No fixed target: sells when the price is below the {TRAIL_DAYS}-day low{trail} at the 15:45 check"
+
+
 def trade_message(head, sym, direction, price, plan, why, tf):
     sign = 1 if direction == "LONG" else -1
-    reward = abs(plan["target"] - price) * plan["qty"]
     lines = [f"{head}: <b>{'BUY' if direction == 'LONG' else 'SELL SHORT'} {plan['qty']} {sym}</b> @ ~{price:.2f}",
-             f"🎯 Take profit {plan['target']:.2f} ({sign * (plan['target'] / price - 1) * 100:+.1f}%, +${reward:,.0f})",
+             exit_line(plan, price, sign),
              f"🛑 Stop loss {plan['stop']:.2f} ({sign * (plan['stop'] / price - 1) * 100:+.1f}%, −${plan['risk']:,.0f} "
              f"= {RISK_PER_TRADE:.0%} of equity)",
              "<b>Why:</b>"] + [f"• {r}" for r in why]
@@ -148,6 +178,10 @@ def check_closed(api, book, send):
                 if leg["status"] == "filled":
                     exit_px = float(leg["filled_avg_price"])
                     how = "🎯 Target hit" if leg["type"] == "limit" else "🛑 Stop hit"
+            if o.get("order_class") == "oto" and exit_px is None and o.get("legs"):
+                leg = o["legs"][0]
+                if leg.get("filled_avg_price"):
+                    exit_px, how = float(leg["filled_avg_price"]), "🛑 Stop hit"
             entry = float(o["filled_avg_price"]) if o.get("filled_avg_price") else t["entry"]
         except Exception:
             entry = t["entry"]
@@ -165,7 +199,57 @@ def check_closed(api, book, send):
         del book[sym]
 
 
-def run(found, state, send, test_mode=False, chart_fn=None):
+def trend_exits(api, book, daily, send, test_mode=False):
+    """Trailing exit: sell long positions whose price is below their 20-day low.
+    Run by the last scan of the day. daily: {ticker: daily candles} from the scanner."""
+    log = []
+    today = pd.Timestamp.now(tz="America/New_York").date()
+    try:
+        positions = api.get("/positions")
+    except Exception as e:
+        return [f"Trend exits: couldn't read positions ({e})"]
+    for p in positions:
+        sym, qty = p["symbol"], int(float(p["qty"]))
+        if qty <= 0:
+            continue                                    # shorts keep their own stop/target
+        low20 = twenty_day_low((daily or {}).get(sym.replace(".", "-")), today)
+        if low20 is None:
+            log.append(f"{sym}: no daily prices for the trend exit check")
+            continue
+        try:
+            price = api.live_price(sym)
+        except Exception:
+            price = float(p.get("current_price") or 0)
+        if not price or price >= low20:
+            log.append(f"{sym}: trend intact ({price:.2f} vs {TRAIL_DAYS}-day low {low20:.2f})")
+            continue
+        entry = float(p["avg_entry_price"])
+        pnl = (price - entry) * qty
+        text = (f"{TRAIL_DAYS}-day low {low20:.2f} broken: {sym} {qty} @ {entry:.2f} → ~{price:.2f}  "
+                f"<b>{'+' if pnl >= 0 else '−'}${abs(pnl):,.2f}</b>")
+        if test_mode:
+            send(f"🧪 Would sell (trend exit): {text}")
+            log.append(f"{sym}: trend exit dry run")
+            continue
+        try:
+            for o in api.get("/orders", status="open", symbols=sym, limit=50):
+                api.delete(f"/orders/{o['id']}")         # the stop order holds the shares: cancel it first
+            for _ in range(10):
+                if not api.get("/orders", status="open", symbols=sym, limit=50):
+                    break
+                time.sleep(1)
+            api.delete(f"/positions/{sym}")
+            if sym in book:
+                book[sym]["status"] = "closed"
+            send(f"📉 Trend exit, sold: {text}")
+            log.append(f"{sym}: trend exit, sold {qty} @ ~{price:.2f}")
+        except Exception as e:
+            send(f"⚠️ Trend exit for {sym} failed: {e}")
+            log.append(f"{sym}: trend exit failed: {e}")
+    return log
+
+
+def run(found, state, send, test_mode=False, chart_fn=None, daily=None):
     """found: the scanner's list of stocks with signals. state: persisted dict (book under '_trades').
     send(text, image=None): sends a Telegram message. chart_fn(item, trade) -> PNG of the trade.
     Returns a list of log lines."""
@@ -184,6 +268,13 @@ def run(found, state, send, test_mode=False, chart_fn=None):
     equity, bp = float(acct["equity"]), float(acct["buying_power"])
     log.append(f"Paper account: equity ${equity:,.0f}, buying power ${bp:,.0f}, market {'open' if clock['is_open'] else 'closed'}")
     check_closed(api, book, send)
+    if EXIT_MODE == "trail":
+        try:
+            close_in = (pd.Timestamp(clock["next_close"]) - pd.Timestamp(clock["timestamp"])).total_seconds() / 60
+        except Exception:
+            close_in = 999
+        if test_mode or (clock["is_open"] and close_in <= EXIT_CHECK_MINUTES):
+            log += trend_exits(api, book, daily, send, test_mode)
 
     candidates = [it for it in found if _strong_direction(it)]
     candidates = [it for it in candidates if ALLOW_SHORTS or _strong_direction(it) == "LONG"]
@@ -222,12 +313,14 @@ def run(found, state, send, test_mode=False, chart_fn=None):
                 price = float(it["ctx"]["price"])
             atr = float(it["sd"]["ATR"].iat[-1])
             plan = plan_trade(direction, price, atr, equity, bp)
+            if plan and EXIT_MODE == "trail":
+                plan["trail"] = twenty_day_low(it["sd"], pd.Timestamp(it["sd"].index[-1]).date())
             if not plan:
                 log.append(f"{sym}: position would be under 1 share, skipped")
                 continue
             side = "buy" if direction == "LONG" else "sell"
             desc = (f"{'BUY' if side == 'buy' else 'SELL SHORT'} {plan['qty']} {sym} @ ~{price:.2f}, "
-                    f"stop {plan['stop']:.2f}, target {plan['target']:.2f} "
+                    f"stop {plan['stop']:.2f}, " + (f"target {plan['target']:.2f} " if plan["target"] else "trend exit ") +
                     f"(risk ${plan['risk']:,.0f} = {RISK_PER_TRADE:.0%} of equity)")
             try:                                     # explaining the trade must never block it
                 tf, why = trade_timeframe(it), reasons(it, direction)
@@ -268,12 +361,13 @@ def run(found, state, send, test_mode=False, chart_fn=None):
                 notify(f"🧪 NOT placed ({reason}), it would be")
                 log.append(f"{sym}: dry run ({reason}): {desc}")
                 continue
-            order = api.post("/orders", {
-                "symbol": sym, "qty": str(plan["qty"]), "side": side, "type": "market",
-                "time_in_force": "gtc", "order_class": "bracket",
-                "take_profit": {"limit_price": f"{plan['target']:.2f}"},
-                "stop_loss": {"stop_price": f"{plan['stop']:.2f}"},
-            })
+            body = {"symbol": sym, "qty": str(plan["qty"]), "side": side, "type": "market",
+                    "time_in_force": "gtc", "stop_loss": {"stop_price": f"{plan['stop']:.2f}"}}
+            if plan["target"] is not None:             # bracket: stop + take profit
+                body.update(order_class="bracket", take_profit={"limit_price": f"{plan['target']:.2f}"})
+            else:                                      # stop only; the trend exit sells the rest
+                body["order_class"] = "oto"
+            order = api.post("/orders", body)
             book[sym] = {"order_id": order["id"], "side": direction, "qty": plan["qty"], "entry": price,
                          "stop": plan["stop"], "target": plan["target"], "status": "open",
                          "filled": False, "opened": dt.datetime.utcnow().isoformat()}

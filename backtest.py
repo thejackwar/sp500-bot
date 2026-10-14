@@ -41,6 +41,7 @@ ET = ZoneInfo("America/New_York")
 START_EQUITY = 100_000      # Alpaca paper accounts start with $100,000
 SLIPPAGE = 0.0002           # 0.02% worse price on market fills (entries and stops)
 MARGIN = 2.0                # buying power = 2 x equity minus what is already invested
+MARGIN_RATE = 0.065         # yearly interest on borrowed money (when more than 100% is invested)
 BENCHMARK = "SPY"
 BARS_URL = "https://data.alpaca.markets/v2/stocks/{}/bars"
 OUT = "backtest-results"
@@ -48,8 +49,8 @@ CACHE_DIR = "price-cache"           # saved prices (kept between runs by the wor
 
 VARIANTS = {                # each one changes the bot's rules (see simulate() for the options)
     "both":    ("1. Longs + shorts (old rules)", {"shorts": True}),
-    "long":    ("2. Longs only (bot now)", {"shorts": False}),
-    "trail":   ("3. Longs only + trailing exit", {"shorts": False, "exit": "trail"}),
+    "long":    ("2. Longs only, 2:1 target", {"shorts": False}),
+    "trail":   ("3. Longs only + trailing exit (bot now)", {"shorts": False, "exit": "trail"}),
     "long1x":  ("4. Longs only, no leverage", {"shorts": False, "margin": 1.0}),
     "trail1x": ("5. Longs + trailing exit, no leverage", {"shorts": False, "exit": "trail", "margin": 1.0}),
 }
@@ -313,6 +314,7 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
     last_of_day = np.r_[day[1:] != day[:-1], True]
     cash, pos, trades, curve, traded_on = float(START_EQUITY), {}, [], [], {}
     skipped = 0
+    interest, prev_day = 0.0, None
 
     def close(col, px, s, why):
         nonlocal cash
@@ -362,6 +364,8 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
                 if not plan:
                     continue
                 sign = 1 if r.dir == "LONG" else -1
+                if plan["target"] is None:              # trader.py is in trailing mode: add the 2:1 target here
+                    plan["target"] = trader._r2(price + sign * trader.REWARD_RISK * trader.STOP_ATR * r.atr)
                 fill = price * (1 + sign * SLIPPAGE)
                 cash -= sign * plan["qty"] * fill
                 pos[col] = {"dir": r.dir, "kind": r.kind, "slot": s, "fill": fill, **plan}
@@ -395,6 +399,12 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
                 elif not trail and ll <= p["target"]:
                     close(col, p["target"], s, "target")
         if last_of_day[s]:
+            if cash < 0:                               # borrowed money pays interest every calendar day
+                n_days = (day[s] - prev_day).days if prev_day is not None else 1
+                fee = -cash * MARGIN_RATE * n_days / 360
+                cash -= fee
+                interest += fee
+            prev_day = day[s]
             value = sum((1 if p["dir"] == "LONG" else -1) * p["qty"] * Cf[s, c] for c, p in pos.items())
             gross = sum(p["qty"] * Cf[s, c] for c, p in pos.items())
             curve.append((day[s], cash + value, len(pos), gross / (cash + value)))
@@ -405,7 +415,7 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
     eq = pd.DataFrame(curve, columns=["date", "equity", "positions", "exposure"]).set_index("date")
     cols = ["symbol", "direction", "signal", "entry_time", "exit_time", "entry", "stop", "target", "exit",
             "qty", "result", "pnl", "R", "days_held"]
-    return pd.DataFrame(trades, columns=cols), eq, {"skipped": skipped, "still_open": still_open}
+    return pd.DataFrame(trades, columns=cols), eq, {"skipped": skipped, "still_open": still_open, "interest": interest}
 
 
 # ---------------------------------------------------------------- statistics
@@ -473,14 +483,15 @@ def summary_text(res, bench, start, end, n_stocks):
              f"All versions: ⭐ STRONG signals (daily + 15-min), stop 2×ATR, risk "
              f"{trader.RISK_PER_TRADE:.0%}/trade, max {trader.MAX_OPEN_POSITIONS} positions of max "
              f"{trader.MAX_POSITION_PCT:.0%} each; target 2:1 unless trailing. 'Invested' = average money "
-             f"in the market as % of the account (SPY = 100%)", ""]
+             f"in the market as % of the account (SPY = 100%). Borrowed money pays {MARGIN_RATE:.1%}/yr interest", ""]
     for key, (name, _) in VARIANTS.items():
         s = res[key]["stats"]
         lines += [f"<b>{name}</b>",
                   f"{pct(s['return'])} ({pct(s['cagr'])}/yr) · max drop {pct(s['max_dd'])} · "
                   f"profit factor {s['pf']:.2f}",
                   f"{s['trades']} trades, win {s['win_rate']:.0%}, avg {s['avg_R']:+.2f}R, "
-                  f"worst streak {s['streak']}, hold {s['days_held']:.0f}d, invested {s['exposure']:.0%}", ""]
+                  f"worst streak {s['streak']}, hold {s['days_held']:.0f}d, invested {s['exposure']:.0%}"
+                  + (f", interest paid ${s['interest']:,.0f}" if s.get("interest") else ""), ""]
     if bench is not None and len(bench) > 1:
         b = bench
         b_years = max((b.index[-1] - b.index[0]).days / 365.25, 1e-9)
@@ -614,7 +625,7 @@ def run(daily, intraday, start, end, spy=None):
     res = {}
     for key, (name, cfg) in VARIANTS.items():
         trades, eq, info = simulate(sig, O, H, L, C, slots, syms, cfg, extra)
-        res[key] = {"trades": trades, "equity": eq, "info": info, "stats": stats(trades, eq)}
+        res[key] = {"trades": trades, "equity": eq, "info": info, "stats": {**stats(trades, eq), "interest": info["interest"]}}
         print(f"{name}: {res[key]['stats']['trades']} trades, return {pct(res[key]['stats']['return'])}, "
               f"{info['skipped']} signals skipped (limits)", flush=True)
     return res, sig

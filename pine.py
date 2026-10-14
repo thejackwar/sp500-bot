@@ -34,15 +34,28 @@ def trade_script(sym, trade, now=None, settings=None):
     settings = settings or ({"bb_std": 2.0, "donchian": 20} if tf == "daily" else {"bb_std": 2.5, "donchian": 55})
     t0 = entry_candle(now, tf)
     long = trade["dir"] == "LONG"
-    e, tp, sl = trade["entry"], trade["target"], trade["stop"]
+    e, tp, sl = trade["entry"], trade.get("target"), trade["stop"]
     sign = 1 if long else -1
-    tp_pct, sl_pct = sign * (tp / e - 1) * 100, sign * (sl / e - 1) * 100
+    sl_pct = sign * (sl / e - 1) * 100
+    trailing = tp is None                      # no fixed target: sells below the 20-day low
+    if trailing:
+        tp = e + (e - sl)                      # only to size the drawing
+    tp_pct = sign * (tp / e - 1) * 100
     rr = abs(tp - e) / abs(e - sl)
+    if trailing:
+        tp_text = "No fixed target: sells below the 20-day low (15:45 check)"
+        rr_text = "trend exit"
+    else:
+        tp_text = f"Take profit {tp:.2f} ({tp_pct:+.1f}%)"
+        rr_text = f"R:R {rr:.1f}"
     side = "BUY" if long else "SELL SHORT"
     why = [w if len(w) <= 90 else w[:89] + "…" for w in trade.get("why", [])][:6]
     tf_name = "1D" if tf == "daily" else "15m"
     rows = "\n".join(f"    table.cell(t, 0, {i + 1}, {_s('• ' + w)}, text_color = color.white, "
                      f"text_halign = text.align_left, text_size = size.small)" for i, w in enumerate(why))
+    exit_plot = ('exit20  = request.security(syminfo.tickerid, "D", ta.lowest(low, 20)[1], lookahead = barmerge.lookahead_on)\n'
+                 'plot(exit20, "Trend exit: 20-day low", color = color.yellow, linewidth = 2, '
+                 'style = plot.style_stepline)\n') if trailing else ""
     return f'''//@version=6
 indicator({_s(f"Bot trade: {side} {sym}")}, overlay = true, max_boxes_count = 10, max_labels_count = 10, max_lines_count = 10)
 // Paper trade from the S&P 100 bot, placed {now.astimezone(ET):%Y-%m-%d %H:%M} New York. Best viewed on the {tf_name} chart of {sym}.
@@ -59,18 +72,18 @@ pLo = plot(basis - dev, "Bollinger lower", color = color.new(color.blue, 40))
 fill(pUp, pLo, color = color.new(color.blue, 92))
 plot(dcHigh, "Donchian high", color = color.new(color.green, 20), style = plot.style_stepline)
 plot(dcLow, "Donchian low", color = color.new(color.red, 20), style = plot.style_stepline)
-
+{exit_plot}
 // The trade (only drawn on the right stock's chart)
 rightStock = syminfo.ticker == {_s(sym)}
 entryTime = timestamp("America/New_York", {t0.year}, {t0.month}, {t0.day}, {t0.hour}, {t0.minute})
 rightTime = entryTime + 30 * timeframe.in_seconds() * 1000
 entry  = {e:.2f}
 stop   = {sl:.2f}
-target = {tp:.2f}
+target = {tp:.2f}{"  // no fixed target: drawn 1x the risk above the entry" if trailing else ""}
 
 if barstate.isfirst and rightStock
     box.new(entryTime, target, rightTime, entry, xloc = xloc.bar_time, border_color = color.teal,
-         bgcolor = color.new(color.teal, 75), text = {_s(f"Take profit {tp:.2f} ({tp_pct:+.1f}%)")},
+         bgcolor = color.new(color.teal, {92 if trailing else 75}), text = {_s(tp_text)},
          text_color = color.white, text_size = size.small, text_halign = text.align_left,
          text_valign = {"text.align_top" if long else "text.align_bottom"})
     box.new(entryTime, entry, rightTime, stop, xloc = xloc.bar_time, border_color = color.red,
@@ -78,7 +91,7 @@ if barstate.isfirst and rightStock
          text_color = color.white, text_size = size.small, text_halign = text.align_left,
          text_valign = {"text.align_bottom" if long else "text.align_top"})
     line.new(entryTime, entry, rightTime, entry, xloc = xloc.bar_time, color = color.white, width = 2)
-    label.new(entryTime, entry, {_s(f"{side} {trade['qty']} @ {e:.2f}  R:R {rr:.1f}")}, xloc = xloc.bar_time,
+    label.new(entryTime, entry, {_s(f"{side} {trade['qty']} @ {e:.2f}  {rr_text}")}, xloc = xloc.bar_time,
          style = {"label.style_label_up" if long else "label.style_label_down"},
          color = {"color.teal" if long else "color.red"}, textcolor = color.white, size = size.normal)
 
