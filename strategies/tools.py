@@ -75,3 +75,29 @@ def market_up(d, n=None):
 def change(x, n):
     """Return over the last n days (0.10 = +10%)."""
     return x / x.shift(n) - 1
+
+
+def adx(d, n=14):
+    """Average Directional Index (0-100), Wilder's smoothing: how strong the trend is, up or down.
+    Above ~25 = a real trend, below ~20 = a sideways market."""
+    up, down = d["High"].diff(), -d["Low"].diff()
+    plus_dm = up.where((up > down) & (up > 0), 0.0)
+    minus_dm = down.where((down > up) & (down > 0), 0.0)
+    a = atr(d, n)
+    plus_di = 100 * plus_dm.ewm(alpha=1 / n, adjust=False).mean() / a
+    minus_di = 100 * minus_dm.ewm(alpha=1 / n, adjust=False).mean() / a
+    dx = 100 * (plus_di - minus_di).abs() / (plus_di + minus_di)
+    return dx.ewm(alpha=1 / n, adjust=False).mean()
+
+
+def bot_long(d):
+    """The bot's STRONG LONG on the daily chart (rules.py): close above the 200-day MA, a new
+    20-day high (Donchian), and Bollinger confirms (close above the upper band, or a squeeze =
+    bands narrowest in ~6 months, within the last 10 days). Daily chart only: the live bot also
+    checks 15-min/hourly candles, which this leaves out."""
+    c = d["Close"]
+    mid, upper, lower = bollinger(c, 20, 2.0)
+    width = (upper - lower) / mid
+    squeeze = width <= width.rolling(125).min().shift(1)
+    confirms = (c > upper) | squeeze.rolling(11, min_periods=1).max().astype(bool)
+    return (c > sma(c, 200)) & crossed_above(c, highest(d["High"], 20)) & confirms
