@@ -15,6 +15,7 @@ message with a chart whenever a signal appears. ⭐ Strong LONG signals are also
 | `.github/workflows/scan.yml` | The schedule that runs it on GitHub for free |
 | `backtest.py` + `.github/workflows/backtest.yml` | Tests the strategy on past years (run by hand) |
 | `strategies/` | Other strategies to compare in the backtest (one file each, `_template.py` to start) |
+| `pattern_trader.py` + `.github/workflows/pattern-trade.yml` | Paper trades your selected chart patterns in a second Alpaca paper account (section *Pattern paper trader*) |
 | `crypto_scanner.py` + `.github/workflows/crypto-scan.yml` | The same strategy on the top 10 cryptocurrencies, run by hand (section *Crypto*) |
 | `crypto.py` | Picks the top 10 coins and downloads their prices |
 | `crypto_trader.py` | Crypto paper trading with Alpaca (same rules, adapted to crypto) |
@@ -156,9 +157,22 @@ Just the chart patterns above, without the bot's strategy alerts, and **no trade
 Actions → **Backtest** → Run workflow → *Market*: **stocks** or **crypto**, *What to compare*: **patterns** → Run.
 - Replays the **daily** chart day by day: a pattern that breaks out on a day's close (same rules as the live alerts, incl. the 1.3× volume check) is traded at the next day's open, with **the pattern's own stop and target** (the measured move), sold after 60 trading days if neither is hit. Same money rules as the bot (1% risk per trade, max 20% per position, no borrowing).
 - **Versions:** (1) up patterns only, (2) up + down patterns (shorts; test only for crypto), (3) up patterns only while SPY/BTC is in an up-trend, (4) up patterns with a trailing exit (20-day low) instead of the target. Compared with buying and holding SPY/BTC.
+- **Version 7** = the pattern paper trader's exact rules: your selected **up** patterns, ABCD sold at its target, the others with the trailing exit, no 60-day limit (stocks only).
 - **Versions 5 and 6** trade only your selected patterns, with the pattern's target (5) or the trailing exit (6). They appear when the selection for that market isn't empty.
 - **Pattern scorecard** (🧩 message + `patterns.csv`): every breakout traded on its own, without the position limits, per pattern and direction (↑/↓): number of trades, win rate, **avgR** with the pattern's stop and target, how often the target was reached, and **trail** = average R with the pattern's stop and a trailing exit (sold on a close below the 20-day low, no target). R = profit in units of the risk; above 0 = made money on average. Under ~20 trades a pattern's figures are mostly luck.
 - **Split check** (✂️ message): picks the patterns that did well on the **first half** of the period only (15+ trades, average R above 0), then shows how they did on the **second half**, which they weren't picked on, next to all patterns. If they still beat "all patterns" in the second half, the pick is probably real; if not, it was luck. Below it, a table of every pattern's results in each half.
+
+### Pattern paper trader (`pattern_trader.py`)
+Trades your selected stock patterns in a **separate Alpaca paper account**, so its results never mix with the breakout bot's (each has its own $100,000).
+- **Setup (once):** in Alpaca, open a second paper account and generate its API keys. In GitHub add two repository secrets: `ALPACA_PATTERN_KEY_ID` and `ALPACA_PATTERN_SECRET_KEY`. Without them the pattern trader does nothing. Optional: `TELEGRAM_CHAT_ID_PATTERNS` to get its messages in a separate chat (otherwise they go to the stock chat, marked 🧩).
+- **When:** inside the normal S&P 500 scan (the timer), so it needs no extra setup: the **first scan after 9:30 New York** places the day's trades, and a scan in the **last 20 minutes before the close** checks the trend exits. Each happens once a day.
+- **Signal:** a selected **up** pattern (`SELECTED["stocks"]` in `patterns.py`) broke out on the daily chart at **yesterday's close**, with the same rules as the alerts (incl. 1.3× volume). Bought at today's open with a market order. Each pattern is traded once.
+- **Stop:** the pattern's own stop, sent with the entry (Alpaca keeps it active, good-till-cancelled).
+- **Exit per pattern** (`EXIT_BY_PATTERN` at the top of `pattern_trader.py`): **ABCD** sells at the pattern's target (bracket order). The others have **no target** and are sold when the price is below the **20-day low** in the last 20 minutes before the close (if that check was missed, at the next open when yesterday's close was below it).
+- **Money:** 1% of equity at risk per trade, max 20% of equity per stock, max 10 positions, max 3 new trades a day, no borrowing. Longs only.
+- **Messages (🧩):** each trade with its pattern chart, stop and exit rule; stops, targets and trend exits with the profit or loss; one summary per morning.
+- **Try it by hand:** Actions → **Pattern trader** → Run workflow. *Dry run* (on by default) shows what it would buy right now without placing orders. With dry run off it places today's trades if the morning run was missed.
+- Backtest version 7 uses exactly these rules.
 
 ### Your pattern selection
 The list `SELECTED` at the top of `patterns.py` decides which patterns the **patterns-only scans** alert on and which ones backtest versions 5-6 trade, separately for stocks and crypto:

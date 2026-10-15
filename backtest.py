@@ -440,7 +440,7 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
                 time_ex = fd & (di[start:end] - di[s] >= max_days) if max_days else np.zeros(len(idx), bool)
                 c1 = sig_ex | time_ex
                 reason1 = (sig_ex, time_ex)
-            if trail_n:
+            if trail_n and tgt is None:                # trailing exit (positions without a target)
                 prev_c = CT[col, np.maximum(idx - 1, 0)]
                 level = (lows if long_ else highs)[di[start:end], col]
                 broke = prev_c < level if long_ else prev_c > level
@@ -1132,6 +1132,15 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
                 ("p_sel_trail", "6. Selected patterns: pattern's stop + trailing exit", "Sel Trl", sel,
                  {**pv, "shorts": True, "pattern_target": False, "trail_days": 20, "max_days": None}),
             ]
+            if MARKET == "stocks":                     # the pattern paper trader's exact rules
+                import pattern_trader
+                mixed = sel[sel["dl"]].copy()
+                trail_rows = [pattern_trader.exit_mode(lbl[:-2]) != "target" for lbl in mixed["pattern"]]
+                mixed.loc[np.array(trail_rows, bool), "target"] = np.nan
+                kinds = ", ".join(f"{k} target" for k in pattern_trader.EXIT_BY_PATTERN)
+                jobs.append(("p_mixed", f"7. Selected up patterns, mixed exits ({kinds}, the rest trailing) = "
+                             "pattern paper trader", "Mixed", mixed,
+                             {**pv, "shorts": False, "pattern_target": True, "trail_days": 20, "max_days": None}))
     else:
         for key, (name, cfg) in VARIANTS.items():
             jobs.append((key, name, SHORT[key], sig, cfg))
@@ -1163,7 +1172,7 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
             per.append({"trades": trades, "equity": eq, "info": info, "stats": st, "spy_cagr": spy_cagr,
                         "start": days[d0]})
         agg = aggregate(per)
-        res[key] = {"name": name, "short": short, "main": key in ("bot", "trail1x", "p_long") or (T is not trader and key == "trail"), "runs": per, "agg": agg,
+        res[key] = {"name": name, "short": short, "main": key in ("bot", "trail1x", "p_long", "p_mixed") or (T is not trader and key == "trail"), "runs": per, "agg": agg,
                     **per[0]}
         print(f"{name}: median {pct(agg['cagr'])}/yr (runs {pct(agg['cagr_min'])} to {pct(agg['cagr_max'])}), "
               f"beat {BENCHMARK} in {agg['beat']}/{agg['spy_runs']}, ~{agg['trades']:.0f} trades", flush=True)

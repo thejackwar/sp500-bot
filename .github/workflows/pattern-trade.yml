@@ -1,0 +1,57 @@
+name: Pattern trader
+
+# Runs by itself once per market day inside the S&P 500 scan (first scan after 9:30 New York).
+# Use this by hand to see what it would do now (dry run), or to force today's run if it was missed.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Dry run: show what it would trade, place no orders"
+        type: boolean
+        default: true
+
+# never at the same time as a scan (they share the pattern-trader memory)
+concurrency:
+  group: scan
+  cancel-in-progress: false
+
+jobs:
+  trade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Restore pattern-trader memory
+        uses: actions/cache/restore@v4
+        with:
+          path: pattern_trader_state.json
+          key: pattern-trader-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: pattern-trader-
+
+      - name: Pattern trader
+        run: python pattern_trader.py
+        env:
+          PYTHONUNBUFFERED: "1"
+          PATTERN_FORCE: "1"
+          DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID_PATTERNS || secrets.TELEGRAM_CHAT_ID }}
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          ALPACA_PATTERN_KEY_ID: ${{ secrets.ALPACA_PATTERN_KEY_ID }}
+          ALPACA_PATTERN_SECRET_KEY: ${{ secrets.ALPACA_PATTERN_SECRET_KEY }}
+
+      - name: Save pattern-trader memory
+        if: always() && hashFiles('pattern_trader_state.json') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: pattern_trader_state.json
+          key: pattern-trader-${{ github.run_id }}-${{ github.run_attempt }}

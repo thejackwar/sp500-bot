@@ -96,3 +96,33 @@ jobs:
         with:
           path: ${{ env.STATE_FILE }}
           key: ${{ env.STATE_KEY }}-${{ github.run_id }}-${{ github.run_attempt }}
+
+      # Pattern paper trader (pattern_trader.py, its own Alpaca paper account): runs once per market day,
+      # in the first scan after 9:30 New York. Does nothing until the ALPACA_PATTERN_* secrets exist.
+      - name: Restore pattern-trader memory
+        if: always() && steps.window.outputs.run == 'true' && env.STRATEGY == 'bot'
+        uses: actions/cache/restore@v4
+        with:
+          path: pattern_trader_state.json
+          key: pattern-trader-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: pattern-trader-
+
+      - name: Pattern trader
+        id: ptrader
+        if: always() && steps.window.outputs.run == 'true' && env.STRATEGY == 'bot'
+        run: python pattern_trader.py
+        env:
+          PYTHONUNBUFFERED: "1"
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID_PATTERNS || secrets.TELEGRAM_CHAT_ID }}
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          ALPACA_PATTERN_KEY_ID: ${{ secrets.ALPACA_PATTERN_KEY_ID }}
+          ALPACA_PATTERN_SECRET_KEY: ${{ secrets.ALPACA_PATTERN_SECRET_KEY }}
+
+      - name: Save pattern-trader memory
+        if: always() && steps.window.outputs.run == 'true' && env.STRATEGY == 'bot' && hashFiles('pattern_trader_state.json') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: pattern_trader_state.json
+          key: pattern-trader-${{ github.run_id }}-${{ github.run_attempt }}
