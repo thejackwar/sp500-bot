@@ -616,9 +616,12 @@ def summary_text(res, bench, start, end, n_stocks, mode="bot versions"):
     money = (f"risk {T.RISK_PER_TRADE:.0%}/trade, max {T.MAX_OPEN_POSITIONS} positions of max "
              f"{T.MAX_POSITION_PCT:.0%} each")
     if mode == "patterns":
+        import patterns
+        sel_txt = (f" Versions 5-6 only trade your selected patterns: {patterns.selection_text(MARKET)}."
+                   if patterns.selection(MARKET) else "")
         rules_txt = (f"Chart patterns only (patterns.py, daily chart): a breakout on a day's close is traded at the "
                      f"next day's open with the pattern's own stop and target (sold after {PATTERN_MAX_DAYS} days "
-                     f"if neither is hit); {money}, max {T.MAX_INVESTED:.0%} invested.")
+                     f"if neither is hit); {money}, max {T.MAX_INVESTED:.0%} invested.{sel_txt}")
     elif mode == "strategies":
         rules_txt = (f"Strategy comparison, same money rules for all: {money}, max "
                      f"{T.MAX_INVESTED:.0%} invested. Daily strategies buy at the next day's open.")
@@ -848,66 +851,151 @@ def pattern_signals(daily, syms, days, first_slot, workers=4):
     return sig
 
 
+TRAIL_DAYS = 20             # scorecard's trailing exit: sell on a close below the lowest low of 20 days
+SPLIT_MIN_TRADES = 15       # split check: a pattern is "chosen" on the first half with this many trades ...
+SPLIT_MIN_R = 0.0           # ... and an average R above this
+
+
+def _trade(o, h, l, c, low_n, high_n, i, sign, stop, target, trail):
+    """One breakout traded on daily candles from the open of day i+1.
+    trail=False: pattern's stop and target, sold after PATTERN_MAX_DAYS days.
+    trail=True: pattern's stop, then sold on a close beyond the 20-day low (high for shorts), no target.
+    Returns (exit price, how, last day index)."""
+    last = len(o) - 1 if trail else min(i + PATTERN_MAX_DAYS, len(o) - 1)
+    for j in range(i + 1, last + 1):
+        if j > i + 1 and sign * (o[j] - stop) <= 0:
+            return o[j], "stop", j                     # opened through the stop
+        if not trail and j > i + 1 and sign * (o[j] - target) >= 0:
+            return o[j], "target", j                   # opened through the target
+        if sign * ((l[j] if sign > 0 else h[j]) - stop) <= 0:
+            return stop, "stop", j
+        if not trail and sign * ((h[j] if sign > 0 else l[j]) - target) >= 0:
+            return target, "target", j
+        if trail:
+            level = low_n[j] if sign > 0 else high_n[j]
+            if np.isfinite(level) and sign * (c[j] - level) < 0:
+                return c[j], "trend exit", j
+    how = "time" if not trail and last - i >= PATTERN_MAX_DAYS else "open"   # "open" = still running at the end
+    return c[last], how, last
+
+
 def pattern_scorecard(sig, daily):
     """How each pattern did on its own, without the money rules: every breakout traded at the next
-    day's open with the pattern's stop and target (or sold after PATTERN_MAX_DAYS days), costs included.
+    day's open, costs included, two ways:
+        R        pattern's stop and target (sold after PATTERN_MAX_DAYS days)
+        R_trail  pattern's stop, then sold on a close below the 20-day low (above the 20-day high for
+                 shorts): no target, the trend decides
     Daily candles: if one day touches both stop and target, the stop counts (cautious)."""
     out = []
     cost = 2 * (FEE + SLIPPAGE)
+    cache = {}
     for r in sig.itertuples():
-        d = daily[r.sym]
-        i = d.index.get_loc(r.date)
-        if i + 1 >= len(d):
+        if r.sym not in cache:
+            d = daily[r.sym]
+            cache[r.sym] = (d.index, *(d[k].values for k in ("Open", "High", "Low", "Close")),
+                            d["Low"].rolling(TRAIL_DAYS).min().shift(1).values,
+                            d["High"].rolling(TRAIL_DAYS).max().shift(1).values)
+        idx, o, h, l, c, low_n, high_n = cache[r.sym]
+        i = idx.get_loc(r.date)
+        if i + 1 >= len(o):
             continue
-        o, h, l, c = (d[k].values for k in ("Open", "High", "Low", "Close"))
         sign = 1 if r.dl else -1
         entry = o[i + 1]
         risk = sign * (entry - r.stop)
         if risk <= 0 or sign * (r.target - entry) <= 0:
-            continue
-        exit_px, how, j = None, "time", i + 1
-        for j in range(i + 1, min(i + 1 + PATTERN_MAX_DAYS, len(d))):
-            if j > i + 1 and sign * (o[j] - r.stop) <= 0:
-                exit_px, how = o[j], "stop"
-            elif j > i + 1 and sign * (o[j] - r.target) >= 0:
-                exit_px, how = o[j], "target"
-            elif sign * ((l[j] if sign > 0 else h[j]) - r.stop) <= 0:
-                exit_px, how = r.stop, "stop"
-            elif sign * ((h[j] if sign > 0 else l[j]) - r.target) >= 0:
-                exit_px, how = r.target, "target"
-            if exit_px is not None:
-                break
-        if exit_px is None:
-            if j - (i + 1) + 1 < PATTERN_MAX_DAYS:
-                how = "open"                           # still running at the end of the data
-            exit_px = c[j]
-        R = sign * (exit_px - entry) / risk - cost * entry / risk
+            continue                                   # opened beyond the stop or the target
+        x1, how1, j1 = _trade(o, h, l, c, low_n, high_n, i, sign, r.stop, r.target, trail=False)
+        x2, how2, j2 = _trade(o, h, l, c, low_n, high_n, i, sign, r.stop, r.target, trail=True)
+        fee = cost * entry / risk
         out.append({"pattern": r.pattern, "symbol": r.sym, "date": r.date, "entry": entry, "stop": r.stop,
-                    "target": r.target, "exit": exit_px, "result": how, "R": R, "days": j - i})
-    return pd.DataFrame(out, columns=["pattern", "symbol", "date", "entry", "stop", "target", "exit", "result",
-                                      "R", "days"])
+                    "target": r.target, "exit": x1, "result": how1, "R": sign * (x1 - entry) / risk - fee,
+                    "days": j1 - i, "exit_trail": x2, "result_trail": how2,
+                    "R_trail": sign * (x2 - entry) / risk - fee, "days_trail": j2 - i})
+    cols = ["pattern", "symbol", "date", "entry", "stop", "target", "exit", "result", "R", "days",
+            "exit_trail", "result_trail", "R_trail", "days_trail"]
+    return pd.DataFrame(out, columns=cols)
+
+
+SHORT_NAMES = {"Symmetrical triangle": "Sym. triangle", "Inverse head & shoulders": "Inv. H&S",
+               "Head & shoulders": "H&S", "Bump & run reversal": "Bump & run", "Ascending triangle": "Asc. triangle",
+               "Descending triangle": "Desc. triangle", "Rounding bottom": "Round. bottom"}
+
+
+def _label(name, width=16):
+    base, arrow = name[:-2], name[-1]
+    return f"{SHORT_NAMES.get(base, base)[:width - 2]} {arrow}"
+
+
+def _closed(card, col):
+    """Trades that finished (not still running at the end of the data) for one exit."""
+    return card[card["result" if col == "R" else "result_trail"] != "open"]
 
 
 def scorecard_text(card):
     if card.empty:
         return "🧩 <b>Pattern scorecard</b>: no pattern breakouts in this period."
-    done = card[card["result"] != "open"]
-    g = done.groupby("pattern")
-    t = pd.DataFrame({"n": g.size(), "win": g["R"].apply(lambda x: (x > 0).mean()), "avgR": g["R"].mean(),
-                      "tgt": g["result"].apply(lambda x: (x == "target").mean()), "days": g["days"].mean()})
+    tg, tr = _closed(card, "R"), _closed(card, "R_trail")
+    t = pd.DataFrame({"n": tg.groupby("pattern").size(),
+                      "win": tg.groupby("pattern")["R"].apply(lambda x: (x > 0).mean()),
+                      "avgR": tg.groupby("pattern")["R"].mean(),
+                      "tgt": tg.groupby("pattern")["result"].apply(lambda x: (x == "target").mean()),
+                      "trail": tr.groupby("pattern")["R_trail"].mean()}).fillna(0)
     t = t.sort_values("avgR", ascending=False)
-    lines = ["🧩 <b>Pattern scorecard</b>: every breakout traded on its own (pattern's stop and target, "
-             f"sold after {PATTERN_MAX_DAYS} days, costs included). Avg R above 0 = made money on average; "
-             "fewer than ~20 trades = too few to trust.", "<pre>Pattern             n  win  avgR  tgt days"]
-    short = {"Symmetrical triangle": "Sym. triangle", "Inverse head & shoulders": "Inv. H&S",
-             "Head & shoulders": "H&S", "Bump & run reversal": "Bump & run", "Ascending triangle": "Asc. triangle",
-             "Descending triangle": "Desc. triangle", "Rounding bottom": "Round. bottom"}
+    lines = ["🧩 <b>Pattern scorecard</b>: every breakout traded on its own, costs included. "
+             f"<b>avgR</b> = with the pattern's stop and target (sold after {PATTERN_MAX_DAYS} days), "
+             f"<b>trail</b> = pattern's stop + sold below the {TRAIL_DAYS}-day low, no target. "
+             "Above 0 = made money on average; fewer than ~20 trades = too few to trust.",
+             "<pre>Pattern            n  win  avgR  tgt trail"]
     for name, r in t.iterrows():
-        base, arrow = name[:-2], name[-1]
-        label = f"{short.get(base, base)[:16]} {arrow}"
-        lines.append(f"{label:<18}{int(r.n):>4}{r.win:>5.0%}{r.avgR:>+6.2f}{r.tgt:>5.0%}{r.days:>5.0f}")
-    lines.append(f"{'All patterns':<18}{len(done):>4}{(done['R'] > 0).mean():>5.0%}{done['R'].mean():>+6.2f}"
-                 f"{(done['result'] == 'target').mean():>5.0%}{done['days'].mean():>5.0f}</pre>")
+        lines.append(f"{_label(name):<16}{int(r.n):>4}{r.win:>5.0%}{r.avgR:>+6.2f}{r.tgt:>5.0%}{r.trail:>+6.2f}")
+    lines.append(f"{'All patterns':<16}{len(tg):>4}{(tg['R'] > 0).mean():>5.0%}{tg['R'].mean():>+6.2f}"
+                 f"{(tg['result'] == 'target').mean():>5.0%}{tr['R_trail'].mean():>+6.2f}</pre>")
+    return "\n".join(lines)
+
+
+def split_text(card):
+    """Honest check: patterns are chosen on the first half of the period only, then judged on the
+    second half, which they weren't chosen on."""
+    if card.empty or card["date"].nunique() < 2:
+        return None
+    dates = pd.to_datetime(card["date"])
+    mid = dates.min() + (dates.max() - dates.min()) / 2
+    first, second = card[dates <= mid], card[dates > mid]
+    lines = [f"✂️ <b>Split check</b>: patterns chosen on {dates.min():%b %Y}–{mid:%b %Y} only (at least "
+             f"{SPLIT_MIN_TRADES} trades and avg R above {SPLIT_MIN_R:+.1f}), then tested on "
+             f"{mid:%b %Y}–{dates.max():%b %Y}, data they weren't chosen on. If the chosen ones still beat "
+             "'all patterns' in the second half, the choice is probably real, not luck."]
+    for col, name in (("R", "stop + target"), ("R_trail", "stop + trailing exit")):
+        a, b = _closed(first, col), _closed(second, col)
+        g = a.groupby("pattern")[col].agg(["size", "mean"])
+        chosen = g[(g["size"] >= SPLIT_MIN_TRADES) & (g["mean"] > SPLIT_MIN_R)].index.tolist()
+        lines += ["", f"<b>{name}</b>"]
+        if not chosen:
+            lines.append("No pattern qualified on the first half.")
+            continue
+        lines.append("Chosen: " + ", ".join(_label(c, 24) for c in chosen))
+        bc = b[b["pattern"].isin(chosen)]
+        lines.append(f"1st half: chosen {len(a[a['pattern'].isin(chosen)])} trades, avg "
+                     f"{a[a['pattern'].isin(chosen)][col].mean():+.2f}R | all {len(a)}, {a[col].mean():+.2f}R")
+        lines.append(f"2nd half: chosen {len(bc)} trades, avg "
+                     f"{(bc[col].mean() if len(bc) else float('nan')):+.2f}R | all {len(b)}, "
+                     f"{(b[col].mean() if len(b) else float('nan')):+.2f}R")
+    # per pattern, both halves (stop + target / trailing)
+    rows = []
+    for pat in card["pattern"].unique():
+        vals = []
+        for part in (first, second):
+            for col in ("R", "R_trail"):
+                x = _closed(part, col)
+                x = x[x["pattern"] == pat][col]
+                vals.append((len(x), x.mean() if len(x) else float("nan")))
+        rows.append((pat, vals))
+    rows.sort(key=lambda r: -(r[1][0][1] if np.isfinite(r[1][0][1]) else -9))
+    lines += ["", "<pre>Pattern         1st: n  avgR trail  2nd: n  avgR trail"]
+    for pat, v in rows:
+        f = lambda x: f"{x:+5.2f}" if np.isfinite(x) else "    -"
+        lines.append(f"{_label(pat):<16}{v[0][0]:>5} {f(v[0][1])} {f(v[1][1])}{v[2][0]:>7} {f(v[2][1])} {f(v[3][1])}")
+    lines[-1] += "</pre>"
     return "\n".join(lines)
 
 
@@ -1032,6 +1120,18 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
             ("p_trail", "4. Up patterns: pattern's stop + trailing exit (20-day low)", "P Trail", sig,
              {**pv, "shorts": False, "pattern_target": False, "trail_days": 20, "max_days": None}),
         ]
+        import patterns
+        if patterns.selection(MARKET):                 # your pattern selection (patterns.SELECTED)
+            keep = [patterns.is_selected(lbl[:-2], "LONG" if lbl.endswith("↑") else "SHORT", MARKET)
+                    for lbl in sig["pattern"]]
+            sel = sig[np.array(keep, bool)]
+            print(f"Selected patterns ({patterns.selection_text(MARKET)}): {len(sel)} breakouts", flush=True)
+            jobs += [
+                ("p_sel", "5. Selected patterns: pattern's stop + target", "Sel Tgt", sel,
+                 {**pv, "shorts": True}),
+                ("p_sel_trail", "6. Selected patterns: pattern's stop + trailing exit", "Sel Trl", sel,
+                 {**pv, "shorts": True, "pattern_target": False, "trail_days": 20, "max_days": None}),
+            ]
     else:
         for key, (name, cfg) in VARIANTS.items():
             jobs.append((key, name, SHORT[key], sig, cfg))
@@ -1125,14 +1225,19 @@ def main():
     if mode == "patterns":
         card = pattern_scorecard(sig, daily)
         card.to_csv(os.path.join(OUT, "patterns.csv"), index=False)
-        print("\n" + html.unescape(scorecard_text(card).replace("<b>", "").replace("</b>", "")
-                                   .replace("<pre>", "").replace("</pre>", "")))
+        for txt in (scorecard_text(card), split_text(card)):
+            if txt:
+                print("\n" + html.unescape(txt.replace("<b>", "").replace("</b>", "")
+                                           .replace("<pre>", "").replace("</pre>", "")))
     details = details_text(res, bench)
     print("\n" + html.unescape(details.replace("<b>", "").replace("</b>", "").replace("<pre>", "").replace("</pre>", "")))
     telegram(text)
     telegram(details)
     if card is not None:
         telegram(scorecard_text(card))
+        split = split_text(card)
+        if split:
+            telegram(split)
     telegram(photo=chart, caption="Account value and drawdowns of each version (first run)")
     telegram(document=csv, caption="Every trade of every version, first run (column 'version'). Open in Excel / Google Sheets.")
     if card is not None:

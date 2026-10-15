@@ -24,6 +24,50 @@ MIN_BREAK_VOLUME = 1.3   # breakout candle volume vs its 20-candle average (patt
 MIN_BREAK_MARGIN = 0.1   # breakout close must clear the line by this many ATRs
 HARMONICS = ("ABCD", "Gartley", "Butterfly")
 
+# YOUR PATTERN SELECTION: the patterns that "patterns only" scans alert on, and that backtest
+# versions 5 and 6 trade. Write the name as in the scorecard plus "up" or "down" (or ↑ / ↓);
+# a name without a direction means both. An empty list = every pattern.
+# Chosen from the 5-year S&P 100 scorecard (positive average R, enough trades). Check them with the
+# backtest's split check before trusting them, and change the list as results come in.
+SELECTED = {
+    "stocks": ["ABCD up", "Falling wedge up", "Symmetrical triangle up", "Bull pennant up", "Gartley up"],
+    "crypto": [],          # not tested yet: every pattern
+}
+
+
+def _norm(text):
+    t = text.lower().replace("↑", " up").replace("↓", " down").replace("&", " and ")
+    t = t.replace("inv.", "inverse").replace("sym.", "symmetrical").replace("h and s", "head and shoulders")
+    return " ".join(t.split())
+
+
+def selection(market):
+    """The selection for "stocks" or "crypto" as (name, direction or None) pairs; empty = everything."""
+    out = []
+    for item in SELECTED.get(market) or []:
+        t = _norm(item)
+        direction = None
+        for word, d in ((" up", "LONG"), (" down", "SHORT")):
+            if t.endswith(word):
+                t, direction = t[: -len(word)], d
+        out.append((t, direction))
+    return out
+
+
+def is_selected(name, direction, market):
+    """Is this pattern (name, "LONG"/"SHORT"/"BOTH") in the market's selection?"""
+    sel = selection(market)
+    if not sel:
+        return True
+    n = _norm(name)
+    dirs = ("LONG", "SHORT") if direction == "BOTH" else (direction,)
+    return any(n == s_name and (s_dir is None or s_dir in dirs) for s_name, s_dir in sel)
+
+
+def selection_text(market):
+    sel = SELECTED.get(market) or []
+    return ", ".join(sel) if sel else "all patterns"
+
 
 # ---------------------------------------------------------------- swing points
 def zigzag(df, k):

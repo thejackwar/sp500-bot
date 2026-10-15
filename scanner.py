@@ -656,11 +656,12 @@ def send_long(lines):
 
 
 # ---------------------------------------------------------------- chart patterns (shared with crypto_scanner.py)
-def chart_patterns(t, frames, price, prev, vol_now, state, ctx_price, recent=False):
+def chart_patterns(t, frames, price, prev, vol_now, state, ctx_price, recent=False, market="stocks"):
     """Chart patterns of one stock/coin. frames: [(timeframe, candles with indicators)].
     price/prev/vol_now: latest price, previous close, latest candle's volume vs its average.
     recent=True (patterns-only scans): breakouts in the last RECENT_BARS candles count too, and
-    patterns still forming are listed again even if they were reported before.
+    patterns still forming are listed again even if they were reported before, and only the
+    patterns in your selection (patterns.SELECTED[market]) are reported.
     Returns (events, keys, pattern hits to draw, forming patterns, watchlist entries)."""
     events, keys, pat_hits, forming_any, watch, seen = [], [], [], [], [], set()
     for tf, frame in frames:
@@ -683,6 +684,8 @@ def chart_patterns(t, frames, price, prev, vol_now, state, ctx_price, recent=Fal
             for pt in pats:
                 if (k and pt["stage"] != "breakout") or pt["id"] in seen:
                     continue
+                if recent and not patterns.is_selected(pt["name"], pt["dir"], market):
+                    continue                           # not in your pattern selection
                 seen.add(pt["id"])
                 if pt["stage"] == "forming":
                     forming_any.append((pt, cframe))   # drawn on this stock's alert chart, if any
@@ -861,7 +864,8 @@ def main():
     if patterns_only:
         send_telegram(f"✅ Pattern scan done: {scanned} stocks checked, {len(found)} with a pattern breakout "
                       f"(last {RECENT_BARS['daily']} days / {RECENT_BARS['hourly']} hourly candles), "
-                      f"{len(watch)} patterns forming. No trades are placed by pattern scans.")
+                      f"{len(watch)} patterns forming. Patterns: {patterns.selection_text('stocks')}. "
+                      f"No trades are placed by pattern scans.")
     else:
         for line in trader.run(found, state, send_telegram, test_mode=force, chart_fn=trade_chart, daily=daily):
             print(line, flush=True)

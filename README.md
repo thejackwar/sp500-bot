@@ -148,14 +148,27 @@ Just the chart patterns above, without the bot's strategy alerts, and **no trade
 - **Run it:** Actions → **S&P 500 scan** (stocks) or **Crypto scan** (crypto) → Run workflow → *What to scan for*: **patterns only** → Run. Works at any time, also when the market is closed.
 - **Formed (breakout):** a chart alert for every pattern that broke out on the latest candle **or recently** (last 3 daily candles / last 7 hourly candles; the message says "2 days ago" etc.), with the pattern drawn, entry, stop and target.
 - **Forming:** one 👀 watchlist message with **every** pattern forming right now, on the daily and hourly charts; 🆕 marks the ones that weren't there at the previous pattern scan.
-- A ✅ message at the end counts what was found. Stock pattern alerts go to the stock chat, crypto ones to the crypto chat.
+- **Only your selected patterns** are reported (see *Your pattern selection* below).
+- A ✅ message at the end counts what was found and lists the selection. Stock pattern alerts go to the stock chat, crypto ones to the crypto chat.
 - Pattern scans keep their own memory, so they never hide or repeat alerts of the normal bot (and the other way round). The timer (cron-job.org) keeps running the normal bot.
 
 ### Backtesting the patterns
 Actions → **Backtest** → Run workflow → *Market*: **stocks** or **crypto**, *What to compare*: **patterns** → Run.
 - Replays the **daily** chart day by day: a pattern that breaks out on a day's close (same rules as the live alerts, incl. the 1.3× volume check) is traded at the next day's open, with **the pattern's own stop and target** (the measured move), sold after 60 trading days if neither is hit. Same money rules as the bot (1% risk per trade, max 20% per position, no borrowing).
 - **Versions:** (1) up patterns only, (2) up + down patterns (shorts; test only for crypto), (3) up patterns only while SPY/BTC is in an up-trend, (4) up patterns with a trailing exit (20-day low) instead of the target. Compared with buying and holding SPY/BTC.
-- **Pattern scorecard** (extra Telegram message + `patterns.csv`): every breakout traded on its own, without the position limits: number of trades, win rate, average R (profit in units of the risk; above 0 = made money on average), how often the target was reached, and days held, per pattern and direction (↑/↓). This is the table that shows which patterns are worth watching. Under ~20 trades a pattern's figures are mostly luck.
+- **Versions 5 and 6** trade only your selected patterns, with the pattern's target (5) or the trailing exit (6). They appear when the selection for that market isn't empty.
+- **Pattern scorecard** (🧩 message + `patterns.csv`): every breakout traded on its own, without the position limits, per pattern and direction (↑/↓): number of trades, win rate, **avgR** with the pattern's stop and target, how often the target was reached, and **trail** = average R with the pattern's stop and a trailing exit (sold on a close below the 20-day low, no target). R = profit in units of the risk; above 0 = made money on average. Under ~20 trades a pattern's figures are mostly luck.
+- **Split check** (✂️ message): picks the patterns that did well on the **first half** of the period only (15+ trades, average R above 0), then shows how they did on the **second half**, which they weren't picked on, next to all patterns. If they still beat "all patterns" in the second half, the pick is probably real; if not, it was luck. Below it, a table of every pattern's results in each half.
+
+### Your pattern selection
+The list `SELECTED` at the top of `patterns.py` decides which patterns the **patterns-only scans** alert on and which ones backtest versions 5-6 trade, separately for stocks and crypto:
+```python
+SELECTED = {
+    "stocks": ["ABCD up", "Falling wedge up", "Symmetrical triangle up", "Bull pennant up", "Gartley up"],
+    "crypto": [],          # empty = every pattern
+}
+```
+Write each pattern's name as in the scorecard plus `up` or `down` (`↑`/`↓` work too); a name without a direction means both. The stock list starts with the patterns that had a positive average R and enough trades in the first 5-year scorecard; change it as the split check and new results come in. The normal bot's alerts always show every pattern.
 - Hourly patterns aren't backtested (only daily), and forming patterns can't be traded, so they aren't either.
 
 

@@ -166,7 +166,8 @@ def main():
                 vol_now = float(hv.Volume / hv.VolAvg20) if hv.VolAvg20 else None
                 hr = scanner.add_indicators(crypto.completed(hourly[t], 60, now).copy())
                 p_ev, p_keys, pat_hits, forming_any, p_watch = scanner.chart_patterns(
-                    t, (("daily", dd), ("hourly", hr)), price, prev, vol_now, state, ctx["price"], recent=patterns_only)
+                    t, (("daily", dd), ("hourly", hr)), price, prev, vol_now, state, ctx["price"], recent=patterns_only,
+                    market="crypto")
                 events += p_ev
                 keys += p_keys
                 watch += p_watch
@@ -207,7 +208,8 @@ def main():
     if patterns_only:
         scanner.send_telegram(f"✅ Crypto pattern scan done: {checked} coins checked ({names}), {sent} with a pattern "
                               f"breakout (last {scanner.RECENT_BARS['daily']} days / {scanner.RECENT_BARS['hourly']} "
-                              f"hourly candles), {len(watch)} patterns forming. No trades are placed by pattern scans.")
+                              f"hourly candles), {len(watch)} patterns forming. Patterns: {patterns.selection_text('crypto')}. "
+                              f"No trades are placed by pattern scans.")
     else:
         scanner.send_telegram(f"✅ Crypto scan done ({m['name']} candles{', dry run' if dry_run else ''}): "
                               f"{checked} coins checked ({names}), {sent} with new signals.")
