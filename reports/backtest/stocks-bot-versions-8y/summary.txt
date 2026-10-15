@@ -3,79 +3,79 @@
 Each version is tested from 10 start dates a week apart (ties between signals in random order); figures are the middle run, with the range in brackets.
 
 <b>1. Longs + shorts (old rules)</b>
--0.5%/yr (-8.3% to +2.9%), beat SPY in 0/10 runs
-max drop -48.0% (worst -57.5%) · profit factor 1.00
-~1190 trades, win 35%, avg +0.02R, worst streak 17, hold 24d, invested 174%, interest ~$6,831
+-1.4%/yr (-7.5% to +10.0%), beat SPY in 0/10 runs
+max drop -44.8% (worst -62.2%) · profit factor 0.99
+~1184 trades, win 35%, avg +0.02R, worst streak 16, hold 24d, invested 173%, interest ~$7,845
 
 <b>2. Longs only, 2:1 target</b>
-+13.9%/yr (+10.3% to +16.2%), beat SPY in 1/10 runs
-max drop -36.7% (worst -38.4%) · profit factor 1.21
-~1187 trades, win 39%, avg +0.16R, worst streak 26, hold 24d, invested 173%, interest ~$70,905
++14.5%/yr (+8.7% to +16.8%), beat SPY in 1/10 runs
+max drop -40.1% (worst -43.6%) · profit factor 1.20
+~1170 trades, win 40%, avg +0.17R, worst streak 28, hold 24d, invested 173%, interest ~$73,104
 
 <b>3. Longs only + trailing exit</b>
-+17.0%/yr (+12.6% to +25.7%), beat SPY in 7/10 runs
-max drop -45.8% (worst -50.1%) · profit factor 1.42
-~577 trades, win 33%, avg +0.41R, worst streak 24, hold 48d, invested 171%, interest ~$86,600
++16.8%/yr (+13.7% to +22.7%), beat SPY in 6/10 runs
+max drop -42.1% (worst -44.4%) · profit factor 1.42
+~570 trades, win 33%, avg +0.42R, worst streak 22, hold 49d, invested 171%, interest ~$91,461
 
 <b>4. Longs only, no leverage</b>
-+12.0%/yr (+9.3% to +17.1%), beat SPY in 1/10 runs
-max drop -24.7% (worst -27.2%) · profit factor 1.23
-~1170 trades, win 39%, avg +0.16R, worst streak 24, hold 24d, invested 96%
++12.9%/yr (+10.6% to +16.8%), beat SPY in 1/10 runs
+max drop -24.2% (worst -26.2%) · profit factor 1.26
+~1168 trades, win 39%, avg +0.16R, worst streak 26, hold 24d, invested 96%
 
 <b>5. Longs + trailing exit, no leverage (bot now)</b>
-+16.3%/yr (+10.6% to +21.8%), beat SPY in 6/10 runs
-max drop -28.8% (worst -39.9%) · profit factor 1.58
-~580 trades, win 33%, avg +0.41R, worst streak 22, hold 48d, invested 96%
++14.6%/yr (+11.1% to +20.7%), beat SPY in 3/10 runs
+max drop -27.7% (worst -30.4%) · profit factor 1.49
+~566 trades, win 34%, avg +0.44R, worst streak 21, hold 49d, invested 96%
 
 <b>6. Bot now, daily-chart signals only (no intraday chart)</b>
-+9.1%/yr (+6.4% to +11.9%), beat SPY in 0/10 runs
-max drop -24.9% (worst -29.9%) · profit factor 1.34
-~524 trades, win 35%, avg +0.36R, worst streak 16, hold 47d, invested 90%
++9.3%/yr (+7.4% to +11.9%), beat SPY in 0/10 runs
+max drop -24.6% (worst -29.8%) · profit factor 1.33
+~523 trades, win 35%, avg +0.34R, worst streak 17, hold 47d, invested 90%
 
 <b>7. Bot now + SPY filter (buy only while SPY is above its 200-day MA)</b>
-+7.3%/yr (+5.2% to +12.9%), beat SPY in 0/10 runs
-max drop -29.3% (worst -35.8%) · profit factor 1.32
-~511 trades, win 31%, avg +0.37R, worst streak 45, hold 46d, invested 83%
++6.0%/yr (+5.1% to +9.7%), beat SPY in 0/10 runs
+max drop -29.2% (worst -33.1%) · profit factor 1.22
+~513 trades, win 31%, avg +0.35R, worst streak 44, hold 46d, invested 83%
 
 <b>8. Bot now, wider stop (3x ATR instead of 2x)</b>
-+11.3%/yr (+8.9% to +14.3%), beat SPY in 0/10 runs
-max drop -26.6% (worst -31.5%) · profit factor 1.39
-~494 trades, win 37%, avg +0.26R, worst streak 18, hold 56d, invested 94%
++12.0%/yr (+8.9% to +16.6%), beat SPY in 1/10 runs
+max drop -26.7% (worst -29.1%) · profit factor 1.43
+~485 trades, win 38%, avg +0.29R, worst streak 16, hold 57d, invested 94%
 
 <b>9. Tight stop 1x ATR + take profit 2:1</b>
-+15.2%/yr (+10.5% to +18.2%), beat SPY in 3/10 runs
-max drop -19.5% (worst -23.3%) · profit factor 1.16
-~3922 trades, win 37%, avg +0.10R, worst streak 31, hold 7d, invested 91%
++14.6%/yr (+8.4% to +19.3%), beat SPY in 4/10 runs
+max drop -21.0% (worst -25.4%) · profit factor 1.16
+~3892 trades, win 38%, avg +0.10R, worst streak 30, hold 7d, invested 91%
 
 <b>10. Tight stop 1x ATR + take profit 1.5:1</b>
-+12.8%/yr (+8.2% to +18.7%), beat SPY in 1/10 runs
-max drop -20.1% (worst -24.7%) · profit factor 1.13
-~4972 trades, win 44%, avg +0.07R, worst streak 24, hold 5d, invested 89%
++14.8%/yr (+11.0% to +18.1%), beat SPY in 3/10 runs
+max drop -17.9% (worst -27.6%) · profit factor 1.14
+~4922 trades, win 44%, avg +0.07R, worst streak 22, hold 5d, invested 89%
 
 <b>11. Tight stop 1x ATR + take profit 3:1</b>
-+14.9%/yr (+9.4% to +17.7%), beat SPY in 3/10 runs
-max drop -21.0% (worst -24.3%) · profit factor 1.20
-~2756 trades, win 30%, avg +0.15R, worst streak 32, hold 10d, invested 93%
++17.2%/yr (+10.7% to +23.1%), beat SPY in 7/10 runs
+max drop -19.7% (worst -25.8%) · profit factor 1.21
+~2713 trades, win 30%, avg +0.16R, worst streak 32, hold 10d, invested 93%
 
 <b>12. Stop 1.5x ATR + take profit 2:1</b>
-+14.7%/yr (+11.9% to +23.0%), beat SPY in 3/10 runs
-max drop -22.3% (worst -28.1%) · profit factor 1.21
-~1934 trades, win 39%, avg +0.16R, worst streak 22, hold 14d, invested 95%
++15.2%/yr (+8.0% to +18.9%), beat SPY in 4/10 runs
+max drop -23.2% (worst -28.6%) · profit factor 1.22
+~1954 trades, win 39%, avg +0.17R, worst streak 23, hold 14d, invested 95%
 
 <b>13. Bot now + volume 1.5x normal (both charts)</b>
-+15.6%/yr (+12.6% to +21.2%), beat SPY in 4/10 runs
-max drop -26.6% (worst -33.0%) · profit factor 1.56
-~570 trades, win 34%, avg +0.42R, worst streak 18, hold 48d, invested 95%
++17.2%/yr (+11.3% to +22.6%), beat SPY in 7/10 runs
+max drop -27.1% (worst -29.4%) · profit factor 1.63
+~566 trades, win 34%, avg +0.46R, worst streak 16, hold 48d, invested 95%
 
 <b>14. Bot now + volume 1.2x normal (both charts)</b>
-+15.3%/yr (+11.3% to +20.8%), beat SPY in 5/10 runs
-max drop -27.8% (worst -39.1%) · profit factor 1.54
-~590 trades, win 33%, avg +0.38R, worst streak 18, hold 46d, invested 95%
++15.4%/yr (+12.3% to +20.8%), beat SPY in 4/10 runs
+max drop -27.3% (worst -32.3%) · profit factor 1.53
+~578 trades, win 34%, avg +0.42R, worst streak 16, hold 48d, invested 95%
 
 <b>15. Bot now + volume 1.5x normal (intraday signals only)</b>
-+16.6%/yr (+10.8% to +21.4%), beat SPY in 6/10 runs
-max drop -25.9% (worst -30.5%) · profit factor 1.59
-~566 trades, win 35%, avg +0.44R, worst streak 22, hold 48d, invested 95%
++18.2%/yr (+10.8% to +21.3%), beat SPY in 7/10 runs
+max drop -25.5% (worst -26.7%) · profit factor 1.64
+~572 trades, win 34%, avg +0.45R, worst streak 22, hold 48d, invested 95%
 
 <b>Buy & hold SPY</b>
 +216.9% (+15.5%/yr) · max drop -33.8%
