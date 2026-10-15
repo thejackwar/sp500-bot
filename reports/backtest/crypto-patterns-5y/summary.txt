@@ -1,0 +1,28 @@
+📊 <b>Backtest top 10 crypto: chart patterns</b>
+15 Oct 2021 → 15 Oct 2026 (5.0 years), top 10 crypto (8 coins), $100,000 start. Chart patterns only (patterns.py, daily chart): a breakout on a day's close is traded at the next day's open with the pattern's own stop and target (sold after 60 days if neither is hit); risk 1%/trade, max 5 positions of max 20% each, max 100% invested. 'Invested' = average money in the market (BTC = 100%)
+Each version is tested from 10 start dates a week apart (ties between signals in random order); figures are the middle run, with the range in brackets.
+
+<b>1. Up patterns: pattern's stop + target</b>
+-0.2%/yr (-0.2% to +0.0%), beat BTC in 0/10 runs
+max drop -10.3% (worst -10.3%) · profit factor 1.03
+~68 trades, win 54%, avg +0.01R, worst streak 7, hold 17d, invested 4%
+
+<b>2. Up + down patterns (shorts) (test only: Alpaca can't short crypto)</b>
++0.9%/yr (+0.6% to +1.1%), beat BTC in 0/10 runs
+max drop -9.7% (worst -9.7%) · profit factor 1.13
+~107 trades, win 56%, avg +0.06R, worst streak 4, hold 19d, invested 7%
+
+<b>3. Up patterns, only while BTC is above its 50-day MA</b>
++0.5%/yr (+0.5% to +0.5%), beat BTC in 0/10 runs
+max drop -8.4% (worst -8.4%) · profit factor 1.22
+~49 trades, win 57%, avg +0.09R, worst streak 4, hold 17d, invested 3%
+
+<b>4. Up patterns: pattern's stop + trailing exit (20-day low)</b>
++3.0%/yr (+2.9% to +3.3%), beat BTC in 0/10 runs
+max drop -27.4% (worst -27.4%) · profit factor 1.43
+~62 trades, win 26%, avg +0.30R, worst streak 19, hold 37d, invested 12%
+
+<b>Buy & hold BTC</b>
++29.8% (+5.4%/yr) · max drop -76.7%
+
+<i>Today's top 10 coins only (coins that dropped out aren't tested, which flatters results); fees 0.25% per buy and sell; fills at the next 15-min open with 0.05% slippage. Past results don't guarantee future ones.</i>

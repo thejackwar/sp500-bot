@@ -1,0 +1,294 @@
+version,symbol,direction,signal,entry_time,exit_time,entry,stop,target,exit,qty,result,pnl,R,days_held
+1. Up patterns: pattern's stop + target,ETH/USD,LONG,Symmetrical triangle ↑,2021-12-01 00:00,2021-12-03 20:30,4634.93,4093.75,7694.1,4091.7,1.85575656,stop,-1048.58,-1.05,2
+1. Up patterns: pattern's stop + target,BCH/USD,LONG,Gartley ↑,2022-01-07 00:00,2022-01-10 14:30,399.84,349.3,440.126,349.13,19.65661973,stop,-1033.68,-1.04,3
+1. Up patterns: pattern's stop + target,DOGE/USD,LONG,Gartley ↑,2022-01-07 00:00,2022-01-14 00:30,0.16,0.1305,0.178213,0.18,33771.81698656,target,590.6,0.6,7
+1. Up patterns: pattern's stop + target,BCH/USD,LONG,Double bottom ↑,2022-02-06 00:00,2022-03-22 10:45,320.79,255.707,370.28,370.28,15.17303961,target,724.69,0.74,44
+1. Up patterns: pattern's stop + target,DOGE/USD,LONG,Double bottom ↑,2022-03-28 00:00,2022-04-05 17:00,0.14,0.105165,0.1718,0.17,25252.23208819,target,662.52,0.66,8
+1. Up patterns: pattern's stop + target,SOL/USD,LONG,Falling wedge ↑,2022-03-24 00:00,2022-05-08 17:15,94.99,75.3326,143.829,75.29,50.60422906,stop,-1018.18,-1.03,45
+1. Up patterns: pattern's stop + target,ETH/USD,LONG,Gartley ↑,2022-05-02 00:00,2022-05-09 02:45,2826.27,2444.68,2992.85,2443.46,2.62016498,stop,-1037.56,-1.04,7
+1. Up patterns: pattern's stop + target,BCH/USD,LONG,ABCD ↑,2022-05-02 00:00,2022-05-09 14:45,284.14,240.57,318.571,240.45,22.93654904,stop,-1032.23,-1.04,7
+1. Up patterns: pattern's stop + target,DOGE/USD,LONG,ABCD ↑,2022-05-11 00:00,2022-05-11 13:00,0.11,0.08714,0.142302,0.09,46408.24104485,stop,-995.25,-1.03,0
+1. Up patterns: pattern's stop + target,DOGE/USD,LONG,Ascending triangle ↑,2022-08-15 00:00,2022-08-19 11:45,0.08,0.0681789,0.0954903,0.07,73056.71984963,stop,-1020.66,-1.03,4
+1. Up patterns: pattern's stop + target,SOL/USD,LONG,Symmetrical triangle ↑,2022-07-15 00:00,2022-08-20 19:15,37.15,34.2593,78.1723,34.24,333.88891395,stop,-1029.64,-1.07,36
+1. Up patterns: pattern's stop + target,LTC/USD,LONG,Ascending triangle ↑,2022-07-29 00:00,2022-09-19 03:30,63.51,51.6527,81.9301,51.63,82.61197005,stop,-1005.61,-1.03,52
+1. Up patterns: pattern's stop + target,LINK/USD,LONG,Ascending triangle ↑,2022-07-30 00:00,2022-09-28 00:15,7.89,6.0638,9.81817,8.05,533.0243228200001,time exit,63.95,0.07,60
+1. Up patterns: pattern's stop + target,ETH/USD,LONG,ABCD ↑,2022-09-20 00:00,2022-10-26 14:30,1376.0,1128.92,1587.09,1587.09,3.75193608,target,764.21,0.83,36
+1. Up patterns: pattern's stop + target,LINK/USD,LONG,Double bottom ↑,2022-10-30 00:00,2022-11-04 14:30,7.65,6.24155,8.433,8.43,673.83901168,target,503.21,0.53,5
+1. Up patterns: pattern's stop + target,SOL/USD,LONG,Falling wedge ↑,2022-10-26 00:00,2022-11-08 03:30,30.88,26.9875,41.0701,26.97,240.17128214000002,stop,-972.92,-1.04,13
+1. Up patterns: pattern's stop + target,BTC/USD,LONG,Triple bottom ↑,2022-10-27 00:00,2022-11-08 19:30,20784.9,18050.7,22576.0,18041.67,0.34405467,stop,-977.21,-1.04,12
+1. Up patterns: pattern's stop + target,BCH/USD,LONG,Falling wedge ↑,2022-10-26 00:00,2022-11-08 19:45,113.2,99.0143,138.629,98.96,65.92437065,stop,-973.19,-1.05,13
+1. Up patterns: pattern's stop + target,ETH/USD,LONG,Ascending triangle ↑,2023-01-12 00:00,2023-01-20 20:45,1389.58,1194.31,1641.84,1641.84,4.68529529,target,1146.38,1.26,8
+1. Up patterns: pattern's stop + target,DOGE/USD,LONG,ABCD ↑,2023-03-06 00:00,2023-03-09 19:15,0.07,0.06922,0.0849449,0.07,171581.54586377,stop,-997.14,-1.08,3
+1. Up patterns: pattern's stop + target,DOGE/USD,LONG,Falling wedge ↑,2023-03-18 00:00,2023-04-03 18:15,0.08,0.0599631,0.0955342,0.1,55068.48667233,target,1019.9,1.12,16
+1. Up patterns: pattern's stop + target,DOGE/USD,LONG,Gartley ↑,2023-05-13 00:00,2023-05-23 16:15,0.07,0.0620967,0.0858806,0.09,89616.02873918001,target,1169.36,1.27,10
+1. Up patterns: pattern's stop + target,LINK/USD,LONG,Triple bottom ↑,2023-09-19 00:00,2023-09-25 15:15,6.57,5.5385,7.36264,7.36,909.28121891,target,688.97,0.74,6
+1. Up patterns: pattern's stop + target,ETH/USD,LONG,Diamond ↑,2023-09-29 00:00,2023-10-09 10:00,1654.0,1606.92,2674.62,1606.12,11.39529159,stop,-638.52,-1.21,10
+1. Up patterns: pattern's stop + target,BTC/USD,LONG,Double bottom ↑,2023-12-02 00:00,2023-12-08 21:30,38732.94,32101.0,44642.0,44642.0,0.14147829,target,806.51,0.86,6
+1. Up patterns: pattern's stop + target,LINK/USD,LONG,Inverse head & shoulders ↑,2024-02-02 00:00,2024-02-11 08:15,17.2,13.3128,20.53,20.53,241.70864704000002,target,781.46,0.83,9
+1. Up patterns: pattern's stop + target,ETH/USD,LONG,Triple bottom ↑,2024-01-11 00:00,2024-02-19 06:00,2587.37,2085.42,2900.57,2900.57,1.8847034900000001,target,564.43,0.6,39
+1. Up patterns: pattern's stop + target,BCH/USD,LONG,Symmetrical triangle ↑,2024-02-28 00:00,2024-03-02 02:15,293.15,254.234,374.698,374.7,24.68818162,target,1972.14,2.06,3
+1. Up patterns: pattern's stop + target,LTC/USD,LONG,Symmetrical triangle ↑,2024-02-28 00:00,2024-03-02 04:00,74.08,65.7809,90.7587,90.76,115.8955983,target,1885.71,1.97,3
+1. Up patterns: pattern's stop + target,ETH/USD,LONG,Triple bottom ↑,2024-05-21 00:00,2024-05-23 11:30,3666.72,2783.48,3869.3,3869.3,1.1296005,target,207.56,0.21,2
+1. Up patterns: pattern's stop + target,XRP/USD,LONG,Falling wedge ↑,2024-06-18 00:00,2024-07-04 02:00,0.51,0.459079,0.599494,0.46,21632.71711746,stop,-1060.3,-1.06,16
+1. Up patterns: pattern's stop + target,BCH/USD,LONG,Symmetrical triangle ↑,2024-07-29 00:00,2024-08-03 16:30,416.67,362.926,555.467,362.74,18.43909721,stop,-1030.23,-1.04,5
+1. Up patterns: pattern's stop + target,SOL/USD,LONG,Double bottom ↑,2024-10-15 00:00,2024-10-21 05:15,157.65,131.82,171.365,171.37,38.20279781,target,492.36,0.5,6
+1. Up patterns: pattern's stop + target,LINK/USD,LONG,Double bottom ↑,2024-10-21 00:00,2024-11-04 21:45,11.98,10.1373,13.2462,10.13,537.08498989,stop,-1023.2,-1.04,14
+1. Up patterns: pattern's stop + target,XRP/USD,LONG,Double bottom ↑,2024-11-07 00:00,2024-11-07 03:30,0.54,0.486681,0.5712,0.57,17734.22076018,target,463.67,0.47,0
+1. Up patterns: pattern's stop + target,BCH/USD,LONG,Symmetrical triangle ↑,2024-09-20 00:00,2024-11-10 13:45,340.46,302.016,440.166,440.17,25.52480134,target,2495.29,2.55,51
+1. Up patterns: pattern's stop + target,ETH/USD,LONG,Ascending triangle ↑,2024-11-08 00:00,2024-11-11 16:30,2899.26,2404.14,3300.57,3300.57,1.9961956600000001,target,770.15,0.78,3
+1. Up patterns: pattern's stop + target,LTC/USD,LONG,ABCD ↑,2024-12-21 00:00,2025-01-05 22:30,101.37,77.3185,114.812,114.81,42.1627504,target,544.08,0.54,15
+1. Up patterns: pattern's stop + target,SOL/USD,LONG,Gartley ↑,2024-12-21 00:00,2025-01-06 15:00,194.39,155.0,220.854,220.85,25.751013150000002,target,654.75,0.65,16
+1. Up patterns: pattern's stop + target,ETH/USD,LONG,Bull pennant ↑,2024-11-22 00:00,2025-01-13 12:45,3364.42,3036.89,4206.5,3035.37,3.0958890500000003,stop,-1068.22,-1.06,52
+1. Up patterns: pattern's stop + target,SOL/USD,LONG,Double bottom ↑,2025-01-19 00:00,2025-01-19 10:45,261.8,166.119,282.235,282.24,10.57139918,target,201.68,0.2,0
+1. Up patterns: pattern's stop + target,ETH/USD,LONG,Falling wedge ↑,2025-02-01 00:00,2025-02-02 18:00,3301.35,2958.4,4314.87,2956.92,2.96146773,stop,-1066.35,-1.06,1
+1. Up patterns: pattern's stop + target,BTC/USD,LONG,Double bottom ↑,2025-01-18 00:00,2025-02-25 07:45,104230.38,88687.2,116015.0,88642.86,0.06520481,stop,-1047.82,-1.04,38
+1. Up patterns: pattern's stop + target,XRP/USD,LONG,Symmetrical triangle ↑,2025-03-03 00:00,2025-03-10 18:00,2.94,2.03516,3.98416,2.03,1094.70797306,stop,-1007.32,-1.02,7
+1. Up patterns: pattern's stop + target,LTC/USD,LONG,Gartley ↑,2025-03-06 00:00,2025-04-03 13:00,104.75,80.38,117.088,80.34,40.545162760000004,stop,-1008.57,-1.02,28
+1. Up patterns: pattern's stop + target,LINK/USD,LONG,ABCD ↑,2025-04-08 00:00,2025-04-22 14:45,11.44,8.53155,13.7077,13.71,334.03143583,target,735.27,0.76,14
+1. Up patterns: pattern's stop + target,XRP/USD,LONG,Diamond ↑,2025-05-09 00:00,2025-05-31 00:30,2.33,2.11114,3.65613,2.11,4504.36213409,stop,-1038.16,-1.06,22
+1. Up patterns: pattern's stop + target,LTC/USD,LONG,Inverse head & shoulders ↑,2025-07-11 00:00,2025-07-18 05:15,94.89,82.9419,108.742,108.74,81.30542781,target,1084.65,1.12,7
+1. Up patterns: pattern's stop + target,BCH/USD,LONG,Rectangle ↑,2025-07-21 00:00,2025-08-12 17:45,548.7,458.539,616.66,616.66,10.88782965,target,708.26,0.72,22
+1. Up patterns: pattern's stop + target,BCH/USD,LONG,ABCD ↑,2025-09-02 00:00,2025-09-02 10:00,545.67,491.734,572.242,572.24,18.27407637,target,434.55,0.44,0
+1. Up patterns: pattern's stop + target,DOGE/USD,LONG,Rounding bottom ↑,2025-07-21 00:00,2025-09-19 00:15,0.27,0.151341,0.339544,0.28,7992.59997345,time exit,29.24,0.03,60
+1. Up patterns: pattern's stop + target,ETH/USD,LONG,Butterfly ↑,2025-09-27 00:00,2025-10-02 06:30,4039.99,3515.87,4404.72,4404.72,1.89267636,target,650.36,0.66,5
+1. Up patterns: pattern's stop + target,LINK/USD,LONG,ABCD ↑,2025-09-25 00:00,2025-10-06 20:15,21.62,18.9315,23.5743,23.57,369.44141464,target,679.16,0.69,11
+1. Up patterns: pattern's stop + target,XRP/USD,LONG,Double bottom ↑,2025-10-03 00:00,2025-10-10 19:30,3.04,2.67828,3.29205,2.68,2748.5034088400002,stop,-1048.18,-1.05,7
+1. Up patterns: pattern's stop + target,LINK/USD,LONG,ABCD ↑,2025-11-06 00:00,2025-11-19 16:00,15.09,13.0087,17.1978,13.0,478.32890191,stop,-1033.47,-1.04,13
+1. Up patterns: pattern's stop + target,XRP/USD,LONG,Double bottom ↑,2026-01-06 00:00,2026-01-30 01:45,2.35,1.75586,2.7968,1.75,1646.76767741,stop,-1003.13,-1.02,24
+1. Up patterns: pattern's stop + target,DOGE/USD,LONG,Falling wedge ↑,2026-02-15 00:00,2026-04-16 00:15,0.11,0.0773092,0.150446,0.09,28902.56030679,time exit,-481.23,-0.49,60
+1. Up patterns: pattern's stop + target,BTC/USD,LONG,Double bottom ↑,2026-03-17 00:00,2026-05-16 00:15,74931.52,59065.4,88470.0,79017.63,0.06130754,time exit,226.91,0.23,60
+1. Up patterns: pattern's stop + target,LTC/USD,LONG,Symmetrical triangle ↑,2026-05-09 00:00,2026-05-18 10:15,58.37,53.5463,68.111,53.52,203.76260449,stop,-1044.66,-1.07,9
+1. Up patterns: pattern's stop + target,XRP/USD,LONG,Symmetrical triangle ↑,2026-05-11 00:00,2026-05-22 18:45,1.47,1.34632,1.88618,1.35,7698.30003284,stop,-1049.45,-1.07,11
+1. Up patterns: pattern's stop + target,DOGE/USD,LONG,Symmetrical triangle ↑,2026-04-30 00:00,2026-06-02 15:45,0.1,0.0945464,0.125212,0.09,101383.94020687,stop,-1028.8,-1.06,33
+1. Up patterns: pattern's stop + target,SOL/USD,LONG,Double bottom ↑,2026-06-16 00:00,2026-08-15 00:15,73.95,59.3831,85.9015,75.42,64.63816351,time exit,71.19,0.08,60
+1. Up patterns: pattern's stop + target,DOGE/USD,LONG,Falling wedge ↑,2026-08-12 00:00,2026-08-20 16:45,0.07,0.0671971,0.0808919,0.08,203636.89166036,target,1763.31,1.88,8
+1. Up patterns: pattern's stop + target,BTC/USD,LONG,Symmetrical triangle ↑,2026-08-20 00:00,2026-08-21 08:15,69358.31,63471.0,76892.6,76892.6,0.16160685,target,1158.5,1.22,1
+1. Up patterns: pattern's stop + target,LTC/USD,LONG,Symmetrical triangle ↑,2026-08-20 00:00,2026-08-21 23:00,46.82,43.9819,54.1418,54.14,336.13464220000003,target,2376.56,2.51,1
+1. Up patterns: pattern's stop + target,LTC/USD,LONG,Triple bottom ↑,2026-08-22 00:00,2026-08-22 00:15,53.15,42.587,53.2075,53.21,94.24381555000001,target,-19.36,-0.02,0
+1. Up patterns: pattern's stop + target,BCH/USD,LONG,Gartley ↑,2026-09-12 00:00,2026-09-15 07:30,228.15,199.659,251.486,251.49,34.97710143,target,774.3,0.78,3
+1. Up patterns: pattern's stop + target,LTC/USD,LONG,ABCD ↑,2026-10-10 00:00,2026-10-12 08:00,63.49,58.1888,67.9976,68.0,187.8281992,target,785.84,0.79,2
+1. Up patterns: pattern's stop + target,XRP/USD,LONG,Triple bottom ↑,2026-09-22 00:00,2026-10-15 14:00,1.54,1.23233,1.6906,1.29,3252.15156269,still open,-848.19,-0.85,23
+1. Up patterns: pattern's stop + target,DOGE/USD,LONG,Double bottom ↑,2026-09-22 00:00,2026-10-15 14:00,0.1,0.0772941,0.111681,0.08,44363.07067108,still open,-980.47,-0.98,23
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),ETH/USD,LONG,Symmetrical triangle ↑,2021-12-01 00:00,2021-12-03 20:30,4634.93,4093.75,7694.1,4091.7,1.85575656,stop,-1048.58,-1.05,2
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BCH/USD,LONG,Gartley ↑,2022-01-07 00:00,2022-01-10 14:30,399.84,349.3,440.126,349.13,19.92470988,stop,-1047.78,-1.04,3
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),DOGE/USD,LONG,Gartley ↑,2022-01-07 00:00,2022-01-14 00:30,0.16,0.1305,0.178213,0.18,34232.41964753,target,598.65,0.6,7
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BTC/USD,SHORT,Double top ↓,2022-01-06 00:00,2022-01-21 03:30,43426.26,52594.3,38794.6,38794.6,0.10936496,target,484.06,0.48,15
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),ETH/USD,SHORT,Symmetrical triangle ↓,2021-12-05 00:00,2022-02-03 00:15,4120.75,4648.36,1655.76,2683.55,1.88280552,time exit,2673.94,2.7,60
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BCH/USD,LONG,Double bottom ↑,2022-02-06 00:00,2022-03-22 10:45,320.79,255.707,370.28,370.28,15.65852854,target,747.88,0.74,44
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),DOGE/USD,LONG,Double bottom ↑,2022-03-28 00:00,2022-04-05 17:00,0.14,0.105165,0.1718,0.17,26060.22305964,target,683.72,0.66,8
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LINK/USD,SHORT,ABCD ↓,2022-03-29 00:00,2022-04-11 10:00,16.49,18.6293,14.3246,14.32,483.78093902,target,1012.36,0.98,13
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),ETH/USD,SHORT,Butterfly ↓,2022-03-31 00:00,2022-04-25 00:30,3384.45,3893.18,2867.11,2867.11,2.03781319,target,1022.39,0.99,25
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),SOL/USD,LONG,Falling wedge ↑,2022-03-24 00:00,2022-05-08 17:15,94.99,75.3326,143.829,75.29,52.223403160000004,stop,-1050.76,-1.03,45
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),ETH/USD,LONG,Gartley ↑,2022-05-02 00:00,2022-05-09 02:45,2826.27,2444.68,2992.85,2443.46,2.75501596,stop,-1090.96,-1.04,7
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BCH/USD,LONG,ABCD ↑,2022-05-02 00:00,2022-05-09 14:45,284.14,240.57,318.571,240.45,24.11701519,stop,-1085.36,-1.04,7
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BTC/USD,SHORT,Head & shoulders ↓,2022-04-27 00:00,2022-05-11 21:00,38094.16,43306.2,28499.4,28499.4,0.20248948,target,1909.13,1.82,14
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),DOGE/USD,SHORT,Head & shoulders ↓,2022-05-10 00:00,2022-05-12 07:30,0.1,0.168739,0.06785,0.07,15508.63043151,target,522.25,0.5,2
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LINK/USD,SHORT,ABCD ↓,2022-06-09 00:00,2022-06-09 14:00,8.7,9.39372,7.18175,9.4,1518.15936422,stop,-1125.75,-1.08,0
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),DOGE/USD,LONG,Ascending triangle ↑,2022-08-15 00:00,2022-08-19 11:45,0.08,0.0681789,0.0954903,0.07,78693.75655249,stop,-1099.41,-1.03,4
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),SOL/USD,LONG,Symmetrical triangle ↑,2022-07-15 00:00,2022-08-20 19:15,37.15,34.2593,78.1723,34.24,359.65169206,stop,-1109.08,-1.07,36
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LTC/USD,LONG,Ascending triangle ↑,2022-07-29 00:00,2022-09-19 03:30,63.51,51.6527,81.9301,51.63,88.98628727,stop,-1083.2,-1.03,52
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LINK/USD,LONG,Ascending triangle ↑,2022-07-30 00:00,2022-09-28 00:15,7.89,6.0638,9.81817,8.05,574.1523351,time exit,68.89,0.07,60
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LINK/USD,LONG,Double bottom ↑,2022-10-30 00:00,2022-11-04 14:30,7.65,6.24155,8.433,8.43,716.29050368,target,534.91,0.53,5
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),SOL/USD,LONG,Falling wedge ↑,2022-10-26 00:00,2022-11-08 03:30,30.88,26.9875,41.0701,26.97,257.65061123,stop,-1043.73,-1.04,13
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BTC/USD,LONG,Triple bottom ↑,2022-10-27 00:00,2022-11-08 19:30,20784.9,18050.7,22576.0,18041.67,0.36623512,stop,-1040.21,-1.04,12
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BCH/USD,LONG,Falling wedge ↑,2022-10-26 00:00,2022-11-08 19:45,113.2,99.0143,138.629,98.96,70.72225389,stop,-1044.01,-1.05,13
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),ETH/USD,SHORT,Head & shoulders ↓,2022-09-17 00:00,2022-11-16 00:15,1432.79,1809.64,820.466,1252.77,2.66311175,time exit,461.55,0.46,60
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BCH/USD,SHORT,Double top ↓,2022-12-17 00:00,2022-12-30 08:45,99.84,120.388,92.65,92.65,47.73630192,target,320.25,0.33,13
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),ETH/USD,LONG,Ascending triangle ↑,2023-01-12 00:00,2023-01-20 20:45,1389.58,1194.31,1641.84,1641.84,5.04539461,target,1234.49,1.26,8
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),DOGE/USD,LONG,ABCD ↑,2023-03-06 00:00,2023-03-09 19:15,0.07,0.06922,0.0849449,0.07,184768.84656951,stop,-1073.78,-1.08,3
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),DOGE/USD,LONG,Falling wedge ↑,2023-03-18 00:00,2023-04-03 18:15,0.08,0.0599631,0.0955342,0.1,59300.903914530005,target,1098.29,1.12,16
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LTC/USD,SHORT,Gartley ↓,2023-03-25 00:00,2023-04-17 00:45,93.7,105.63,82.7681,105.68,82.66573666000001,stop,-1031.52,-1.05,23
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),SOL/USD,SHORT,Rising wedge ↓,2023-04-20 00:00,2023-05-23 15:15,22.7,27.6005,12.7092,27.61,201.20204076000002,stop,-1014.35,-1.03,33
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),DOGE/USD,LONG,Gartley ↑,2023-05-13 00:00,2023-05-23 16:15,0.07,0.0620967,0.0858806,0.09,95838.14606123,target,1250.55,1.27,10
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LINK/USD,SHORT,Diamond ↓,2023-07-17 00:00,2023-07-20 09:15,6.6,7.7083,2.61204,7.71,896.23579534,stop,-1024.84,-1.04,3
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BTC/USD,SHORT,Bear flag ↓,2023-08-17 00:00,2023-08-17 21:45,28688.58,30487.3,25675.3,25675.3,0.54702375,target,1573.99,1.61,0
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LINK/USD,LONG,Triple bottom ↑,2023-09-19 00:00,2023-09-25 15:15,6.57,5.5385,7.36264,7.36,964.52672208,target,730.83,0.74,6
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),ETH/USD,LONG,Diamond ↑,2023-09-29 00:00,2023-10-09 10:00,1654.0,1606.92,2674.62,1606.12,12.08763914,stop,-677.32,-1.21,10
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BCH/USD,SHORT,ABCD ↓,2023-10-25 00:00,2023-10-27 17:15,251.7,295.801,233.965,233.97,22.56608242,target,372.79,0.38,2
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),DOGE/USD,SHORT,ABCD ↓,2023-11-19 00:00,2023-11-21 14:15,0.08,0.0923394,0.0760491,0.08,82578.67914215,target,313.27,0.31,2
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BTC/USD,LONG,Double bottom ↑,2023-12-02 00:00,2023-12-08 21:30,38732.94,32101.0,44642.0,44642.0,0.15121985000000002,target,862.05,0.86,6
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BCH/USD,SHORT,Rising wedge ↓,2023-11-18 00:00,2023-12-11 02:15,229.58,282.088,163.774,282.23,19.01309838,stop,-1025.3,-1.03,23
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LINK/USD,LONG,Inverse head & shoulders ↑,2024-02-02 00:00,2024-02-11 08:15,17.2,13.3128,20.53,20.53,255.78223,target,826.96,0.83,9
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),ETH/USD,LONG,Triple bottom ↑,2024-01-11 00:00,2024-02-19 06:00,2587.37,2085.42,2900.57,2900.57,1.99160652,target,596.44,0.6,39
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),DOGE/USD,SHORT,Double top ↓,2024-01-04 00:00,2024-02-28 16:45,0.08,0.108363,0.0586323,0.11,37938.59293098,stop,-1019.28,-1.02,55
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BCH/USD,LONG,Symmetrical triangle ↑,2024-02-28 00:00,2024-03-02 02:15,293.15,254.234,374.698,374.7,25.94654826,target,2072.66,2.06,3
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LTC/USD,LONG,Symmetrical triangle ↑,2024-02-28 00:00,2024-03-02 04:00,74.08,65.7809,90.7587,90.76,121.80284398,target,1981.82,1.97,3
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BCH/USD,SHORT,Rising wedge ↓,2024-04-11 00:00,2024-04-13 21:30,628.94,790.476,449.408,449.41,6.4641320900000006,target,1143.06,1.1,2
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),ETH/USD,SHORT,Bear flag ↓,2024-04-13 00:00,2024-05-21 11:30,3236.28,3758.91,2233.51,3760.79,2.01197734,stop,-1090.5,-1.04,38
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),XRP/USD,SHORT,Head & shoulders ↓,2024-04-13 00:00,2024-06-12 00:15,0.55,0.649277,0.391086,0.48,10319.907508870001,time exit,659.6,0.63,60
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BTC/USD,SHORT,Double top ↓,2024-06-19 00:00,2024-06-24 09:45,65082.59,72339.2,60615.8,60615.8,0.14607299,target,606.58,0.57,5
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),XRP/USD,LONG,Falling wedge ↑,2024-06-18 00:00,2024-07-04 02:00,0.51,0.459079,0.599494,0.46,22844.85021555,stop,-1119.72,-1.06,16
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),ETH/USD,SHORT,Symmetrical triangle ↓,2024-08-03 00:00,2024-08-05 01:15,2983.6,3446.83,2417.32,2417.32,2.30858869,target,1276.14,1.2,2
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BCH/USD,SHORT,Diamond top ↓,2024-06-12 00:00,2024-08-11 00:15,446.0,507.746,145.224,355.31,17.05614186,time exit,1512.64,1.44,60
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BTC/USD,SHORT,Gartley ↓,2024-08-27 00:00,2024-08-27 22:15,62780.88,70015.7,59728.5,59728.5,0.1510314,target,414.75,0.38,0
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),DOGE/USD,SHORT,Diamond ↓,2024-07-31 00:00,2024-09-29 00:15,0.13,0.138617,0.0431126,0.13,79830.32212986,time exit,-265.46,-0.25,60
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),SOL/USD,LONG,Double bottom ↑,2024-10-15 00:00,2024-10-21 05:15,157.65,131.82,171.365,171.37,41.93199254,target,540.43,0.5,6
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),DOGE/USD,SHORT,ABCD ↓,2024-10-21 00:00,2024-10-28 19:30,0.14,0.156716,0.118183,0.16,73698.14686813,stop,-1146.51,-1.06,7
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),SOL/USD,SHORT,Double top ↓,2024-11-05 00:00,2024-11-06 04:00,157.7,184.824,135.22,184.92,39.48776373,stop,-1108.36,-1.04,1
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),XRP/USD,LONG,Double bottom ↑,2024-11-07 00:00,2024-11-07 03:30,0.54,0.486681,0.5712,0.57,19178.76771471,target,501.44,0.47,0
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LINK/USD,SHORT,Bear flag ↓,2024-10-02 00:00,2024-11-08 12:15,11.0,13.1089,7.51048,13.12,507.83614734,stop,-1103.63,-1.03,37
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BCH/USD,LONG,Symmetrical triangle ↑,2024-09-20 00:00,2024-11-10 13:45,340.46,302.016,440.166,440.17,28.54344237,target,2790.39,2.55,51
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),ETH/USD,LONG,Ascending triangle ↑,2024-11-08 00:00,2024-11-11 16:30,2899.26,2404.14,3300.57,3300.57,2.15454256,target,831.24,0.78,3
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LTC/USD,SHORT,ABCD ↓,2024-12-01 00:00,2024-12-01 21:00,102.67,113.544,89.9976,113.6,101.39964992,stop,-1163.59,-1.06,0
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LTC/USD,LONG,ABCD ↑,2024-12-21 00:00,2025-01-05 22:30,101.37,77.3185,114.812,114.81,45.46082691,target,586.64,0.54,15
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),ETH/USD,LONG,Bull pennant ↑,2024-11-22 00:00,2025-01-13 12:45,3364.42,3036.89,4206.5,3035.37,3.33471252,stop,-1150.62,-1.06,52
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),SOL/USD,SHORT,Diamond top ↓,2024-12-17 00:00,2025-01-18 06:30,216.2,234.576,110.907,234.69,59.95554514,stop,-1176.58,-1.07,32
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),SOL/USD,LONG,Double bottom ↑,2025-01-19 00:00,2025-01-19 10:45,261.8,166.119,282.235,282.24,11.06823208,target,211.16,0.2,0
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),DOGE/USD,SHORT,ABCD ↓,2025-01-19 00:00,2025-01-19 12:00,0.4,0.469696,0.358973,0.36,14303.507967540001,target,496.37,0.47,0
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),ETH/USD,LONG,Falling wedge ↑,2025-02-01 00:00,2025-02-02 18:00,3301.35,2958.4,4314.87,2956.92,3.11515749,stop,-1121.69,-1.06,1
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BTC/USD,LONG,Double bottom ↑,2025-01-18 00:00,2025-02-25 07:45,104230.38,88687.2,116015.0,88642.86,0.06887436,stop,-1106.79,-1.04,38
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),XRP/USD,LONG,Symmetrical triangle ↑,2025-03-03 00:00,2025-03-10 18:00,2.94,2.03516,3.98416,2.03,1151.47532898,stop,-1059.55,-1.02,7
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LTC/USD,LONG,Gartley ↑,2025-03-06 00:00,2025-04-03 13:00,104.75,80.38,117.088,80.34,42.64767936,stop,-1060.87,-1.02,28
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LINK/USD,LONG,ABCD ↑,2025-04-08 00:00,2025-04-22 14:45,11.44,8.53155,13.7077,13.71,351.35302467,target,773.4,0.76,14
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),XRP/USD,LONG,Diamond ↑,2025-05-09 00:00,2025-05-31 00:30,2.33,2.11114,3.65613,2.11,4737.94107455,stop,-1091.99,-1.06,22
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BTC/USD,SHORT,Symmetrical triangle ↓,2025-06-18 00:00,2025-07-03 09:30,104626.86,109987.0,64015.2,110041.99,0.19179963,stop,-1141.55,-1.12,15
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LTC/USD,LONG,Inverse head & shoulders ↑,2025-07-11 00:00,2025-07-18 05:15,94.89,82.9419,108.742,108.74,84.56257289,target,1128.11,1.12,7
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),ETH/USD,SHORT,Double top ↓,2025-08-02 00:00,2025-08-08 14:00,3483.0,3972.29,3078.03,3974.28,2.07180966,stop,-1056.46,-1.05,6
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BCH/USD,LONG,Rectangle ↑,2025-07-21 00:00,2025-08-12 17:45,548.7,458.539,616.66,616.66,11.32400275,target,736.64,0.72,22
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BCH/USD,SHORT,ABCD ↓,2025-08-14 00:00,2025-08-18 03:45,615.82,680.531,565.389,565.39,15.71600271,target,746.16,0.74,4
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BCH/USD,LONG,ABCD ↑,2025-09-02 00:00,2025-09-02 10:00,545.67,491.734,572.242,572.24,18.95693886,target,450.79,0.44,0
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),DOGE/USD,LONG,Rounding bottom ↑,2025-07-21 00:00,2025-09-19 00:15,0.27,0.151341,0.339544,0.28,8312.78840797,time exit,30.41,0.03,60
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),ETH/USD,LONG,Butterfly ↑,2025-09-27 00:00,2025-10-02 06:30,4039.99,3515.87,4404.72,4404.72,1.96973383,target,676.84,0.66,5
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BTC/USD,SHORT,Double top ↓,2025-08-26 00:00,2025-10-05 05:00,110192.97,125109.0,99448.3,125171.55,0.06841338,stop,-1064.99,-1.05,40
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),XRP/USD,LONG,Double bottom ↑,2025-10-03 00:00,2025-10-10 19:30,3.04,2.67828,3.29205,2.68,2810.25737346,stop,-1071.73,-1.05,7
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LINK/USD,SHORT,Head & shoulders ↓,2025-09-23 00:00,2025-10-10 21:30,21.68,25.8673,15.9908,15.99,245.54811411,target,1374.37,1.34,17
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LINK/USD,LONG,ABCD ↑,2025-11-06 00:00,2025-11-19 16:00,15.09,13.0087,17.1978,13.0,494.60205612,stop,-1068.63,-1.04,13
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),XRP/USD,SHORT,Descending triangle ↓,2025-10-11 00:00,2025-11-19 20:15,2.25,2.99341,2.02634,2.03,1387.65772323,target,299.51,0.29,39
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LTC/USD,SHORT,Descending triangle ↓,2025-10-11 00:00,2025-12-01 15:45,97.23,121.023,75.5994,75.6,43.21673536,target,916.21,0.89,51
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BCH/USD,SHORT,Rising wedge ↓,2025-11-05 00:00,2025-12-03 04:45,479.59,582.023,382.902,582.31,10.09605738,stop,-1063.91,-1.03,28
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BCH/USD,SHORT,ABCD ↓,2025-12-29 00:00,2026-01-19 00:15,621.89,676.958,567.199,567.2,18.57069099,target,960.42,0.94,21
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),XRP/USD,LONG,Double bottom ↑,2026-01-06 00:00,2026-01-30 01:45,2.35,1.75586,2.7968,1.75,1695.83318687,stop,-1033.01,-1.02,24
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),ETH/USD,SHORT,Symmetrical triangle ↓,2026-01-21 00:00,2026-01-31 18:45,2934.12,3339.12,2360.48,2360.48,2.5239448700000002,target,1414.43,1.39,10
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),DOGE/USD,LONG,Falling wedge ↑,2026-02-15 00:00,2026-04-16 00:15,0.11,0.0773092,0.150446,0.09,30611.1362974,time exit,-509.68,-0.49,60
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BCH/USD,SHORT,Double top ↓,2026-02-25 00:00,2026-04-26 00:15,484.31,592.82,393.56,453.47,9.45969715,time exit,269.57,0.26,60
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BTC/USD,LONG,Double bottom ↑,2026-03-17 00:00,2026-05-16 00:15,74931.52,59065.4,88470.0,79017.63,0.06495829,time exit,240.43,0.23,60
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LTC/USD,LONG,Symmetrical triangle ↑,2026-05-09 00:00,2026-05-18 10:15,58.37,53.5463,68.111,53.52,215.29520744,stop,-1103.79,-1.07,9
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),XRP/USD,LONG,Symmetrical triangle ↑,2026-05-11 00:00,2026-05-22 18:45,1.47,1.34632,1.88618,1.35,8105.81376612,stop,-1105.0,-1.07,11
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LINK/USD,SHORT,ABCD ↓,2026-05-08 00:00,2026-05-23 07:15,9.85,10.9019,9.29492,9.29,988.6182935100001,target,501.76,0.48,15
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),DOGE/USD,LONG,Symmetrical triangle ↑,2026-04-30 00:00,2026-06-02 15:45,0.1,0.0945464,0.125212,0.09,107659.49905684,stop,-1092.48,-1.06,33
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),SOL/USD,LONG,Double bottom ↑,2026-06-16 00:00,2026-08-15 00:15,73.95,59.3831,85.9015,75.42,68.99457047,time exit,75.99,0.08,60
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),XRP/USD,SHORT,Diamond ↓,2026-07-28 00:00,2026-08-19 22:00,1.06,1.13103,0.548086,1.13,15237.58870289,stop,-1102.73,-1.1,22
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),DOGE/USD,LONG,Falling wedge ↑,2026-08-12 00:00,2026-08-20 16:45,0.07,0.0671971,0.0808919,0.08,218681.39398628002,target,1893.58,1.88,8
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BTC/USD,LONG,Symmetrical triangle ↑,2026-08-20 00:00,2026-08-21 08:15,69358.31,63471.0,76892.6,76892.6,0.17062123,target,1223.13,1.22,1
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LTC/USD,LONG,Symmetrical triangle ↑,2026-08-20 00:00,2026-08-21 23:00,46.82,43.9819,54.1418,54.14,354.88412458,target,2509.12,2.51,1
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LTC/USD,LONG,Triple bottom ↑,2026-08-22 00:00,2026-08-22 00:15,53.15,42.587,53.2075,53.21,99.52053658,target,-20.45,-0.02,0
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BCH/USD,SHORT,ABCD ↓,2026-08-23 00:00,2026-09-10 13:15,276.58,322.608,237.363,237.36,22.83966155,target,866.36,0.83,18
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BCH/USD,LONG,Gartley ↑,2026-09-12 00:00,2026-09-15 07:30,228.15,199.659,251.486,251.49,37.24078212,target,824.41,0.78,3
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BTC/USD,SHORT,Double top ↓,2026-09-16 00:00,2026-09-21 08:45,75553.95,82642.3,70211.2,82683.62,0.15105208,stop,-1136.71,-1.07,5
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),LTC/USD,LONG,ABCD ↑,2026-10-10 00:00,2026-10-12 08:00,63.49,58.1888,67.9976,68.0,197.84976276,target,827.77,0.79,2
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),DOGE/USD,LONG,Double bottom ↑,2026-09-22 00:00,2026-10-15 14:00,0.1,0.0772941,0.111681,0.08,46730.05994311,still open,-1032.78,-0.98,23
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),XRP/USD,LONG,Triple bottom ↑,2026-09-22 00:00,2026-10-15 14:00,1.54,1.23233,1.6906,1.29,3425.66993605,still open,-893.45,-0.85,23
+2. Up + down patterns (shorts) (test only: Alpaca can't short crypto),BTC/USD,SHORT,Double top ↓,2026-10-13 00:00,2026-10-15 14:00,81701.93,87765.5,77711.0,80096.98,0.17376547,still open,208.6,0.2,2
+"3. Up patterns, only while BTC is above its 50-day MA",DOGE/USD,LONG,Double bottom ↑,2022-03-28 00:00,2022-04-05 17:00,0.14,0.105165,0.1718,0.17,25447.40468982,target,667.64,0.66,8
+"3. Up patterns, only while BTC is above its 50-day MA",SOL/USD,LONG,Falling wedge ↑,2022-03-24 00:00,2022-05-08 17:15,94.99,75.3326,143.829,75.29,50.99534534,stop,-1026.05,-1.03,45
+"3. Up patterns, only while BTC is above its 50-day MA",DOGE/USD,LONG,Ascending triangle ↑,2022-08-15 00:00,2022-08-19 11:45,0.08,0.0681789,0.0954903,0.07,74520.17954616,stop,-1041.1,-1.03,4
+"3. Up patterns, only while BTC is above its 50-day MA",SOL/USD,LONG,Bull flag ↑,2022-07-28 00:00,2022-08-26 15:15,40.25,33.6635,54.7639,33.65,151.67810543000002,stop,-1030.05,-1.03,29
+"3. Up patterns, only while BTC is above its 50-day MA",LTC/USD,LONG,Ascending triangle ↑,2022-07-29 00:00,2022-09-19 03:30,63.51,51.6527,81.9301,51.63,84.57584077,stop,-1029.52,-1.03,52
+"3. Up patterns, only while BTC is above its 50-day MA",LINK/USD,LONG,Ascending triangle ↑,2022-07-30 00:00,2022-09-28 00:15,7.89,6.0638,9.81817,8.05,546.74228887,time exit,65.6,0.07,60
+"3. Up patterns, only while BTC is above its 50-day MA",ETH/USD,LONG,Double bottom ↑,2022-10-26 00:00,2022-10-26 14:30,1461.22,1178.33,1578.24,1578.24,3.42379855,target,374.64,0.39,0
+"3. Up patterns, only while BTC is above its 50-day MA",LINK/USD,LONG,Double bottom ↑,2022-10-30 00:00,2022-11-04 14:30,7.65,6.24155,8.433,8.43,698.30170848,target,521.48,0.53,5
+"3. Up patterns, only while BTC is above its 50-day MA",SOL/USD,LONG,Falling wedge ↑,2022-10-26 00:00,2022-11-08 03:30,30.88,26.9875,41.0701,26.97,249.15587617,stop,-1009.32,-1.04,13
+"3. Up patterns, only while BTC is above its 50-day MA",BTC/USD,LONG,Triple bottom ↑,2022-10-27 00:00,2022-11-08 19:30,20784.9,18050.7,22576.0,18041.67,0.35654232,stop,-1012.68,-1.04,12
+"3. Up patterns, only while BTC is above its 50-day MA",BCH/USD,LONG,Falling wedge ↑,2022-10-26 00:00,2022-11-08 19:45,113.2,99.0143,138.629,98.96,68.39054271,stop,-1009.59,-1.05,13
+"3. Up patterns, only while BTC is above its 50-day MA",ETH/USD,LONG,Ascending triangle ↑,2023-01-12 00:00,2023-01-20 20:45,1389.58,1194.31,1641.84,1641.84,4.85523196,target,1187.96,1.26,8
+"3. Up patterns, only while BTC is above its 50-day MA",DOGE/USD,LONG,Falling wedge ↑,2023-03-18 00:00,2023-04-03 18:15,0.08,0.0599631,0.0955342,0.1,57688.98802722,target,1068.44,1.12,16
+"3. Up patterns, only while BTC is above its 50-day MA",ETH/USD,LONG,Diamond ↑,2023-09-29 00:00,2023-10-09 10:00,1654.0,1606.92,2674.62,1606.12,11.70203174,stop,-655.71,-1.21,10
+"3. Up patterns, only while BTC is above its 50-day MA",BTC/USD,LONG,Double bottom ↑,2023-12-02 00:00,2023-12-08 21:30,38732.94,32101.0,44642.0,44642.0,0.14528662,target,828.22,0.86,6
+"3. Up patterns, only while BTC is above its 50-day MA",LINK/USD,LONG,Inverse head & shoulders ↑,2024-02-02 00:00,2024-02-11 08:15,17.2,13.3128,20.53,20.53,248.21499606,target,802.5,0.83,9
+"3. Up patterns, only while BTC is above its 50-day MA",ETH/USD,LONG,Triple bottom ↑,2024-01-11 00:00,2024-02-19 06:00,2587.37,2085.42,2900.57,2900.57,1.93543621,target,579.62,0.6,39
+"3. Up patterns, only while BTC is above its 50-day MA",BCH/USD,LONG,Symmetrical triangle ↑,2024-02-28 00:00,2024-03-02 02:15,293.15,254.234,374.698,374.7,25.35274174,target,2025.22,2.06,3
+"3. Up patterns, only while BTC is above its 50-day MA",LTC/USD,LONG,Symmetrical triangle ↑,2024-02-28 00:00,2024-03-02 04:00,74.08,65.7809,90.7587,90.76,119.01529311,target,1936.47,1.97,3
+"3. Up patterns, only while BTC is above its 50-day MA",ETH/USD,LONG,Triple bottom ↑,2024-05-21 00:00,2024-05-23 11:30,3666.72,2783.48,3869.3,3869.3,1.16000725,target,213.14,0.21,2
+"3. Up patterns, only while BTC is above its 50-day MA",XRP/USD,LONG,Falling wedge ↑,2024-06-18 00:00,2024-07-04 02:00,0.51,0.459079,0.599494,0.46,22215.02978802,stop,-1088.85,-1.06,16
+"3. Up patterns, only while BTC is above its 50-day MA",BCH/USD,LONG,Symmetrical triangle ↑,2024-07-29 00:00,2024-08-03 16:30,416.67,362.926,555.467,362.74,18.93544355,stop,-1057.97,-1.04,5
+"3. Up patterns, only while BTC is above its 50-day MA",SOL/USD,LONG,Double bottom ↑,2024-10-15 00:00,2024-10-21 05:15,157.65,131.82,171.365,171.37,39.231146360000004,target,505.62,0.5,6
+"3. Up patterns, only while BTC is above its 50-day MA",LINK/USD,LONG,Double bottom ↑,2024-10-21 00:00,2024-11-04 21:45,11.98,10.1373,13.2462,10.13,551.54232288,stop,-1050.74,-1.04,14
+"3. Up patterns, only while BTC is above its 50-day MA",XRP/USD,LONG,Double bottom ↑,2024-11-07 00:00,2024-11-07 03:30,0.54,0.486681,0.5712,0.57,18211.59313071,target,476.15,0.47,0
+"3. Up patterns, only while BTC is above its 50-day MA",BCH/USD,LONG,Symmetrical triangle ↑,2024-09-20 00:00,2024-11-10 13:45,340.46,302.016,440.166,440.17,26.21188171,target,2562.46,2.55,51
+"3. Up patterns, only while BTC is above its 50-day MA",ETH/USD,LONG,Ascending triangle ↑,2024-11-08 00:00,2024-11-11 16:30,2899.26,2404.14,3300.57,3300.57,2.04992955,target,790.88,0.78,3
+"3. Up patterns, only while BTC is above its 50-day MA",LTC/USD,LONG,ABCD ↑,2024-12-21 00:00,2025-01-05 22:30,101.37,77.3185,114.812,114.81,43.29769354,target,558.73,0.54,15
+"3. Up patterns, only while BTC is above its 50-day MA",SOL/USD,LONG,Gartley ↑,2024-12-21 00:00,2025-01-06 15:00,194.39,155.0,220.854,220.85,26.44418272,target,672.38,0.65,16
+"3. Up patterns, only while BTC is above its 50-day MA",ETH/USD,LONG,Bull pennant ↑,2024-11-22 00:00,2025-01-13 12:45,3364.42,3036.89,4206.5,3035.37,3.17922465,stop,-1096.97,-1.06,52
+"3. Up patterns, only while BTC is above its 50-day MA",SOL/USD,LONG,Double bottom ↑,2025-01-19 00:00,2025-01-19 10:45,261.8,166.119,282.235,282.24,10.85596166,target,207.11,0.2,0
+"3. Up patterns, only while BTC is above its 50-day MA",ETH/USD,LONG,Falling wedge ↑,2025-02-01 00:00,2025-02-02 18:00,3301.35,2958.4,4314.87,2956.92,3.0411849600000003,stop,-1095.05,-1.06,1
+"3. Up patterns, only while BTC is above its 50-day MA",BTC/USD,LONG,Double bottom ↑,2025-01-18 00:00,2025-02-25 07:45,104230.38,88687.2,116015.0,88642.86,0.06696,stop,-1076.03,-1.04,38
+"3. Up patterns, only while BTC is above its 50-day MA",XRP/USD,LONG,Diamond ↑,2025-05-09 00:00,2025-05-31 00:30,2.33,2.11114,3.65613,2.11,4686.16983731,stop,-1080.06,-1.06,22
+"3. Up patterns, only while BTC is above its 50-day MA",LTC/USD,LONG,Inverse head & shoulders ↑,2025-07-11 00:00,2025-07-18 05:15,94.89,82.9419,108.742,108.74,84.58712512,target,1128.43,1.12,7
+"3. Up patterns, only while BTC is above its 50-day MA",BCH/USD,LONG,Rectangle ↑,2025-07-21 00:00,2025-08-12 17:45,548.7,458.539,616.66,616.66,11.32729061,target,736.85,0.72,22
+"3. Up patterns, only while BTC is above its 50-day MA",DOGE/USD,LONG,Rounding bottom ↑,2025-07-21 00:00,2025-09-19 00:15,0.27,0.151341,0.339544,0.28,8315.20197584,time exit,30.42,0.03,60
+"3. Up patterns, only while BTC is above its 50-day MA",XRP/USD,LONG,Double bottom ↑,2025-10-03 00:00,2025-10-10 19:30,3.04,2.67828,3.29205,2.68,2816.62304232,stop,-1074.16,-1.05,7
+"3. Up patterns, only while BTC is above its 50-day MA",XRP/USD,LONG,Double bottom ↑,2026-01-06 00:00,2026-01-30 01:45,2.35,1.75586,2.7968,1.75,1700.77345739,stop,-1036.02,-1.02,24
+"3. Up patterns, only while BTC is above its 50-day MA",BTC/USD,LONG,Double bottom ↑,2026-03-17 00:00,2026-05-16 00:15,74931.52,59065.4,88470.0,79017.63,0.06347362,time exit,234.93,0.23,60
+"3. Up patterns, only while BTC is above its 50-day MA",LTC/USD,LONG,Symmetrical triangle ↑,2026-05-09 00:00,2026-05-18 10:15,58.37,53.5463,68.111,53.52,211.48953188000002,stop,-1084.28,-1.07,9
+"3. Up patterns, only while BTC is above its 50-day MA",XRP/USD,LONG,Symmetrical triangle ↑,2026-05-11 00:00,2026-05-22 18:45,1.47,1.34632,1.88618,1.35,7990.20419793,stop,-1089.24,-1.07,11
+"3. Up patterns, only while BTC is above its 50-day MA",DOGE/USD,LONG,Symmetrical triangle ↑,2026-04-30 00:00,2026-06-02 15:45,0.1,0.0945464,0.125212,0.09,105229.27608244,stop,-1067.82,-1.06,33
+"3. Up patterns, only while BTC is above its 50-day MA",DOGE/USD,LONG,Falling wedge ↑,2026-08-12 00:00,2026-08-20 16:45,0.07,0.0671971,0.0808919,0.08,211052.50642751,target,1827.52,1.88,8
+"3. Up patterns, only while BTC is above its 50-day MA",BTC/USD,LONG,Symmetrical triangle ↑,2026-08-20 00:00,2026-08-21 08:15,69358.31,63471.0,76892.6,76892.6,0.16760772000000002,target,1201.52,1.22,1
+"3. Up patterns, only while BTC is above its 50-day MA",LTC/USD,LONG,Symmetrical triangle ↑,2026-08-20 00:00,2026-08-21 23:00,46.82,43.9819,54.1418,54.14,348.61616426,target,2464.8,2.51,1
+"3. Up patterns, only while BTC is above its 50-day MA",LTC/USD,LONG,Triple bottom ↑,2026-08-22 00:00,2026-08-22 00:15,53.15,42.587,53.2075,53.21,97.74253952000001,target,-20.08,-0.02,0
+"3. Up patterns, only while BTC is above its 50-day MA",BCH/USD,LONG,Gartley ↑,2026-09-12 00:00,2026-09-15 07:30,228.15,199.659,251.486,251.49,36.27559749,target,803.05,0.78,3
+"3. Up patterns, only while BTC is above its 50-day MA",LTC/USD,LONG,ABCD ↑,2026-10-10 00:00,2026-10-12 08:00,63.49,58.1888,67.9976,68.0,194.80116629,target,815.01,0.79,2
+"3. Up patterns, only while BTC is above its 50-day MA",XRP/USD,LONG,Triple bottom ↑,2026-09-22 00:00,2026-10-15 14:00,1.54,1.23233,1.6906,1.29,3372.8850090700003,still open,-879.68,-0.85,23
+"3. Up patterns, only while BTC is above its 50-day MA",DOGE/USD,LONG,Double bottom ↑,2026-09-22 00:00,2026-10-15 14:00,0.1,0.0772941,0.111681,0.08,46010.01310622,still open,-1016.87,-0.98,23
+4. Up patterns: pattern's stop + trailing exit (20-day low),ETH/USD,LONG,Symmetrical triangle ↑,2021-12-01 00:00,2021-12-03 20:30,4634.93,4093.75,,4091.7,1.85575656,stop,-1048.58,-1.05,2
+4. Up patterns: pattern's stop + trailing exit (20-day low),BCH/USD,LONG,Gartley ↑,2022-01-07 00:00,2022-01-08 00:00,399.84,349.3,,385.88,19.65661973,trend exit,-313.07,-0.32,0
+4. Up patterns: pattern's stop + trailing exit (20-day low),DOGE/USD,LONG,Gartley ↑,2022-01-07 00:00,2022-01-11 00:00,0.16,0.1305,,0.14,33771.81698656,trend exit,-601.41,-0.61,3
+4. Up patterns: pattern's stop + trailing exit (20-day low),BCH/USD,LONG,Double bottom ↑,2022-02-06 00:00,2022-04-12 00:00,320.79,255.707,,293.95,15.10043034,trend exit,-428.46,-0.44,64
+4. Up patterns: pattern's stop + trailing exit (20-day low),DOGE/USD,LONG,Double bottom ↑,2022-03-28 00:00,2022-04-25 00:00,0.14,0.105165,,0.13,25159.7429803,trend exit,-342.92,-0.34,27
+4. Up patterns: pattern's stop + trailing exit (20-day low),SOL/USD,LONG,Falling wedge ↑,2022-03-24 00:00,2022-04-30 00:00,94.99,75.3326,,94.09,50.32091301,trend exit,-69.03,-0.07,36
+4. Up patterns: pattern's stop + trailing exit (20-day low),BCH/USD,LONG,ABCD ↑,2022-05-02 00:00,2022-05-09 00:00,284.14,240.57,,261.1,22.38004245,trend exit,-546.2,-0.56,6
+4. Up patterns: pattern's stop + trailing exit (20-day low),ETH/USD,LONG,Gartley ↑,2022-05-02 00:00,2022-05-09 00:00,2826.27,2444.68,,2518.74,2.55659225,trend exit,-820.4,-0.84,6
+4. Up patterns: pattern's stop + trailing exit (20-day low),DOGE/USD,LONG,ABCD ↑,2022-05-11 00:00,2022-05-11 13:00,0.11,0.08714,,0.09,45939.56175152,stop,-985.19,-1.03,0
+4. Up patterns: pattern's stop + trailing exit (20-day low),DOGE/USD,LONG,Ascending triangle ↑,2022-08-15 00:00,2022-08-19 11:45,0.08,0.0681789,,0.07,72318.91615225,stop,-1010.35,-1.03,4
+4. Up patterns: pattern's stop + trailing exit (20-day low),SOL/USD,LONG,Symmetrical triangle ↑,2022-07-15 00:00,2022-08-20 00:00,37.15,34.2593,,35.81,330.51695206,trend exit,-502.9,-0.53,35
+4. Up patterns: pattern's stop + trailing exit (20-day low),LTC/USD,LONG,Ascending triangle ↑,2022-07-29 00:00,2022-08-20 00:00,63.51,51.6527,,53.71,81.77766738,trend exit,-825.27,-0.85,21
+4. Up patterns: pattern's stop + trailing exit (20-day low),LINK/USD,LONG,Ascending triangle ↑,2022-07-30 00:00,2022-08-20 00:00,7.89,6.0638,,6.88,527.64128185,trend exit,-553.39,-0.58,20
+4. Up patterns: pattern's stop + trailing exit (20-day low),ETH/USD,LONG,ABCD ↑,2022-09-20 00:00,2022-09-22 00:00,1376.0,1128.92,,1250.9,3.73206318,trend exit,-491.37,-0.53,1
+4. Up patterns: pattern's stop + trailing exit (20-day low),SOL/USD,LONG,Falling wedge ↑,2022-10-26 00:00,2022-11-08 03:30,30.88,26.9875,,26.97,235.88630653,stop,-955.57,-1.04,13
+4. Up patterns: pattern's stop + trailing exit (20-day low),BTC/USD,LONG,Triple bottom ↑,2022-10-27 00:00,2022-11-08 19:30,20784.9,18050.7,,18041.67,0.33746103,stop,-958.49,-1.04,12
+4. Up patterns: pattern's stop + trailing exit (20-day low),BCH/USD,LONG,Falling wedge ↑,2022-10-26 00:00,2022-11-08 19:45,113.2,99.0143,,98.96,64.74819206000001,stop,-955.82,-1.05,13
+4. Up patterns: pattern's stop + trailing exit (20-day low),ETH/USD,LONG,Double bottom ↑,2022-10-26 00:00,2022-11-09 10:15,1461.22,1178.33,,1177.74,3.2414535300000002,stop,-940.27,-1.03,14
+4. Up patterns: pattern's stop + trailing exit (20-day low),LINK/USD,LONG,Double bottom ↑,2022-10-30 00:00,2022-11-09 18:45,7.65,6.24155,,6.24,662.1845123200001,stop,-955.07,-1.03,10
+4. Up patterns: pattern's stop + trailing exit (20-day low),ETH/USD,LONG,Ascending triangle ↑,2023-01-12 00:00,2023-02-11 00:00,1389.58,1194.31,,1515.1,4.45565411,trend exit,526.91,0.61,29
+4. Up patterns: pattern's stop + trailing exit (20-day low),DOGE/USD,LONG,ABCD ↑,2023-03-06 00:00,2023-03-09 00:00,0.07,0.06922,,0.07,162124.78536051,trend exit,-612.88,-0.7,2
+4. Up patterns: pattern's stop + trailing exit (20-day low),DOGE/USD,LONG,Falling wedge ↑,2023-03-18 00:00,2023-05-09 00:00,0.08,0.0599631,,0.07,52231.963120320004,trend exit,-169.16,-0.2,51
+4. Up patterns: pattern's stop + trailing exit (20-day low),DOGE/USD,LONG,Gartley ↑,2023-05-13 00:00,2023-06-10 04:30,0.07,0.0620967,,0.06,83896.91579742,stop,-898.27,-1.04,28
+4. Up patterns: pattern's stop + trailing exit (20-day low),ETH/USD,LONG,Diamond ↑,2023-09-29 00:00,2023-10-09 10:00,1654.0,1606.92,,1606.12,10.472263680000001,stop,-586.8,-1.21,10
+4. Up patterns: pattern's stop + trailing exit (20-day low),LINK/USD,LONG,Triple bottom ↑,2023-09-19 00:00,2024-04-13 00:00,6.57,5.5385,,15.16,831.8715133100001,trend exit,7102.76,8.3,206
+4. Up patterns: pattern's stop + trailing exit (20-day low),ETH/USD,LONG,Triple bottom ↑,2024-01-11 00:00,2024-04-14 00:00,2587.37,2085.42,,3024.55,1.85979869,trend exit,786.98,0.85,93
+4. Up patterns: pattern's stop + trailing exit (20-day low),BCH/USD,LONG,Symmetrical triangle ↑,2024-02-28 00:00,2024-05-01 00:00,293.15,254.234,,433.35,25.551140970000002,trend exit,3536.01,3.57,62
+4. Up patterns: pattern's stop + trailing exit (20-day low),BTC/USD,LONG,Double bottom ↑,2023-12-02 00:00,2024-05-02 00:00,38732.94,32101.0,,58297.89,0.13905382,trend exit,2686.85,2.92,151
+4. Up patterns: pattern's stop + trailing exit (20-day low),LTC/USD,LONG,Symmetrical triangle ↑,2024-02-28 00:00,2024-06-08 00:00,74.08,65.7809,,80.15,119.94665364000001,trend exit,682.13,0.69,100
+4. Up patterns: pattern's stop + trailing exit (20-day low),ETH/USD,LONG,Triple bottom ↑,2024-05-21 00:00,2024-06-12 00:00,3666.72,2783.48,,3492.84,1.1435511600000001,trend exit,-219.3,-0.22,21
+4. Up patterns: pattern's stop + trailing exit (20-day low),XRP/USD,LONG,Falling wedge ↑,2024-06-18 00:00,2024-07-04 02:00,0.51,0.459079,,0.46,21580.72041443,stop,-1057.76,-1.06,16
+4. Up patterns: pattern's stop + trailing exit (20-day low),BCH/USD,LONG,Symmetrical triangle ↑,2024-07-29 00:00,2024-08-03 16:30,416.67,362.926,,362.74,18.39477674,stop,-1027.76,-1.04,5
+4. Up patterns: pattern's stop + trailing exit (20-day low),LINK/USD,LONG,Double bottom ↑,2024-10-21 00:00,2024-11-04 21:45,11.98,10.1373,,10.13,535.79404485,stop,-1020.74,-1.04,14
+4. Up patterns: pattern's stop + trailing exit (20-day low),BCH/USD,LONG,Symmetrical triangle ↑,2024-09-20 00:00,2024-11-05 00:00,340.46,302.016,,328.87,25.46344957,trend exit,-337.68,-0.35,45
+4. Up patterns: pattern's stop + trailing exit (20-day low),SOL/USD,LONG,Double bottom ↑,2024-10-15 00:00,2024-12-20 00:00,157.65,131.82,,194.67,38.110973030000004,trend exit,1377.24,1.4,65
+4. Up patterns: pattern's stop + trailing exit (20-day low),ETH/USD,LONG,Ascending triangle ↑,2024-11-08 00:00,2024-12-20 00:00,2899.26,2404.14,,3434.98,1.98000906,trend exit,1029.37,1.05,41
+4. Up patterns: pattern's stop + trailing exit (20-day low),ETH/USD,LONG,Falling wedge ↑,2025-02-01 00:00,2025-02-02 18:00,3301.35,2958.4,,2956.92,4.2396917400000005,stop,-1526.61,-1.06,1
+4. Up patterns: pattern's stop + trailing exit (20-day low),SOL/USD,LONG,Gartley ↑,2024-12-21 00:00,2025-02-19 00:00,194.39,155.0,,168.88,32.83352873,trend exit,-867.37,-0.67,59
+4. Up patterns: pattern's stop + trailing exit (20-day low),BTC/USD,LONG,Double bottom ↑,2025-01-18 00:00,2025-02-25 00:00,104230.38,88687.2,,91980.64,0.0964757,trend exit,-1229.13,-0.82,37
+4. Up patterns: pattern's stop + trailing exit (20-day low),LTC/USD,LONG,ABCD ↑,2024-12-21 00:00,2025-03-05 00:00,101.37,77.3185,,103.24,53.75912275,trend exit,72.96,0.06,73
+4. Up patterns: pattern's stop + trailing exit (20-day low),LTC/USD,LONG,Gartley ↑,2025-03-06 00:00,2025-03-11 00:00,104.75,80.38,,88.47,53.17417929,trend exit,-891.6,-0.69,4
+4. Up patterns: pattern's stop + trailing exit (20-day low),XRP/USD,LONG,Double bottom ↑,2024-11-07 00:00,2025-04-07 00:00,0.54,0.486681,,1.92,17567.06169038,trend exit,24162.64,24.86,150
+4. Up patterns: pattern's stop + trailing exit (20-day low),LINK/USD,LONG,ABCD ↑,2025-04-08 00:00,2025-05-31 00:00,11.44,8.53155,,13.88,406.74730392000004,trend exit,964.45,0.82,52
+4. Up patterns: pattern's stop + trailing exit (20-day low),XRP/USD,LONG,Diamond ↑,2025-05-09 00:00,2025-05-31 00:00,2.33,2.11114,,2.14,5526.43209458,trend exit,-1100.94,-0.92,21
+4. Up patterns: pattern's stop + trailing exit (20-day low),LTC/USD,LONG,Inverse head & shoulders ↑,2025-07-11 00:00,2025-08-26 00:00,94.89,82.9419,,109.35,99.20013887,trend exit,1383.08,1.17,45
+4. Up patterns: pattern's stop + trailing exit (20-day low),BCH/USD,LONG,Rectangle ↑,2025-07-21 00:00,2025-09-26 00:00,548.7,458.539,,535.26,13.37449172,trend exit,-215.9,-0.18,66
+4. Up patterns: pattern's stop + trailing exit (20-day low),LINK/USD,LONG,ABCD ↑,2025-09-25 00:00,2025-09-26 00:00,21.62,18.9315,,20.07,444.74423,trend exit,-737.26,-0.62,0
+4. Up patterns: pattern's stop + trailing exit (20-day low),XRP/USD,LONG,Double bottom ↑,2025-10-03 00:00,2025-10-10 19:30,3.04,2.67828,,2.68,3277.80846357,stop,-1250.03,-1.05,7
+4. Up patterns: pattern's stop + trailing exit (20-day low),DOGE/USD,LONG,Rounding bottom ↑,2025-07-21 00:00,2025-10-10 21:30,0.27,0.151341,,0.15,9818.02301965,stop,-1214.67,-1.01,81
+4. Up patterns: pattern's stop + trailing exit (20-day low),ETH/USD,LONG,Butterfly ↑,2025-09-27 00:00,2025-10-10 21:30,4039.99,3515.87,,3514.11,2.2619450100000003,stop,-1232.22,-1.04,13
+4. Up patterns: pattern's stop + trailing exit (20-day low),LINK/USD,LONG,ABCD ↑,2025-11-06 00:00,2025-11-18 00:00,15.09,13.0087,,13.25,552.95673844,trend exit,-1058.7,-0.92,11
+4. Up patterns: pattern's stop + trailing exit (20-day low),XRP/USD,LONG,Double bottom ↑,2026-01-06 00:00,2026-01-26 00:00,2.35,1.75586,,1.83,1905.97161577,trend exit,-1020.42,-0.9,19
+4. Up patterns: pattern's stop + trailing exit (20-day low),LTC/USD,LONG,Symmetrical triangle ↑,2026-05-09 00:00,2026-05-18 10:15,58.37,53.5463,,53.52,235.91718912000002,stop,-1209.51,-1.07,9
+4. Up patterns: pattern's stop + trailing exit (20-day low),XRP/USD,LONG,Symmetrical triangle ↑,2026-05-11 00:00,2026-05-22 18:45,1.47,1.34632,,1.35,8894.15552098,stop,-1212.47,-1.07,11
+4. Up patterns: pattern's stop + trailing exit (20-day low),BTC/USD,LONG,Double bottom ↑,2026-03-17 00:00,2026-05-23 00:00,74931.52,59065.4,,75638.09,0.07104606000000001,trend exit,23.46,0.02,66
+4. Up patterns: pattern's stop + trailing exit (20-day low),DOGE/USD,LONG,Falling wedge ↑,2026-02-15 00:00,2026-06-03 00:00,0.11,0.0773092,,0.09,33493.64409738,trend exit,-646.65,-0.57,107
+4. Up patterns: pattern's stop + trailing exit (20-day low),SOL/USD,LONG,Double bottom ↑,2026-06-16 00:00,2026-08-02 00:00,73.95,59.3831,,71.97,75.50357539,trend exit,-176.92,-0.16,46
+4. Up patterns: pattern's stop + trailing exit (20-day low),BTC/USD,LONG,Symmetrical triangle ↑,2026-08-20 00:00,2026-09-16 00:00,69358.31,63471.0,,75589.52,0.1883242,trend exit,1105.24,1.0,26
+4. Up patterns: pattern's stop + trailing exit (20-day low),BCH/USD,LONG,Gartley ↑,2026-09-12 00:00,2026-09-16 00:00,228.15,199.659,,217.46,41.002551940000004,trend exit,-484.13,-0.42,3
+4. Up patterns: pattern's stop + trailing exit (20-day low),LTC/USD,LONG,Symmetrical triangle ↑,2026-08-20 00:00,2026-10-15 00:00,46.82,43.9819,,59.26,391.70546221,trend exit,4770.99,4.33,55
+4. Up patterns: pattern's stop + trailing exit (20-day low),DOGE/USD,LONG,Falling wedge ↑,2026-08-12 00:00,2026-10-15 14:00,0.07,0.0671971,,0.08,237138.80208845,trend exit,1671.88,1.53,64
+4. Up patterns: pattern's stop + trailing exit (20-day low),XRP/USD,LONG,Triple bottom ↑,2026-09-22 00:00,2026-10-15 14:00,1.54,1.23233,,1.3,3986.69439724,trend exit,-985.8,-0.8,23
