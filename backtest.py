@@ -55,8 +55,16 @@ VARIANTS = {                # each one changes the bot's rules (see simulate() f
     "trail":   ("3. Longs only + trailing exit", {"shorts": False, "exit": "trail"}),
     "long1x":  ("4. Longs only, no leverage", {"shorts": False, "margin": 1.0}),
     "trail1x": ("5. Longs + trailing exit, no leverage (bot now)", {"shorts": False, "exit": "trail", "margin": 1.0}),
+    # ideas to improve the bot now (version 5), one change each
+    "daily1x": ("6. Bot now, daily-chart signals only (no 15-min)",
+                {"shorts": False, "exit": "trail", "margin": 1.0, "kinds": ("daily",)}),
+    "spy1x":   ("7. Bot now + SPY filter (buy only while SPY is above its 200-day MA)",
+                {"shorts": False, "exit": "trail", "margin": 1.0, "spy_filter": True}),
+    "wide1x":  ("8. Bot now, wider stop (3x ATR instead of 2x)",
+                {"shorts": False, "exit": "trail", "margin": 1.0, "stop_atr": 3.0}),
 }
-SHORT = {"both": "1 L+S", "long": "2 Long", "trail": "3 Trail", "long1x": "4 L 1x", "trail1x": "5 T 1x"}
+SHORT = {"both": "1 L+S", "long": "2 Long", "trail": "3 Trail", "long1x": "4 L 1x", "trail1x": "5 T 1x",
+         "daily1x": "6 Daily", "spy1x": "7 SPYflt", "wide1x": "8 3xATR"}
 
 # What is tested (main() switches these to crypto when MARKET=crypto, see use_crypto())
 T = trader                  # money rules: trader.py (stocks) or crypto_trader.py (crypto)
