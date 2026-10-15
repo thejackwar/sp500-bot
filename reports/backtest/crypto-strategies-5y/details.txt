@@ -1,0 +1,23 @@
+📅 Return by year (middle of 10 runs)
+Version    2021   2022   2023   2024   2025   2026
+Bot        -10%   -10%   +15%   +80%   -16%   +12%
+Bot+BTC     -2%    -5%   +12%   +83%   -11%   +12%
+CBreak      +0%   -13%    +1%   +37%    -3%    -4%
+C20/50      +0%   -16%   +12%   +31%    +8%    -5%
+C4wMom      -1%   -15%   +31%   +23%    -5%    -3%
+CRotate     +0%    -6%   +12%   +31%    -6%    +2%
+GoldX       -1%    -0%    +2%   +23%    -6%    -2%
+52wHi       +0%    +0%    +3%   +11%    -7%    -2%
+RSI2        -2%    -2%    -2%    -4%    +0%    +1%
+BTC        -25%   -64%  +156%  +121%    -6%    -8%
+
+Long vs short (first run)
+Bot: long 151× +0.47R $+58k
+Bot+BTC: long 111× +0.76R $+86k
+CBreak: long 91× +0.12R $+5k
+C20/50: long 113× +0.19R $+17k
+C4wMom: long 468× +0.05R $+15k
+CRotate: long 207× +0.15R $+30k
+GoldX: long 29× +0.43R $+12k
+52wHi: long 25× +0.05R $+0k
+RSI2: long 230× -0.04R $-9k
