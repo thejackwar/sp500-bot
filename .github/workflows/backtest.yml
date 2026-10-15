@@ -18,6 +18,11 @@ on:
         type: choice
         options: ["strategies", "bot versions", "patterns"]
         default: "strategies"
+      bot_candles:
+        description: "Bot versions / strategies only: the bot's intraday chart (15m = like live)"
+        type: choice
+        options: ["15m", "1h"]
+        default: "15m"
       pattern_candles:
         description: "Patterns test only: which candles to find patterns on (15m: max 5 years)"
         type: choice
@@ -63,6 +68,7 @@ jobs:
           TEST: ${{ inputs.test }}
           RUNS: ${{ inputs.runs }}
           PATTERN_TF: ${{ inputs.pattern_candles }}
+          BOT_TF: ${{ inputs.bot_candles }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ inputs.market == 'crypto' && secrets.TELEGRAM_CHAT_ID_CRYPTO || secrets.TELEGRAM_CHAT_ID }}
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
@@ -88,6 +94,7 @@ jobs:
         run: |
           [ -f backtest-results/summary.txt ] || { echo "No results"; exit 0; }
           tf=""; [ "${{ inputs.test }}" = "patterns" ] && [ "${{ inputs.pattern_candles }}" != "daily" ] && tf="-${{ inputs.pattern_candles }}"
+          [ "${{ inputs.test }}" != "patterns" ] && [ "${{ inputs.bot_candles }}" = "1h" ] && tf="-1h"
           yrs="${{ inputs.years }}"; [ "$tf" = "-15m" ] && [ "$yrs" -gt 5 ] && yrs=5
           dir="reports/backtest/${{ inputs.market }}-$(echo '${{ inputs.test }}' | tr ' ' '-')${tf}-${yrs}y"
           mkdir -p "$dir"

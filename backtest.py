@@ -56,7 +56,7 @@ VARIANTS = {                # each one changes the bot's rules (see simulate() f
     "long1x":  ("4. Longs only, no leverage", {"shorts": False, "margin": 1.0}),
     "trail1x": ("5. Longs + trailing exit, no leverage (bot now)", {"shorts": False, "exit": "trail", "margin": 1.0}),
     # ideas to improve the bot now (version 5), one change each
-    "daily1x": ("6. Bot now, daily-chart signals only (no 15-min)",
+    "daily1x": ("6. Bot now, daily-chart signals only (no intraday chart)",
                 {"shorts": False, "exit": "trail", "margin": 1.0, "kinds": ("daily",)}),
     "spy1x":   ("7. Bot now + SPY filter (buy only while SPY is above its 200-day MA)",
                 {"shorts": False, "exit": "trail", "margin": 1.0, "spy_filter": True}),
@@ -71,6 +71,7 @@ T = trader                  # money rules: trader.py (stocks) or crypto_trader.p
 FEE = 0.0                   # trading fee per buy and per sell, as a share of the trade
 UNIVERSE, UNIT = "S&amp;P 100", "stocks"
 MARKET = "stocks"           # strategy files can be limited to one market with MARKETS = ("crypto",)
+BOT_TF = "15m"              # bot versions / strategies: the bot's intraday chart ("15m" like live, or "1h")
 PATTERN_TF = "daily"        # patterns test: which candles the patterns are found on ("daily", "1h", "15m")
 NEED_INTRADAY_VOLUME = False  # True for intraday pattern tests (re-downloads saved 15-min prices without volume)
 FILTER_MA = 200             # market trend filter: benchmark (SPY / BTC) above its N-day average
@@ -259,10 +260,11 @@ def daily_context(D):
     return known.shift(1)
 
 
-def stock_signals(h, D, debug=False):
+def stock_signals(h, D, debug=False, minutes=15):
     """Every STRONG signal of one stock. Returns one row per check that has one:
     check (time of the check), fill (start of the candle the order fills on), dl/ds/il/is (daily or
-    intraday long/short strong), atr (daily ATR incl. today, used for the stop), price."""
+    intraday long/short strong), atr (daily ATR incl. today, used for the stop), price.
+    h: the intraday chart's candles (15-min, or hourly with minutes=60); checks happen after each closes."""
     day = pd.DatetimeIndex(h.index.tz_localize(None).normalize())
     H = h["High"].groupby(day).cummax().values
     L = h["Low"].groupby(day).cummin().values
@@ -283,7 +285,7 @@ def stock_signals(h, D, debug=False):
     # checks: the opening check (9:30, live price = first trade) and one after every candle closes
     op = np.flatnonzero(at_open)
     chk = pd.DataFrame({
-        "check": np.r_[h.index[op], h.index + pd.Timedelta(minutes=15)],
+        "check": np.r_[h.index[op], h.index + pd.Timedelta(minutes=minutes)],
         "day": np.r_[day[op], day],
         "p": np.r_[h["Open"].values[op], h["Close"].values],
         "H": np.r_[h["Open"].values[op], H],
@@ -385,7 +387,7 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
         if lows is None and trail_n == rules.SETTINGS["daily"]["donchian"]:
             lows, highs = extra["dcl"], extra["dch"]
     exit_m, max_days = cfg["exit_matrix"], cfg["max_days"]
-    use["kind"] = np.where((use["dl"] | use["ds"]) & ("daily" in kinds), "daily", "15-min")
+    use["kind"] = np.where((use["dl"] | use["ds"]) & ("daily" in kinds), "daily", "hourly" if BOT_TF == "1h" else "15-min")
     if "pattern" in use:                               # chart-pattern trades: named after the pattern
         use["kind"] = use["pattern"].fillna("daily").values
     for c in ("stop", "target"):                       # the pattern's own stop/target prices (NaN = none)
@@ -639,9 +641,11 @@ def summary_text(res, bench, start, end, n_stocks, mode="bot versions"):
         rules_txt = (f"Strategy comparison, same money rules for all: {money}, max "
                      f"{T.MAX_INVESTED:.0%} invested. Daily strategies buy at the next day's open.")
     else:
-        rules_txt = (f"Bot versions: ⭐ STRONG signals (daily + 15-min), stop 2×ATR, {money}; target 2:1 "
+        rules_txt = (f"Bot versions: ⭐ STRONG signals (daily + {'hourly' if BOT_TF == '1h' else '15-min'}), stop 2×ATR, {money}; target 2:1 "
                      f"unless trailing. " + (f"Borrowed money pays {MARGIN_RATE:.1%}/yr interest." if MARGIN > 1 else "No borrowing."))
     title = {"strategies": "strategies", "patterns": f"chart patterns ({tf_name()} candles)"}.get(mode, "bot versions")
+    if mode != "patterns" and BOT_TF == "1h":
+        title += " (bot on hourly candles)"
     lines = [f"📊 <b>Backtest {UNIVERSE}: {title}</b>",
              f"{start:%d %b %Y} → {end:%d %b %Y} ({years:.1f} years), {UNIVERSE} ({n_stocks} {UNIT}), "
              f"$100,000 start. {rules_txt} 'Invested' = average money in the market ({BENCHMARK} = 100%)", ""]
@@ -1209,7 +1213,11 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
     else:
         sig = []
         for col, sym in enumerate(syms):
-            s = stock_signals(intraday[sym], daily[sym])
+            if BOT_TF == "1h":                         # the bot's intraday chart on hourly candles
+                hh, _ = intraday_frame(intraday[sym], "1h", MARKET == "crypto")
+                s = stock_signals(hh, daily[sym], minutes=60)
+            else:
+                s = stock_signals(intraday[sym], daily[sym])
             s["sym"], s["col"] = sym, col
             sig.append(s)
         sig = pd.concat(sig, ignore_index=True)
@@ -1217,7 +1225,7 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
         sig["slot"] = slots.get_indexer(sig["fill"])
         sig = sig[sig["slot"] >= 0]
         print(f"Signals: {len(sig)} ({sig[['dl', 'ds']].any(axis=1).sum()} daily, "
-              f"{sig[['il', 'is']].any(axis=1).sum()} 15-min) in {time.time() - t0:.0f}s", flush=True)
+              f"{sig[['il', 'is']].any(axis=1).sum()} {'hourly' if BOT_TF == '1h' else '15-min'}) in {time.time() - t0:.0f}s", flush=True)
 
     def matrix(field):
         return np.column_stack([intraday[s][field].reindex(slots).values for s in syms])
@@ -1351,7 +1359,8 @@ def main():
     mode = os.environ.get("TEST", "strategies")
     runs = int(os.environ.get("RUNS") or RUNS)
     market = os.environ.get("MARKET", "stocks")
-    global PATTERN_TF, NEED_INTRADAY_VOLUME
+    global PATTERN_TF, NEED_INTRADAY_VOLUME, BOT_TF
+    BOT_TF = os.environ.get("BOT_TF", "15m") if mode != "patterns" else "15m"
     PATTERN_TF = os.environ.get("PATTERN_TF", "daily") if mode == "patterns" else "daily"
     NEED_INTRADAY_VOLUME = PATTERN_TF != "daily"
     if PATTERN_TF == "15m" and years > 5:
