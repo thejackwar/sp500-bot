@@ -62,9 +62,19 @@ VARIANTS = {                # each one changes the bot's rules (see simulate() f
                 {"shorts": False, "exit": "trail", "margin": 1.0, "spy_filter": True}),
     "wide1x":  ("8. Bot now, wider stop (3x ATR instead of 2x)",
                 {"shorts": False, "exit": "trail", "margin": 1.0, "stop_atr": 3.0}),
+    # tighter stop + fixed take profit (longs, no leverage): shorter trades, more of them
+    "t1x2":    ("9. Tight stop 1x ATR + take profit 2:1",
+                {"shorts": False, "exit": "target", "margin": 1.0, "stop_atr": 1.0, "target_r": 2.0}),
+    "t1x15":   ("10. Tight stop 1x ATR + take profit 1.5:1",
+                {"shorts": False, "exit": "target", "margin": 1.0, "stop_atr": 1.0, "target_r": 1.5}),
+    "t1x3":    ("11. Tight stop 1x ATR + take profit 3:1",
+                {"shorts": False, "exit": "target", "margin": 1.0, "stop_atr": 1.0, "target_r": 3.0}),
+    "t15x2":   ("12. Stop 1.5x ATR + take profit 2:1",
+                {"shorts": False, "exit": "target", "margin": 1.0, "stop_atr": 1.5, "target_r": 2.0}),
 }
 SHORT = {"both": "1 L+S", "long": "2 Long", "trail": "3 Trail", "long1x": "4 L 1x", "trail1x": "5 T 1x",
-         "daily1x": "6 Daily", "spy1x": "7 SPYflt", "wide1x": "8 3xATR"}
+         "daily1x": "6 Daily", "spy1x": "7 SPYflt", "wide1x": "8 3xATR",
+         "t1x2": "T1 2R", "t1x15": "T1 1.5R", "t1x3": "T1 3R", "t15x2": "T1.5 2R"}
 
 # What is tested (main() switches these to crypto when MARKET=crypto, see use_crypto())
 T = trader                  # money rules: trader.py (stocks) or crypto_trader.py (crypto)
