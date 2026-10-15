@@ -24,6 +24,9 @@ on:
         options: ["10", "5", "1"]
         default: "10"
 
+permissions:
+  contents: write              # to commit the results to reports/backtest/
+
 jobs:
   backtest:
     runs-on: ubuntu-latest
@@ -73,3 +76,19 @@ jobs:
           name: backtest-results
           path: backtest-results/
           if-no-files-found: ignore
+
+      - name: Commit the results to reports/backtest/
+        if: always()
+        run: |
+          [ -f backtest-results/summary.txt ] || { echo "No results"; exit 0; }
+          dir="reports/backtest/${{ inputs.market }}-$(echo '${{ inputs.test }}' | tr ' ' '-')-${{ inputs.years }}y"
+          mkdir -p "$dir"
+          cp backtest-results/summary.txt backtest-results/trades.csv "$dir"/
+          for f in details.txt patterns.csv; do [ -f "backtest-results/$f" ] && cp "backtest-results/$f" "$dir"/; done
+          echo "Run ${{ github.run_id }}, $(date -u '+%Y-%m-%d %H:%M UTC'), runs=${{ inputs.runs }}" > "$dir/run.txt"
+          git config user.name "backtest bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/backtest
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "Backtest results: $dir"
+          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done

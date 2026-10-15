@@ -1239,6 +1239,14 @@ def main():
                 print("\n" + html.unescape(txt.replace("<b>", "").replace("</b>", "")
                                            .replace("<pre>", "").replace("</pre>", "")))
     details = details_text(res, bench)
+    with open(os.path.join(OUT, "details.txt"), "w") as f:      # committed to reports/backtest/ by the workflow
+        plain = lambda s: html.unescape(s.replace("<b>", "").replace("</b>", "").replace("<i>", "")
+                                        .replace("</i>", "").replace("<pre>", "").replace("</pre>", ""))
+        f.write(plain(details))
+        if card is not None:
+            for txt in (scorecard_text(card), split_text(card)):
+                if txt:
+                    f.write("\n\n" + plain(txt))
     print("\n" + html.unescape(details.replace("<b>", "").replace("</b>", "").replace("<pre>", "").replace("</pre>", "")))
     telegram(text)
     telegram(details)
