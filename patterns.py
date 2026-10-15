@@ -27,10 +27,11 @@ HARMONICS = ("ABCD", "Gartley", "Butterfly")
 # YOUR PATTERN SELECTION: the patterns that "patterns only" scans alert on, and that backtest
 # versions 5 and 6 trade. Write the name as in the scorecard plus "up" or "down" (or ↑ / ↓);
 # a name without a direction means both. An empty list = every pattern.
-# Chosen from the 5-year S&P 100 scorecard (positive average R, enough trades). Check them with the
-# backtest's split check before trusting them, and change the list as results come in.
+# Stocks: the patterns with a positive average R (stop + target) in BOTH halves of the 5-year S&P 100
+# split check (Oct 2021-Apr 2024 and Apr 2024-Oct 2026). Bull pennant was dropped: it faded to ~0 in the
+# second half. Change the list as new results come in.
 SELECTED = {
-    "stocks": ["ABCD up", "Falling wedge up", "Symmetrical triangle up", "Bull pennant up", "Gartley up"],
+    "stocks": ["ABCD up", "Falling wedge up", "Symmetrical triangle up", "Gartley up"],
     "crypto": [],          # not tested yet: every pattern
 }
 
