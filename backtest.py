@@ -63,6 +63,8 @@ T = trader                  # money rules: trader.py (stocks) or crypto_trader.p
 FEE = 0.0                   # trading fee per buy and per sell, as a share of the trade
 UNIVERSE, UNIT = "S&amp;P 100", "stocks"
 MARKET = "stocks"           # strategy files can be limited to one market with MARKETS = ("crypto",)
+PATTERN_TF = "daily"        # patterns test: which candles the patterns are found on ("daily", "1h", "15m")
+NEED_INTRADAY_VOLUME = False  # True for intraday pattern tests (re-downloads saved 15-min prices without volume)
 FILTER_MA = 200             # market trend filter: benchmark (SPY / BTC) above its N-day average
 DAYS_PER_YEAR = 252
 OPENING_CHECK = True        # stocks: a check at 9:30 with the opening price
@@ -134,7 +136,7 @@ def fetch(sym, timeframe, start, end, headers):
             df = pd.DataFrame(bars)
             df.index = pd.DatetimeIndex(pd.to_datetime(df["t"], utc=True)).tz_convert(ET)
             df = df.rename(columns={"o": "Open", "h": "High", "l": "Low", "c": "Close", "v": "Volume"})
-            cols = ["Open", "High", "Low", "Close"] + (["Volume"] if timeframe == "1Day" and "Volume" in df else [])
+            cols = ["Open", "High", "Low", "Close"] + (["Volume"] if "Volume" in df else [])
             df = df[cols].astype(float)
             if timeframe != "1Day":
                 mins = df.index.hour * 60 + df.index.minute
@@ -165,8 +167,9 @@ def cached_fetch(sym, timeframe, start, end, headers):
     Alpaca has re-adjusted old prices (after a split or dividend the last saved candle no longer matches)."""
     path = os.path.join(CACHE_DIR, f"{sym}_{timeframe}.pkl.gz")
     old = _load(path)
-    if old is not None and timeframe == "1Day" and "Volume" not in old:
-        old = None                                     # saved before volume was kept: download again (small)
+    if old is not None and (timeframe == "1Day" or NEED_INTRADAY_VOLUME) and \
+            ("Volume" not in old or old["Volume"].isna().any()):
+        old = None                                     # saved before volume was kept: download again
     if old is not None and len(old) > 1 and old.attrs.get("from") and pd.Timestamp(old.attrs["from"]) <= pd.Timestamp(start):
         last = old.index[-1]
         since = (last.tz_localize(ET) if last.tzinfo is None else last).tz_convert("UTC").to_pydatetime()
@@ -619,16 +622,18 @@ def summary_text(res, bench, start, end, n_stocks, mode="bot versions"):
         import patterns
         sel_txt = (f" Versions 5-6 only trade your selected patterns: {patterns.selection_text(MARKET)}."
                    if patterns.selection(MARKET) else "")
-        rules_txt = (f"Chart patterns only (patterns.py, daily chart): a breakout on a day's close is traded at the "
-                     f"next day's open with the pattern's own stop and target (sold after {PATTERN_MAX_DAYS} days "
-                     f"if neither is hit); {money}, max {T.MAX_INVESTED:.0%} invested.{sel_txt}")
+        when = ("a breakout on a day's close is traded at the next day's open" if PATTERN_TF == "daily" else
+                f"a breakout at a {tf_name()} candle's close is traded at the next 15-min candle's open")
+        rules_txt = (f"Chart patterns only (patterns.py, {tf_name()} chart): {when} with the pattern's own stop and "
+                     f"target (sold after {pattern_max_days()} days if neither is hit); {money}, max "
+                     f"{T.MAX_INVESTED:.0%} invested.{sel_txt}")
     elif mode == "strategies":
         rules_txt = (f"Strategy comparison, same money rules for all: {money}, max "
                      f"{T.MAX_INVESTED:.0%} invested. Daily strategies buy at the next day's open.")
     else:
         rules_txt = (f"Bot versions: ⭐ STRONG signals (daily + 15-min), stop 2×ATR, {money}; target 2:1 "
                      f"unless trailing. " + (f"Borrowed money pays {MARGIN_RATE:.1%}/yr interest." if MARGIN > 1 else "No borrowing."))
-    title = {"strategies": "strategies", "patterns": "chart patterns"}.get(mode, "bot versions")
+    title = {"strategies": "strategies", "patterns": f"chart patterns ({tf_name()} candles)"}.get(mode, "bot versions")
     lines = [f"📊 <b>Backtest {UNIVERSE}: {title}</b>",
              f"{start:%d %b %Y} → {end:%d %b %Y} ({years:.1f} years), {UNIVERSE} ({n_stocks} {UNIT}), "
              f"$100,000 start. {rules_txt} 'Invested' = average money in the market ({BENCHMARK} = 100%)", ""]
@@ -851,6 +856,156 @@ def pattern_signals(daily, syms, days, first_slot, workers=4):
     return sig
 
 
+PATTERN_MAX_DAYS_INTRADAY = 10   # intraday pattern trades still open after 10 trading days are sold
+TF_KEY = {"1h": "hourly", "15m": "15min"}               # patterns.SETTINGS key per candle size
+TF_MINUTES = {"1h": 60, "15m": 15}
+
+
+def pattern_max_days():
+    return PATTERN_MAX_DAYS if PATTERN_TF == "daily" else PATTERN_MAX_DAYS_INTRADAY
+
+
+def tf_name():
+    return {"daily": "daily", "1h": "hourly", "15m": "15-min"}[PATTERN_TF]
+
+
+def intraday_frame(h, tf, crypto_mkt):
+    """Candles of the pattern timeframe built from 15-min candles, with each candle's end time."""
+    if "Volume" not in h:
+        h = h.assign(Volume=np.nan)                    # no volume: the breakout volume check is skipped
+    h = h[["Open", "High", "Low", "Close", "Volume"]]
+    if tf == "15m":
+        d = h.copy()
+    else:
+        agg = {"Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"}
+        d = (h.resample("60min").agg(agg) if crypto_mkt else h.resample("60min", offset="30min").agg(agg)).dropna()
+    end = d.index + pd.Timedelta(minutes=TF_MINUTES[tf])
+    if not crypto_mkt:                                 # the last US candle ends at 16:00
+        close = d.index.normalize() + pd.Timedelta(hours=16)
+        end = end.where(end <= close, close)
+    return d, end
+
+
+def _pattern_rows_intraday(args):
+    """Every pattern breakout of one stock/coin on hourly or 15-min candles, judged at each candle's close.
+    Returns [(candle end time, direction, stop, target, name, atr)], each pattern once."""
+    import patterns
+    import scanner
+    sym, h, tf, start, crypto_mkt = args
+    d, end = intraday_frame(h, tf, crypto_mkt)
+    d = scanner.add_indicators(d.copy())
+    key = TF_KEY[tf]
+    look = patterns.SETTINGS[key]["lookback"]
+    close = d["Close"].values
+    vol = (d["Volume"] / d["VolAvg20"]).values
+    atr = d["ATR"].values
+    out, seen = [], set()
+    first = max(60, int(np.searchsorted(end, start)))
+    for i in range(first, len(d)):
+        v = vol[i] if np.isfinite(vol[i]) and vol[i] > 0 else None
+        pats, _ = patterns.find_patterns(d.iloc[max(0, i - look + 1):i + 1], key, float(close[i]),
+                                         float(close[i - 1]), v)
+        for pt in pats:
+            if pt["stage"] != "breakout" or pt["id"] in seen:
+                continue
+            seen.add(pt["id"])
+            out.append((end[i], pt["dir"], pt["stop"], pt["target"], pt["name"], float(atr[i])))
+    return sym, out
+
+
+def pattern_signals_intraday(intraday, syms, slots, start):
+    """Hourly / 15-min pattern breakouts as simulator rows: a breakout at a candle's close is traded at the
+    open of the next 15-minute candle (for stocks, the next morning if it was the day's last candle)."""
+    from concurrent.futures import ProcessPoolExecutor
+    t0 = time.time()
+    crypto_mkt = MARKET == "crypto"
+    jobs = [(sym, intraday[sym], PATTERN_TF, pd.Timestamp(start).tz_convert(slots.tz), crypto_mkt) for sym in syms]
+    rows = []
+    col_of = {sym: k for k, sym in enumerate(syms)}
+    with ProcessPoolExecutor(max_workers=os.cpu_count() or 2) as pool:
+        for n, (sym, found) in enumerate(pool.map(_pattern_rows_intraday, jobs), 1):
+            for t_end, direction, stop, target, name, atr in found:
+                slot = int(slots.searchsorted(t_end))
+                if slot >= len(slots):
+                    continue
+                rows.append({"slot": slot, "col": col_of[sym], "sym": sym, "date": t_end,
+                             "dl": direction == "LONG", "ds": direction == "SHORT", "il": False, "is": False,
+                             "atr": atr, "score": 0.0, "stop": stop, "target": target,
+                             "pattern": f"{name} {'↑' if direction == 'LONG' else '↓'}"})
+            if n % 10 == 0:
+                print(f"Patterns {n}/{len(syms)} ({time.time() - t0:.0f}s)", flush=True)
+    sig = pd.DataFrame(rows, columns=["slot", "col", "sym", "date", "dl", "ds", "il", "is", "atr", "score",
+                                      "stop", "target", "pattern"])
+    print(f"{tf_name()} pattern breakouts: {len(sig)} ({int(sig['dl'].sum())} up, {int(sig['ds'].sum())} down) "
+          f"in {time.time() - t0:.0f}s", flush=True)
+    return sig
+
+
+def pattern_scorecard_intraday(sig, intraday, daily):
+    """The scorecard for hourly / 15-min patterns, replayed on 15-minute candles: entry at the open of the
+    next 15-min candle; R with the pattern's stop and target (sold after PATTERN_MAX_DAYS_INTRADAY days),
+    R_trail with the pattern's stop then sold at a day's close below the 20-day low (above the high for shorts)."""
+    out = []
+    cost = 2 * (FEE + SLIPPAGE)
+    cache = {}
+    for r in sig.itertuples():
+        if r.sym not in cache:
+            h = intraday[r.sym]
+            day = pd.DatetimeIndex(h.index.tz_localize(None).normalize())
+            dd = daily[r.sym]
+            low_n = dd["Low"].rolling(TRAIL_DAYS).min().shift(1).reindex(day).values
+            high_n = dd["High"].rolling(TRAIL_DAYS).max().shift(1).reindex(day).values
+            last_of_day = np.r_[day[1:] != day[:-1], True]
+            day_no = np.cumsum(np.r_[True, day[1:] != day[:-1]]) - 1
+            cache[r.sym] = (h.index, *(h[k].values for k in ("Open", "High", "Low", "Close")),
+                            low_n, high_n, last_of_day, day_no)
+        idx, o, hh, ll, c, low_n, high_n, lod, dno = cache[r.sym]
+        s = int(idx.searchsorted(r.date))
+        if s >= len(o):
+            continue
+        sign = 1 if r.dl else -1
+        entry = o[s]
+        risk = sign * (entry - r.stop)
+        if risk <= 0 or sign * (r.target - entry) <= 0:
+            continue
+        res = []
+        for trail in (False, True):
+            px_, how, j = None, "open", len(o) - 1
+            for j in range(s, len(o)):
+                if not trail and dno[j] - dno[s] >= PATTERN_MAX_DAYS_INTRADAY:
+                    px_, how = o[j], "time"
+                    break
+                if j > s and sign * (o[j] - r.stop) <= 0:
+                    px_, how = o[j], "stop"
+                    break
+                if not trail and j > s and sign * (o[j] - r.target) >= 0:
+                    px_, how = o[j], "target"
+                    break
+                if sign * ((ll[j] if sign > 0 else hh[j]) - r.stop) <= 0:
+                    px_, how = r.stop, "stop"
+                    break
+                if not trail and sign * ((hh[j] if sign > 0 else ll[j]) - r.target) >= 0:
+                    px_, how = r.target, "target"
+                    break
+                if trail and lod[j]:
+                    level = low_n[j] if sign > 0 else high_n[j]
+                    if np.isfinite(level) and sign * (c[j] - level) < 0:
+                        px_, how = c[j], "trend exit"
+                        break
+            if px_ is None:
+                px_ = c[j]
+            res.append((px_, how, int(dno[j] - dno[s])))
+        fee = cost * entry / risk
+        (x1, how1, d1), (x2, how2, d2) = res
+        out.append({"pattern": r.pattern, "symbol": r.sym, "date": r.date, "entry": entry, "stop": r.stop,
+                    "target": r.target, "exit": x1, "result": how1, "R": sign * (x1 - entry) / risk - fee,
+                    "days": d1, "exit_trail": x2, "result_trail": how2,
+                    "R_trail": sign * (x2 - entry) / risk - fee, "days_trail": d2})
+    cols = ["pattern", "symbol", "date", "entry", "stop", "target", "exit", "result", "R", "days",
+            "exit_trail", "result_trail", "R_trail", "days_trail"]
+    return pd.DataFrame(out, columns=cols)
+
+
 TRAIL_DAYS = 20             # scorecard's trailing exit: sell on a close below the lowest low of 20 days
 SPLIT_MIN_TRADES = 15       # split check: a pattern is "chosen" on the first half with this many trades ...
 SPLIT_MIN_R = 0.0           # ... and an average R above this
@@ -942,7 +1097,8 @@ def scorecard_text(card):
                       "trail": tr.groupby("pattern")["R_trail"].mean()}).fillna(0)
     t = t.sort_values("avgR", ascending=False)
     lines = ["🧩 <b>Pattern scorecard</b>: every breakout traded on its own, costs included. "
-             f"<b>avgR</b> = with the pattern's stop and target (sold after {PATTERN_MAX_DAYS} days), "
+             f"<b>{tf_name()} candles.</b> <b>avgR</b> = with the pattern's stop and target (sold after "
+             f"{pattern_max_days()} days), "
              f"<b>trail</b> = pattern's stop + sold below the {TRAIL_DAYS}-day low, no target. "
              "Above 0 = made money on average; fewer than ~20 trades = too few to trust.",
              "<pre>Pattern            n  win  avgR  tgt trail"]
@@ -1108,9 +1264,12 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
             print(f"Strategy {name}: {len(s_sig)} buy signals", flush=True)
     elif mode == "patterns":
         first_slot = np.flatnonzero(np.r_[True, slot_day[1:] != slot_day[:-1]])
-        sig = pattern_signals(daily, syms, days, first_slot)
+        if PATTERN_TF == "daily":
+            sig = pattern_signals(daily, syms, days, first_slot)
+        else:
+            sig = pattern_signals_intraday(intraday, syms, slots, start)
         pv = {"kinds": ("daily",), "exit": "custom", "margin": T.MAX_INVESTED, "pattern_target": True,
-              "target_r": None, "trail_days": None, "max_days": PATTERN_MAX_DAYS}
+              "target_r": None, "trail_days": None, "max_days": pattern_max_days()}
         no_short = " (test only: Alpaca can't short crypto)" if MARKET == "crypto" else ""
         jobs += [
             ("p_long", "1. Up patterns: pattern's stop + target", "P Long", sig, {**pv, "shorts": False}),
@@ -1184,6 +1343,12 @@ def main():
     mode = os.environ.get("TEST", "strategies")
     runs = int(os.environ.get("RUNS") or RUNS)
     market = os.environ.get("MARKET", "stocks")
+    global PATTERN_TF, NEED_INTRADAY_VOLUME
+    PATTERN_TF = os.environ.get("PATTERN_TF", "daily") if mode == "patterns" else "daily"
+    NEED_INTRADAY_VOLUME = PATTERN_TF != "daily"
+    if PATTERN_TF == "15m" and years > 5:
+        print("15-min patterns: testing 5 years at most (8 years would take more than the 2-hour limit)", flush=True)
+        years = 5.0
     end = dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=20)
     start = end - dt.timedelta(days=round(365.25 * years))
     start = max(start, dt.datetime(2016, 3, 1, tzinfo=dt.timezone.utc))      # Alpaca history starts 2016
@@ -1232,7 +1397,7 @@ def main():
                                             .replace("<i>", "").replace("</i>", "")) + "\n```\n")
     card = None
     if mode == "patterns":
-        card = pattern_scorecard(sig, daily)
+        card = pattern_scorecard(sig, daily) if PATTERN_TF == "daily" else pattern_scorecard_intraday(sig, intraday, daily)
         card.to_csv(os.path.join(OUT, "patterns.csv"), index=False)
         for txt in (scorecard_text(card), split_text(card)):
             if txt:

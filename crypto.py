@@ -257,7 +257,7 @@ def history(coins, start, end, cache_dir="price-cache", workers=4):
                 print(f"{sym}: only {len(d)} days of prices, left out (needs 250+)", flush=True)
                 continue
             daily[sym] = d
-            intraday[sym] = df[df.index >= pd.Timestamp(start) - pd.Timedelta(days=21)][["Open", "High", "Low", "Close"]]
+            intraday[sym] = df[df.index >= pd.Timestamp(start) - pd.Timedelta(days=21)][["Open", "High", "Low", "Close", "Volume"]]
             full += bool(df.attrs.get("fresh"))
     print(f"Crypto prices ready in {time.time() - t0:.0f}s: {full} coins downloaded in full, "
           f"{len(intraday) - full} from the saved copy + new days", flush=True)

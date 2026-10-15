@@ -18,6 +18,7 @@ import numpy as np
 SETTINGS = {
     "daily":  {"k": 2.0, "k_fine": 1.2, "lookback": 250, "max_age": 25, "max_span": 160},
     "hourly": {"k": 2.0, "k_fine": 1.2, "lookback": 220, "max_age": 35, "max_span": 160},
+    "15min":  {"k": 2.0, "k_fine": 1.2, "lookback": 220, "max_age": 35, "max_span": 160},   # backtest only
 }
 TOL = 0.6          # "equal" price levels may differ by up to TOL x ATR
 MIN_BREAK_VOLUME = 1.3   # breakout candle volume vs its 20-candle average (pattern breakouts)
@@ -107,6 +108,17 @@ def zigzag(df, k):
                 trend, ext_i, ext_p = 1, i, h[i]
     last = (ext_i, float(ext_p), "H" if trend == 1 else "L") if trend else None
     return piv, last
+
+
+def _fit1(xs, ys):
+    """Least-squares straight line through the points: (slope, intercept). Same result as
+    np.polyfit(xs, ys, 1), several times faster (it runs millions of times in the backtests)."""
+    x = np.asarray(xs, float)
+    y = np.asarray(ys, float)
+    xm, ym = x.mean(), y.mean()
+    den = ((x - xm) ** 2).sum()
+    slope = ((x - xm) * (y - ym)).sum() / den if den else 0.0
+    return slope, ym - slope * xm
 
 
 def _line(p1, p2):
@@ -204,8 +216,8 @@ def _line_patterns(df, cp, n, atr, sizes=(7, 6, 5, 4), flags_only=False):
         span = (n - 1) - i0
         if span < 8:
             continue
-        hs, hb = np.polyfit([p[0] for p in highs], [p[1] for p in highs], 1)
-        ls, lb = np.polyfit([p[0] for p in lows], [p[1] for p in lows], 1)
+        hs, hb = _fit1([p[0] for p in highs], [p[1] for p in highs])
+        ls, lb = _fit1([p[0] for p in lows], [p[1] for p in lows])
         up = lambda x: hs * x + hb
         lo = lambda x: ls * x + lb
         if max(abs(p[1] - up(p[0])) for p in highs) > tol or max(abs(p[1] - lo(p[0])) for p in lows) > tol:

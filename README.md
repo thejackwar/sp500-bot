@@ -193,7 +193,10 @@ SELECTED = {
 }
 ```
 Write each pattern's name as in the scorecard plus `up` or `down` (`↑`/`↓` work too); a name without a direction means both. The stock list holds the up patterns that made money (with the exit the pattern trader uses for them) in all four halves of the 5-year and 8-year S&P 100 split checks; change it as new results come in. The normal bot's alerts always show every pattern.
-- Hourly patterns aren't backtested (only daily), and forming patterns can't be traded, so they aren't either.
+- **Hourly and 15-minute patterns:** *Pattern candles* = **1h** or **15m** (default **daily**). The same patterns are found on hourly (or 15-min) candles, built from the 15-min prices; a breakout at a candle's close (incl. the 1.3× volume check on that candle) is traded at the open of the next 15-min candle (for stocks, the next morning if it was the day's last candle). Target trades are sold after 10 trading days if neither stop nor target is hit; the trailing versions use the same 20-day low as the daily ones. The scorecard and split check are replayed on 15-min candles. Results go to `reports/backtest/<market>-patterns-1h-<years>y` (or `-15m-`).
+  - **Time:** hourly ≈ 25-30 min for 8 years of the S&P 100; 15-min is ~4× slower, so it tests **at most 5 years** (3 years ≈ 35 min is a good choice).
+  - **First intraday run:** the saved 15-min prices didn't keep volume, so the first hourly/15-min pattern test downloads them again with volume (one time, ~45-60 min for 8 years). Later runs reuse them.
+- Forming patterns can't be traded, so they aren't backtested.
 
 
 ## Notes
