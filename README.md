@@ -188,11 +188,11 @@ Every weekday after the US close (~23:20 Milan in summer time, ~22:20 in winter)
 The list `SELECTED` at the top of `patterns.py` decides which patterns the **patterns-only scans** alert on and which ones backtest versions 5-6 trade, separately for stocks and crypto:
 ```python
 SELECTED = {
-    "stocks": ["ABCD up", "Falling wedge up", "Symmetrical triangle up", "Gartley up"],
+    "stocks": ["ABCD up", "Falling wedge up", "Inverse head & shoulders up", "Triple bottom up", "Gartley up"],
     "crypto": [],          # empty = every pattern
 }
 ```
-Write each pattern's name as in the scorecard plus `up` or `down` (`↑`/`↓` work too); a name without a direction means both. The stock list holds the patterns that made money (stop + target) in both halves of the 5-year S&P 100 split check; change it as new results come in. The normal bot's alerts always show every pattern.
+Write each pattern's name as in the scorecard plus `up` or `down` (`↑`/`↓` work too); a name without a direction means both. The stock list holds the up patterns that made money (with the exit the pattern trader uses for them) in all four halves of the 5-year and 8-year S&P 100 split checks; change it as new results come in. The normal bot's alerts always show every pattern.
 - Hourly patterns aren't backtested (only daily), and forming patterns can't be traded, so they aren't either.
 
 
