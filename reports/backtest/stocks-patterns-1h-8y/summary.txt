@@ -1,0 +1,43 @@
+📊 <b>Backtest S&P 100: chart patterns (hourly candles)</b>
+15 Oct 2018 → 15 Oct 2026 (8.0 years), S&P 100 (100 stocks), $100,000 start. Chart patterns only (patterns.py, hourly chart): a breakout at a hourly candle's close is traded at the next 15-min candle's open with the pattern's own stop and target (sold after 10 days if neither is hit); risk 1%/trade, max 10 positions of max 20% each, max 100% invested. Versions 5-6 only trade your selected patterns: ABCD up, Falling wedge up, Inverse head & shoulders up, Triple bottom up, Gartley up. 'Invested' = average money in the market (SPY = 100%)
+Each version is tested from 10 start dates a week apart (ties between signals in random order); figures are the middle run, with the range in brackets.
+
+<b>1. Up patterns: pattern's stop + target</b>
++11.6%/yr (+7.3% to +14.9%), beat SPY in 0/10 runs
+max drop -27.8% (worst -29.8%) · profit factor 1.13
+~4878 trades, win 53%, avg +0.04R, worst streak 29, hold 4d, invested 80%, interest ~$0
+
+<b>2. Up + down patterns (shorts)</b>
+-1.1%/yr (-3.3% to +4.3%), beat SPY in 0/10 runs
+max drop -29.3% (worst -38.3%) · profit factor 0.99
+~6608 trades, win 51%, avg -0.02R, worst streak 11, hold 4d, invested 91%
+
+<b>3. Up patterns, only while SPY is above its 200-day MA</b>
++11.0%/yr (+9.1% to +13.4%), beat SPY in 0/10 runs
+max drop -19.2% (worst -22.0%) · profit factor 1.15
+~3964 trades, win 54%, avg +0.05R, worst streak 18, hold 4d, invested 66%
+
+<b>4. Up patterns: pattern's stop + trailing exit (20-day low)</b>
++11.4%/yr (+7.3% to +13.3%), beat SPY in 0/10 runs
+max drop -32.5% (worst -33.8%) · profit factor 1.35
+~970 trades, win 23%, avg +0.56R, worst streak 36, hold 28d, invested 96%
+
+<b>5. Selected patterns: pattern's stop + target</b>
++8.9%/yr (+7.2% to +10.4%), beat SPY in 0/10 runs
+max drop -26.9% (worst -32.8%) · profit factor 1.11
+~3386 trades, win 55%, avg +0.02R, worst streak 25, hold 3d, invested 60%
+
+<b>6. Selected patterns: pattern's stop + trailing exit</b>
++12.3%/yr (+7.9% to +20.2%), beat SPY in 2/10 runs
+max drop -31.9% (worst -35.2%) · profit factor 1.39
+~1006 trades, win 22%, avg +0.56R, worst streak 35, hold 26d, invested 94%
+
+<b>7. Selected up patterns, mixed exits (ABCD target, the rest trailing) = pattern paper trader</b>
++14.7%/yr (+10.3% to +20.3%), beat SPY in 3/10 runs
+max drop -35.0% (worst -39.4%) · profit factor 1.43
+~1210 trades, win 38%, avg +0.55R, worst streak 25, hold 22d, invested 93%
+
+<b>Buy & hold SPY</b>
++216.0% (+15.5%/yr) · max drop -33.8%
+
+<i>Today's S&P 100 members only (flatters results); no short-borrow fees; fills at the next 15-min open with 0.02% slippage. Past results don't guarantee future ones.</i>
