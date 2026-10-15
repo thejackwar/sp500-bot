@@ -20,6 +20,7 @@ import re
 import math
 import os
 import time
+import uuid
 
 import pandas as pd
 import requests
@@ -372,7 +373,9 @@ def run(found, state, send, test_mode=False, chart_fn=None, daily=None):
                 log.append(f"{sym}: dry run ({reason}): {desc}")
                 continue
             body = {"symbol": sym, "qty": str(plan["qty"]), "side": side, "type": "market",
-                    "time_in_force": "gtc", "stop_loss": {"stop_price": f"{plan['stop']:.2f}"}}
+                    "time_in_force": "gtc", "stop_loss": {"stop_price": f"{plan['stop']:.2f}"},
+                    # the source of the trade, for the daily paper report (paper_report.py)
+                    "client_order_id": f"bot-{tf}-{uuid.uuid4().hex[:12]}"}
             if plan["target"] is not None:             # bracket: stop + take profit
                 body.update(order_class="bracket", take_profit={"limit_price": f"{plan['target']:.2f}"})
             else:                                      # stop only; the trend exit sells the rest

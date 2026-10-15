@@ -1,0 +1,49 @@
+name: Paper report
+
+# Every weekday after the US close, rebuild the paper-trading report of both Alpaca paper accounts
+# (paper_report.py) and save it in the repo under reports/paper/. Also by hand: Run workflow.
+on:
+  schedule:
+    - cron: "20 21 * * 1-5"     # 21:20 UTC = 23:20 Milan in summer time, 22:20 in winter (after the 16:00 New York close)
+  workflow_dispatch:
+
+permissions:
+  contents: write              # to commit the report files
+
+concurrency:
+  group: paper-report
+  cancel-in-progress: false
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Build the report
+        run: python paper_report.py
+        env:
+          PYTHONUNBUFFERED: "1"
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          ALPACA_PATTERN_KEY_ID: ${{ secrets.ALPACA_PATTERN_KEY_ID }}
+          ALPACA_PATTERN_SECRET_KEY: ${{ secrets.ALPACA_PATTERN_SECRET_KEY }}
+
+      - name: Save the report in the repo
+        run: |
+          git config user.name "paper-report bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/paper
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "Paper report $(TZ=America/New_York date +%Y-%m-%d)"
+          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done

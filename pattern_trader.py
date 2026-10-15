@@ -24,7 +24,9 @@ Without them it does nothing. Safety: paper-trading address only (trader.Alpaca)
 import datetime as dt
 import json
 import os
+import re
 import time
+import uuid
 
 import pandas as pd
 
@@ -271,8 +273,10 @@ def run(now=None, force=False, dry_run=False, send=None):
                f"{risk / equity:.1%} of equity)\n"
                f'<a href="https://www.tradingview.com/chart/?symbol={sym}&interval=D">Open {sym} on TradingView</a>')
         if live:
+            slug = re.sub(r"[^A-Za-z0-9]+", "_", pt["name"]).strip("_")
             body = {"symbol": sym, "qty": str(qty), "side": "buy", "type": "market", "time_in_force": "gtc",
-                    "stop_loss": {"stop_price": f"{stop:.2f}"}}
+                    "stop_loss": {"stop_price": f"{stop:.2f}"},
+                    "client_order_id": f"pat-{slug}-{uuid.uuid4().hex[:12]}"}   # for the daily report
             if tgt:
                 body.update(order_class="bracket", take_profit={"limit_price": f"{tgt:.2f}"})
             else:

@@ -16,6 +16,7 @@ message with a chart whenever a signal appears. ⭐ Strong LONG signals are also
 | `backtest.py` + `.github/workflows/backtest.yml` | Tests the strategy on past years (run by hand) |
 | `strategies/` | Other strategies to compare in the backtest (one file each, `_template.py` to start) |
 | `pattern_trader.py` + `.github/workflows/pattern-trade.yml` | Paper trades your selected chart patterns in a second Alpaca paper account (section *Pattern paper trader*) |
+| `paper_report.py` + `.github/workflows/paper-report.yml` | Daily report of both paper accounts, saved in `reports/paper/` (section *Paper report*) |
 | `crypto_scanner.py` + `.github/workflows/crypto-scan.yml` | The same strategy on the top 10 cryptocurrencies, run by hand (section *Crypto*) |
 | `crypto.py` | Picks the top 10 coins and downloads their prices |
 | `crypto_trader.py` | Crypto paper trading with Alpaca (same rules, adapted to crypto) |
@@ -173,6 +174,15 @@ Trades your selected stock patterns in a **separate Alpaca paper account**, so i
 - **Messages (🧩):** each trade with its pattern chart, stop and exit rule; stops, targets and trend exits with the profit or loss; one summary per morning.
 - **Try it by hand:** Actions → **Pattern trader** → Run workflow. *Dry run* (on by default) shows what it would buy right now without placing orders. With dry run off it places today's trades if the morning run was missed.
 - Backtest version 7 uses exactly these rules.
+
+### Paper report (`paper_report.py`)
+Every weekday after the US close (~23:20 Milan in summer time, ~22:20 in winter) the **Paper report** workflow rebuilds a report of **both** paper accounts from Alpaca's own records and commits it to the repo:
+- `reports/paper/README.md`: account value (today and since the start, vs SPY), worst drop, open positions with their stop and profit, closed trades by what opened them (breakout daily / 15-min, crypto, or the chart pattern), last 10 trades.
+- `reports/paper/<account>_trades.csv` (every closed trade with profit, % and R), `<account>_open.csv`, `<account>_equity.csv` (value per day next to SPY with the same money). `<account>` = `breakout` or `patterns`.
+- A 📒 summary on Telegram (stock chat).
+- Run it any time: Actions → **Paper report** → Run workflow. Everything is rebuilt from Alpaca each time, so a missed day loses nothing.
+- "What opened it" comes from a tag on each order (`bot-…`, `crypto-…`, `pat-<pattern>-…`); trades placed before the tag existed show "unknown". R = profit ÷ the money at risk between entry and the first stop.
+- The daily commit also keeps the repo active, so GitHub never pauses its schedules.
 
 ### Your pattern selection
 The list `SELECTED` at the top of `patterns.py` decides which patterns the **patterns-only scans** alert on and which ones backtest versions 5-6 trade, separately for stocks and crypto:

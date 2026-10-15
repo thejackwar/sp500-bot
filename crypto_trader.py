@@ -22,6 +22,7 @@ import datetime as dt
 import math
 import re
 import time
+import uuid
 
 import pandas as pd
 
@@ -336,7 +337,8 @@ def run(found, state, send, dry_run=False, chart_fn=None, daily=None, prices=Non
                 log.append(f"{coin}: dry run: {desc}")
                 continue
             order = api.post("/orders", {"symbol": crypto.to_alpaca(coin), "qty": f"{plan['qty']:.10g}",
-                                         "side": "buy", "type": "market", "time_in_force": "gtc"})
+                                         "side": "buy", "type": "market", "time_in_force": "gtc",
+                                         "client_order_id": f"crypto-{trade['tf']}-{uuid.uuid4().hex[:12]}"})
             book[coin] = {"order_id": order["id"], "stop_id": None, "qty": plan["qty"], "entry": price,
                           "stop": plan["stop"], "status": "open", "opened": dt.datetime.utcnow().isoformat()}
             o = _wait_fill(api, order["id"])
