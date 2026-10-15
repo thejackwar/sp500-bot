@@ -771,8 +771,9 @@ def equity_chart(res, bench):
     for i, (key, r) in enumerate(res.items()):
         e = r["equity"]["equity"]
         colr = palette[i % len(palette)]
-        a1.plot(e.index, e.values, color=colr, lw=2 if r.get("main") else 1.1, label=r["name"])
-        a2.plot(e.index, (e / e.cummax() - 1).values * 100, color=colr, lw=1)
+        ls = "-" if i < len(palette) else ":"            # versions 11+ reuse the colours, dotted
+        a1.plot(e.index, e.values, color=colr, lw=2 if r.get("main") else 1.1, ls=ls, label=r["name"])
+        a2.plot(e.index, (e / e.cummax() - 1).values * 100, color=colr, lw=1, ls=ls)
     if bench is not None:
         a1.plot(bench.index, bench.values, color="#9e9e9e", lw=1.2, ls="--", label=f"Buy & hold {BENCHMARK}")
     a1.axhline(START_EQUITY, color="#555555", lw=0.8)
@@ -1466,6 +1467,11 @@ def main():
     t = t[["version"] + [c for c in t.columns if c != "version"]]
     for c in ("entry_time", "exit_time"):
         t[c] = pd.to_datetime(t[c]).dt.strftime("%Y-%m-%d %H:%M")
+    # account value per day of every version (first run), to look into any part of the curve
+    eqs = pd.DataFrame({r["short"]: r["equity"]["equity"] for r in res.values()})
+    if bench is not None:
+        eqs[f"Buy & hold {BENCHMARK}"] = bench.reindex(eqs.index).ffill()
+    eqs.round(0).to_csv(os.path.join(OUT, "equity.csv"), index_label="date")
     csv = os.path.join(OUT, "trades.csv")
     t.to_csv(csv, index=False)
     with open(os.path.join(OUT, "summary.txt"), "w") as f:

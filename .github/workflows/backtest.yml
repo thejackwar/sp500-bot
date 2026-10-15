@@ -99,7 +99,7 @@ jobs:
           dir="reports/backtest/${{ inputs.market }}-$(echo '${{ inputs.test }}' | tr ' ' '-')${tf}-${yrs}y"
           mkdir -p "$dir"
           cp backtest-results/summary.txt backtest-results/trades.csv "$dir"/
-          for f in details.txt patterns.csv; do [ -f "backtest-results/$f" ] && cp "backtest-results/$f" "$dir"/; done
+          for f in details.txt patterns.csv equity.csv; do [ -f "backtest-results/$f" ] && cp "backtest-results/$f" "$dir"/; done
           echo "Run ${{ github.run_id }}, $(date -u '+%Y-%m-%d %H:%M UTC'), runs=${{ inputs.runs }}" > "$dir/run.txt"
           git config user.name "backtest bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
