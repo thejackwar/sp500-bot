@@ -54,3 +54,24 @@ def crossed_above(a, b):
 def crossed_below(a, b):
     """True on the day a goes from >= b to < b."""
     return (a < b) & (a.shift() >= (b.shift() if isinstance(b, pd.Series) else b))
+
+
+# The market's daily closes (SPY for stocks, BTC for crypto), set by backtest.py before the
+# strategies run; MARKET_MA is the backtest's filter length (200 for stocks, 50 for crypto).
+MARKET = None
+MARKET_MA = 200
+
+
+def market_up(d, n=None):
+    """True on the days the market (SPY / BTC) closed above its n-day average. Use it as a filter:
+    entries(d) & tools.market_up(d). Always True when the market prices aren't available."""
+    if MARKET is None:
+        return pd.Series(True, index=d.index)
+    c = MARKET
+    up = c > c.rolling(n or MARKET_MA).mean()
+    return up.reindex(d.index).ffill().fillna(False).astype(bool)
+
+
+def change(x, n):
+    """Return over the last n days (0.10 = +10%)."""
+    return x / x.shift(n) - 1

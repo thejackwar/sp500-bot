@@ -62,6 +62,8 @@ SHORT = {"both": "1 L+S", "long": "2 Long", "trail": "3 Trail", "long1x": "4 L 1
 T = trader                  # money rules: trader.py (stocks) or crypto_trader.py (crypto)
 FEE = 0.0                   # trading fee per buy and per sell, as a share of the trade
 UNIVERSE, UNIT = "S&amp;P 100", "stocks"
+MARKET = "stocks"           # strategy files can be limited to one market with MARKETS = ("crypto",)
+FILTER_MA = 200             # market trend filter: benchmark (SPY / BTC) above its N-day average
 DAYS_PER_YEAR = 252
 OPENING_CHECK = True        # stocks: a check at 9:30 with the opening price
 OVERNIGHT_FILLS = False     # crypto never closes: a signal at a day's last candle fills at the next candle
@@ -81,12 +83,13 @@ def use_crypto():
     0.25% fee per buy and sell, 0.05% slippage, no borrowing, BTC as the buy-and-hold benchmark,
     UTC days, no opening check (crypto trades around the clock)."""
     global T, FEE, SLIPPAGE, MARGIN, BENCHMARK, RUN_STEP_DAYS, UNIVERSE, UNIT, DAYS_PER_YEAR
-    global OPENING_CHECK, OVERNIGHT_FILLS, VARIANTS, SHORT, FOOTER
+    global OPENING_CHECK, OVERNIGHT_FILLS, VARIANTS, SHORT, FOOTER, MARKET, FILTER_MA
     import crypto_trader
     T, FEE, SLIPPAGE, MARGIN = crypto_trader, crypto_trader.FEE, 0.0005, 1.0
     BENCHMARK, RUN_STEP_DAYS, DAYS_PER_YEAR = "BTC", 7, 365
     UNIVERSE, UNIT = "top 10 crypto", "coins"
     OPENING_CHECK, OVERNIGHT_FILLS = False, True
+    MARKET, FILTER_MA = "crypto", 50          # BTC filter: BTC above its 50-day average (crypto turns fast)
     VARIANTS, SHORT = CRYPTO_VARIANTS, CRYPTO_SHORT
     FOOTER = ("Today's top 10 coins only (coins that dropped out aren't tested, which flatters results); "
               f"fees {crypto_trader.FEE:.2%} per buy and sell; fills at the next 15-min open with 0.05% slippage.")
@@ -830,7 +833,7 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
     extra["dch"] = np.column_stack([ctx[sym]["dch"].values for sym in syms])
     if spy is not None:
         c = spy["Close"]
-        up = (c > c.rolling(rules.SMA_LONG).mean()).shift(1)       # yesterday's close vs its 200-day MA
+        up = (c > c.rolling(FILTER_MA).mean()).shift(1)            # yesterday's close vs its N-day MA
         extra["spy_up"] = up.reindex(days).fillna(True).astype(bool).values
     else:
         print(f"No {BENCHMARK} prices: the {BENCHMARK} trend filter is switched off", flush=True)
@@ -844,8 +847,16 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
     jobs = []
     if mode == "strategies":
         jobs.append(("bot", "Bot now: breakout, trailing exit", "Bot", sig, BOT_NOW))
+        if MARKET == "crypto" and spy is not None:
+            jobs.append(("bot_btc", f"Bot now + BTC filter (BTC above its {FILTER_MA}-day MA)", "Bot+BTC", sig,
+                         {**BOT_NOW, "spy_filter": True}))
+        from strategies import tools
+        tools.MARKET = spy["Close"] if spy is not None else None      # for tools.market_up()
+        tools.MARKET_MA = FILTER_MA
         first_slot = np.flatnonzero(np.r_[True, slot_day[1:] != slot_day[:-1]])
         for name, mod in (strategies if strategies is not None else load_strategies()).items():
+            if MARKET not in getattr(mod, "MARKETS", ("stocks", "crypto")):
+                continue                               # a strategy made for the other market
             try:
                 s_sig, s_exit = strategy_signals(mod, daily, syms, days, first_slot)
             except Exception as e:

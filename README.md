@@ -114,6 +114,13 @@ The same strategy, alerts, charts and paper trading on the **10 biggest cryptocu
   - Every crypto position in the paper account is treated as the bot's own: it gets the trend-exit check and a ⚠️ warning if it has no stop order.
   - No Pine Script for crypto trades yet.
 - **Backtest:** Actions → **Backtest** → Run workflow → *Market*: **crypto**. Same versions and `strategies/` files as for stocks, on the current top 10 coins, with the 0.25% fee per buy and sell, 0.05% slippage, no borrowing, and **buy & hold BTC** as the benchmark. Start dates are a week (7 days) apart. Alpaca's crypto history is shorter than its stock history; if it doesn't reach back as far as the years you pick, the test starts where the prices start (the report shows the dates). The first run downloads the 15-minute history (a few minutes); later runs reuse the saved copy.
+- **Crypto strategies** (in `strategies/`, tested only when *Market* is **crypto**; `MARKETS = ("crypto",)` at the top of a file limits it to crypto):
+  - `crypto_breakout.py`: new 20-day high above the 100-day average, only while BTC is above its 50-day average, 3× ATR stop, sells below the 20-day low.
+  - `crypto_ma_cross.py`: 20-day average crosses above the 50-day; sells when it crosses back below.
+  - `crypto_momentum_4w.py`: buys when the 4-week return turns positive, sells when it turns negative.
+  - `crypto_rotation.py`: holds the coins with the best 3-month gain while they're above their 50-day average and BTC is in an up-trend.
+  - The report also shows **Bot now + BTC filter**: the live bot's signals, taken only while BTC is above its 50-day average.
+  - Any strategy can use the market filter with `tools.market_up(d)` (SPY for stocks, BTC for crypto).
 - **Strategy files on crypto:** they get daily candles too, but crypto has 365 trading days a year, so "252 days" in a strategy means about 8 months for crypto instead of a year.
 - **Running it on a timer later:** the workflow file has the lines to put back (every 4 hours ≈ 180 runs a month). Running every 15 minutes, 24/7, needs about 2,900 runs a month, more than the 2,000 free minutes of a private repo.
 
