@@ -133,8 +133,9 @@ def fetch(sym, timeframe, start, end, headers):
         if bars:
             df = pd.DataFrame(bars)
             df.index = pd.DatetimeIndex(pd.to_datetime(df["t"], utc=True)).tz_convert(ET)
-            df = df.rename(columns={"o": "Open", "h": "High", "l": "Low", "c": "Close"})
-            df = df[["Open", "High", "Low", "Close"]].astype(float)
+            df = df.rename(columns={"o": "Open", "h": "High", "l": "Low", "c": "Close", "v": "Volume"})
+            cols = ["Open", "High", "Low", "Close"] + (["Volume"] if timeframe == "1Day" and "Volume" in df else [])
+            df = df[cols].astype(float)
             if timeframe != "1Day":
                 mins = df.index.hour * 60 + df.index.minute
                 df = df[(mins >= 570) & (mins < 960)]
@@ -164,6 +165,8 @@ def cached_fetch(sym, timeframe, start, end, headers):
     Alpaca has re-adjusted old prices (after a split or dividend the last saved candle no longer matches)."""
     path = os.path.join(CACHE_DIR, f"{sym}_{timeframe}.pkl.gz")
     old = _load(path)
+    if old is not None and timeframe == "1Day" and "Volume" not in old:
+        old = None                                     # saved before volume was kept: download again (small)
     if old is not None and len(old) > 1 and old.attrs.get("from") and pd.Timestamp(old.attrs["from"]) <= pd.Timestamp(start):
         last = old.index[-1]
         since = (last.tz_localize(ET) if last.tzinfo is None else last).tz_convert("UTC").to_pydatetime()
@@ -372,15 +375,21 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
             lows, highs = extra["dcl"], extra["dch"]
     exit_m, max_days = cfg["exit_matrix"], cfg["max_days"]
     use["kind"] = np.where((use["dl"] | use["ds"]) & ("daily" in kinds), "daily", "15-min")
+    if "pattern" in use:                               # chart-pattern trades: named after the pattern
+        use["kind"] = use["pattern"].fillna("daily").values
+    for c in ("stop", "target"):                       # the pattern's own stop/target prices (NaN = none)
+        if c not in use:
+            use[c] = np.nan
     if cfg["seed"] is None:
         use["tie"] = use["sym"].rank(method="dense")
     else:
         use["tie"] = np.random.default_rng(cfg["seed"]).random(len(use))
     use = use.sort_values(["slot", "n", "score", "tie"], ascending=[True, False, False, True])
     by_slot = {}
-    for slot, col, dr, atr, kind in zip(use["slot"].values, use["col"].values, use["dir"].values,
-                                        use["atr"].values, use["kind"].values):
-        by_slot.setdefault(int(slot), []).append((int(col), dr, float(atr), kind))
+    for slot, col, dr, atr, kind, stp, tgt in zip(use["slot"].values, use["col"].values, use["dir"].values,
+                                        use["atr"].values, use["kind"].values, use["stop"].values,
+                                        use["target"].values):
+        by_slot.setdefault(int(slot), []).append((int(col), dr, float(atr), kind, float(stp), float(tgt)))
     stop_scale = cfg["stop_atr"] / T.STOP_ATR
 
     Cf = pd.DataFrame(C).ffill().values
@@ -483,7 +492,7 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
             equity = cash + value
             bp = max(0.0, cfg["margin"] * equity - gross)
             placed, free = 0, T.MAX_OPEN_POSITIONS - len(pos)
-            for col, r_dir, r_atr, r_kind in by_slot[s]:
+            for col, r_dir, r_atr, r_kind, r_stop, r_tgt in by_slot[s]:
                 if col in pos or traded_on.get(col) == day[s]:
                     continue
                 if spy_up is not None and spy_up[di[s]] != (r_dir == "LONG"):
@@ -494,12 +503,23 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
                 price = O[s, col]
                 if not np.isfinite(price) or not np.isfinite(r_atr):
                     continue
-                plan = T.plan_trade(r_dir, price, r_atr * stop_scale, equity, bp)
-                if not plan:
-                    continue
                 sign = 1 if r_dir == "LONG" else -1
-                dist = cfg["stop_atr"] * r_atr
-                plan["target"] = _round(price + sign * cfg["target_r"] * dist) if cfg["target_r"] else None
+                if np.isfinite(r_stop):                # chart pattern: its own stop (and target)
+                    dist = sign * (price - r_stop)
+                    use_tgt = cfg.get("pattern_target") and np.isfinite(r_tgt)
+                    if dist <= 0 or (use_tgt and sign * (r_tgt - price) <= 0):
+                        continue                       # opened beyond the stop or already at the target
+                    plan = T.plan_trade(r_dir, price, dist / T.STOP_ATR, equity, bp)
+                    if not plan:
+                        continue
+                    plan["target"] = _round(r_tgt) if use_tgt else \
+                        (_round(price + sign * cfg["target_r"] * dist) if cfg["target_r"] else None)
+                else:
+                    plan = T.plan_trade(r_dir, price, r_atr * stop_scale, equity, bp)
+                    if not plan:
+                        continue
+                    dist = cfg["stop_atr"] * r_atr
+                    plan["target"] = _round(price + sign * cfg["target_r"] * dist) if cfg["target_r"] else None
                 fill = price * (1 + sign * SLIPPAGE)
                 cash -= sign * plan["qty"] * fill + FEE * plan["qty"] * fill
                 pid = len(trades) + len(pos) + s * 1000
@@ -595,13 +615,18 @@ def summary_text(res, bench, start, end, n_stocks, mode="bot versions"):
     years = (eq0.index[-1] - eq0.index[0]).days / 365.25
     money = (f"risk {T.RISK_PER_TRADE:.0%}/trade, max {T.MAX_OPEN_POSITIONS} positions of max "
              f"{T.MAX_POSITION_PCT:.0%} each")
-    if mode == "strategies":
+    if mode == "patterns":
+        rules_txt = (f"Chart patterns only (patterns.py, daily chart): a breakout on a day's close is traded at the "
+                     f"next day's open with the pattern's own stop and target (sold after {PATTERN_MAX_DAYS} days "
+                     f"if neither is hit); {money}, max {T.MAX_INVESTED:.0%} invested.")
+    elif mode == "strategies":
         rules_txt = (f"Strategy comparison, same money rules for all: {money}, max "
                      f"{T.MAX_INVESTED:.0%} invested. Daily strategies buy at the next day's open.")
     else:
         rules_txt = (f"Bot versions: ⭐ STRONG signals (daily + 15-min), stop 2×ATR, {money}; target 2:1 "
                      f"unless trailing. " + (f"Borrowed money pays {MARGIN_RATE:.1%}/yr interest." if MARGIN > 1 else "No borrowing."))
-    lines = [f"📊 <b>Backtest {UNIVERSE}: {'strategies' if mode == 'strategies' else 'bot versions'}</b>",
+    title = {"strategies": "strategies", "patterns": "chart patterns"}.get(mode, "bot versions")
+    lines = [f"📊 <b>Backtest {UNIVERSE}: {title}</b>",
              f"{start:%d %b %Y} → {end:%d %b %Y} ({years:.1f} years), {UNIVERSE} ({n_stocks} {UNIT}), "
              f"$100,000 start. {rules_txt} 'Invested' = average money in the market ({BENCHMARK} = 100%)", ""]
     n_runs = next(iter(res.values())).get("agg", {}).get("runs", 1)
@@ -767,6 +792,125 @@ def strategy_signals(mod, daily, syms, days, first_slot):
     return sig, (np.column_stack(exit_cols) if exit_cols else None)
 
 
+# ---------------------------------------------------------------- chart patterns (patterns.py)
+PATTERN_MAX_DAYS = 60       # pattern trades still open after 60 trading days are sold
+
+
+def _pattern_rows(args):
+    """Every daily pattern breakout of one stock/coin, judged on each day's close (run in parallel).
+    Returns [(date, direction, stop, target, name, atr)], each pattern once (its first breakout)."""
+    import patterns
+    import scanner
+    sym, d, dates = args
+    d = d.copy()
+    if "Volume" not in d:
+        d["Volume"] = np.nan                           # no volume: the breakout volume check is skipped
+    d = scanner.add_indicators(d)
+    look = patterns.SETTINGS["daily"]["lookback"]
+    close = d["Close"].values
+    vol = (d["Volume"] / d["VolAvg20"]).values
+    pos = d.index.get_indexer(dates)
+    out, seen = [], set()
+    for date, i in zip(dates, pos):
+        if i < 60:
+            continue
+        v = vol[i] if np.isfinite(vol[i]) and vol[i] > 0 else None
+        pats, _ = patterns.find_patterns(d.iloc[max(0, i - look + 1):i + 1], "daily", float(close[i]),
+                                         float(close[i - 1]), v)
+        for pt in pats:
+            if pt["stage"] != "breakout" or pt["id"] in seen:
+                continue
+            seen.add(pt["id"])
+            out.append((date, pt["dir"], pt["stop"], pt["target"], pt["name"], float(d["ATR"].iat[i])))
+    return sym, out
+
+
+def pattern_signals(daily, syms, days, first_slot, workers=4):
+    """Pattern breakouts of every stock/coin as simulator rows: a breakout on a day's close buys
+    (or sells short) at the next day's open, with the pattern's own stop and target."""
+    from concurrent.futures import ProcessPoolExecutor
+    t0 = time.time()
+    jobs = [(sym, daily[sym], days[:-1]) for sym in syms]
+    rows = []
+    col_of = {sym: k for k, sym in enumerate(syms)}
+    with ProcessPoolExecutor(max_workers=workers) as pool:
+        for sym, found in pool.map(_pattern_rows, jobs):
+            for date, direction, stop, target, name, atr in found:
+                p = days.get_loc(date)
+                rows.append({"slot": first_slot[p + 1], "col": col_of[sym], "sym": sym, "date": date,
+                             "dl": direction == "LONG", "ds": direction == "SHORT", "il": False, "is": False,
+                             "atr": atr, "score": 0.0, "stop": stop, "target": target,
+                             "pattern": f"{name} {'↑' if direction == 'LONG' else '↓'}"})
+    sig = pd.DataFrame(rows, columns=["slot", "col", "sym", "date", "dl", "ds", "il", "is", "atr", "score",
+                                      "stop", "target", "pattern"])
+    print(f"Pattern breakouts: {len(sig)} ({int(sig['dl'].sum())} up, {int(sig['ds'].sum())} down) "
+          f"in {time.time() - t0:.0f}s", flush=True)
+    return sig
+
+
+def pattern_scorecard(sig, daily):
+    """How each pattern did on its own, without the money rules: every breakout traded at the next
+    day's open with the pattern's stop and target (or sold after PATTERN_MAX_DAYS days), costs included.
+    Daily candles: if one day touches both stop and target, the stop counts (cautious)."""
+    out = []
+    cost = 2 * (FEE + SLIPPAGE)
+    for r in sig.itertuples():
+        d = daily[r.sym]
+        i = d.index.get_loc(r.date)
+        if i + 1 >= len(d):
+            continue
+        o, h, l, c = (d[k].values for k in ("Open", "High", "Low", "Close"))
+        sign = 1 if r.dl else -1
+        entry = o[i + 1]
+        risk = sign * (entry - r.stop)
+        if risk <= 0 or sign * (r.target - entry) <= 0:
+            continue
+        exit_px, how, j = None, "time", i + 1
+        for j in range(i + 1, min(i + 1 + PATTERN_MAX_DAYS, len(d))):
+            if j > i + 1 and sign * (o[j] - r.stop) <= 0:
+                exit_px, how = o[j], "stop"
+            elif j > i + 1 and sign * (o[j] - r.target) >= 0:
+                exit_px, how = o[j], "target"
+            elif sign * ((l[j] if sign > 0 else h[j]) - r.stop) <= 0:
+                exit_px, how = r.stop, "stop"
+            elif sign * ((h[j] if sign > 0 else l[j]) - r.target) >= 0:
+                exit_px, how = r.target, "target"
+            if exit_px is not None:
+                break
+        if exit_px is None:
+            if j - (i + 1) + 1 < PATTERN_MAX_DAYS:
+                how = "open"                           # still running at the end of the data
+            exit_px = c[j]
+        R = sign * (exit_px - entry) / risk - cost * entry / risk
+        out.append({"pattern": r.pattern, "symbol": r.sym, "date": r.date, "entry": entry, "stop": r.stop,
+                    "target": r.target, "exit": exit_px, "result": how, "R": R, "days": j - i})
+    return pd.DataFrame(out, columns=["pattern", "symbol", "date", "entry", "stop", "target", "exit", "result",
+                                      "R", "days"])
+
+
+def scorecard_text(card):
+    if card.empty:
+        return "🧩 <b>Pattern scorecard</b>: no pattern breakouts in this period."
+    done = card[card["result"] != "open"]
+    g = done.groupby("pattern")
+    t = pd.DataFrame({"n": g.size(), "win": g["R"].apply(lambda x: (x > 0).mean()), "avgR": g["R"].mean(),
+                      "tgt": g["result"].apply(lambda x: (x == "target").mean()), "days": g["days"].mean()})
+    t = t.sort_values("avgR", ascending=False)
+    lines = ["🧩 <b>Pattern scorecard</b>: every breakout traded on its own (pattern's stop and target, "
+             f"sold after {PATTERN_MAX_DAYS} days, costs included). Avg R above 0 = made money on average; "
+             "fewer than ~20 trades = too few to trust.", "<pre>Pattern             n  win  avgR  tgt days"]
+    short = {"Symmetrical triangle": "Sym. triangle", "Inverse head & shoulders": "Inv. H&S",
+             "Head & shoulders": "H&S", "Bump & run reversal": "Bump & run", "Ascending triangle": "Asc. triangle",
+             "Descending triangle": "Desc. triangle", "Rounding bottom": "Round. bottom"}
+    for name, r in t.iterrows():
+        base, arrow = name[:-2], name[-1]
+        label = f"{short.get(base, base)[:16]} {arrow}"
+        lines.append(f"{label:<18}{int(r.n):>4}{r.win:>5.0%}{r.avgR:>+6.2f}{r.tgt:>5.0%}{r.days:>5.0f}")
+    lines.append(f"{'All patterns':<18}{len(done):>4}{(done['R'] > 0).mean():>5.0%}{done['R'].mean():>+6.2f}"
+                 f"{(done['result'] == 'target').mean():>5.0%}{done['days'].mean():>5.0f}</pre>")
+    return "\n".join(lines)
+
+
 BOT_NOW = {"shorts": False, "exit": "trail", "margin": 1.0}     # the paper bot's current rules
 
 
@@ -805,20 +949,23 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
     mode "strategies": the bot now vs every strategy file in strategies/."""
     syms = sorted(intraday)
     t0 = time.time()
-    sig = []
-    for col, sym in enumerate(syms):
-        s = stock_signals(intraday[sym], daily[sym])
-        s["sym"], s["col"] = sym, col
-        sig.append(s)
-    sig = pd.concat(sig, ignore_index=True)
     slots = pd.DatetimeIndex(sorted(set().union(*(intraday[s].index for s in syms))))
-    keep = slots >= pd.Timestamp(start).tz_convert(ET)
+    keep = slots >= pd.Timestamp(start).tz_convert(slots.tz)
     slots = slots[keep]
-    sig = sig[sig["fill"] >= slots[0]].copy()
-    sig["slot"] = slots.get_indexer(sig["fill"])
-    sig = sig[sig["slot"] >= 0]
-    print(f"Signals: {len(sig)} ({sig[['dl', 'ds']].any(axis=1).sum()} daily, "
-          f"{sig[['il', 'is']].any(axis=1).sum()} 15-min) in {time.time() - t0:.0f}s", flush=True)
+    if mode == "patterns":
+        sig = None                                     # pattern breakouts are found below, per day
+    else:
+        sig = []
+        for col, sym in enumerate(syms):
+            s = stock_signals(intraday[sym], daily[sym])
+            s["sym"], s["col"] = sym, col
+            sig.append(s)
+        sig = pd.concat(sig, ignore_index=True)
+        sig = sig[sig["fill"] >= slots[0]].copy()
+        sig["slot"] = slots.get_indexer(sig["fill"])
+        sig = sig[sig["slot"] >= 0]
+        print(f"Signals: {len(sig)} ({sig[['dl', 'ds']].any(axis=1).sum()} daily, "
+              f"{sig[['il', 'is']].any(axis=1).sum()} 15-min) in {time.time() - t0:.0f}s", flush=True)
 
     def matrix(field):
         return np.column_stack([intraday[s][field].reindex(slots).values for s in syms])
@@ -871,6 +1018,20 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
                     lows_highs(ex["trail_days"])
             jobs.append((name, getattr(mod, "NAME", name), getattr(mod, "SHORT", name[:7]), s_sig, cfg))
             print(f"Strategy {name}: {len(s_sig)} buy signals", flush=True)
+    elif mode == "patterns":
+        first_slot = np.flatnonzero(np.r_[True, slot_day[1:] != slot_day[:-1]])
+        sig = pattern_signals(daily, syms, days, first_slot)
+        pv = {"kinds": ("daily",), "exit": "custom", "margin": T.MAX_INVESTED, "pattern_target": True,
+              "target_r": None, "trail_days": None, "max_days": PATTERN_MAX_DAYS}
+        no_short = " (test only: Alpaca can't short crypto)" if MARKET == "crypto" else ""
+        jobs += [
+            ("p_long", "1. Up patterns: pattern's stop + target", "P Long", sig, {**pv, "shorts": False}),
+            ("p_both", "2. Up + down patterns (shorts)" + no_short, "P L+S", sig, {**pv, "shorts": True}),
+            ("p_filter", f"3. Up patterns, only while {BENCHMARK} is above its {FILTER_MA}-day MA", "P Filt", sig,
+             {**pv, "shorts": False, "spy_filter": True}),
+            ("p_trail", "4. Up patterns: pattern's stop + trailing exit (20-day low)", "P Trail", sig,
+             {**pv, "shorts": False, "pattern_target": False, "trail_days": 20, "max_days": None}),
+        ]
     else:
         for key, (name, cfg) in VARIANTS.items():
             jobs.append((key, name, SHORT[key], sig, cfg))
@@ -902,7 +1063,7 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
             per.append({"trades": trades, "equity": eq, "info": info, "stats": st, "spy_cagr": spy_cagr,
                         "start": days[d0]})
         agg = aggregate(per)
-        res[key] = {"name": name, "short": short, "main": key in ("bot", "trail1x") or (T is not trader and key == "trail"), "runs": per, "agg": agg,
+        res[key] = {"name": name, "short": short, "main": key in ("bot", "trail1x", "p_long") or (T is not trader and key == "trail"), "runs": per, "agg": agg,
                     **per[0]}
         print(f"{name}: median {pct(agg['cagr'])}/yr (runs {pct(agg['cagr_min'])} to {pct(agg['cagr_max'])}), "
               f"beat {BENCHMARK} in {agg['beat']}/{agg['spy_runs']}, ~{agg['trades']:.0f} trades", flush=True)
@@ -960,12 +1121,23 @@ def main():
         with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
             f.write("```\n" + html.unescape(text.replace("<b>", "").replace("</b>", "")
                                             .replace("<i>", "").replace("</i>", "")) + "\n```\n")
+    card = None
+    if mode == "patterns":
+        card = pattern_scorecard(sig, daily)
+        card.to_csv(os.path.join(OUT, "patterns.csv"), index=False)
+        print("\n" + html.unescape(scorecard_text(card).replace("<b>", "").replace("</b>", "")
+                                   .replace("<pre>", "").replace("</pre>", "")))
     details = details_text(res, bench)
     print("\n" + html.unescape(details.replace("<b>", "").replace("</b>", "").replace("<pre>", "").replace("</pre>", "")))
     telegram(text)
     telegram(details)
+    if card is not None:
+        telegram(scorecard_text(card))
     telegram(photo=chart, caption="Account value and drawdowns of each version (first run)")
     telegram(document=csv, caption="Every trade of every version, first run (column 'version'). Open in Excel / Google Sheets.")
+    if card is not None:
+        telegram(document=os.path.join(OUT, "patterns.csv"),
+                 caption="Every pattern breakout traded on its own (the scorecard's trades).")
 
 
 if __name__ == "__main__":

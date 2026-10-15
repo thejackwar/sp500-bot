@@ -9,6 +9,11 @@ on:
   #     - cron: "0,15,30,45 13-21 * * 1-5"
   workflow_dispatch:          # "Run workflow" button (manual tests) and the outside timer
     inputs:
+      strategy:
+        description: "What to scan for (patterns only = chart patterns, no strategy alerts, no trades)"
+        type: choice
+        options: ["bot", "patterns only"]
+        default: "bot"
       mode:
         description: "Which candles to scan"
         type: choice
@@ -34,6 +39,10 @@ jobs:
     timeout-minutes: 14
     env:
       SCAN_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.mode || '15m' }}
+      STRATEGY: ${{ inputs.strategy == 'patterns only' && 'patterns' || 'bot' }}
+      # pattern scans keep their own memory of what was already reported
+      STATE_FILE: ${{ inputs.strategy == 'patterns only' && 'pattern_state.json' || 'state.json' }}
+      STATE_KEY: ${{ inputs.strategy == 'patterns only' && 'pattern-state' || 'alert-state' }}
     steps:
       # Skip quickly (no downloads) when this run falls outside its window in New York time.
       - name: Check market window
@@ -66,9 +75,9 @@ jobs:
         if: steps.window.outputs.run == 'true'
         uses: actions/cache/restore@v4
         with:
-          path: state.json
-          key: alert-state-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: alert-state-
+          path: ${{ env.STATE_FILE }}
+          key: ${{ env.STATE_KEY }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: ${{ env.STATE_KEY }}-
 
       - name: Scan
         if: steps.window.outputs.run == 'true'
@@ -85,5 +94,5 @@ jobs:
         if: always() && steps.window.outputs.run == 'true'
         uses: actions/cache/save@v4
         with:
-          path: state.json
-          key: alert-state-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.STATE_FILE }}
+          key: ${{ env.STATE_KEY }}-${{ github.run_id }}-${{ github.run_attempt }}

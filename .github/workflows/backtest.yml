@@ -16,7 +16,7 @@ on:
       test:
         description: "What to compare"
         type: choice
-        options: ["strategies", "bot versions"]
+        options: ["strategies", "bot versions", "patterns"]
         default: "strategies"
       runs:
         description: "Start dates per version (more = more reliable, slower)"

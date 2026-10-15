@@ -8,6 +8,11 @@ on:
   #     - cron: "5 */4 * * *"
   workflow_dispatch:
     inputs:
+      strategy:
+        description: "What to scan for (patterns only = chart patterns, no strategy alerts, no trades)"
+        type: choice
+        options: ["bot", "patterns only"]
+        default: "bot"
       mode:
         description: "Intraday candles (the daily chart is always checked)"
         type: choice
@@ -27,6 +32,10 @@ jobs:
   scan:
     runs-on: ubuntu-latest
     timeout-minutes: 14
+    env:
+      STRATEGY: ${{ inputs.strategy == 'patterns only' && 'patterns' || 'bot' }}
+      STATE_FILE: ${{ inputs.strategy == 'patterns only' && 'crypto_pattern_state.json' || 'crypto_state.json' }}
+      STATE_KEY: ${{ inputs.strategy == 'patterns only' && 'crypto-pattern-state' || 'crypto-state' }}
     steps:
       - uses: actions/checkout@v4
 
@@ -40,9 +49,9 @@ jobs:
       - name: Restore sent-alerts memory
         uses: actions/cache/restore@v4
         with:
-          path: crypto_state.json
-          key: crypto-state-${{ github.run_id }}-${{ github.run_attempt }}
-          restore-keys: crypto-state-
+          path: ${{ env.STATE_FILE }}
+          key: ${{ env.STATE_KEY }}-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: ${{ env.STATE_KEY }}-
 
       - name: Scan
         run: python crypto_scanner.py
@@ -59,5 +68,5 @@ jobs:
         if: always()
         uses: actions/cache/save@v4
         with:
-          path: crypto_state.json
-          key: crypto-state-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ${{ env.STATE_FILE }}
+          key: ${{ env.STATE_KEY }}-${{ github.run_id }}-${{ github.run_attempt }}

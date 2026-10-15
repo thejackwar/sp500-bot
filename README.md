@@ -134,14 +134,29 @@ Every alert comes with a **candlestick chart on a black background** (green = up
 
 ## Chart patterns (`patterns.py`)
 Recognised automatically on the **daily and hourly** charts:
-- **Reversal:** double top/bottom, triple top/bottom, head & shoulders (and inverse), rising/falling wedge, rounding bottom, bump & run
+- **Reversal:** double top/bottom, triple top/bottom, head & shoulders (and inverse), rising/falling wedge, rounding bottom, bump & run, diamond (top/bottom)
 - **Continuation:** ascending/descending/symmetrical triangle, rectangle, bull/bear flag, bull/bear pennant
 - **Harmonic:** ABCD, Gartley, Butterfly
 
 How it works: swing highs/lows are found with a zigzag that ignores moves smaller than 2× ATR, and each pattern is checked against those swings.
 - **Forming:** listed in one 👀 watchlist message per check (each pattern only once).
 - **Breakout:** a chart alert with the pattern drawn, plus entry, stop and target (target = the pattern's height, the usual "measured move"). Breakouts need the candle's volume at least 1.3× its 20-candle average and a clear close beyond the line. Harmonics alert when price reaches the completion zone and turns.
-- Diamond patterns are not detected (too rare and loosely shaped to recognise reliably).
+- **Diamond:** swings first spread out (higher highs, lower lows) then narrow again. After a rise it's a top (breaks down), after a fall a bottom (breaks up); if the trend before it isn't clear, both breakouts are watched. Rare, so expect few.
+
+### Patterns-only scan (stocks and crypto)
+Just the chart patterns above, without the bot's strategy alerts, and **no trades**.
+- **Run it:** Actions → **S&P 500 scan** (stocks) or **Crypto scan** (crypto) → Run workflow → *What to scan for*: **patterns only** → Run. Works at any time, also when the market is closed.
+- **Formed (breakout):** a chart alert for every pattern that broke out on the latest candle **or recently** (last 3 daily candles / last 7 hourly candles; the message says "2 days ago" etc.), with the pattern drawn, entry, stop and target.
+- **Forming:** one 👀 watchlist message with **every** pattern forming right now, on the daily and hourly charts; 🆕 marks the ones that weren't there at the previous pattern scan.
+- A ✅ message at the end counts what was found. Stock pattern alerts go to the stock chat, crypto ones to the crypto chat.
+- Pattern scans keep their own memory, so they never hide or repeat alerts of the normal bot (and the other way round). The timer (cron-job.org) keeps running the normal bot.
+
+### Backtesting the patterns
+Actions → **Backtest** → Run workflow → *Market*: **stocks** or **crypto**, *What to compare*: **patterns** → Run.
+- Replays the **daily** chart day by day: a pattern that breaks out on a day's close (same rules as the live alerts, incl. the 1.3× volume check) is traded at the next day's open, with **the pattern's own stop and target** (the measured move), sold after 60 trading days if neither is hit. Same money rules as the bot (1% risk per trade, max 20% per position, no borrowing).
+- **Versions:** (1) up patterns only, (2) up + down patterns (shorts; test only for crypto), (3) up patterns only while SPY/BTC is in an up-trend, (4) up patterns with a trailing exit (20-day low) instead of the target. Compared with buying and holding SPY/BTC.
+- **Pattern scorecard** (extra Telegram message + `patterns.csv`): every breakout traded on its own, without the position limits: number of trades, win rate, average R (profit in units of the risk; above 0 = made money on average), how often the target was reached, and days held, per pattern and direction (↑/↓). This is the table that shows which patterns are worth watching. Under ~20 trades a pattern's figures are mostly luck.
+- Hourly patterns aren't backtested (only daily), and forming patterns can't be traded, so they aren't either.
 
 
 ## Notes

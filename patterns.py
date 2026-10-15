@@ -327,6 +327,60 @@ def _harmonics(cp, last, n, atr, price, prev):
     return out
 
 
+# ---------------------------------------------------------------- diamond
+def _diamond(df, cp, n, atr):
+    """Diamond: swings first spread out (higher highs + lower lows) then narrow again (lower highs +
+    higher lows). After a rise it is a top (breaks down), after a fall a bottom (breaks up).
+    Entry = the right side's line; stop = the opposite line; target = the diamond's height."""
+    tol = TOL * atr
+    closes = df["Close"].values
+    for m in (9, 8, 7):
+        if len(cp) < m + 1:
+            continue
+        seg = cp[-m:]
+        highs = [p for p in seg if p[2] == "H"]
+        lows = [p for p in seg if p[2] == "L"]
+        if len(highs) < 3 or len(lows) < 3:
+            continue
+        hm = max(highs, key=lambda p: p[1])
+        lm = min(lows, key=lambda p: p[1])
+        hb, ha = [p for p in highs if p[0] < hm[0]], [p for p in highs if p[0] > hm[0]]
+        lb, la = [p for p in lows if p[0] < lm[0]], [p for p in lows if p[0] > lm[0]]
+        if not (hb and ha and lb and la):
+            continue                                    # widest point must be in the middle
+        if any(b[1] >= a[1] - 0.2 * tol for b, a in zip(hb, hb[1:] + [hm])):
+            continue                                    # left side: highs rising ...
+        if any(b[1] <= a[1] + 0.2 * tol for b, a in zip(lb, lb[1:] + [lm])):
+            continue                                    # ... and lows falling
+        if any(a[1] >= b[1] - 0.2 * tol for b, a in zip([hm] + ha, ha)):
+            continue                                    # right side: highs falling ...
+        if any(a[1] <= b[1] + 0.2 * tol for b, a in zip([lm] + la, la)):
+            continue                                    # ... and lows rising
+        height = hm[1] - lm[1]
+        if height < 4 * atr or abs(hm[0] - lm[0]) > 0.6 * (seg[-1][0] - seg[0][0]):
+            continue
+        up, _ = _line((hm[0], hm[1]), (ha[-1][0], ha[-1][1]))         # upper-right side
+        lo, _ = _line((lm[0], lm[1]), (la[-1][0], la[-1][1]))         # lower-right side
+        U, L = up(n - 1), lo(n - 1)
+        if U - L <= 0 or U - L > 0.75 * height:
+            continue                                    # must have narrowed
+        i0 = min(hm[0], lm[0])
+        xs = np.arange(i0, n - 1)
+        if np.any(closes[i0:n - 1] > up(xs) + tol) or np.any(closes[i0:n - 1] < lo(xs) - tol):
+            continue
+        before = cp[-m - 1]                             # where price came from
+        if before[2] == "L" and before[1] < lm[1]:
+            name, breaks = "Diamond top", [_brk("SHORT", L, U, L - height)]
+        elif before[2] == "H" and before[1] > hm[1]:
+            name, breaks = "Diamond bottom", [_brk("LONG", U, L, U + height)]
+        else:
+            name, breaks = "Diamond", [_brk("LONG", U, L, U + height), _brk("SHORT", L, U, L - height)]
+        lines = [((hb[0][0], hb[0][1]), (hm[0], hm[1])), ((lb[0][0], lb[0][1]), (lm[0], lm[1])),   # left sides
+                 ((hm[0], hm[1]), (n - 1, U)), ((lm[0], lm[1]), (n - 1, L))]                          # right sides
+        return [_pat(name, breaks, [hm, lm, ha[-1], la[-1]], lines, [(p[0], p[1], "") for p in seg])]
+    return []
+
+
 # ---------------------------------------------------------------- stage
 def _stage(p, d, ts_col, n, cfg, timeframe, price, prev, atr, vol_ratio):
     """Fill in stage/direction/levels. Returns False if the pattern is too old or no longer valid."""
@@ -380,6 +434,7 @@ def find_patterns(df, timeframe, price, prev, vol_ratio=None):
     shape_finders = (
         lambda: _line_patterns(d, fine, n, atr, flags_only=True),
         lambda: _heads_triples(cp, n, atr),
+        lambda: _diamond(d, cp, n, atr),
         lambda: _line_patterns(d, cp, n, atr, sizes=(7, 6, 5)),
         lambda: _doubles(cp, n, atr),
         lambda: _bump_and_run(cp, n, atr),

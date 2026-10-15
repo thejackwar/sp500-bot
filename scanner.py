@@ -53,7 +53,7 @@ ALPACA_URL = "https://data.alpaca.markets/v2/stocks/bars"
 DATA_DELAY_MINUTES = 16            # Alpaca free plan: full-market (SIP) data must be 15+ min old
 INTRADAY_FEED = "iex"              # real-time on the free plan ("sip" = complete but 15+ min late)
 SNAPSHOT_URL = "https://data.alpaca.markets/v2/stocks/snapshots"
-STATE_FILE = "state.json"          # remembers sent alerts so you never get duplicates
+STATE_FILE = os.environ.get("STATE_FILE", "state.json")   # remembers sent alerts so you never get duplicates
 DAILY_LOOKBACK = 120               # daily bars used for levels / trend lines (~6 months)
 INTRADAY_LOOKBACK = 200            # entry-chart candles used for levels / trend lines
 
@@ -69,6 +69,8 @@ PIVOT_WINDOW = 5                   # a swing high/low must be the extreme of +-5
 MAX_CHART_ALERTS = 10              # full chart alerts per run; any extra setups go in one summary
 MAX_WATCHLIST = 40                 # forming patterns listed per check (the rest are counted)
 TELEGRAM_PAUSE = 1.5               # seconds between Telegram messages (avoids rate limits)
+# Patterns-only scans (STRATEGY=patterns): a breakout up to this many candles ago still counts as "formed"
+RECENT_BARS = {"daily": 3, "hourly": 7}
 
 
 # ---------------------------------------------------------------- data
@@ -653,6 +655,83 @@ def send_long(lines):
     return ok
 
 
+# ---------------------------------------------------------------- chart patterns (shared with crypto_scanner.py)
+def chart_patterns(t, frames, price, prev, vol_now, state, ctx_price, recent=False):
+    """Chart patterns of one stock/coin. frames: [(timeframe, candles with indicators)].
+    price/prev/vol_now: latest price, previous close, latest candle's volume vs its average.
+    recent=True (patterns-only scans): breakouts in the last RECENT_BARS candles count too, and
+    patterns still forming are listed again even if they were reported before.
+    Returns (events, keys, pattern hits to draw, forming patterns, watchlist entries)."""
+    events, keys, pat_hits, forming_any, watch, seen = [], [], [], [], [], set()
+    for tf, frame in frames:
+        cfg = rules.SETTINGS["daily" if tf == "daily" else "intraday"]
+        lb = rules.SQUEEZE_LOOKBACK["daily" if tf == "daily" else "intraday"]
+        for k in range(RECENT_BARS[tf] if recent else 1):
+            if k == 0:
+                sub, p_now, p_prev, vol = frame, price, prev, vol_now
+            else:                                      # the chart as it was k candles ago
+                sub = frame.iloc[:len(frame) - k]
+                if len(sub) < 60:
+                    break
+                p_now, p_prev = float(sub["Close"].iat[-1]), float(sub["Close"].iat[-2])
+                avg = sub["VolAvg20"].iat[-1] if "VolAvg20" in sub else None
+                vol = float(sub["Volume"].iat[-1] / avg) if avg else None
+            pats, _ = patterns.find_patterns(sub, tf, p_now, p_prev, vol)
+            if not pats:
+                continue
+            cframe = rules.add_strategy_indicators(sub, lb, **cfg).tail(patterns.SETTINGS[tf]["lookback"])
+            for pt in pats:
+                if (k and pt["stage"] != "breakout") or pt["id"] in seen:
+                    continue
+                seen.add(pt["id"])
+                if pt["stage"] == "forming":
+                    forming_any.append((pt, cframe))   # drawn on this stock's alert chart, if any
+                key = f"{t}|PAT|{pt['id']}|{pt['stage']}"
+                known = key in state
+                if known and not (recent and pt["stage"] == "forming"):
+                    continue
+                if pt["stage"] == "breakout":
+                    verb = "completed" if pt["name"] in patterns.HARMONICS else "breakout"
+                    unit = "day" if tf == "daily" else "candle"
+                    ago = f", {k} {unit}{'s' if k > 1 else ''} ago" if k else ""
+                    events.append({"dir": pt["dir"], "code": "pattern", "tf": tf, "strong": False, "key": key,
+                                   "text": f"{pt['name']} {verb} ({tf}{ago}): entry {px(pt['level'])}, "
+                                           f"stop {px(pt['stop'])}, target {px(pt['target'])}"})
+                    pat_hits.append((pt, cframe))
+                    keys.append(key)
+                else:
+                    watch.append({"t": t, "p": pt, "price": ctx_price, "key": key, "new": not known})
+    return events, keys, pat_hits, forming_any, watch
+
+
+def send_watchlist(watch, state, now, title="👀 Patterns forming"):
+    """One message listing the patterns that are forming (no breakout yet)."""
+    if not watch:
+        return
+    icon = {"LONG": "🟢", "SHORT": "🔴", "BOTH": "⚪"}
+    new = sum(w.get("new", True) for w in watch)
+    if new == len(watch):
+        lines = [f"<b>{title}</b> (watchlist, {len(watch)} new)"]
+    else:
+        lines = [f"<b>{title}</b> (watchlist: {len(watch)}, 🆕 = {new} new since the last scan)"]
+    for w in watch[:MAX_WATCHLIST]:
+        p = w["p"]
+        if p["dir"] == "BOTH":
+            b1, b2 = p["breaks"]
+            where = f"breaks above {px(b1['level'])} or below {px(b2['level'])}"
+        elif p["name"] in patterns.HARMONICS:
+            where = f"completion zone near {px(p['level'])}"
+        else:
+            where = f"breakout {'above' if p['dir'] == 'LONG' else 'below'} {px(p['level'])}"
+        mark = "🆕 " if w.get("new", True) and new != len(watch) else ""
+        lines.append(f"{mark}{icon[p['dir']]} <b>{w['t']}</b> ${px(w['price'])}: {p['name']} ({p['timeframe']}), {where}")
+    if len(watch) > MAX_WATCHLIST:
+        lines.append(f"…and {len(watch) - MAX_WATCHLIST} more")
+    if send_long(lines):
+        for w in watch:
+            state[w["key"]] = now.isoformat()
+
+
 def load_state():
     try:
         with open(STATE_FILE) as f:
@@ -677,12 +756,13 @@ def main():
     t0 = time.time()
     now = dt.datetime.now(ET)
     force = os.environ.get("ALERT_ANY_TIME") == "1"
+    patterns_only = os.environ.get("STRATEGY") == "patterns"     # chart patterns only, no strategy, no trades
     mode = os.environ.get("SCAN_MODE", "1h")
     m = MODES[mode]
     state = load_state()
 
     tickers = get_tickers()
-    log(f"{now:%Y-%m-%d %H:%M} ET: {m['name']} scan of {len(tickers)} tickers"
+    log(f"{now:%Y-%m-%d %H:%M} ET: {m['name']} {'PATTERN ' if patterns_only else ''}scan of {len(tickers)} tickers"
         + (" (test mode)" if force else ""), t0)
     daily_cutoff = now - dt.timedelta(minutes=DATA_DELAY_MINUTES)
     cutoff = now if INTRADAY_FEED == "iex" else daily_cutoff     # intraday candles are real-time
@@ -706,7 +786,7 @@ def main():
             live = with_snapshot(daily[t], snaps.get(t), now.date())
             # opening check (9:32): no closed candle today yet -> daily-chart signals with the live price
             opening = not fresh and live is not None and (9, 30) <= (now.hour, now.minute) < (10, 0)
-            if not (fresh or opening or force):
+            if not (fresh or opening or force or patterns_only):
                 continue
             scanned += 1
             dd = add_indicators(live if live is not None else with_today(daily[t], h))
@@ -715,6 +795,8 @@ def main():
                 ctx["price"] = float(dd["Close"].iat[-1])
             if opening and not force:
                 events = [e for e in events if e["tf"] == "daily"]       # no new candle to judge yet
+            if patterns_only:
+                events = []                                              # strategy signals off
             # each event once per day (daily chart) or once per candle (intraday chart)
             day_key, bar_key = str(dd.index[-1].date()), f"{mode}|{h.index[-1].isoformat()}"
             for e in events:
@@ -723,32 +805,16 @@ def main():
             keys = [e["key"] for e in events]
             pat_hits, forming_any = [], []
 
-            if PATTERNS_ENABLED and (fresh or force):   # chart patterns on the daily and hourly charts
+            if (PATTERNS_ENABLED and (fresh or force)) or patterns_only:   # daily and hourly chart patterns
                 price, prev = float(h["Close"].iat[-1]), float(h["Close"].iat[-2])
                 hv = add_indicators(h).iloc[-1]
                 vol_now = float(hv.Volume / hv.VolAvg20) if hv.VolAvg20 else None
-                for tf, frame in (("daily", dd), ("hourly", add_indicators(hourly_from(h, mode, cutoff)))):
-                    pats, pdf = patterns.find_patterns(frame, tf, price, prev, vol_now)
-                    if not pats:
-                        continue
-                    cfg = rules.SETTINGS["daily" if tf == "daily" else "intraday"]
-                    lb = rules.SQUEEZE_LOOKBACK["daily" if tf == "daily" else "intraday"]
-                    cframe = rules.add_strategy_indicators(frame, lb, **cfg).tail(patterns.SETTINGS[tf]["lookback"])
-                    for pt in pats:
-                        if pt["stage"] == "forming":
-                            forming_any.append((pt, cframe))    # drawn on this stock's alert chart, if any
-                        key = f"{t}|PAT|{pt['id']}|{pt['stage']}"
-                        if key in state:
-                            continue
-                        if pt["stage"] == "breakout":
-                            verb = "completed" if pt["name"] in patterns.HARMONICS else "breakout"
-                            events.append({"dir": pt["dir"], "code": "pattern", "tf": tf, "strong": False, "key": key,
-                                           "text": f"{pt['name']} {verb} ({tf}): entry {px(pt['level'])}, "
-                                                   f"stop {px(pt['stop'])}, target {px(pt['target'])}"})
-                            pat_hits.append((pt, cframe))
-                            keys.append(key)
-                        else:
-                            watch.append({"t": t, "p": pt, "price": ctx["price"], "key": key})
+                frames = (("daily", dd), ("hourly", add_indicators(hourly_from(h, mode, cutoff))))
+                p_ev, p_keys, pat_hits, forming_any, p_watch = chart_patterns(
+                    t, frames, price, prev, vol_now, state, ctx["price"], recent=patterns_only)
+                events += p_ev
+                keys += p_keys
+                watch += p_watch
 
             if events:
                 n_strong = sum(e["strong"] for e in events)
@@ -789,32 +855,20 @@ def main():
                 mark(item)
 
     # 3) one watchlist message for patterns that are forming (no breakout yet)
-    if watch:
-        icon = {"LONG": "🟢", "SHORT": "🔴", "BOTH": "⚪"}
-        lines = [f"<b>👀 Patterns forming</b> (watchlist, {len(watch)} new)"]
-        for w in watch[:MAX_WATCHLIST]:
-            p = w["p"]
-            if p["dir"] == "BOTH":
-                b1, b2 = p["breaks"]
-                where = f"breaks above {px(b1['level'])} or below {px(b2['level'])}"
-            elif p["name"] in patterns.HARMONICS:
-                where = f"completion zone near {px(p['level'])}"
-            else:
-                where = f"breakout {'above' if p['dir'] == 'LONG' else 'below'} {px(p['level'])}"
-            lines.append(f"{icon[p['dir']]} <b>{w['t']}</b> ${px(w['price'])}: {p['name']} ({p['timeframe']}), {where}")
-        if len(watch) > MAX_WATCHLIST:
-            lines.append(f"…and {len(watch) - MAX_WATCHLIST} more")
-        if send_long(lines):
-            for w in watch:
-                state[w["key"]] = now.isoformat()
+    send_watchlist(watch, state, now)
 
     # 4) paper trading: STRONG signals become bracket orders in the Alpaca paper account
-    for line in trader.run(found, state, send_telegram, test_mode=force, chart_fn=trade_chart, daily=daily):
-        print(line, flush=True)
+    if patterns_only:
+        send_telegram(f"✅ Pattern scan done: {scanned} stocks checked, {len(found)} with a pattern breakout "
+                      f"(last {RECENT_BARS['daily']} days / {RECENT_BARS['hourly']} hourly candles), "
+                      f"{len(watch)} patterns forming. No trades are placed by pattern scans.")
+    else:
+        for line in trader.run(found, state, send_telegram, test_mode=force, chart_fn=trade_chart, daily=daily):
+            print(line, flush=True)
 
     save_state(state, now)
     log(f"Done: {sent} chart alerts sent" + (f", {len(rest)} more in the summary" if rest else ""), t0)
-    if scanned == 0 and not force:
+    if scanned == 0 and not force and not patterns_only:
         print(f"No fresh {m['name']} candle in this mode's window. Use test mode to scan anyway.")
 
 

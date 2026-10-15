@@ -27,7 +27,7 @@ import scanner
 import trader
 from fmt import px
 
-STATE_FILE = "crypto_state.json"     # remembers sent alerts and the paper-trade book
+STATE_FILE = os.environ.get("STATE_FILE", "crypto_state.json")   # sent alerts and the paper-trade book
 MODES = {
     "15m": {"minutes": 15, "name": "15-min", "days": 12},
     "1h":  {"minutes": 60, "name": "hourly"},
@@ -120,13 +120,14 @@ def main():
     now = dt.datetime.now(dt.timezone.utc)
     mode = os.environ.get("SCAN_MODE", "15m")
     dry_run = os.environ.get("DRY_RUN") == "1"
+    patterns_only = os.environ.get("STRATEGY") == "patterns"     # chart patterns only, no strategy, no trades
     m = MODES[mode]
     state = load_state()
     log = scanner.log
 
     coins = crypto.top_coins()
     extra = [c for c in held_coins() if c not in coins]
-    log(f"{now:%Y-%m-%d %H:%M} UTC: {m['name']} crypto scan of {len(coins)} coins"
+    log(f"{now:%Y-%m-%d %H:%M} UTC: {m['name']} crypto {'PATTERN ' if patterns_only else ''}scan of {len(coins)} coins"
         + (f" (+{len(extra)} held: {' '.join(extra)})" if extra else "") + (" (dry run)" if dry_run else ""), t0)
     daily, intra, hourly = get_prices(coins + extra, mode, now)
     live = crypto.latest_prices(coins + extra)
@@ -150,6 +151,8 @@ def main():
             events, ctx, sd, sh = rules.evaluate(dd, scanner.add_indicators(h.copy()), m["name"])
             if live.get(t):
                 ctx["price"] = live[t]
+            if patterns_only:
+                events = []                                  # strategy signals off
             day_key, bar_key = str(dd.index[-1].date()), f"{mode}|{h.index[-1].isoformat()}"
             for e in events:
                 e["key"] = f"{t}|{e['code']}|{e['tf']}|{day_key if e['tf'] == 'daily' else bar_key}"
@@ -157,33 +160,16 @@ def main():
             keys = [e["key"] for e in events]
             pat_hits, forming_any = [], []
 
-            if scanner.PATTERNS_ENABLED:            # chart patterns on the daily and hourly charts
+            if scanner.PATTERNS_ENABLED or patterns_only:      # chart patterns on the daily and hourly charts
                 price, prev = float(h["Close"].iat[-1]), float(h["Close"].iat[-2])
                 hv = scanner.add_indicators(h.copy()).iloc[-1]
                 vol_now = float(hv.Volume / hv.VolAvg20) if hv.VolAvg20 else None
                 hr = scanner.add_indicators(crypto.completed(hourly[t], 60, now).copy())
-                for tf, frame in (("daily", dd), ("hourly", hr)):
-                    pats, _ = patterns.find_patterns(frame, tf, price, prev, vol_now)
-                    if not pats:
-                        continue
-                    cfg = rules.SETTINGS["daily" if tf == "daily" else "intraday"]
-                    lb = rules.SQUEEZE_LOOKBACK["daily" if tf == "daily" else "intraday"]
-                    cframe = rules.add_strategy_indicators(frame, lb, **cfg).tail(patterns.SETTINGS[tf]["lookback"])
-                    for pt in pats:
-                        if pt["stage"] == "forming":
-                            forming_any.append((pt, cframe))
-                        key = f"{t}|PAT|{pt['id']}|{pt['stage']}"
-                        if key in state:
-                            continue
-                        if pt["stage"] == "breakout":
-                            verb = "completed" if pt["name"] in patterns.HARMONICS else "breakout"
-                            events.append({"dir": pt["dir"], "code": "pattern", "tf": tf, "strong": False, "key": key,
-                                           "text": f"{pt['name']} {verb} ({tf}): entry {px(pt['level'])}, "
-                                                   f"stop {px(pt['stop'])}, target {px(pt['target'])}"})
-                            pat_hits.append((pt, cframe))
-                            keys.append(key)
-                        else:
-                            watch.append({"t": t, "p": pt, "price": ctx["price"], "key": key})
+                p_ev, p_keys, pat_hits, forming_any, p_watch = scanner.chart_patterns(
+                    t, (("daily", dd), ("hourly", hr)), price, prev, vol_now, state, ctx["price"], recent=patterns_only)
+                events += p_ev
+                keys += p_keys
+                watch += p_watch
 
             if events:
                 found.append({"t": t, "events": events, "ctx": ctx, "sd": sd, "sh": sh, "pats": pat_hits,
@@ -208,32 +194,23 @@ def main():
         except Exception as e:
             print(f"{item['t']}: alert failed: {e}", flush=True)
 
-    if watch:                                        # one watchlist message for forming patterns
-        icon = {"LONG": "🟢", "SHORT": "🔴", "BOTH": "⚪"}
-        lines = [f"<b>👀 Crypto patterns forming</b> (watchlist, {len(watch)} new)"]
-        for w in watch[:scanner.MAX_WATCHLIST]:
-            p = w["p"]
-            if p["dir"] == "BOTH":
-                b1, b2 = p["breaks"]
-                where = f"breaks above {px(b1['level'])} or below {px(b2['level'])}"
-            elif p["name"] in patterns.HARMONICS:
-                where = f"completion zone near {px(p['level'])}"
-            else:
-                where = f"breakout {'above' if p['dir'] == 'LONG' else 'below'} {px(p['level'])}"
-            lines.append(f"{icon[p['dir']]} <b>{w['t']}</b> ${px(w['price'])}: {p['name']} ({p['timeframe']}), {where}")
-        if scanner.send_long(lines):
-            for w in watch:
-                state[w["key"]] = now.isoformat()
+    scanner.send_watchlist(watch, state, now, title="👀 Crypto patterns forming")
 
-    for line in crypto_trader.run(found, state, scanner.send_telegram, dry_run=dry_run,
-                                  chart_fn=lambda it, tr: trade_chart(it, tr, m), daily=daily, prices=live,
-                                  tf_name=m["name"]):
-        print(line, flush=True)
+    if not patterns_only:
+        for line in crypto_trader.run(found, state, scanner.send_telegram, dry_run=dry_run,
+                                      chart_fn=lambda it, tr: trade_chart(it, tr, m), daily=daily, prices=live,
+                                      tf_name=m["name"]):
+            print(line, flush=True)
 
     save_state(state, now)
     names = " ".join(crypto.coin_of(c) for c in coins)
-    scanner.send_telegram(f"✅ Crypto scan done ({m['name']} candles{', dry run' if dry_run else ''}): "
-                          f"{checked} coins checked ({names}), {sent} with new signals.")
+    if patterns_only:
+        scanner.send_telegram(f"✅ Crypto pattern scan done: {checked} coins checked ({names}), {sent} with a pattern "
+                              f"breakout (last {scanner.RECENT_BARS['daily']} days / {scanner.RECENT_BARS['hourly']} "
+                              f"hourly candles), {len(watch)} patterns forming. No trades are placed by pattern scans.")
+    else:
+        scanner.send_telegram(f"✅ Crypto scan done ({m['name']} candles{', dry run' if dry_run else ''}): "
+                              f"{checked} coins checked ({names}), {sent} with new signals.")
     log(f"Done: {sent} alerts sent", t0)
 
 
