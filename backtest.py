@@ -71,16 +71,26 @@ VARIANTS = {                # each one changes the bot's rules (see simulate() f
                 {"shorts": False, "exit": "target", "margin": 1.0, "stop_atr": 1.0, "target_r": 3.0}),
     "t15x2":   ("12. Stop 1.5x ATR + take profit 2:1",
                 {"shorts": False, "exit": "target", "margin": 1.0, "stop_atr": 1.5, "target_r": 2.0}),
+    # volume confirmation: intraday candle volume vs its 20-candle average; daily = volume so far today vs
+    # the normal volume by that time of day (previous 20 days)
+    "vol15":   ("13. Bot now + volume 1.5x normal (both charts)",
+                {"shorts": False, "exit": "trail", "margin": 1.0, "vol": 1.5}),
+    "vol12":   ("14. Bot now + volume 1.2x normal (both charts)",
+                {"shorts": False, "exit": "trail", "margin": 1.0, "vol": 1.2}),
+    "vol15i":  ("15. Bot now + volume 1.5x normal (intraday signals only)",
+                {"shorts": False, "exit": "trail", "margin": 1.0, "vol": 1.5, "vol_daily": False}),
 }
 SHORT = {"both": "1 L+S", "long": "2 Long", "trail": "3 Trail", "long1x": "4 L 1x", "trail1x": "5 T 1x",
          "daily1x": "6 Daily", "spy1x": "7 SPYflt", "wide1x": "8 3xATR",
-         "t1x2": "T1 2R", "t1x15": "T1 1.5R", "t1x3": "T1 3R", "t15x2": "T1.5 2R"}
+         "t1x2": "T1 2R", "t1x15": "T1 1.5R", "t1x3": "T1 3R", "t15x2": "T1.5 2R",
+         "vol15": "Vol1.5", "vol12": "Vol1.2", "vol15i": "Vol1.5i"}
 
 # What is tested (main() switches these to crypto when MARKET=crypto, see use_crypto())
 T = trader                  # money rules: trader.py (stocks) or crypto_trader.py (crypto)
 FEE = 0.0                   # trading fee per buy and per sell, as a share of the trade
 UNIVERSE, UNIT = "S&amp;P 100", "stocks"
 MARKET = "stocks"           # strategy files can be limited to one market with MARKETS = ("crypto",)
+VOLUME_LEVELS = ((1.2, "12"), (1.5, "15"))   # volume filters tested: x the normal volume
 BOT_TF = "15m"              # bot versions / strategies: the bot's intraday chart ("15m" like live, or "1h")
 PATTERN_TF = "daily"        # patterns test: which candles the patterns are found on ("daily", "1h", "15m")
 NEED_INTRADAY_VOLUME = False  # True for intraday pattern tests (re-downloads saved 15-min prices without volume)
@@ -292,6 +302,16 @@ def stock_signals(h, D, debug=False, minutes=15):
     i_up = ((c.shift() <= dch.shift()) & (c > dch) & ((c > hi["BB_up"]) | recent)).values
     i_dn = ((c.shift() >= dcl.shift()) & (c < dcl) & ((c < hi["BB_lo"]) | recent)).values
 
+    # volume: the candle's volume vs its 20-candle average (intraday chart), and the day's volume so far vs
+    # what the stock normally trades by that time of day (average of the previous 20 days) for the daily chart
+    vol = h["Volume"] if "Volume" in h else pd.Series(np.nan, index=h.index)
+    vi = (vol / vol.rolling(20).mean()).values
+    cum = vol.groupby(day).cumsum()
+    tod = h.index.hour * 60 + h.index.minute
+    normal = pd.Series(cum.values, index=h.index).groupby(tod).transform(
+        lambda x: x.rolling(20, min_periods=10).mean().shift(1))
+    rv = (cum.values / normal.values)
+
     # checks: the opening check (9:30, live price = first trade) and one after every candle closes
     op = np.flatnonzero(at_open)
     chk = pd.DataFrame({
@@ -303,6 +323,8 @@ def stock_signals(h, D, debug=False, minutes=15):
         "fill": np.r_[op, np.where(same_next | (OVERNIGHT_FILLS & (pos + 1 < n)), pos + 1, -1)],   # -1 = market closed
         "i_up": np.r_[np.zeros(len(op), bool), i_up],
         "i_dn": np.r_[np.zeros(len(op), bool), i_dn],
+        "vi": np.r_[np.full(len(op), np.nan), vi],      # no volume yet at the opening check
+        "rv": np.r_[np.full(len(op), np.nan), rv],
     }).sort_values("check", kind="stable").reset_index(drop=True)
     k = daily_context(D).reindex(chk["day"]).reset_index(drop=True)
 
@@ -323,16 +345,29 @@ def stock_signals(h, D, debug=False, minutes=15):
     d_up &= ~d_up.groupby(chk["day"]).cumsum().gt(1)
     d_dn &= ~d_dn.groupby(chk["day"]).cumsum().gt(1)
 
+    # the same daily breakouts with a volume filter: the first check of the day where the breakout AND
+    # enough volume happen together (like the live bot, which keeps checking until an alert is sent)
+    vol_cols = {}
+    for m, tag in VOLUME_LEVELS:
+        ok = chk["rv"].values >= m
+        u = (k["up_ok"] > 0) & (p > k["dch"]) & ok
+        d = (k["dn_ok"] > 0) & (p < k["dcl"]) & ok
+        u &= ~u.groupby(chk["day"]).cumsum().gt(1)
+        d &= ~d.groupby(chk["day"]).cumsum().gt(1)
+        vol_cols[f"dl{tag}"] = u & above & confirm_up
+        vol_cols[f"ds{tag}"] = d & below & confirm_dn
+
     tr = np.maximum.reduce([chk["H"] - chk["L"], (chk["H"] - k["pc"]).abs(), (chk["L"] - k["pc"]).abs()])
     out = pd.DataFrame({
         "check": chk["check"], "fill": chk["fill"], "price": p,
         "dl": d_up & above & confirm_up, "ds": d_dn & below & confirm_dn,
         "il": chk["i_up"] & above, "is": chk["i_dn"] & below,
         "atr": k["atr"] + (tr - k["atr"]) / 14,
+        "vi": chk["vi"], "rv": chk["rv"], **vol_cols,
     })
     if debug:                                        # every check with its indicator values (tests)
         return out.assign(sma=sma, up=up, lo=lo, sq=sq_today | (k["sq_recent"] > 0), dch=k["dch"], dcl=k["dcl"])
-    out = out[out[["dl", "ds", "il", "is"]].any(axis=1)]
+    out = out[out[["dl", "ds", "il", "is"] + list(vol_cols)].any(axis=1)]
     out = out[out["fill"] >= 0].copy()
     out["fill"] = h.index[out["fill"].values]
     return out
@@ -373,6 +408,13 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
         cfg.setdefault("trail_days", None)
     kinds = cfg["kinds"]
     use = sig.copy()
+    if cfg.get("vol"):                                 # volume filter (bot versions 13-15)
+        m = cfg["vol"]
+        tag = dict(VOLUME_LEVELS)[m]
+        if cfg.get("vol_daily", True):
+            use["dl"], use["ds"] = use[f"dl{tag}"], use[f"ds{tag}"]
+        ok = use["vi"].values >= m
+        use["il"], use["is"] = use["il"] & ok, use["is"] & ok
     long_ = np.zeros(len(use), int)
     short = np.zeros(len(use), int)
     if "daily" in kinds:
@@ -752,6 +794,16 @@ def equity_chart(res, bench):
 def telegram(text=None, photo=None, document=None, caption=""):
     token, chat = os.environ.get("TELEGRAM_TOKEN"), os.environ.get("TELEGRAM_CHAT_ID")
     if not token or not chat:
+        return
+    if text and len(text) > 4000 and "<pre>" not in text:   # long summaries: several messages, split between blocks
+        part = ""
+        for block in text.split("\n\n"):
+            if part and len(part) + len(block) > 3900:
+                telegram(part)
+                part = ""
+            part += ("\n\n" if part else "") + block
+        if part:
+            telegram(part)
         return
     base = f"https://api.telegram.org/bot{token}"
     for attempt in range(3):
@@ -1372,7 +1424,7 @@ def main():
     global PATTERN_TF, NEED_INTRADAY_VOLUME, BOT_TF
     BOT_TF = os.environ.get("BOT_TF", "15m") if mode != "patterns" else "15m"
     PATTERN_TF = os.environ.get("PATTERN_TF", "daily") if mode == "patterns" else "daily"
-    NEED_INTRADAY_VOLUME = PATTERN_TF != "daily"
+    NEED_INTRADAY_VOLUME = PATTERN_TF != "daily" or mode == "bot versions"   # volume versions need it
     if PATTERN_TF == "15m" and years > 5:
         print("15-min patterns: testing 5 years at most (8 years would take more than the 2-hour limit)", flush=True)
         years = 5.0
