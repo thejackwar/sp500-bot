@@ -269,10 +269,10 @@ def markdown(reports, now):
     return "\n".join(lines)
 
 
-def telegram_text(reports, now):
+def telegram_text(reports, now, only=None):
     lines = [f"📒 <b>Paper trading, {now:%a %d %b}</b>"]
     for name, st in reports.items():
-        if "error" in st:
+        if "error" in st or (only and name not in only):
             continue
         lines.append(f"\n<b>{st['title']}</b>\n${st['equity']:,.0f} ({pct(st['day'])} today), "
                      f"{pct(st['ret'])} since {st['since']:%d %b} (SPY {pct(st['spy'])})\n"
@@ -302,7 +302,19 @@ def main():
     with open(os.path.join(OUT, "README.md"), "w") as f:
         f.write(markdown(reports, now))
     if os.environ.get("SEND_TELEGRAM", "1") == "1":
-        scanner.send_telegram(telegram_text(reports, now))
+        main_chat, pat_chat = os.environ.get("TELEGRAM_CHAT_ID"), os.environ.get("TELEGRAM_CHAT_ID_PATTERNS")
+        if pat_chat and pat_chat != main_chat and "patterns" in reports:
+            # each account's summary to its own group: breakout bot -> stock chat, pattern trader -> pattern chat
+            others = [n for n in reports if n != "patterns"]
+            if others:
+                scanner.send_telegram(telegram_text(reports, now, only=others))
+            os.environ["TELEGRAM_CHAT_ID"] = pat_chat
+            try:
+                scanner.send_telegram(telegram_text(reports, now, only=["patterns"]))
+            finally:
+                os.environ["TELEGRAM_CHAT_ID"] = main_chat or ""
+        else:
+            scanner.send_telegram(telegram_text(reports, now))
 
 
 if __name__ == "__main__":
