@@ -1,0 +1,48 @@
+📊 <b>Backtest S&P 100: bot versions (bot on hourly candles)</b>
+15 Oct 2018 → 15 Oct 2026 (8.0 years), S&P 100 (100 stocks), $100,000 start. Bot versions: ⭐ STRONG signals (daily + hourly), stop 2×ATR, risk 1%/trade, max 10 positions of max 20% each; target 2:1 unless trailing. Borrowed money pays 6.5%/yr interest. 'Invested' = average money in the market (SPY = 100%)
+Each version is tested from 10 start dates a week apart (ties between signals in random order); figures are the middle run, with the range in brackets.
+
+<b>1. Longs + shorts (old rules)</b>
++0.8%/yr (-6.2% to +4.3%), beat SPY in 0/10 runs
+max drop -42.9% (worst -64.7%) · profit factor 1.01
+~1184 trades, win 35%, avg +0.03R, worst streak 16, hold 24d, invested 172%, interest ~$7,644
+
+<b>2. Longs only, 2:1 target</b>
++6.8%/yr (-1.8% to +9.9%), beat SPY in 0/10 runs
+max drop -45.4% (worst -51.6%) · profit factor 1.11
+~1136 trades, win 38%, avg +0.11R, worst streak 26, hold 23d, invested 166%, interest ~$55,684
+
+<b>3. Longs only + trailing exit</b>
++15.9%/yr (+5.7% to +24.0%), beat SPY in 5/10 runs
+max drop -45.8% (worst -47.9%) · profit factor 1.42
+~559 trades, win 35%, avg +0.38R, worst streak 19, hold 47d, invested 167%, interest ~$74,962
+
+<b>4. Longs only, no leverage</b>
++5.9%/yr (+1.1% to +8.6%), beat SPY in 0/10 runs
+max drop -26.6% (worst -33.2%) · profit factor 1.11
+~1137 trades, win 38%, avg +0.11R, worst streak 25, hold 23d, invested 93%
+
+<b>5. Longs + trailing exit, no leverage (bot now)</b>
++14.2%/yr (+11.0% to +16.9%), beat SPY in 2/10 runs
+max drop -29.5% (worst -31.9%) · profit factor 1.50
+~556 trades, win 35%, avg +0.37R, worst streak 20, hold 48d, invested 94%
+
+<b>6. Bot now, daily-chart signals only (no intraday chart)</b>
++10.0%/yr (+6.8% to +11.8%), beat SPY in 0/10 runs
+max drop -27.8% (worst -35.2%) · profit factor 1.36
+~520 trades, win 36%, avg +0.40R, worst streak 19, hold 48d, invested 90%
+
+<b>7. Bot now + SPY filter (buy only while SPY is above its 200-day MA)</b>
++12.5%/yr (+8.8% to +15.5%), beat SPY in 0/10 runs
+max drop -24.6% (worst -29.5%) · profit factor 1.51
+~474 trades, win 35%, avg +0.48R, worst streak 20, hold 48d, invested 82%
+
+<b>8. Bot now, wider stop (3x ATR instead of 2x)</b>
++14.9%/yr (+11.8% to +15.7%), beat SPY in 0/10 runs
+max drop -27.3% (worst -29.9%) · profit factor 1.67
+~436 trades, win 42%, avg +0.35R, worst streak 12, hold 62d, invested 92%
+
+<b>Buy & hold SPY</b>
++217.3% (+15.5%/yr) · max drop -33.8%
+
+<i>Today's S&P 100 members only (flatters results); no short-borrow fees; fills at the next 15-min open with 0.02% slippage. Past results don't guarantee future ones.</i>
