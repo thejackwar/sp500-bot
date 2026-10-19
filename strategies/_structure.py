@@ -12,6 +12,8 @@ only known PIVOT days later (no look-ahead). Swing lows the same way with lows.
     entry        close crosses above the 50-day average (yesterday's close at or below it),
                  optionally only while the close is above the 200-day average; line="both": crosses
                  above the HIGHER of the 50- and 200-day averages
+    trend        uptrend filter for the entry: None, "rising50" (50-day average higher than 10 days
+                 ago) or "golden" (50-day average above the 200-day); above200=True = close above the 200-day
     ma_exit      also sell after a close below that line (the hold rule's exit, which keeps losses small)
     start stop   sell if a close falls below the last swing low before the entry, kept between
                  1 and 3 ATR below the entry (protection before any high has formed)
@@ -37,11 +39,11 @@ _cache = {}
 
 
 def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False, line="50", ma_exit=False,
-        start_stop=True):
+        start_stop=True, trend=None):
     """Replays the rule on daily candles. Returns a DataFrame indexed like d with columns
     entry (signal on that close), exit (signal on that close), stop (starting/trailing stop while in a
     trade), peak (highest high since entry), lh (a lower high was confirmed that day), reason."""
-    key = (exit_mode, tp_r, stretch, reentry, above200, line, ma_exit, start_stop,
+    key = (exit_mode, tp_r, stretch, reentry, above200, line, ma_exit, start_stop, trend,
            d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
     if key in _cache:
         return _cache[key]
@@ -86,6 +88,10 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
             peak, peak_day, brk, trailed = h[i], i, None, False
         if not pos:
             if not np.isfinite(ln[i]) or (above200 and not (np.isfinite(sma200[i]) and c[i] > sma200[i])):
+                continue
+            if trend == "rising50" and not (i >= 10 and np.isfinite(sma50[i - 10]) and sma50[i] > sma50[i - 10]):
+                continue
+            if trend == "golden" and not (np.isfinite(sma200[i]) and sma50[i] > sma200[i]):
                 continue
             cross = c[i] > ln[i] and (c[i - 1] <= ln[i - 1] or not np.isfinite(ln[i - 1]))
             resume = reentry and failed_high is not None and c[i] > failed_high and c[i] > ln[i]
