@@ -464,6 +464,13 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
 
     Cf = pd.DataFrame(C).ffill().values
     OT, HT, LT, CT = (np.ascontiguousarray(m.T) for m in (O, H, L, C))      # one row per stock (fast)
+    if cfg.get("leverage"):
+        # liquidation is judged on 15-min highs/lows, so bad ticks in Alpaca's crypto history (e.g. a ~$24k
+        # print on 21 Oct 2021 with Bitcoin near $64k) would liquidate falsely: wicks more than 15% beyond the
+        # candle's open/close are clipped, like trade_charts.py does for the pictures
+        lo_b, hi_b = np.fmin(OT, CT), np.fmax(OT, CT)
+        LT = np.where(np.isfinite(lo_b), np.fmax(LT, lo_b * (1 - 0.15)), LT)
+        HT = np.where(np.isfinite(hi_b), np.fmin(HT, hi_b * (1 + 0.15)), HT)
     n_slots = len(slots)
     day = slots.tz_localize(None).normalize()
     last_of_day = np.r_[day[1:] != day[:-1], True]
