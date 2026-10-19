@@ -1,0 +1,23 @@
+📊 <b>Backtest BTC only: strategies</b>
+01 Jan 2018 → 19 Oct 2026 (8.8 years), BTC only (1 coins), $100,000 start. Strategy comparison, same money rules for all: risk 1%/trade, max 5 positions of max 20% each, max 100% invested. Daily strategies buy at the next day's open. 'Invested' = average money in the market (BTC = 100%)
+Each version is tested from 10 start dates a week apart (ties between signals in random order); figures are the middle run, with the range in brackets.
+
+<b>5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)</b>
++26.6%/yr (+26.3% to +26.9%), beat BTC in 7/10 runs
+max drop -85.7% (worst -85.7%) · profit factor 3.19
+~29 trades, win 28%, avg +0.25R, worst streak 5, hold 11d, invested 37%, interest ~$88,705
+
+<b>7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)</b>
++21.2%/yr (+21.0% to +21.4%), beat BTC in 0/10 runs
+max drop -95.0% (worst -95.0%) · profit factor 2.55
+~29 trades, win 28%, avg +0.35R, worst streak 5, hold 11d, invested 48%, interest ~$71,140
+
+<b>Your rule (50-day rising) + close below the 50-day, lower high after 1 day</b>
++13.0%/yr (+12.9% to +13.2%), beat BTC in 0/10 runs
+max drop -28.2% (worst -28.2%) · profit factor 4.08
+~29 trades, win 28%, avg +0.06R, worst streak 5, hold 11d, invested 10%, interest ~$0
+
+<b>Buy & hold BTC</b>
++499.6% (+22.6%/yr) · max drop -81.5%
+
+<i>BTC only (no coin-picking bias); fees 0.05% per buy and sell; daily candles (Yahoo/Coinbase): fills at the next daily open, leverage liquidation judged on daily lows with 0.05% slippage. Past results don't guarantee future ones.</i>
