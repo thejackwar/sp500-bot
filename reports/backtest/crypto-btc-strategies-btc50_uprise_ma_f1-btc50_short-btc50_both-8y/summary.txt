@@ -1,0 +1,33 @@
+📊 <b>Backtest BTC only: strategies</b>
+22 Jan 2021 → 19 Oct 2026 (5.7 years), BTC only (1 coins), $100,000 start. Strategy comparison, same money rules for all: risk 1%/trade, max 5 positions of max 20% each, max 100% invested. Daily strategies buy at the next day's open. 'Invested' = average money in the market (BTC = 100%)
+Each version is tested from 10 start dates a week apart (ties between signals in random order); figures are the middle run, with the range in brackets.
+
+<b>Bot now: breakout, trailing exit</b>
++0.7%/yr (+0.7% to +0.7%), beat BTC in 0/10 runs
+max drop -14.9% (worst -14.9%) · profit factor 1.12
+~36 trades, win 19%, avg +0.12R, worst streak 11, hold 29d, invested 9%
+
+<b>Bot now + BTC filter (BTC above its 50-day MA)</b>
++2.1%/yr (+2.0% to +2.1%), beat BTC in 0/10 runs
+max drop -10.8% (worst -10.8%) · profit factor 1.66
+~24 trades, win 25%, avg +0.49R, worst streak 6, hold 35d, invested 8%
+
+<b>LONG + SHORT: your rule both ways (close beyond the 50-day, lower high / higher low after 1 day)</b>
++18.9%/yr (+18.6% to +19.2%), beat BTC in 10/10 runs
+max drop -35.3% (worst -35.3%) · profit factor 2.14
+~46 trades, win 26%, avg +0.03R, worst streak 9, hold 9d, invested 21%, interest ~$0
+
+<b>SHORT mirror: 50-day cross down (50-day falling) + close above the 50-day, higher low after 1 day</b>
+-3.9%/yr (-3.9% to -3.8%), beat BTC in 0/10 runs
+max drop -35.7% (worst -35.7%) · profit factor 0.67
+~25 trades, win 20%, avg -0.01R, worst streak 8, hold 6d, invested 6%
+
+<b>Your rule (50-day rising) + close below the 50-day, lower high after 1 day</b>
++23.7%/yr (+23.3% to +24.1%), beat BTC in 10/10 runs
+max drop -16.9% (worst -16.9%) · profit factor 4.68
+~21 trades, win 33%, avg +0.07R, worst streak 4, hold 14d, invested 14%, interest ~$0
+
+<b>Buy & hold BTC</b>
++148.3% (+17.2%/yr) · max drop -76.7%
+
+<i>BTC only (no coin-picking bias); fees 0.25% per buy and sell; fills at the next 15-min open with 0.05% slippage. Past results don't guarantee future ones.</i>
