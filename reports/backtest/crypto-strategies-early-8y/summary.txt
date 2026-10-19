@@ -1,0 +1,58 @@
+📊 <b>Backtest top 10 crypto: strategies</b>
+22 Jan 2021 → 19 Oct 2026 (5.7 years), top 10 crypto (8 coins), $100,000 start. Strategy comparison, same money rules for all: risk 1%/trade, max 5 positions of max 20% each, max 100% invested. Daily strategies buy at the next day's open. 'Invested' = average money in the market (BTC = 100%)
+Each version is tested from 10 start dates a week apart (ties between signals in random order); figures are the middle run, with the range in brackets.
+
+<b>Bot now: breakout, trailing exit</b>
++13.4%/yr (+13.2% to +13.6%), beat BTC in 7/10 runs
+max drop -34.8% (worst -35.2%) · profit factor 1.62
+~154 trades, win 25%, avg +0.58R, worst streak 22, hold 33d, invested 29%
+
+<b>Bot now + BTC filter (BTC above its 50-day MA)</b>
++16.9%/yr (+16.6% to +17.2%), beat BTC in 9/10 runs
+max drop -31.5% (worst -31.5%) · profit factor 2.01
+~114 trades, win 29%, avg +0.92R, worst streak 19, hold 36d, invested 26%
+
+<b>Early: all 3 setups together → next resistance</b>
++11.1%/yr (+9.6% to +12.7%), beat BTC in 6/10 runs
+max drop -39.2% (worst -39.2%) · profit factor 1.25
+~355 trades, win 36%, avg +0.21R, worst streak 17, hold 14d, invested 28%
+
+<b>Early: bottom pattern forming near its lows → target = neckline</b>
++0.4%/yr (+0.4% to +0.4%), beat BTC in 0/10 runs
+max drop -11.6% (worst -11.6%) · profit factor 1.10
+~33 trades, win 39%, avg +0.05R, worst streak 5, hold 19d, invested 3%
+
+<b>Early: bottom pattern forming, above 200-day MA → neckline</b>
+-0.3%/yr (-0.3% to -0.3%), beat BTC in 0/10 runs
+max drop -5.2% (worst -5.2%) · profit factor 0.78
+~10 trades, win 30%, avg -0.16R, worst streak 5, hold 16d, invested 1%
+
+<b>Early: bottom pattern forming, pattern stop + 20-day-low trail</b>
++1.2%/yr (+1.1% to +1.2%), beat BTC in 0/10 runs
+max drop -15.4% (worst -15.4%) · profit factor 0.69
+~31 trades, win 32%, avg -0.21R, worst streak 11, hold 30d, invested 6%
+
+<b>Early: retest of the 200-day MA after crossing above → next resistance</b>
++3.5%/yr (+3.4% to +3.5%), beat BTC in 0/10 runs
+max drop -7.0% (worst -7.0%) · profit factor 1.92
+~39 trades, win 46%, avg +0.53R, worst streak 7, hold 12d, invested 2%
+
+<b>Early: retest of the 200-day MA after crossing above, 20-day-low trail</b>
++5.0%/yr (+4.9% to +5.0%), beat BTC in 0/10 runs
+max drop -23.2% (worst -23.2%) · profit factor 2.36
+~34 trades, win 26%, avg +1.21R, worst streak 11, hold 38d, invested 10%
+
+<b>Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance</b>
++7.1%/yr (+6.5% to +7.2%), beat BTC in 2/10 runs
+max drop -16.3% (worst -16.3%) · profit factor 1.31
+~171 trades, win 37%, avg +0.27R, worst streak 16, hold 15d, invested 13%
+
+<b>Early: bounce at support / Fib, above 200-day MA, 20-day-low trail</b>
++5.5%/yr (+5.4% to +5.7%), beat BTC in 0/10 runs
+max drop -34.4% (worst -34.4%) · profit factor 1.27
+~115 trades, win 22%, avg +0.44R, worst streak 16, hold 30d, invested 24%
+
+<b>Buy & hold BTC</b>
++149.6% (+17.3%/yr) · max drop -76.7%
+
+<i>Today's top 10 coins only (coins that dropped out aren't tested, which flatters results); fees 0.25% per buy and sell; fills at the next 15-min open with 0.05% slippage. Past results don't guarantee future ones.</i>
