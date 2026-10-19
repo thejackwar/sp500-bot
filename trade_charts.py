@@ -280,12 +280,17 @@ def page(d, chunk, path, heading, cols=3):
                                   label="Exit line (higher average; a close below it = sell next open)"))
     else:
         sh = SHORTS[0]
-        handles += [plt.Line2D([], [], color=STOP_C, lw=1.8, ls=(0, (4, 2)),
+        if RULE.get("swing"):
+            how = "a close below" if RULE["swing"] == "close" else "a touch below"
+            handles.append(plt.Line2D([], [], color=STOP_C, lw=1.8, ls=(0, (4, 2)),
+                                      label=f"Low to hold (rises with each higher low; {how} = sell)"))
+        else:
+          handles += [plt.Line2D([], [], color=STOP_C, lw=1.8, ls=(0, (4, 2)),
                                label="Stop (a close above = cover)" if sh else "Stop (a close below = sell)"),
                     plt.Line2D([], [], color=PEAK_C, lw=1.4, ls=(0, (1, 1.5)),
                                label="Lowest low since entry" if sh else "Highest high since entry"),
                     plt.Line2D([], [], marker="x", color=LH_C, ls="", mew=1.8, label="Higher low" if sh else "Lower high")]
-    nxt = "next 00:00 UTC open" if TF["rule"] is None else "next 15-min open"
+    nxt = ("next 00:00 UTC open" if NAME[0] == "BTC/USD" else "next open") if TF["rule"] is None else "next 15-min open"
     if SHORTS[0]:
         handles += [plt.Line2D([], [], marker="v", color=INK, ls="", label=f"Sell short ({nxt})"),
                     plt.Line2D([], [], marker="^", color=INK, ls="", label="Cover")]
@@ -371,7 +376,15 @@ def main():
     folder = os.path.join("reports", "backtest", results, "charts")
     if symbol != "BTC/USD":
         folder = os.path.join(folder, symbol.replace("/", "-"))
-    if mod is not None:
+    if mod is not None and "_swing" in getattr(mod, "__dict__", {}):
+        # the swing rule: the red line is the low to hold (moves up with each higher low); no peak / lower highs
+        from strategies import _swing
+        st = _swing.run(d[["Open", "High", "Low", "Close"]], **mod.KW).copy()
+        st["peak"], st["lh"] = np.nan, False
+        RULE.update(name=rule, st=st, swing=mod.KW.get("mode", "close"))
+        RULE["right"] = None
+        folder = os.path.join(folder, rule)
+    elif mod is not None:
         from strategies import _structure
         RULE["name"], RULE["st"] = rule, _structure.run(d[["Open", "High", "Low", "Close"]], **mod.KW)
         RULE["right"] = mod.KW.get("lh_right")
