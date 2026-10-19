@@ -1,0 +1,48 @@
+📊 <b>Backtest BTC only: strategies</b>
+22 Jan 2021 → 19 Oct 2026 (5.7 years), BTC only (1 coins), $100,000 start. Strategy comparison, same money rules for all: risk 1%/trade, max 5 positions of max 20% each, max 100% invested. Daily strategies buy at the next day's open. 'Invested' = average money in the market (BTC = 100%)
+Each version is tested from 10 start dates a week apart (ties between signals in random order); figures are the middle run, with the range in brackets.
+
+<b>Bot now: breakout, trailing exit</b>
++1.1%/yr (+1.0% to +1.1%), beat BTC in 0/10 runs
+max drop -14.4% (worst -14.4%) · profit factor 1.20
+~36 trades, win 22%, avg +0.18R, worst streak 11, hold 29d, invested 9%
+
+<b>Bot now + BTC filter (BTC above its 50-day MA)</b>
++2.3%/yr (+2.3% to +2.4%), beat BTC in 0/10 runs
+max drop -10.5% (worst -10.5%) · profit factor 1.80
+~24 trades, win 25%, avg +0.55R, worst streak 6, hold 35d, invested 8%
+
+<b>LONG (your rule) on 15-minute candles (50-candle average)</b>
+-66.7%/yr (-67.0% to -66.5%), beat BTC in 0/10 runs
+max drop -99.8% (worst -99.8%) · profit factor 0.52
+~3260 trades, win 14%, avg -0.03R, worst streak 50, hold 0d, invested 11%, interest ~$0
+
+<b>LONG (your rule) on 1-hour candles (50-candle average)</b>
+-16.1%/yr (-18.2% to -15.2%), beat BTC in 0/10 runs
+max drop -69.3% (worst -69.3%) · profit factor 0.74
+~770 trades, win 19%, avg -0.00R, worst streak 24, hold 0d, invested 12%, interest ~$0
+
+<b>LONG (your rule) on 2-hour candles (50-candle average)</b>
+-17.0%/yr (-17.1% to -12.6%), beat BTC in 0/10 runs
+max drop -65.7% (worst -65.7%) · profit factor 0.62
+~366 trades, win 17%, avg -0.01R, worst streak 22, hold 1d, invested 10%, interest ~$0
+
+<b>LONG (your rule) on 30-minute candles (50-candle average)</b>
+-50.2%/yr (-50.5% to -48.5%), beat BTC in 0/10 runs
+max drop -98.1% (worst -98.2%) · profit factor 0.46
+~1581 trades, win 15%, avg -0.02R, worst streak 29, hold 0d, invested 11%, interest ~$0
+
+<b>LONG (your rule) on 4-hour candles (50-candle average)</b>
+-9.6%/yr (-9.7% to -2.7%), beat BTC in 0/10 runs
+max drop -56.8% (worst -63.6%) · profit factor 0.63
+~179 trades, win 21%, avg -0.00R, worst streak 18, hold 1d, invested 11%, interest ~$0
+
+<b>Your rule (50-day rising) + close below the 50-day, lower high after 1 day</b>
++25.5%/yr (+25.1% to +26.0%), beat BTC in 10/10 runs
+max drop -16.8% (worst -16.8%) · profit factor 5.78
+~21 trades, win 38%, avg +0.07R, worst streak 4, hold 14d, invested 14%, interest ~$0
+
+<b>Buy & hold BTC</b>
++148.3% (+17.2%/yr) · max drop -76.7%
+
+<i>BTC only (no coin-picking bias); fees 0.05% per buy and sell; fills at the next 15-min open with 0.05% slippage. Past results don't guarantee future ones.</i>
