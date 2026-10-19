@@ -1,0 +1,93 @@
+📊 <b>Backtest BTC only: strategies</b>
+22 Jan 2021 → 19 Oct 2026 (5.7 years), BTC only (1 coins), $100,000 start. Strategy comparison, same money rules for all: risk 1%/trade, max 5 positions of max 20% each, max 100% invested. Daily strategies buy at the next day's open. 'Invested' = average money in the market (BTC = 100%)
+Each version is tested from 10 start dates a week apart (ties between signals in random order); figures are the middle run, with the range in brackets.
+
+<b>Bot now: breakout, trailing exit</b>
++0.7%/yr (+0.7% to +0.7%), beat BTC in 0/10 runs
+max drop -14.9% (worst -14.9%) · profit factor 1.12
+~36 trades, win 19%, avg +0.12R, worst streak 11, hold 29d, invested 9%
+
+<b>Bot now + BTC filter (BTC above its 50-day MA)</b>
++2.1%/yr (+2.0% to +2.1%), beat BTC in 0/10 runs
+max drop -10.8% (worst -10.8%) · profit factor 1.66
+~24 trades, win 25%, avg +0.49R, worst streak 6, hold 35d, invested 8%
+
+<b>Previous-day high breakout, 1×ATR stop, 2R target, max 2 days</b>
+-7.9%/yr (-8.0% to -7.7%), beat BTC in 0/10 runs
+max drop -37.7% (worst -37.7%) · profit factor 0.58
+~353 trades, win 36%, avg -0.16R, worst streak 9, hold 2d, invested 5%
+
+<b>RSI(2) dip below 10 in up-trend, sell RSI above 70 or after 2 days</b>
+-0.9%/yr (-1.0% to -0.9%), beat BTC in 0/10 runs
+max drop -5.9% (worst -5.9%) · profit factor 0.62
+~61 trades, win 46%, avg -0.09R, worst streak 7, hold 2d, invested 1%
+
+<b>Volatility breakout: open + 0.5× yesterday's range, sell next open</b>
+-4.3%/yr (-4.4% to -4.2%), beat BTC in 0/10 runs
+max drop -22.6% (worst -22.6%) · profit factor 0.57
+~396 trades, win 37%, avg -0.06R, worst streak 10, hold 1d, invested 3%
+
+<b>Bot rule (daily) + BTC filter + ADX above 25</b>
++0.4%/yr (+0.4% to +0.5%), beat BTC in 0/10 runs
+max drop -4.7% (worst -4.7%) · profit factor 1.44
+~8 trades, win 25%, avg +0.34R, worst streak 3, hold 47d, invested 3%
+
+<b>Bot rule, daily chart only + BTC filter</b>
++0.6%/yr (+0.6% to +0.6%), beat BTC in 0/10 runs
+max drop -5.7% (worst -5.7%) · profit factor 1.42
+~14 trades, win 36%, avg +0.28R, worst streak 4, hold 39d, invested 4%
+
+<b>Crypto daily breakout, 3×ATR stop, BTC filter</b>
+-0.8%/yr (-0.8% to -0.8%), beat BTC in 0/10 runs
+max drop -8.5% (worst -8.5%) · profit factor 0.73
+~21 trades, win 24%, avg -0.17R, worst streak 9, hold 35d, invested 4%
+
+<b>Bot rule (daily) + BTC filter, Chandelier exit (3×ATR from 22-day high)</b>
+-0.3%/yr (-0.3% to -0.3%), beat BTC in 0/10 runs
+max drop -4.7% (worst -4.7%) · profit factor 0.89
+~16 trades, win 38%, avg -0.05R, worst streak 4, hold 21d, invested 2%
+
+<b>Crypto 20/50-day MA cross</b>
++1.3%/yr (+1.3% to +1.3%), beat BTC in 0/10 runs
+max drop -7.9% (worst -7.9%) · profit factor 1.37
+~24 trades, win 25%, avg +0.19R, worst streak 10, hold 34d, invested 5%
+
+<b>Crypto 4-week momentum</b>
++2.7%/yr (+2.6% to +3.0%), beat BTC in 0/10 runs
+max drop -6.8% (worst -6.8%) · profit factor 1.66
+~89 trades, win 31%, avg +0.15R, worst streak 10, hold 11d, invested 6%
+
+<b>Crypto 3-month momentum rotation, BTC filter</b>
++0.5%/yr (+0.5% to +0.5%), beat BTC in 0/10 runs
+max drop -7.8% (worst -7.8%) · profit factor 1.19
+~39 trades, win 18%, avg +0.07R, worst streak 15, hold 19d, invested 4%
+
+<b>Squeeze breakout (Bollinger narrowest in 6 months), BTC filter</b>
++0.5%/yr (+0.5% to +0.6%), beat BTC in 0/10 runs
+max drop -5.0% (worst -5.0%) · profit factor 1.47
+~10 trades, win 30%, avg +0.60R, worst streak 3, hold 28d, invested 3%
+
+<b>Turtle: 55-day high, 20-day-low exit, BTC filter</b>
++0.2%/yr (+0.2% to +0.3%), beat BTC in 0/10 runs
+max drop -8.6% (worst -8.6%) · profit factor 1.07
+~18 trades, win 22%, avg +0.06R, worst streak 9, hold 35d, invested 5%
+
+<b>Golden cross (50/200-day averages)</b>
++0.4%/yr (+0.4% to +0.4%), beat BTC in 0/10 runs
+max drop -4.6% (worst -4.6%) · profit factor 1.56
+~5 trades, win 40%, avg +0.36R, worst streak 2, hold 124d, invested 3%
+
+<b>52-week-high momentum</b>
++0.1%/yr (+0.1% to +0.1%), beat BTC in 0/10 runs
+max drop -4.3% (worst -4.3%) · profit factor 1.10
+~7 trades, win 29%, avg +0.09R, worst streak 3, hold 65d, invested 2%
+
+<b>RSI(2) pullback: buy dips in up-trends</b>
+-0.5%/yr (-0.5% to -0.5%), beat BTC in 0/10 runs
+max drop -3.3% (worst -3.3%) · profit factor 0.69
+~49 trades, win 65%, avg -0.05R, worst streak 2, hold 3d, invested 1%
+
+<b>Buy & hold BTC</b>
++149.5% (+17.3%/yr) · max drop -76.7%
+
+<i>BTC only (no coin-picking bias); fees 0.25% per buy and sell; fills at the next 15-min open with 0.05% slippage. Past results don't guarantee future ones.</i>

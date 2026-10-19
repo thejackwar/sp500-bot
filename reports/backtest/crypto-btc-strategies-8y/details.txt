@@ -1,0 +1,39 @@
+📅 Return by year (middle of 10 runs)
+Version    2021   2022   2023   2024   2025   2026
+Bot         -5%    -0%    -0%   +13%    -4%    +2%
+Bot+BTC     -3%    +0%    +2%   +12%    -1%    +2%
+PrevHi      -5%   -11%   -14%    -3%    -6%    -6%
+RSI2s       -1%    +0%    -2%    -1%    -1%    -0%
+VolBO       -2%    -4%    -7%    -2%    -6%    -4%
+BotADX      -3%    +0%    +2%    +5%    -1%    -1%
+BotD        -3%    +0%    +1%    +5%    -0%    +1%
+CBreak      -3%    -3%    -1%    +5%    -3%    +0%
+Chand       -3%    +0%    +0%    +2%    -1%    +1%
+C20/50      -0%    -4%    +5%    +4%    +1%    +1%
+C4wMom      -0%    -4%   +15%    +6%    -2%    +1%
+CRotate     -4%    -2%    +4%    +7%    -1%    -0%
+Squeeze     -1%    -2%    +4%    +3%    -1%    -0%
+Turtle      -6%    -1%    +0%   +10%    -1%    -1%
+GoldX       -1%    +0%    +0%    +6%    -3%    +0%
+52wHi       -2%    +0%    +1%    +5%    -3%    +0%
+RSI2        -1%    +0%    -1%    -1%    -0%    +0%
+BTC        +40%   -64%  +156%  +121%    -6%    -6%
+
+Long vs short (first run)
+Bot: long 36× +0.12R $+3k
+Bot+BTC: long 24× +0.49R $+11k
+PrevHi: long 354× -0.16R $-37k
+RSI2s: long 61× -0.09R $-5k
+VolBO: long 396× -0.06R $-22k
+BotADX: long 8× +0.34R $+3k
+BotD: long 14× +0.28R $+4k
+CBreak: long 21× -0.17R $-4k
+Chand: long 16× -0.05R $-1k
+C20/50: long 24× +0.19R $+4k
+C4wMom: long 90× +0.17R $+15k
+CRotate: long 39× +0.07R $+2k
+Squeeze: long 10× +0.60R $+3k
+Turtle: long 18× +0.06R $+1k
+GoldX: long 5× +0.36R $+2k
+52wHi: long 7× +0.09R $+1k
+RSI2: long 49× -0.05R $-3k
