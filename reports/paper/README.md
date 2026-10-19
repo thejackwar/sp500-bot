@@ -1,30 +1,30 @@
 # Paper trading report
 
-Updated 2026-10-16 17:43 New York time by `paper_report.py` (rebuilt from Alpaca every weekday after the close).
+Updated 2026-10-19 17:44 New York time by `paper_report.py` (rebuilt from Alpaca every weekday after the close).
 Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positions), `<account>_equity.csv` (account value per day vs SPY).
 
 ## Breakout bot (stocks + crypto)
 
 | | |
 |---|---|
-| Account value | $99,282.02 (-2.0% today) |
-| Since 12 Oct 2026 | -0.7% (SPY -1.9%) |
-| Worst drop from a high | -2.0% |
+| Account value | $99,088.82 (-0.4% today) |
+| Since 12 Oct 2026 | -0.9% (SPY -1.5%) |
+| Worst drop from a high | -2.2% |
 | Closed trades | 18, win 78%, avg +0.14R, profit factor 2.32, $+1,337.20 |
-| Open positions | 8 ($-2,049.02 not yet realised, 100% invested) |
+| Open positions | 8 ($-2,242.21 not yet realised, 100% invested) |
 
 **Open positions**
 
 | Symbol | Opened by | Since | Entry | Now | Stop | P/L | R |
 |---|---|---|---|---|---|---|---|
-| ADBE | breakout (daily) | 2026-10-16 | 254.73 | 244.50 | 238.99 | $-624.03 (-4.0%) | -0.65 |
-| COP | breakout (15-min) | 2026-10-16 | 143.67 | 146.25 | 137.58 | $+361.20 (+1.8%) | +0.42 |
-| CRM | breakout (daily) | 2026-10-16 | 250.13 | 240.05 | 234.48 | $-614.58 (-4.0%) | -0.64 |
-| DIS | breakout (15-min) | 2026-10-16 | 112.10 | 110.60 | 107.99 | $-4.50 (-1.3%) | -0.36 |
-| GM | breakout (15-min) | 2026-10-16 | 85.67 | 84.00 | 81.40 | $-390.78 (-1.9%) | -0.39 |
-| LIN | breakout (15-min) | 2026-10-16 | 499.74 | 498.43 | 484.05 | $-1.31 (-0.3%) | -0.08 |
-| NOW | breakout (daily) | 2026-10-15 | 148.66 | 140.90 | 136.82 | $-659.60 (-5.2%) | -0.66 |
-| WFC | breakout (15-min) | 2026-10-16 | 84.43 | 83.85 | 80.28 | $-115.42 (-0.7%) | -0.14 |
+| ADBE | breakout (daily) | 2026-10-16 | 254.73 | 246.62 | 238.99 | $-494.71 (-3.2%) | -0.52 |
+| COP | breakout (15-min) | 2026-10-16 | 143.67 | 145.24 | 137.58 | $+219.80 (+1.1%) | +0.26 |
+| CRM | breakout (daily) | 2026-10-16 | 250.13 | 242.97 | 234.48 | $-436.77 (-2.9%) | -0.46 |
+| DIS | breakout (15-min) | 2026-10-16 | 112.10 | 109.30 | 107.99 | $-8.40 (-2.5%) | -0.68 |
+| GM | breakout (15-min) | 2026-10-16 | 85.67 | 82.59 | 81.40 | $-720.72 (-3.6%) | -0.72 |
+| LIN | breakout (15-min) | 2026-10-16 | 499.74 | 502.95 | 484.05 | $+3.21 (+0.6%) | +0.20 |
+| NOW | breakout (daily) | 2026-10-15 | 148.66 | 145.00 | 136.82 | $-311.10 (-2.5%) | -0.31 |
+| WFC | breakout (15-min) | 2026-10-16 | 84.43 | 81.95 | 80.28 | $-493.52 (-2.9%) | -0.60 |
 
 **Closed trades by what opened them**
 
@@ -53,15 +53,16 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 
 | | |
 |---|---|
-| Account value | $99,978.84 (-0.0% today) |
-| Since 15 Oct 2026 | -0.0% (SPY -1.1%) |
-| Worst drop from a high | -0.0% |
+| Account value | $99,431.15 (-0.5% today) |
+| Since 15 Oct 2026 | -0.6% (SPY -0.7%) |
+| Worst drop from a high | -0.6% |
 | Closed trades | 0, $+0.00 |
-| Open positions | 2 ($-21.16 not yet realised, 22% invested) |
+| Open positions | 3 ($-568.84 not yet realised, 35% invested) |
 
 **Open positions**
 
 | Symbol | Opened by | Since | Entry | Now | Stop | P/L | R |
 |---|---|---|---|---|---|---|---|
-| C | ABCD | 2026-10-16 | 124.16 | 124.31 | nan | $+17.84 (+0.1%) |  |
-| LLY | Triple bottom | 2026-10-16 | 1265.00 | 1258.50 | 1106.68 | $-39.00 (-0.5%) | -0.04 |
+| C | ABCD | 2026-10-16 | 124.16 | 121.90 | nan | $-267.06 (-1.8%) |  |
+| LLY | Triple bottom | 2026-10-16 | 1265.00 | 1241.00 | 1106.68 | $-144.00 (-1.9%) | -0.15 |
+| WFC | Falling wedge | 2026-10-19 | 82.93 | 81.95 | 77.09 | $-157.78 (-1.2%) | -0.17 |
