@@ -1,0 +1,8 @@
+stock                                                                    version     short       from    cagr  cagr_min  cagr_max  max_dd  beat  runs       final  trades
+  SPY                                                             Buy & hold SPY       B&H 2021-01-01  0.1498       NaN       NaN -0.2450   NaN   NaN 224287.4700     NaN
+  SPY Your rule (50-day rising) + close below the 50-day, lower high after 1 day     MA f1 2021-01-01 -0.0130   -0.0185   -0.0128 -0.1845   0.0  10.0  92808.4295    37.0
+  SPY                    Your rule + 200-day filter (buy only above the 200-day)     R 200 2021-01-01  0.0027   -0.0026    0.0027 -0.1077   0.0  10.0 101548.8266    32.0
+  SPY                    Your rule + real cross (close 0.5 ATR above the 50-day)   R cross 2021-01-01 -0.0186   -0.0189   -0.0183 -0.1846   0.0  10.0  89859.7395    29.0
+  SPY                     Your rule + stronger rise (50-day up 0.5%+ in 10 days)    R rise 2021-01-01 -0.0109   -0.0163   -0.0107 -0.1616   0.0  10.0  93969.1542    18.0
+  SPY   Your rule + turn-up entry (buy when the 50-day turns up, price above it)    R turn 2021-01-01  0.0326    0.0277    0.0331 -0.1733   0.0  10.0 120120.3858    44.0
+  SPY                                 Your rule + turn-up entry + 200-day filter R turn200 2021-01-01  0.0584    0.0539    0.0594 -0.0899   0.0  10.0 138375.1248    37.0

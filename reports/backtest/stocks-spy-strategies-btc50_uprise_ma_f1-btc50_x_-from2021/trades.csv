@@ -1,0 +1,198 @@
+stock,version,symbol,direction,signal,entry_time,exit_time,entry,stop,target,exit,qty,result,pnl,R,days_held
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2021-03-08 09:30,2021-03-31 09:45,356.34,176.63,,367.28,280.62987060151056,exit signal,3068.77,0.06,23
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2021-06-22 09:30,2021-09-21 09:45,392.42,286.63,,408.18,262.65013880251894,exit signal,4139.33,0.15,91
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2021-09-24 09:30,2021-09-29 09:45,412.94,281.47,,406.93,259.6198770185964,exit signal,-1561.35,-0.05,5
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2021-12-03 09:30,2021-12-21 09:45,429.53,266.22,,430.3,245.9613157661637,exit signal,191.37,0.0,18
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2021-12-22 09:30,2022-01-14 09:45,434.44,246.72,,432.76,243.62140081356512,exit signal,-407.69,-0.01,23
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2022-04-14 09:30,2022-04-18 09:45,417.66,211.48,,411.16,252.42911817436132,exit signal,-1642.24,-0.03,4
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2022-04-20 09:30,2022-04-22 09:45,420.83,219.33,,411.24,246.62492045361043,exit signal,-2366.71,-0.05,2
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2022-09-12 09:30,2022-09-14 09:45,386.59,189.29,,372.9,262.35076373130033,exit signal,-3592.08,-0.07,2
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2022-12-22 09:30,2022-12-23 09:45,365.41,168.04,,362.03,267.72275849749667,exit signal,-906.37,-0.02,1
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2023-01-11 09:30,2023-01-20 09:45,374.17,183.23,,371.99,259.03138637114375,exit signal,-567.08,-0.01,9
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2023-01-23 09:30,2023-02-16 09:45,378.46,196.45,,389.81,254.60297910745328,exit signal,2891.36,0.06,24
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2023-02-28 09:30,2023-03-01 09:45,378.95,207.5,,377.05,261.90370470551846,exit signal,-495.31,-0.01,1
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2023-03-03 09:30,2023-03-08 09:45,381.31,219.22,,379.89,258.9834046588397,exit signal,-365.75,-0.01,5
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2023-03-09 09:30,2023-03-10 09:45,381.36,224.18,,372.84,257.9903739231321,exit signal,-2198.29,-0.05,1
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2023-03-30 09:30,2023-05-12 09:45,386.96,204.4,,395.72,248.57504952071847,exit signal,2178.38,0.05,43
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2023-08-30 09:30,2023-09-07 09:45,432.07,288.59,,425.72,227.66484112173424,exit signal,-1443.75,-0.04,8
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2023-09-12 09:30,2023-09-13 09:45,429.59,307.68,,428.71,225.61861924436081,exit signal,-196.66,-0.01,1
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2023-09-15 09:30,2023-09-18 09:45,431.3,313.67,,427.17,224.26792876900498,exit signal,-924.36,-0.04,3
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2024-05-06 09:30,2024-06-05 09:45,499.09,315.77,,515.42,191.95253336513986,exit signal,3134.03,0.09,30
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2024-07-29 09:30,2024-07-31 09:45,532.16,351.01,,534.82,185.91447376608093,exit signal,495.76,0.01,2
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2024-08-01 09:30,2024-08-05 09:45,538.54,344.55,,498.45,184.63209129212052,exit signal,-7401.42,-0.21,4
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2024-08-15 09:30,2024-09-09 09:45,535.55,279.95,,530.6,171.84281552449397,exit signal,-849.46,-0.02,25
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2024-09-12 09:30,2024-12-19 09:45,540.92,301.81,,577.87,168.56609241913162,exit signal,6229.57,0.15,98
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2024-12-23 09:30,2024-12-31 09:45,579.6,396.02,,578.39,168.0654237313344,exit signal,-201.95,-0.01,8
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2025-01-06 09:30,2025-01-08 09:45,584.87,375.34,,577.21,166.20546395578978,exit signal,-1271.87,-0.04,2
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2025-01-21 09:30,2025-02-04 09:45,589.19,370.39,,586.13,162.82789145651782,exit signal,-497.45,-0.01,14
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2025-11-26 09:30,2025-12-18 09:45,670.47,375.53,,670.21,142.3451917846736,exit signal,-38.17,-0.0,22
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2025-12-19 09:30,2026-01-21 09:45,671.46,446.4,,674.22,142.07843478265738,exit signal,390.84,0.01,33
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2026-01-22 09:30,2026-02-06 09:45,684.61,486.92,,676.01,139.92180215641517,exit signal,-1202.23,-0.04,15
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2026-02-09 09:30,2026-02-13 09:45,684.19,448.38,,676.23,138.2505530949281,exit signal,-1099.38,-0.03,4
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2026-02-23 09:30,2026-02-24 09:45,682.6,445.56,,676.44,136.96206468564324,exit signal,-842.56,-0.03,1
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2026-02-25 09:30,2026-03-02 09:45,684.95,443.8,,673.28,135.26194830581278,exit signal,-1578.73,-0.05,5
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2026-06-30 09:30,2026-07-21 09:45,739.6,421.75,,744.29,123.13249198006184,exit signal,577.89,0.01,21
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2026-07-22 09:30,2026-07-24 09:45,744.92,495.39,,736.56,123.02871189819574,exit signal,-1028.06,-0.03,2
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2026-08-03 09:30,2026-09-01 09:45,747.73,477.09,,759.99,121.19135744542587,exit signal,1485.62,0.05,29
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2026-09-14 09:30,2026-09-16 09:45,757.26,571.12,,757.47,121.62771176910198,exit signal,25.18,0.0,2
+SPY,"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",SPY,LONG,daily,2026-09-18 09:30,2026-10-19 09:45,761.46,559.1,,767.08,120.9897877685092,exit signal,679.27,0.03,31
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2021-03-08 09:30,2021-03-31 09:45,356.34,176.63,,367.28,280.62987060151056,exit signal,3068.77,0.06,23
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2021-06-22 09:30,2021-09-21 09:45,392.42,286.63,,408.18,262.65013880251894,exit signal,4139.33,0.15,91
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2021-09-24 09:30,2021-09-29 09:45,412.94,281.47,,406.93,259.6198770185964,exit signal,-1561.35,-0.05,5
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2021-12-03 09:30,2021-12-21 09:45,429.53,266.22,,430.3,245.9613157661637,exit signal,191.37,0.0,18
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2021-12-22 09:30,2022-01-14 09:45,434.44,246.72,,432.76,243.62140081356512,exit signal,-407.69,-0.01,23
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2023-01-23 09:30,2023-02-16 09:45,378.46,196.45,,389.81,278.580662739177,exit signal,3163.66,0.06,24
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2023-02-28 09:30,2023-03-01 09:45,378.95,207.5,,377.05,286.5689470189438,exit signal,-541.96,-0.01,1
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2023-03-03 09:30,2023-03-08 09:45,381.31,219.22,,379.89,283.37362257595026,exit signal,-400.19,-0.01,5
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2023-03-09 09:30,2023-03-10 09:45,381.36,224.18,,372.84,282.2870714230785,exit signal,-2405.32,-0.05,1
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2023-03-30 09:30,2023-05-12 09:45,386.96,204.4,,395.72,271.98504227509375,exit signal,2383.53,0.05,43
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2023-08-30 09:30,2023-09-07 09:45,432.07,288.59,,425.72,249.1055782003829,exit signal,-1579.72,-0.04,8
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2023-09-12 09:30,2023-09-13 09:45,429.59,307.68,,428.71,246.866649776574,exit signal,-215.18,-0.01,1
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2023-09-15 09:30,2023-09-18 09:45,431.3,313.67,,427.17,245.38875564862934,exit signal,-1011.42,-0.04,3
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2024-05-06 09:30,2024-06-05 09:45,499.09,315.77,,515.42,210.0300010109317,exit signal,3429.18,0.09,30
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2024-07-29 09:30,2024-07-31 09:45,532.16,351.01,,534.82,203.423296522786,exit signal,542.45,0.01,2
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2024-08-01 09:30,2024-08-05 09:45,538.54,344.55,,498.45,202.02014342248305,exit signal,-8098.46,-0.21,4
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2024-08-15 09:30,2024-09-09 09:45,535.55,279.95,,530.6,188.02641510166936,exit signal,-929.46,-0.02,25
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2024-09-12 09:30,2024-12-19 09:45,540.92,301.81,,577.87,184.44110083117386,exit signal,6816.25,0.15,98
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2024-12-23 09:30,2024-12-31 09:45,579.6,396.02,,578.39,183.89328078857946,exit signal,-220.97,-0.01,8
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2025-01-06 09:30,2025-01-08 09:45,584.87,375.34,,577.21,181.85815602784072,exit signal,-1391.65,-0.04,2
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2025-01-21 09:30,2025-02-04 09:45,589.19,370.39,,586.13,178.16249469427993,exit signal,-544.3,-0.01,14
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2025-11-26 09:30,2025-12-18 09:45,670.47,375.53,,670.21,155.75080073345762,exit signal,-41.76,-0.0,22
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2025-12-19 09:30,2026-01-21 09:45,671.46,446.4,,674.22,155.45892142131248,exit signal,427.65,0.01,33
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2026-01-22 09:30,2026-02-06 09:45,684.61,486.92,,676.01,153.09918412204885,exit signal,-1315.45,-0.04,15
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2026-02-09 09:30,2026-02-13 09:45,684.19,448.38,,676.23,151.27054223897494,exit signal,-1202.92,-0.03,4
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2026-02-23 09:30,2026-02-24 09:45,682.6,445.56,,676.44,149.86070816614253,exit signal,-921.91,-0.03,1
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2026-02-25 09:30,2026-03-02 09:45,684.95,443.8,,673.28,148.00048033421677,exit signal,-1727.41,-0.05,5
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2026-06-30 09:30,2026-07-21 09:45,739.6,421.75,,744.29,134.72871111242966,exit signal,632.31,0.01,21
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2026-07-22 09:30,2026-07-24 09:45,744.92,495.39,,736.56,134.61515735871185,exit signal,-1124.88,-0.03,2
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2026-08-03 09:30,2026-09-01 09:45,747.73,477.09,,759.99,132.60476681680314,exit signal,1625.53,0.05,29
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2026-09-14 09:30,2026-09-16 09:45,757.26,571.12,,757.47,133.08221557684885,exit signal,27.56,0.0,2
+SPY,Your rule + 200-day filter (buy only above the 200-day),SPY,LONG,daily,2026-09-18 09:30,2026-10-19 09:45,761.46,559.1,,767.08,132.38421396082157,exit signal,743.24,0.03,31
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2021-03-10 09:30,2021-03-31 09:45,360.99,178.25,,367.28,277.01430787764644,exit signal,1740.85,0.03,21
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2021-06-22 09:30,2021-09-21 09:45,392.42,286.63,,408.18,259.2662222962801,exit signal,4086.0,0.15,91
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2021-12-03 09:30,2021-12-21 09:45,429.53,266.22,,430.3,246.38062865513797,exit signal,191.69,0.0,18
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2021-12-22 09:30,2022-01-14 09:45,434.44,246.72,,432.76,244.03672463419474,exit signal,-408.38,-0.01,23
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2022-04-20 09:30,2022-04-22 09:45,420.83,219.33,,411.24,250.9543724021913,exit signal,-2408.26,-0.05,2
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2022-09-12 09:30,2022-09-14 09:45,386.59,189.29,,372.9,266.95627976414505,exit signal,-3655.14,-0.07,2
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2023-01-12 09:30,2023-01-20 09:45,378.41,190.83,,371.99,263.0689211902564,exit signal,-1688.92,-0.03,8
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2023-01-23 09:30,2023-02-16 09:45,378.46,196.45,,389.81,258.57148812714115,exit signal,2936.43,0.06,24
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2023-03-06 09:30,2023-03-08 09:45,386.4,222.32,,379.89,260.85659503631956,exit signal,-1696.42,-0.04,2
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2023-03-31 09:30,2023-05-12 09:45,387.5,211.82,,395.72,255.7380653337795,exit signal,2103.03,0.05,42
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2023-08-30 09:30,2023-09-07 09:45,432.07,288.59,,425.72,234.2253018766544,exit signal,-1485.35,-0.04,8
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2023-09-15 09:30,2023-09-18 09:45,431.3,313.67,,427.17,231.199623336713,exit signal,-952.93,-0.04,3
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2024-05-07 09:30,2024-06-05 09:45,502.78,321.47,,515.42,196.43281218155715,exit signal,2482.2,0.07,29
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2024-08-01 09:30,2024-08-05 09:45,538.54,344.55,,498.45,187.99945288725658,exit signal,-7536.41,-0.21,4
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2024-08-16 09:30,2024-09-09 09:45,537.42,280.02,,530.6,174.36795124363564,exit signal,-1188.07,-0.03,24
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2024-09-12 09:30,2024-12-19 09:45,540.92,301.81,,577.87,171.04307849332113,exit signal,6321.11,0.15,98
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2024-12-24 09:30,2024-12-31 09:45,584.66,398.13,,578.39,169.05883664093648,exit signal,-1058.75,-0.03,7
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2025-01-07 09:30,2025-01-08 09:45,586.01,375.15,,577.21,166.86257576802439,exit signal,-1467.16,-0.04,1
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2025-01-22 09:30,2025-02-04 09:45,594.34,379.65,,586.13,162.0548696863904,exit signal,-1329.84,-0.04,13
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2025-11-26 09:30,2025-12-18 09:45,670.47,375.53,,670.21,141.6694111727758,exit signal,-37.99,-0.0,22
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2025-12-22 09:30,2026-01-21 09:45,678.74,455.68,,674.22,139.88902742726054,exit signal,-632.38,-0.02,30
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2026-01-22 09:30,2026-02-06 09:45,684.61,486.92,,676.01,137.76562818609892,exit signal,-1183.7,-0.04,15
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2026-02-09 09:30,2026-02-13 09:45,684.19,448.38,,676.23,136.12013282181104,exit signal,-1082.44,-0.03,4
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2026-02-26 09:30,2026-03-02 09:45,688.02,450.63,,673.28,133.7889669287184,exit signal,-1972.35,-0.06,4
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2026-06-30 09:30,2026-07-21 09:45,739.6,421.75,,744.29,121.79159847768678,exit signal,571.6,0.01,21
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2026-07-22 09:30,2026-07-24 09:45,744.92,495.39,,736.56,121.68894854461578,exit signal,-1016.87,-0.03,2
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2026-08-04 09:30,2026-09-01 09:45,758.89,482.88,,759.99,118.10845963928894,exit signal,129.47,0.0,28
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2026-09-14 09:30,2026-09-16 09:45,757.26,571.12,,757.47,118.53371386626249,exit signal,24.54,0.0,2
+SPY,Your rule + real cross (close 0.5 ATR above the 50-day),SPY,LONG,daily,2026-09-21 09:30,2026-10-19 09:45,766.44,569.89,,767.08,117.14572560947222,exit signal,74.19,0.0,28
+SPY,Your rule + stronger rise (50-day up 0.5%+ in 10 days),SPY,LONG,daily,2021-03-08 09:30,2021-03-31 09:45,356.34,176.63,,367.28,280.62987060151056,exit signal,3068.77,0.06,23
+SPY,Your rule + stronger rise (50-day up 0.5%+ in 10 days),SPY,LONG,daily,2021-06-22 09:30,2021-09-21 09:45,392.42,286.63,,408.18,262.65013880251894,exit signal,4139.33,0.15,91
+SPY,Your rule + stronger rise (50-day up 0.5%+ in 10 days),SPY,LONG,daily,2021-12-03 09:30,2021-12-21 09:45,429.53,266.22,,430.3,249.59636369666939,exit signal,194.19,0.0,18
+SPY,Your rule + stronger rise (50-day up 0.5%+ in 10 days),SPY,LONG,daily,2021-12-22 09:30,2022-01-14 09:45,434.44,246.72,,432.76,247.22186727755232,exit signal,-413.71,-0.01,23
+SPY,Your rule + stronger rise (50-day up 0.5%+ in 10 days),SPY,LONG,daily,2022-09-12 09:30,2022-09-14 09:45,386.59,189.29,,372.9,276.7514160463509,exit signal,-3789.25,-0.07,2
+SPY,Your rule + stronger rise (50-day up 0.5%+ in 10 days),SPY,LONG,daily,2022-12-22 09:30,2022-12-23 09:45,365.41,168.04,,362.03,282.41828408741793,exit signal,-956.12,-0.02,1
+SPY,Your rule + stronger rise (50-day up 0.5%+ in 10 days),SPY,LONG,daily,2023-01-11 09:30,2023-01-20 09:45,374.17,183.23,,371.99,273.2498352933542,exit signal,-598.21,-0.01,9
+SPY,Your rule + stronger rise (50-day up 0.5%+ in 10 days),SPY,LONG,daily,2023-01-23 09:30,2023-02-16 09:45,378.46,196.45,,389.81,268.5783490600931,exit signal,3050.07,0.06,24
+SPY,Your rule + stronger rise (50-day up 0.5%+ in 10 days),SPY,LONG,daily,2023-03-09 09:30,2023-03-10 09:45,381.36,224.18,,372.84,274.53350421118233,exit signal,-2339.26,-0.05,1
+SPY,Your rule + stronger rise (50-day up 0.5%+ in 10 days),SPY,LONG,daily,2023-09-12 09:30,2023-09-13 09:45,429.59,307.68,,428.71,238.26623219612404,exit signal,-207.69,-0.01,1
+SPY,Your rule + stronger rise (50-day up 0.5%+ in 10 days),SPY,LONG,daily,2024-07-29 09:30,2024-07-31 09:45,532.16,351.01,,534.82,191.95132245729198,exit signal,511.86,0.01,2
+SPY,Your rule + stronger rise (50-day up 0.5%+ in 10 days),SPY,LONG,daily,2024-08-01 09:30,2024-08-05 09:45,538.54,344.55,,498.45,190.62729960535162,exit signal,-7641.75,-0.21,4
+SPY,Your rule + stronger rise (50-day up 0.5%+ in 10 days),SPY,LONG,daily,2024-12-23 09:30,2024-12-31 09:45,579.6,396.02,,578.39,163.93876048115496,exit signal,-196.99,-0.01,8
+SPY,Your rule + stronger rise (50-day up 0.5%+ in 10 days),SPY,LONG,daily,2026-02-09 09:30,2026-02-13 09:45,684.19,448.38,,676.23,138.58969933005253,exit signal,-1102.08,-0.03,4
+SPY,Your rule + stronger rise (50-day up 0.5%+ in 10 days),SPY,LONG,daily,2026-06-30 09:30,2026-07-21 09:45,739.6,421.75,,744.29,126.71638010335653,exit signal,594.71,0.01,21
+SPY,Your rule + stronger rise (50-day up 0.5%+ in 10 days),SPY,LONG,daily,2026-07-22 09:30,2026-07-24 09:45,744.92,495.39,,736.56,126.60957940364331,exit signal,-1057.99,-0.03,2
+SPY,Your rule + stronger rise (50-day up 0.5%+ in 10 days),SPY,LONG,daily,2026-09-14 09:30,2026-09-16 09:45,757.26,571.12,,757.47,123.1488698942458,exit signal,25.5,0.0,2
+SPY,Your rule + stronger rise (50-day up 0.5%+ in 10 days),SPY,LONG,daily,2026-09-18 09:30,2026-10-19 09:45,761.46,559.1,,767.08,122.50296758622119,exit signal,687.77,0.03,31
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2021-03-08 09:30,2021-03-31 09:45,356.34,176.63,,367.28,280.62987060151056,exit signal,3068.77,0.06,23
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2021-06-22 09:30,2021-09-21 09:45,392.42,286.63,,408.18,262.65013880251894,exit signal,4139.33,0.15,91
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2021-09-24 09:30,2021-09-29 09:45,412.94,281.47,,406.93,259.6198770185964,exit signal,-1561.35,-0.05,5
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2021-10-20 09:30,2021-11-18 09:45,422.0,277.78,,438.77,250.34515415865883,exit signal,4197.75,0.12,29
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2021-12-03 09:30,2021-12-21 09:45,429.53,266.22,,430.3,255.73429711225745,exit signal,198.97,0.0,18
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2021-12-22 09:30,2022-01-14 09:45,434.44,246.72,,432.76,253.3014084124988,exit signal,-423.88,-0.01,23
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2022-04-07 09:30,2022-04-12 09:45,419.6,211.14,,417.06,261.2453918646664,exit signal,-665.48,-0.01,5
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2022-04-14 09:30,2022-04-18 09:45,417.66,211.48,,411.16,260.8657529518917,exit signal,-1697.13,-0.03,4
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2022-04-20 09:30,2022-04-22 09:45,420.83,219.33,,411.24,254.86756851241077,exit signal,-2445.81,-0.05,2
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2022-08-02 09:30,2022-08-30 09:45,386.91,171.63,,381.77,270.8947181296845,exit signal,-1390.7,-0.02,28
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2022-09-12 09:30,2022-09-14 09:45,386.59,189.29,,372.9,267.5216163416472,exit signal,-3662.88,-0.07,2
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2022-11-25 09:30,2022-12-16 09:45,381.58,181.74,,367.31,261.435476311015,exit signal,-3730.63,-0.07,21
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2022-12-22 09:30,2022-12-23 09:45,365.41,168.04,,362.03,262.79015301686826,exit signal,-889.67,-0.02,1
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2023-01-11 09:30,2023-01-20 09:45,374.17,183.23,,371.99,254.2589133724352,exit signal,-556.63,-0.01,9
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2023-01-23 09:30,2023-02-16 09:45,378.46,196.45,,389.81,249.91209643024717,exit signal,2838.09,0.06,24
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2023-02-28 09:30,2023-03-01 09:45,378.95,207.5,,377.05,257.0783112407361,exit signal,-486.19,-0.01,1
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2023-03-03 09:30,2023-03-08 09:45,381.31,219.22,,379.89,254.21181568978332,exit signal,-359.01,-0.01,5
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2023-03-09 09:30,2023-03-10 09:45,381.36,224.18,,372.84,253.23708085419597,exit signal,-2157.79,-0.05,1
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2023-03-30 09:30,2023-05-12 09:45,386.96,204.4,,395.72,243.9952272504917,exit signal,2138.24,0.05,43
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2023-08-30 09:30,2023-09-07 09:45,432.07,288.59,,425.72,223.47027488700016,exit signal,-1417.15,-0.04,8
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2023-09-12 09:30,2023-09-13 09:45,429.59,307.68,,428.71,221.46175322347318,exit signal,-193.04,-0.01,1
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2023-09-15 09:30,2023-09-18 09:45,431.3,313.67,,427.17,220.13594827999654,exit signal,-907.33,-0.04,3
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2023-11-24 09:30,2024-02-21 09:45,438.94,307.36,,479.6,214.23646045556504,exit signal,8712.2,0.31,89
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2024-05-06 09:30,2024-06-05 09:45,499.09,315.77,,515.42,205.87212290506176,exit signal,3361.29,0.09,30
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2024-07-29 09:30,2024-07-31 09:45,532.16,351.01,,534.82,199.3962086459833,exit signal,531.71,0.01,2
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2024-08-01 09:30,2024-08-05 09:45,538.54,344.55,,498.45,198.02083319423937,exit signal,-7938.14,-0.21,4
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2024-08-15 09:30,2024-09-09 09:45,535.55,279.95,,530.6,184.30413299476336,exit signal,-911.06,-0.02,25
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2024-09-12 09:30,2024-12-19 09:45,540.92,301.81,,577.87,180.78979572582102,exit signal,6681.31,0.15,98
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2024-12-23 09:30,2024-12-31 09:45,579.6,396.02,,578.39,180.25282065275522,exit signal,-216.59,-0.01,8
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2025-01-06 09:30,2025-01-08 09:45,584.87,375.34,,577.21,178.25798442529583,exit signal,-1364.1,-0.04,2
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2025-01-21 09:30,2025-02-04 09:45,589.19,370.39,,586.13,174.63548458900476,exit signal,-533.52,-0.01,14
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2025-05-21 09:30,2025-10-23 09:45,578.96,282.72,,660.8,176.80034034955148,exit signal,14469.7,0.28,155
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2025-11-26 09:30,2025-12-18 09:45,670.47,375.53,,670.21,174.24876515498525,exit signal,-46.72,-0.0,22
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2025-12-19 09:30,2026-01-21 09:45,671.46,446.4,,674.22,173.9222203829772,exit signal,478.44,0.01,33
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2026-01-22 09:30,2026-02-06 09:45,684.61,486.92,,676.01,171.28222554153484,exit signal,-1471.68,-0.04,15
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2026-02-09 09:30,2026-02-13 09:45,684.19,448.38,,676.23,169.23640241551692,exit signal,-1345.78,-0.03,4
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2026-02-23 09:30,2026-02-24 09:45,682.6,445.56,,676.44,167.65912740243442,exit signal,-1031.41,-0.03,1
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2026-02-25 09:30,2026-03-02 09:45,684.95,443.8,,673.28,165.57796697761762,exit signal,-1932.57,-0.05,5
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2026-04-21 09:30,2026-06-17 09:45,706.84,441.99,,747.35,157.7151081325393,exit signal,6388.91,0.15,57
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2026-06-30 09:30,2026-07-21 09:45,739.6,421.75,,744.29,159.36830879872753,exit signal,747.95,0.01,21
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2026-07-22 09:30,2026-07-24 09:45,744.92,495.39,,736.56,159.23398798812727,exit signal,-1330.61,-0.03,2
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2026-08-03 09:30,2026-09-01 09:45,747.73,477.09,,759.99,156.85593109109672,exit signal,1922.81,0.05,29
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2026-09-14 09:30,2026-09-16 09:45,757.26,571.12,,757.47,157.4206971368658,exit signal,32.59,0.0,2
+SPY,"Your rule + turn-up entry (buy when the 50-day turns up, price above it)",SPY,LONG,daily,2026-09-18 09:30,2026-10-19 09:45,761.46,559.1,,767.08,156.59504285600346,exit signal,879.17,0.03,31
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2021-03-08 09:30,2021-03-31 09:45,356.34,176.63,,367.28,280.62987060151056,exit signal,3068.77,0.06,23
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2021-06-22 09:30,2021-09-21 09:45,392.42,286.63,,408.18,262.65013880251894,exit signal,4139.33,0.15,91
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2021-09-24 09:30,2021-09-29 09:45,412.94,281.47,,406.93,259.6198770185964,exit signal,-1561.35,-0.05,5
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2021-10-20 09:30,2021-11-18 09:45,422.0,277.78,,438.77,250.34515415865883,exit signal,4197.75,0.12,29
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2021-12-03 09:30,2021-12-21 09:45,429.53,266.22,,430.3,255.73429711225745,exit signal,198.97,0.0,18
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2021-12-22 09:30,2022-01-14 09:45,434.44,246.72,,432.76,253.3014084124988,exit signal,-423.88,-0.01,23
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2022-04-07 09:30,2022-04-12 09:45,419.6,211.14,,417.06,261.2453918646664,exit signal,-665.48,-0.01,5
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2023-01-23 09:30,2023-02-16 09:45,378.46,196.45,,389.81,287.89132913380973,exit signal,3269.39,0.06,24
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2023-02-28 09:30,2023-03-01 09:45,378.95,207.5,,377.05,296.14659623019804,exit signal,-560.07,-0.01,1
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2023-03-03 09:30,2023-03-08 09:45,381.31,219.22,,379.89,292.8444783019037,exit signal,-413.57,-0.01,5
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2023-03-09 09:30,2023-03-10 09:45,381.36,224.18,,372.84,291.72161265682837,exit signal,-2485.71,-0.05,1
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2023-03-30 09:30,2023-05-12 09:45,386.96,204.4,,395.72,281.07527118062404,exit signal,2463.19,0.05,43
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2023-08-30 09:30,2023-09-07 09:45,432.07,288.59,,425.72,257.4311342991468,exit signal,-1632.51,-0.04,8
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2023-09-12 09:30,2023-09-13 09:45,429.59,307.68,,428.71,255.11737686376696,exit signal,-222.38,-0.01,1
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2023-09-15 09:30,2023-09-18 09:45,431.3,313.67,,427.17,253.59008885809735,exit signal,-1045.22,-0.04,3
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2023-11-24 09:30,2024-02-21 09:45,438.94,307.36,,479.6,246.79405371116178,exit signal,10036.2,0.31,89
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2024-05-06 09:30,2024-06-05 09:45,499.09,315.77,,515.42,237.15858472372793,exit signal,3872.11,0.09,30
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2024-07-29 09:30,2024-07-31 09:45,532.16,351.01,,534.82,229.69852340603558,exit signal,612.52,0.01,2
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2024-08-01 09:30,2024-08-05 09:45,538.54,344.55,,498.45,228.11413164382614,exit signal,-9144.5,-0.21,4
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2024-08-15 09:30,2024-09-09 09:45,535.55,279.95,,530.6,212.31289949794908,exit signal,-1049.51,-0.02,25
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2024-09-12 09:30,2024-12-19 09:45,540.92,301.81,,577.87,208.26448710882454,exit signal,7696.67,0.15,98
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2024-12-23 09:30,2024-12-31 09:45,579.6,396.02,,578.39,207.64590773749836,exit signal,-249.51,-0.01,8
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2025-01-06 09:30,2025-01-08 09:45,584.87,375.34,,577.21,205.347915518911,exit signal,-1571.41,-0.04,2
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2025-01-21 09:30,2025-02-04 09:45,589.19,370.39,,586.13,201.1749030575157,exit signal,-614.6,-0.01,14
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2025-05-21 09:30,2025-10-23 09:45,578.96,282.72,,660.8,203.66875273982083,exit signal,16668.67,0.28,155
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2025-11-26 09:30,2025-12-18 09:45,670.47,375.53,,670.21,200.72941372965994,exit signal,-53.82,-0.0,22
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2025-12-19 09:30,2026-01-21 09:45,671.46,446.4,,674.22,200.3532438292112,exit signal,551.14,0.01,33
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2026-01-22 09:30,2026-02-06 09:45,684.61,486.92,,676.01,197.31204800609754,exit signal,-1695.33,-0.04,15
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2026-02-09 09:30,2026-02-13 09:45,684.19,448.38,,676.23,194.95532039132848,exit signal,-1550.3,-0.03,4
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2026-02-23 09:30,2026-02-24 09:45,682.6,445.56,,676.44,193.1383463175961,exit signal,-1188.15,-0.03,1
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2026-02-25 09:30,2026-03-02 09:45,684.95,443.8,,673.28,190.74091118180456,exit signal,-2226.26,-0.05,5
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2026-04-21 09:30,2026-06-17 09:45,706.84,441.99,,747.35,181.68313080208242,exit signal,7359.83,0.15,57
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2026-06-30 09:30,2026-07-21 09:45,739.6,421.75,,744.29,183.58756897819393,exit signal,861.62,0.01,21
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2026-07-22 09:30,2026-07-24 09:45,744.92,495.39,,736.56,183.4328353848769,exit signal,-1532.82,-0.03,2
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2026-08-03 09:30,2026-09-01 09:45,747.73,477.09,,759.99,180.69338431139502,exit signal,2215.02,0.05,29
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2026-09-14 09:30,2026-09-16 09:45,757.26,571.12,,757.47,181.34397805971122,exit signal,37.55,0.0,2
+SPY,Your rule + turn-up entry + 200-day filter,SPY,LONG,daily,2026-09-18 09:30,2026-10-19 09:45,761.46,559.1,,767.08,180.3928487957909,exit signal,1012.78,0.03,31
