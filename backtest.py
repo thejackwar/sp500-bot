@@ -505,6 +505,7 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
         em = exit_m.get(p["dir"]) if isinstance(exit_m, dict) else exit_m    # "both" strategies: per direction
         per_slot = isinstance(exit_m, dict) and exit_m.get("per_slot")       # TF strategies: per 15-min slot
         lev = cfg.get("leverage")                                             # leveraged: the stop is liquidation
+        sm = exit_m.get("stop_day") if isinstance(exit_m, dict) else None    # strategy's moving stop per day
         start, step = s, 1500
         while start < n_slots:
             end = min(n_slots, start + step)
@@ -542,7 +543,13 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
                 c4 = old & (o <= tgt) if tgt is not None else np.zeros(len(idx), bool)
                 c5 = valid & (hh >= stop)
                 c6 = valid & (ll <= tgt) if tgt is not None else np.zeros(len(idx), bool)
-            hit = c1 | c2 | c3 | c4 | c5 | c6
+            if sm is not None:                         # the strategy's moving stop (level in force that day)
+                lvl = sm[di[start:end], col]
+                ok = valid & np.isfinite(lvl)
+                c7 = ok & ((ll <= lvl) if long_ else (hh >= lvl))
+            else:
+                c7 = np.zeros(len(idx), bool)
+            hit = c1 | c2 | c3 | c4 | c5 | c6 | c7
             if hit.any():
                 k = int(np.argmax(hit))
                 j = start + k
@@ -557,6 +564,9 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
                     return j, 1, o[k], "target (gap)"
                 if c5[k]:
                     return j, 1, stop * (1 - sign * SLIPPAGE), "liquidated" if lev else "stop"
+                if c7[k]:                              # moving stop: at the level, or the open if it gapped past
+                    px = min(o[k], lvl[k]) if long_ else max(o[k], lvl[k])
+                    return j, 1, px * (1 - sign * SLIPPAGE), "stop (lower low)"
                 return j, 1, tgt, "target"
             start = end
             step *= 4
@@ -893,6 +903,7 @@ def strategy_signals(mod, daily, syms, days, first_slot, intraday=None, slots=No
     from strategies import tools
     rows, exit_cols, short_exit_cols = [], [], []
     slot_exit_cols, slot_short_exit_cols = [], []          # TF strategies: exits per 15-min slot
+    stop_cols = []                                         # strategies with stops(): stop level per day
     for col, sym in enumerate(syms):
         d = daily[sym][["Open", "High", "Low", "Close"]].copy()
         atr = tools.atr(d)
@@ -988,6 +999,9 @@ def strategy_signals(mod, daily, syms, days, first_slot, intraday=None, slots=No
         if side == "both":
             ex = pd.Series(mod.short_exits(d), index=d.index).reindex(days).fillna(False).astype(bool)
             short_exit_cols.append(ex.values)
+        if hasattr(mod, "stops"):                      # a stop that moves: the level after each close is in
+            sl = pd.Series(mod.stops(d), index=d.index).shift(1)    # force during the NEXT day
+            stop_cols.append(sl.reindex(days).values.astype(float))
     cols = ["slot", "col", "sym", "dl", "ds", "il", "is", "atr", "score"]
     if hasattr(mod, "setups"):
         cols += ["stop", "target", "pattern"]
@@ -997,6 +1011,9 @@ def strategy_signals(mod, daily, syms, days, first_slot, intraday=None, slots=No
     ex_m = np.column_stack(exit_cols) if exit_cols else None
     if short_exit_cols:                                # "both": exits per direction
         ex_m = {"LONG": ex_m, "SHORT": np.column_stack(short_exit_cols)}
+    if stop_cols:                                      # moving stop per [day, stock]: a touch sells at that level
+        base = ex_m if isinstance(ex_m, dict) else {"LONG": ex_m, "SHORT": ex_m}
+        ex_m = {**base, "stop_day": np.column_stack(stop_cols)}
     if slot_exit_cols:                                 # TF strategies: [slot, stock], sell at that slot's open
         m = np.column_stack(slot_exit_cols)
         ex_m = {"per_slot": True, "LONG": m,
