@@ -7,7 +7,8 @@ which is what the backtest does with entries()/exits(). Stops are judged on clos
 the bad price spikes in Alpaca's crypto history can't set them off.
 
 Swing points: a swing high is a day whose high is above the PIVOT days before and after it; it is
-only known PIVOT days later (no look-ahead). Swing lows the same way with lows.
+only known PIVOT days later (no look-ahead). Swing lows the same way with lows. For the lower-high
+exit, lh_right sets how many lower days after a high confirm it (default PIVOT = 3; 1 = next day).
 
     entry        close crosses above the 50-day average (yesterday's close at or below it),
                  optionally only while the close is above the 200-day average; line="both": crosses
@@ -41,11 +42,11 @@ _cache = {}
 
 
 def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False, line="50", ma_exit=False,
-        start_stop=True, trend=None):
+        start_stop=True, trend=None, lh_right=None):
     """Replays the rule on daily candles. Returns a DataFrame indexed like d with columns
     entry (signal on that close), exit (signal on that close), stop (starting/trailing stop while in a
     trade), peak (highest high since entry), lh (a lower high was confirmed that day), reason."""
-    key = (exit_mode, tp_r, stretch, reentry, above200, line, ma_exit, start_stop, trend,
+    key = (exit_mode, tp_r, stretch, reentry, above200, line, ma_exit, start_stop, trend, lh_right,
            d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
     if key in _cache:
         return _cache[key]
@@ -64,6 +65,13 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
             piv_hi[j] = True
         if l[j] < l[j - P:j].min() and l[j] <= l[j + 1:j + P + 1].min():
             piv_lo[j] = True
+    # swing highs for the lower-high exit: above the P days before, confirmed by R lower days after
+    # (R = lh_right; 1 = sell as soon as one day trades below the failed high)
+    R = P if lh_right is None else lh_right
+    piv_hr = np.zeros(n, bool)
+    for j in range(P, n - R):
+        if h[j] > h[j - P:j].max() and h[j] >= h[j + 1:j + R + 1].max():
+            piv_hr[j] = True
 
     entry = np.zeros(n, bool)
     exit_ = np.zeros(n, bool)
@@ -109,17 +117,17 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
         # in a trade: update the highest high (the "previous high" a bounce must beat)
         if h[i] > peak:
             peak, peak_day, brk = h[i], i, None
-        j = i - P                                    # swing points confirmed today
+        j = i - P                                    # swing lows confirmed today
+        jh = i - R                                   # swing highs confirmed today
         why = None
-        if j > e_day:
-            if piv_hi[j] and h[j] < max(h[e_day:j]) and j > peak_day:
-                lh_s[i] = True
-                if exit_mode == "lh":
-                    why = "lower high"
-                elif exit_mode == "break" and brk is None:
-                    brk = l[peak_day:j + 1].min()    # the pullback low between the high and the lower high
-            if exit_mode == "hl" and piv_lo[j] and l[j] > stop:
-                stop, trailed = l[j], True
+        if jh > e_day and piv_hr[jh] and h[jh] < max(h[e_day:jh]) and jh > peak_day:
+            lh_s[i] = True
+            if exit_mode == "lh":
+                why = "lower high"
+            elif exit_mode == "break" and brk is None:
+                brk = l[peak_day:jh + 1].min()       # the pullback low between the high and the lower high
+        if j > e_day and exit_mode == "hl" and piv_lo[j] and l[j] > stop:
+            stop, trailed = l[j], True
         if why is None and exit_mode == "break" and brk is not None and c[i] < brk:
             why = "broke the pullback low"
         if l[i] > ln[i]:

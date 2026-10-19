@@ -157,7 +157,7 @@ def trade_panel(ax, d, r, n):
         ax.plot(sh.index, sh["peak"], color=PEAK_C, lw=1.1, ls=(0, (1, 1.5)), zorder=5, drawstyle="steps-post")
         from strategies import _structure
         for day in sh.index[sh["lh"].fillna(False).astype(bool)]:
-            k = w.index.get_loc(day) - _structure.PIVOT
+            k = w.index.get_loc(day) - (RULE.get("right") or _structure.PIVOT)
             if k >= 0:
                 ax.scatter([w.index[k]], [w["High"].iat[k]], marker="x", s=45, color=LH_C, lw=1.8, zorder=6)
         sig_day = r["exit_day"] - pd.Timedelta(days=1)
@@ -250,6 +250,7 @@ def main():
         mod = importlib.import_module(f"strategies.{rule}")
         from strategies import _structure
         RULE["name"], RULE["st"] = rule, _structure.run(d[["Open", "High", "Low", "Close"]], **mod.KW)
+        RULE["right"] = mod.KW.get("lh_right")
         folder = os.path.join(folder, rule)
     for p in make(d, t, folder, title):
         print("saved", p, flush=True)
