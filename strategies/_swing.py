@@ -29,6 +29,7 @@ breaks with a LOWER LOW. Shared by the swing_*.py strategy files (starts with "_
                UP on a higher low (a new swing low above the previous one) or a close above the last swing high;
                DOWN on a lower high (a new swing high below the previous one) or a close below the last swing
                low. Buy = the first close above the 50-day while the trend is UP.
+    above200   the buy also needs the close above the 200-day average (the sell rule is unchanged).
 """
 import numpy as np
 import pandas as pd
@@ -38,15 +39,16 @@ from strategies import tools
 _cache = {}
 
 
-def run(d, pivot=5, mode="close", trail="pivot", pull_min=0.0, hh_entry=False, trend_entry=False):
+def run(d, pivot=5, mode="close", trail="pivot", pull_min=0.0, hh_entry=False, trend_entry=False, above200=False):
     """Daily candles -> DataFrame: entry (signal on that close), exit (signal on that close; mode "close"
     only), stop (the low to hold after that day's close, while in a trade), reason."""
-    key = (pivot, mode, trail, pull_min, hh_entry, trend_entry, d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
+    key = (pivot, mode, trail, pull_min, hh_entry, trend_entry, above200, d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
     if key in _cache:
         return _cache[key]
     o, h, l, c = (d[k].values.astype(float) for k in ("Open", "High", "Low", "Close"))
     n, P = len(d), pivot
     sma50 = tools.sma(d["Close"], 50).values
+    sma200 = tools.sma(d["Close"], 200).values
     piv = np.zeros(n, bool)                          # day j is a swing low (known at day j + P)
     for j in range(P, n - P):
         if l[j] < l[j - P:j].min() and l[j] <= l[j + 1:j + P + 1].min():
@@ -82,7 +84,7 @@ def run(d, pivot=5, mode="close", trail="pivot", pull_min=0.0, hh_entry=False, t
     for i in range(n):
         above50 = np.isfinite(sma50[i]) and c[i] > sma50[i]
         ok_buy[i] = above50 and (not hh_entry or (np.isfinite(last_sh[i]) and c[i] > last_sh[i])) \
-            and (not trend_entry or trend_up[i])
+            and (not trend_entry or trend_up[i]) and (not above200 or (np.isfinite(sma200[i]) and c[i] > sma200[i]))
 
     entry, exit_ = np.zeros(n, bool), np.zeros(n, bool)
     stop_s = np.full(n, np.nan)
