@@ -1,0 +1,168 @@
+version,symbol,direction,signal,entry_time,exit_time,entry,stop,target,exit,qty,result,pnl,R,days_held
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2021-08-09 18:45,2021-09-21 00:30,46381.78,41401.8,,41381.1,0.20174326,stop,-1017.71,-1.02,43
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2021-10-01 10:30,2021-10-21 11:45,46507.6,41175.4,,41154.81,0.18644522,stop,-1006.17,-1.02,20
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2021-10-23 11:45,2021-11-19 00:00,61705.1,48908.6,,56671.29,0.07674981,trend exit,-390.89,-0.4,26
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2021-11-19 14:15,2021-11-27 00:00,58007.46,51044.2,,53636.17,0.14072801000000001,trend exit,-623.02,-0.64,7
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2021-11-27 08:15,2021-12-04 05:15,55085.21,48725.0,,48700.64,0.15311455000000002,stop,-985.52,-1.02,7
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2021-12-06 22:00,2022-01-05 22:45,50179.98,42747.7,,42726.33,0.12957158,stop,-971.8,-1.01,30
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2023-01-13 21:45,2023-02-06 11:15,19770.56,18876.2,,18866.76,0.96155494,stop,-887.63,-1.04,24
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2023-02-07 18:00,2023-03-09 00:00,23294.3,20918.9,,21685.13,0.39817409000000004,trend exit,-649.68,-0.69,29
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2023-03-12 17:30,2023-05-26 01:45,20853.63,18703.9,,18694.55,0.43689927,stop,-951.94,-1.02,75
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2023-05-26 14:30,2023-05-27 01:30,26804.8,23018.8,,23007.29,0.24522951,stop,-937.37,-1.01,1
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2023-05-28 00:45,2023-05-28 01:30,27032.07,22600.8,,22589.5,0.20729456000000002,stop,-926.06,-1.01,0
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2023-05-30 10:45,2023-07-25 00:00,28009.02,22827.7,,29170.76,0.17543303,trend exit,198.79,0.22,55
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2023-07-25 13:45,2023-08-17 21:00,29343.15,27539.9,,27526.13,0.50793439,stop,-937.37,-1.03,23
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2023-10-02 14:00,2023-10-11 02:45,28568.87,27109.4,,27095.85,0.62215131,stop,-933.76,-1.04,9
+"Bot now: breakout, trailing exit",BTC/USD,LONG,daily,2023-10-16 13:30,2023-10-16 13:45,29222.54,27587.2,,27573.41,0.54901543,stop,-920.99,-1.04,0
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2023-10-18 05:00,2024-05-02 00:00,28772.03,27090.6,,58297.89,0.52824034,trend exit,15573.75,17.69,196
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2024-05-02 12:00,2024-06-15 00:00,58552.34,52353.7,,65971.3,0.16797768,trend exit,1235.76,1.19,43
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2024-06-16 07:00,2024-06-19 00:00,66316.64,62427.3,,65051.18,0.27195086,trend exit,-362.01,-0.35,2
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2024-06-20 07:30,2024-06-24 00:00,65890.57,62073.2,,63290.18,0.27614554,trend exit,-735.92,-0.7,3
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2024-06-25 14:30,2024-07-04 02:15,62144.21,58096.4,,58067.35,0.25834417,stop,-1068.76,-1.03,9
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2024-07-13 23:00,2024-08-05 00:00,59574.38,54996.1,,58344.45,0.22579356,trend exit,-291.02,-0.28,22
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2024-08-08 23:00,2024-09-06 07:30,62395.68,55457.0,,55429.27,0.14826058,stop,-1041.58,-1.02,29
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2024-09-20 04:15,2024-10-10 18:15,63972.72,59352.5,,59322.82,0.22093029,stop,-1040.92,-1.03,20
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2024-10-12 15:15,2025-02-25 00:00,63463.54,59337.1,,91980.64,0.24501798,trend exit,6968.16,6.95,135
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-02-27 11:00,2025-02-28 02:45,87031.14,79678.8,,79638.96,0.14680251,stop,-1097.42,-1.02,1
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-02-28 15:30,2025-04-07 00:00,84304.95,76346.9,,78139.64,0.13415865,trend exit,-838.03,-0.79,37
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-04-21 14:30,2025-06-06 00:00,88546.6,82177.8,,101485.19,0.16658987,trend exit,2139.61,2.03,45
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-06-06 13:45,2025-06-22 20:15,104481.51,98514.2,,98464.94,0.18173926,stop,-1111.89,-1.03,16
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-06-23 14:00,2025-08-02 00:00,102535.36,96295.4,,113264.53,0.17190852,trend exit,1825.89,1.72,39
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-08-03 11:00,2025-08-26 00:00,114012.42,108490.0,,110150.73,0.18992422,trend exit,-754.72,-0.73,22
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-08-27 14:30,2025-08-30 00:00,112319.03,105815.0,,108423.55,0.16665381,trend exit,-667.59,-0.62,2
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-08-30 08:30,2025-09-26 00:00,108860.2,102380.0,,109061.19,0.16618148,trend exit,15.29,0.01,26
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-09-28 20:30,2025-10-10 21:30,110683.16,105962.0,,105909.02,0.1930933,stop,-942.77,-1.05,12
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-10-12 16:15,2025-10-17 08:00,114069.38,105666.0,,105613.17,0.12683244,stop,-1086.45,-1.03,5
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-10-20 04:00,2025-11-04 17:00,110237.24,102207.0,,102155.9,0.13137983,stop,-1075.68,-1.03,15
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2026-08-20 08:15,2026-09-16 00:00,71266.71,67893.4,,75589.52,0.29117226,trend exit,1237.3,1.27,26
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2026-09-18 03:15,2026-10-19 18:30,77284.7,73123.3,,81725.08,0.2545355,still open,1110.0,1.06,31
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2021-08-09 18:45,2021-09-21 00:30,46381.78,41401.8,,41381.1,0.20174326,stop,-1017.71,-1.02,43
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2021-10-03 18:00,2021-10-21 11:45,48950.27,43731.3,,43709.43,0.19055071,stop,-1007.47,-1.02,18
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2021-10-23 11:45,2021-11-19 00:00,61705.1,48908.6,,56671.29,0.07674879,trend exit,-390.88,-0.4,26
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2023-01-13 21:45,2023-02-06 11:15,19770.56,18876.2,,18866.76,0.98765769,stop,-911.72,-1.04,24
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2023-02-07 18:00,2023-03-09 00:00,23294.3,20918.9,,21685.13,0.40898309,trend exit,-667.32,-0.69,29
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2023-03-14 05:15,2023-05-25 07:15,24793.2,22140.6,,22129.53,0.36362263,stop,-977.1,-1.02,72
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2023-06-21 01:15,2023-07-25 00:00,28890.38,25875.2,,29170.76,0.31667734000000003,trend exit,79.6,0.08,33
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2023-07-25 13:45,2023-08-17 21:00,29343.15,27539.9,,27526.13,0.53173119,stop,-981.29,-1.03,23
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2023-10-02 14:00,2023-10-11 02:45,28568.87,27109.4,,27095.85,0.6512992,stop,-977.51,-1.04,9
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,daily,2023-10-16 13:30,2023-10-16 13:45,29222.54,27587.2,,27573.41,0.5747368900000001,stop,-964.14,-1.04,0
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2023-10-18 05:00,2024-05-02 00:00,28772.03,27090.6,,58297.89,0.55298849,trend exit,16303.39,17.69,196
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,daily,2024-05-17 15:00,2024-06-15 00:00,66849.24,61457.1,,65971.3,0.20245174,trend exit,-191.19,-0.18,28
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2024-06-16 07:00,2024-06-19 00:00,66316.64,62427.3,,65051.18,0.28084122,trend exit,-373.84,-0.35,2
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2024-07-19 13:45,2024-08-03 19:30,64681.16,59945.5,,59915.53,0.22946038,stop,-1107.82,-1.03,15
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2024-08-25 22:15,2024-08-27 22:15,64686.23,59366.6,,59336.92,0.20202208,stop,-1093.21,-1.02,2
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2024-09-20 04:15,2024-10-10 18:15,63972.72,59352.5,,59322.82,0.2304168,stop,-1085.62,-1.03,20
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2024-10-12 15:15,2025-02-25 00:00,63463.54,59337.1,,91980.64,0.25553879,trend exit,7267.37,6.95,135
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2025-04-21 14:30,2025-06-06 00:00,88546.6,82177.8,,101485.19,0.17693468,trend exit,2272.47,2.03,45
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2025-06-06 13:45,2025-06-22 20:15,104481.51,98514.2,,98464.94,0.19302481,stop,-1180.93,-1.03,16
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2025-06-24 17:00,2025-08-02 00:00,106304.91,99678.6,,113264.53,0.17190186000000002,trend exit,1177.5,1.04,38
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2025-08-03 11:00,2025-08-26 00:00,114012.42,108490.0,,110150.73,0.20038107,trend exit,-796.27,-0.73,22
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2025-09-12 17:30,2025-09-25 17:15,115943.16,110417.0,,110361.79,0.19566999000000002,stop,-1114.25,-1.04,13
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2025-10-01 08:30,2025-10-10 21:15,115187.54,110379.0,,110323.81,0.19501794,stop,-970.5,-1.05,9
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2026-08-20 08:15,2026-09-16 00:00,71266.71,67893.4,,75589.52,0.31248026,trend exit,1327.85,1.27,26
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2026-09-18 03:15,2026-10-19 18:30,77284.7,73123.3,,81725.08,0.27316243,still open,1191.23,1.06,31
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2021-05-01 00:00,2021-05-03 00:15,57821.1,46522.72099999999,,56573.35,8.643041357659964,exit signal,-11278.69,-0.12,2
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2021-09-13 00:00,2021-09-14 00:15,46047.97,37050.0928,,44928.3,9.596547189839454,exit signal,-11181.47,-0.13,1
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2021-09-15 00:00,2021-09-21 00:15,47143.48,37931.535599999996,,42980.83,8.174520042806133,exit signal,-34396.04,-0.46,6
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2021-10-02 00:00,2021-11-04 00:15,48187.62,38771.649699999994,,62899.66,4.35854502932514,exit signal,63881.01,1.56,33
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2022-03-17 00:00,2022-04-12 00:15,41153.01,33111.614199999996,,39511.03,12.553989231589034,exit signal,-21119.62,-0.21,26
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2023-03-14 00:00,2023-04-07 00:15,24185.61,19459.6836,,28036.08,16.107404709191307,exit signal,61600.63,0.81,24
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2023-05-03 00:00,2023-05-09 00:15,28765.27,23144.466449999996,,28144.85,23.69138956290224,exit signal,-15372.63,-0.12,6
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2023-08-02 00:00,2023-08-03 00:15,29707.8,23902.831082693498,,29149.34,20.14586343385419,exit signal,-11843.69,-0.1,1
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2024-01-17 00:00,2024-01-18 00:15,43166.8,34731.906124999994,,42708.77,12.473005599245157,exit signal,-6248.6,-0.06,1
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2024-02-07 00:00,2024-03-29 00:15,43101.66,34679.49982,,70782.11,11.748801924291103,exit signal,324543.12,3.29,51
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2024-10-12 00:00,2024-12-01 00:15,62569.36,50343.162449999996,,96399.96,33.14883883576713,exit signal,1118810.41,2.77,50
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-01-03 00:00,2025-01-08 00:15,96970.22,78022.01317749999,,96828.31,77.02211287698769,exit signal,-18393.19,-0.01,5
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-01-16 00:00,2025-02-01 00:15,100578.12,80924.9268975,,102322.91,72.77822310756957,exit signal,119599.15,0.08,16
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-02-04 00:00,2025-02-05 00:15,101571.07,81723.84552499998,,97827.38,76.17641532578159,exit signal,-292775.1,-0.19,1
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-06-24 00:00,2025-07-02 00:15,105494.49,84880.62485,,105728.08,59.36808857009513,exit signal,7598.07,0.01,8
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-07-03 00:00,2025-07-24 00:15,108858.9,87587.6225,,118776.48,57.1819568567508,exit signal,560598.3,0.46,21
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-08-23 00:00,2025-08-24 00:15,117069.07,94193.5008,,115441.29,75.33126244513397,exit signal,-131379.68,-0.08,1
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-10-13 00:00,2025-10-15 00:15,115145.54,92645.84,,113055.33,70.77440230818907,exit signal,-156008.93,-0.1,2
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2026-05-24 00:00,2026-05-27 00:15,76704.59,61716.33366499999,,75793.98,95.76316198663493,exit signal,-94504.34,-0.07,3
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2026-08-03 00:00,2026-08-15 00:15,63526.69,51113.42589499999,,62952.54,107.67376809718263,exit signal,-68629.98,-0.05,12
+"5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2026-08-18 00:00,2026-09-13 00:15,64518.05,51911.0718175,,77226.5,98.78097681093395,exit signal,1248353.11,1.0,26
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2021-05-01 00:00,2021-05-03 00:15,57821.1,48449.12766666667,,56573.35,10.371649629191957,exit signal,-13534.42,-0.14,2
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2021-09-13 00:00,2021-09-14 00:15,46047.97,38584.25813333334,,44928.3,11.214352361254509,exit signal,-13066.47,-0.16,1
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2021-09-15 00:00,2021-09-21 00:15,47143.48,39502.1996,,42980.83,9.272365178257198,exit signal,-39015.45,-0.55,6
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2021-10-02 00:00,2021-11-04 00:15,48187.62,40377.10103333333,,62899.66,4.118391854955967,exit signal,60361.21,1.88,33
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2022-03-17 00:00,2022-04-12 00:15,41153.01,34482.69553333334,,39511.03,13.270250128767987,exit signal,-22324.59,-0.25,26
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2023-03-14 00:00,2023-04-07 00:15,24185.61,20265.4676,,28036.08,15.915687109367116,exit signal,60867.43,0.98,24
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2023-05-03 00:00,2023-05-09 00:15,28765.27,24102.82945,,28144.85,25.414928076517647,exit signal,-16490.98,-0.14,6
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2023-08-02 00:00,2023-08-03 00:15,29707.8,24892.596344916834,,29149.34,21.01204188090876,exit signal,-12352.91,-0.12,1
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2024-01-17 00:00,2024-01-18 00:15,43166.8,36170.080291666665,,42708.77,12.71900643609748,exit signal,-6371.84,-0.07,1
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2024-02-07 00:00,2024-03-29 00:15,43101.66,36115.50395333334,,70782.11,11.828978066445462,exit signal,326757.87,3.97,51
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2024-10-12 00:00,2024-12-01 00:15,62569.36,52427.76545,,96399.96,38.42035657658761,exit signal,1296730.03,3.34,50
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-01-03 00:00,2025-01-08 00:15,96970.22,81252.73836083333,,96828.31,102.16663749938436,exit signal,-24397.8,-0.02,5
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-01-16 00:00,2025-02-01 00:15,100578.12,84275.8555475,,102322.91,96.14440297831632,exit signal,157997.66,0.1,16
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-02-04 00:00,2025-02-05 00:15,101571.07,85107.85569166667,,97827.38,101.7194404683547,exit signal,-390946.72,-0.23,1
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-06-24 00:00,2025-07-02 00:15,105494.49,88395.35051666667,,105728.08,75.54277158571729,exit signal,9668.14,0.01,8
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-07-03 00:00,2025-07-24 00:15,108858.9,91214.43916666668,,118776.48,72.67163387180862,exit signal,712455.41,0.56,21
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-08-23 00:00,2025-08-24 00:15,117069.07,98093.85280000001,,115441.29,101.36973423003694,exit signal,-176791.45,-0.09,1
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-10-13 00:00,2025-10-15 00:15,115145.54,96482.10666666667,,113055.33,93.67271266423077,exit signal,-206483.97,-0.12,2
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2026-05-24 00:00,2026-05-27 00:15,76704.59,64271.87543166667,,75793.98,123.97211638964086,exit signal,-122342.49,-0.08,3
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2026-08-03 00:00,2026-08-15 00:15,63526.69,53229.92386166667,,62952.54,137.33172694921834,exit signal,-87533.61,-0.06,12
+"6x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2026-08-18 00:00,2026-09-13 00:15,64518.05,54060.598600833335,,77226.5,124.14306902395309,exit signal,1568868.74,1.21,26
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2021-05-01 00:00,2021-05-03 00:15,57821.1,49825.13242857142,,56573.35,12.10025790072395,exit signal,-15790.16,-0.16,2
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2021-09-13 00:00,2021-09-14 00:15,46047.97,39680.09051428571,,44928.3,12.73165611048526,exit signal,-14834.37,-0.18,1
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2021-09-15 00:00,2021-09-21 00:15,47143.48,40624.10245714286,,42980.83,10.208770473549135,exit signal,-42955.58,-0.65,6
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2021-10-02 00:00,2021-11-04 00:15,48187.62,41523.85198571428,,62899.66,3.625426626308216,exit signal,53136.06,2.21,33
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2022-03-17 00:00,2022-04-12 00:15,41153.01,35462.03934285714,,39511.03,12.921266636631803,exit signal,-21737.49,-0.3,26
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2023-03-14 00:00,2023-04-07 00:15,24185.61,20841.027599999998,,28036.08,14.415626610584402,exit signal,55130.65,1.15,24
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2023-05-03 00:00,2023-05-09 00:15,28765.27,24787.37445,,28144.85,24.836062539756963,exit signal,-16115.38,-0.16,6
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2023-08-02 00:00,2023-08-03 00:15,29707.8,25599.57153221921,,29149.34,19.94768740384171,exit signal,-11727.18,-0.14,1
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2024-01-17 00:00,2024-01-18 00:15,43166.8,37197.347553571424,,42708.77,11.79915512930813,exit signal,-5911.02,-0.08,1
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2024-02-07 00:00,2024-03-29 00:15,43101.66,37141.22119142857,,70782.11,10.832912663149559,exit signal,299243.05,4.65,51
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2024-10-12 00:00,2024-12-01 00:15,62569.36,53916.76759285714,,96399.96,39.80561102414548,exit signal,1343483.92,3.91,50
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-01-03 00:00,2025-01-08 00:15,96970.22,83560.39920607142,,96828.31,119.21127552276565,exit signal,-28468.13,-0.02,5
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-01-16 00:00,2025-02-01 00:15,100578.12,86669.37601178572,,102322.91,111.72590367687108,exit signal,183603.31,0.12,16
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-02-04 00:00,2025-02-05 00:15,101571.07,87525.00581071427,,97827.38,119.46624495745678,exit signal,-459154.48,-0.27,1
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-06-24 00:00,2025-07-02 00:15,105494.49,90905.86885,,105728.08,84.33914430209775,exit signal,10793.92,0.01,8
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-07-03 00:00,2025-07-24 00:15,108858.9,93805.02249999999,,118776.48,81.03387477739975,exit signal,794436.83,0.65,21
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-08-23 00:00,2025-08-24 00:15,117069.07,100879.81851428571,,115441.29,119.31478887281213,exit signal,-208088.09,-0.11,1
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-10-13 00:00,2025-10-15 00:15,115145.54,99222.29714285713,,113055.33,108.4130692265448,exit signal,-238976.33,-0.14,2
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2026-05-24 00:00,2026-05-27 00:15,76704.59,66097.26240785714,,75793.98,140.26963840564144,exit signal,-138425.77,-0.09,3
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2026-08-03 00:00,2026-08-15 00:15,63526.69,54741.70812357142,,62952.54,153.0552718240842,exit signal,-97555.61,-0.07,12
+"7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2026-08-18 00:00,2026-09-13 00:15,64518.05,55595.97487464286,,77226.5,136.29878935170632,exit signal,1722487.71,1.42,26
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2021-05-01 00:00,2021-05-03 00:15,57821.1,50857.136,,56573.35,13.828866172255943,exit signal,-18045.9,-0.19,2
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2021-09-13 00:00,2021-09-14 00:15,46047.97,40501.9648,,44928.3,14.148458437531735,exit signal,-16485.16,-0.21,1
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2021-09-15 00:00,2021-09-21 00:15,47143.48,41465.5296,,42980.83,10.991270121915228,exit signal,-46248.11,-0.74,6
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2021-10-02 00:00,2021-11-04 00:15,48187.62,42383.9152,,62899.66,2.9247726799188802,exit signal,42866.93,2.54,33
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2022-03-17 00:00,2022-04-12 00:15,41153.01,36196.5472,,39511.03,11.423997076431247,exit signal,-19218.63,-0.34,26
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2023-03-14 00:00,2023-04-07 00:15,24185.61,21272.6976,,28036.08,11.789010306620552,exit signal,45085.51,1.32,24
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2023-05-03 00:00,2023-05-09 00:15,28765.27,25300.783199999998,,28144.85,21.796302967053677,exit signal,-14142.97,-0.19,6
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2023-08-02 00:00,2023-08-03 00:15,29707.8,26129.802922696,,29149.34,16.992153247547858,exit signal,-9989.63,-0.16,1
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2024-01-17 00:00,2024-01-18 00:15,43166.8,37967.798,,42708.77,9.816196326987743,exit signal,-4917.62,-0.1,1
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2024-02-07 00:00,2024-03-29 00:15,43101.66,37910.50912,,70782.11,8.895384236516355,exit signal,245721.72,5.34,51
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2024-10-12 00:00,2024-12-01 00:15,62569.36,55033.519199999995,,96399.96,36.480214834898725,exit signal,1231248.08,4.5,50
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-01-03 00:00,2025-01-08 00:15,96970.22,85291.14484,,96828.31,121.49706713056646,exit signal,-29013.99,-0.02,5
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-01-16 00:00,2025-02-01 00:15,100578.12,88464.51636000001,,102322.91,113.40094092485924,exit signal,186355.96,0.14,16
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-02-04 00:00,2025-02-05 00:15,101571.07,89337.86839999999,,97827.38,122.53803920754531,exit signal,-470960.56,-0.32,1
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-06-24 00:00,2025-07-02 00:15,105494.49,92788.7576,,105728.08,82.01158148392344,exit signal,10496.03,0.01,8
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-07-03 00:00,2025-07-24 00:15,108858.9,95747.96,,118776.48,78.70047419396164,exit signal,771560.73,0.75,21
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-08-23 00:00,2025-08-24 00:15,117069.07,102969.2928,,115441.29,121.9787806608479,exit signal,-212734.16,-0.12,1
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-10-13 00:00,2025-10-15 00:15,115145.54,101277.44,,113055.33,108.95039680026515,exit signal,-240160.76,-0.16,2
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2026-05-24 00:00,2026-05-27 00:15,76704.59,67466.30264,,75793.98,137.73818849787682,exit signal,-135927.6,-0.11,3
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2026-08-03 00:00,2026-08-15 00:15,63526.69,55875.54632,,62952.54,148.00488583610385,exit signal,-94336.55,-0.08,12
+"8x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2026-08-18 00:00,2026-09-13 00:15,64518.05,56747.50708,,77226.5,129.81140800255776,exit signal,1640502.87,1.63,26
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2021-05-01 00:00,2021-05-03 00:15,57821.1,51659.80544444444,,56573.35,15.557474443787935,exit signal,-20301.64,-0.21,2
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2021-09-13 00:00,2021-09-14 00:15,46047.97,41141.20035555556,,44928.3,15.46475934239395,exit signal,-18018.86,-0.24,1
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2021-09-15 00:00,2021-09-21 00:15,47143.48,42119.97293333334,,42980.83,11.627398316588765,exit signal,-48924.76,-0.84,6
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2021-10-02 00:00,2021-11-04 00:15,48187.62,43052.85325555556,,62899.66,2.058870305064879,exit signal,30175.83,2.87,33
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2022-03-17 00:00,2022-04-12 00:15,41153.01,36767.831088888895,,39511.03,8.745708956575237,exit signal,-14712.94,-0.39,26
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2023-03-14 00:00,2023-04-07 00:15,24185.61,21608.440933333335,,28036.08,8.293133334945002,exit signal,31715.99,1.49,24
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2023-05-03 00:00,2023-05-09 00:15,28765.27,25700.10111666667,,28144.85,16.377905794315172,exit signal,-10627.13,-0.21,6
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2023-08-02 00:00,2023-08-03 00:15,29707.8,26542.205115289056,,29149.34,12.381750015320577,exit signal,-7279.19,-0.19,1
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2024-01-17 00:00,2024-01-18 00:15,43166.8,38567.037236111115,,42708.77,6.981759355605199,exit signal,-3497.65,-0.11,1
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2024-02-07 00:00,2024-03-29 00:15,43101.66,38508.84417555556,,70782.11,6.243648071165525,exit signal,172471.46,6.04,51
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2024-10-12 00:00,2024-12-01 00:15,62569.36,55902.10378333333,,96399.96,28.268416952043367,exit signal,954090.71,5.09,50
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-01-03 00:00,2025-01-08 00:15,96970.22,86637.28033305556,,96828.31,103.63620661740786,exit signal,-24748.74,-0.02,5
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-01-16 00:00,2025-02-01 00:15,100578.12,89860.73663083334,,102322.91,96.33172156087137,exit signal,158305.48,0.15,16
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-02-04 00:00,2025-02-05 00:15,101571.07,90747.87263611112,,97827.38,105.18143199132358,exit signal,-404252.48,-0.36,1
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-06-24 00:00,2025-07-02 00:15,105494.49,94253.22662777778,,105728.08,66.53594712718335,exit signal,8515.43,0.01,8
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-07-03 00:00,2025-07-24 00:15,108858.9,97259.13361111112,,118776.48,63.7709067203027,exit signal,625194.8,0.85,21
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-08-23 00:00,2025-08-24 00:15,117069.07,104594.43946666668,,115441.29,103.78185493874714,exit signal,-180998.25,-0.14,1
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2025-10-13 00:00,2025-10-15 00:15,115145.54,102875.88444444445,,113055.33,91.09474878354493,exit signal,-200801.33,-0.18,2
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2026-05-24 00:00,2026-05-27 00:15,76704.59,68531.11170944445,,75793.98,112.46671433574846,exit signal,-110988.32,-0.12,3
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2026-08-03 00:00,2026-08-15 00:15,63526.69,56757.42047277778,,62952.54,118.98136456895644,exit signal,-75837.31,-0.09,12
+"9x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)",BTC/USD,LONG,daily,2026-08-18 00:00,2026-09-13 00:15,64518.05,57643.14323972223,,77226.5,102.7559057198458,exit signal,1298586.62,1.85,26
