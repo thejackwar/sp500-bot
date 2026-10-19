@@ -15,6 +15,10 @@ How a strategy is tested (backtest.py):
       trail_days  sell when the price falls below the lowest low of this many days (None = off)
       max_days    sell after this many trading days (None = off)
       exits(d)    optional: return True on days whose close gives a sell signal (sold next open)
+  - entry_level(d) optional, instead of entries(d): buy DURING the day. Return one price per day
+    (NaN = no trade that day), using only what is known when that day starts (its Open, and
+    yesterday's values via .shift(1)). The backtest buys at the next 15-min candle after the first
+    15-min close above that day's level (see btc_vol_breakout.py).
   - rank(d) optional: when more stocks signal on the same day than there is room for, the
     highest rank goes first.
 

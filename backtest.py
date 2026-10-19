@@ -851,16 +851,47 @@ def load_strategies(only=None):
     return out
 
 
-def strategy_signals(mod, daily, syms, days, first_slot):
+def strategy_signals(mod, daily, syms, days, first_slot, intraday=None, slots=None):
     """Buy signals of one strategy file, as rows the simulator understands, plus its exit matrix.
-    A signal on a day's close buys at the next trading day's open."""
+    A signal on a day's close buys at the next trading day's open.
+    Strategies with entry_level(d) instead buy DURING the day: the first 15-min candle that closes
+    above that day's level, bought at the next candle's open (like the live bot checking every 15 min)."""
     from strategies import tools
     rows, exit_cols = [], []
     for col, sym in enumerate(syms):
         d = daily[sym][["Open", "High", "Low", "Close"]].copy()
-        ent = pd.Series(mod.entries(d), index=d.index).fillna(False).astype(bool)
         atr = tools.atr(d)
         score = pd.Series(mod.rank(d), index=d.index) if hasattr(mod, "rank") else pd.Series(0.0, index=d.index)
+        if hasattr(mod, "entry_level"):
+            if hasattr(mod, "exits"):
+                ex = pd.Series(mod.exits(d), index=d.index).reindex(days).fillna(False).astype(bool)
+                exit_cols.append(ex.values)
+            if intraday is None or sym not in intraday:
+                continue
+            level = pd.Series(mod.entry_level(d), index=d.index)
+            h = intraday[sym]
+            hday = h.index.tz_convert("UTC").tz_localize(None).normalize()
+            above = h["Close"].values > level.reindex(hday).values        # NaN level = no trade that day
+            idx = np.flatnonzero(above)
+            idx = idx[~pd.Index(hday[idx]).duplicated()]                  # first candle of each day only
+            if not len(idx):
+                continue
+            at = slots.get_indexer(h.index[idx]) + 1                      # buy at the next candle's open
+            prev_atr, prev_score = atr.shift(1), score.shift(1)           # known before the day started
+            for j, a in zip(idx, at):
+                if a <= 0 or a >= len(slots):
+                    continue
+                dte = hday[j]
+                if slots[a].tz_convert("UTC").tz_localize(None).normalize() != dte:
+                    continue                                              # crossed in the day's last candle
+                if dte not in prev_atr.index or not np.isfinite(prev_atr.at[dte]):
+                    continue
+                sc = prev_score.at[dte]
+                rows.append({"slot": int(a), "col": col, "sym": sym, "dl": True, "ds": False,
+                             "il": False, "is": False, "atr": float(prev_atr.at[dte]),
+                             "score": float(sc) if pd.notna(sc) else 0.0})
+            continue
+        ent = pd.Series(mod.entries(d), index=d.index).fillna(False).astype(bool)
         dates = d.index[ent.values]
         pos = days.get_indexer(dates)
         ok = (pos >= 0) & (pos + 1 < len(days))
@@ -1328,7 +1359,7 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
             if MARKET not in getattr(mod, "MARKETS", ("stocks", "crypto")):
                 continue                               # a strategy made for the other market
             try:
-                s_sig, s_exit = strategy_signals(mod, daily, syms, days, first_slot)
+                s_sig, s_exit = strategy_signals(mod, daily, syms, days, first_slot, intraday, slots)
             except Exception as e:
                 print(f"Strategy {name} failed: {e}", flush=True)
                 continue
@@ -1422,7 +1453,7 @@ def main():
     mode = os.environ.get("TEST", "strategies")
     runs = int(os.environ.get("RUNS") or RUNS)
     market = os.environ.get("MARKET", "stocks")
-    global PATTERN_TF, NEED_INTRADAY_VOLUME, BOT_TF
+    global PATTERN_TF, NEED_INTRADAY_VOLUME, BOT_TF, UNIVERSE, FOOTER
     BOT_TF = os.environ.get("BOT_TF", "15m") if mode != "patterns" else "15m"
     PATTERN_TF = os.environ.get("PATTERN_TF", "daily") if mode == "patterns" else "daily"
     NEED_INTRADAY_VOLUME = PATTERN_TF != "daily" or mode == "bot versions"   # volume versions need it
@@ -1437,7 +1468,14 @@ def main():
     if market == "crypto":
         import crypto
         use_crypto()
-        tickers = crypto.top_coins()
+        coins = os.environ.get("COINS", "").replace("+", " ").replace(",", " ").upper().split()
+        if coins and coins != ["TOP", "10"]:                       # e.g. COINS="BTC" or "BTC ETH"
+            tickers = [crypto.to_alpaca(c) for c in coins]
+            UNIVERSE = " + ".join(coins) + " only"
+            FOOTER = FOOTER.replace("Today's top 10 coins only (coins that dropped out aren't tested, which flatters "
+                                    "results); ", f"{UNIVERSE} (no coin-picking bias); ")
+        else:
+            tickers = crypto.top_coins()
         print(f"Crypto backtest {start:%Y-%m-%d} → {end:%Y-%m-%d}, {len(tickers)} coins", flush=True)
         daily, intraday = crypto.history(tickers, start, end, CACHE_DIR)
         if not intraday:
