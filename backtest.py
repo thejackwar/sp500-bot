@@ -497,6 +497,7 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
         sign = 1 if long_ else -1
         em = exit_m.get(p["dir"]) if isinstance(exit_m, dict) else exit_m    # "both" strategies: per direction
         per_slot = isinstance(exit_m, dict) and exit_m.get("per_slot")       # TF strategies: per 15-min slot
+        lev = cfg.get("leverage")                                             # leveraged: the stop is liquidation
         start, step = s, 1500
         while start < n_slots:
             end = min(n_slots, start + step)
@@ -544,11 +545,11 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
                 if c2[k]:
                     return j, 0, o[k] * (1 - sign * SLIPPAGE), "trend exit"
                 if c3[k]:
-                    return j, 1, o[k] * (1 - sign * SLIPPAGE), "stop (gap)"
+                    return j, 1, o[k] * (1 - sign * SLIPPAGE), "liquidated (gap)" if lev else "stop (gap)"
                 if c4[k]:
                     return j, 1, o[k], "target (gap)"
                 if c5[k]:
-                    return j, 1, stop * (1 - sign * SLIPPAGE), "stop"
+                    return j, 1, stop * (1 - sign * SLIPPAGE), "liquidated" if lev else "stop"
                 return j, 1, tgt, "target"
             start = end
             step *= 4
@@ -599,6 +600,9 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
                     plan["target"] = _round(price + sign * cfg["target_r"] * dist) if cfg["target_r"] else None
                 if cfg.get("size"):                    # fixed share of the account (strategy SIZE), not 1% risk
                     plan["qty"] = min(cfg["size"] * equity, bp) / (price * (1 + SLIPPAGE) * (1 + FEE))
+                    if cfg.get("leverage"):            # futures, whole account as margin: liquidated when the
+                        L = cfg["leverage"]            # loss eats the margin (less 0.5% maintenance margin),
+                        plan["stop"] = price * (1 - sign * (1 / L - 0.005))   # judged on 15-min lows/highs
                     plan["risk"] = plan["qty"] * abs(price - plan["stop"])
                 fill = price * (1 + sign * SLIPPAGE)
                 cash -= sign * plan["qty"] * fill + FEE * plan["qty"] * fill
@@ -614,9 +618,14 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
         if s in exits_at:
             run_exits(s, 1)
         if last_of_day[s]:
-            if cash < 0:                               # borrowed money pays interest every calendar day
-                n_days = (day[s] - prev_day).days if prev_day is not None else 1
+            n_days = (day[s] - prev_day).days if prev_day is not None else 1
+            if cash < 0 and not cfg.get("funding"):    # borrowed money pays interest every calendar day
                 fee = -cash * MARGIN_RATE * n_days / 360
+                cash -= fee
+                interest += fee
+            if cfg.get("funding") and pos:             # perpetual futures: longs pay funding on the whole
+                net = sum((1 if p["dir"] == "LONG" else -1) * p["qty"] * Cf[s, c] for c, p in pos.items())
+                fee = net * cfg["funding"] * n_days / 365      # position (shorts receive it)
                 cash -= fee
                 interest += fee
             prev_day = day[s]
@@ -1456,6 +1465,9 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
             if ex["trail_days"]:
                 extra.setdefault("low", {})[ex["trail_days"]], extra.setdefault("high", {})[ex["trail_days"]] = \
                     lows_highs(ex["trail_days"])
+            if getattr(mod, "LEVERAGE", None):        # perpetual futures with leverage (LEVERAGE = 1, 2, 3, 5 ...)
+                L = mod.LEVERAGE
+                cfg.update(margin=L, size=L, leverage=L, funding=getattr(mod, "FUNDING", 0.1095))
             if getattr(mod, "TF", None):
                 cfg["once_per_day"] = False            # intraday-candle strategies can trade several times a day
             jobs.append((name, getattr(mod, "NAME", name), getattr(mod, "SHORT", name[:7]), s_sig, cfg))
