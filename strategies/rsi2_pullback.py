@@ -2,6 +2,7 @@
 sell when they bounce back. Many small wins, holds only a few days."""
 from strategies import tools
 
+MARKETS = ("stocks",)          # lost money on crypto in every test (fees eat the small wins)
 NAME = "RSI(2) pullback: buy dips in up-trends"
 SHORT = "RSI2"
 EXIT = {"stop_atr": 3.0, "target_r": None, "trail_days": None, "max_days": 10}

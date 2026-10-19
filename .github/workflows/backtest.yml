@@ -33,6 +33,10 @@ on:
         type: choice
         options: ["top 10", "BTC", "BTC ETH"]
         default: "top 10"
+      only:
+        description: "Strategies test only: strategy files whose name starts with this (e.g. early); empty = all"
+        type: string
+        default: ""
       runs:
         description: "Start dates per version (more = more reliable, slower)"
         type: choice
@@ -75,6 +79,7 @@ jobs:
           PATTERN_TF: ${{ inputs.pattern_candles }}
           BOT_TF: ${{ inputs.bot_candles }}
           COINS: ${{ inputs.coins }}
+          ONLY: ${{ inputs.only }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ inputs.market == 'crypto' && secrets.TELEGRAM_CHAT_ID_CRYPTO || secrets.TELEGRAM_CHAT_ID }}
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
@@ -103,7 +108,8 @@ jobs:
           [ "${{ inputs.test }}" != "patterns" ] && [ "${{ inputs.bot_candles }}" = "1h" ] && tf="-1h"
           yrs="${{ inputs.years }}"; [ "$tf" = "-15m" ] && [ "$yrs" -gt 5 ] && yrs=5
           coins=""; [ "${{ inputs.market }}" = "crypto" ] && [ "${{ inputs.coins }}" != "top 10" ] && coins="-$(echo '${{ inputs.coins }}' | tr 'A-Z ' 'a-z-')"
-          dir="reports/backtest/${{ inputs.market }}${coins}-$(echo '${{ inputs.test }}' | tr ' ' '-')${tf}-${yrs}y"
+          only=""; [ -n "${{ inputs.only }}" ] && [ "${{ inputs.test }}" = "strategies" ] && only="-$(echo '${{ inputs.only }}' | tr 'A-Z ' 'a-z-')"
+          dir="reports/backtest/${{ inputs.market }}${coins}-$(echo '${{ inputs.test }}' | tr ' ' '-')${only}${tf}-${yrs}y"
           mkdir -p "$dir"
           cp backtest-results/summary.txt backtest-results/trades.csv "$dir"/
           for f in details.txt patterns.csv equity.csv; do [ -f "backtest-results/$f" ] && cp "backtest-results/$f" "$dir"/; done

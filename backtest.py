@@ -891,6 +891,20 @@ def strategy_signals(mod, daily, syms, days, first_slot, intraday=None, slots=No
                              "il": False, "is": False, "atr": float(prev_atr.at[dte]),
                              "score": float(sc) if pd.notna(sc) else 0.0})
             continue
+        if hasattr(mod, "setups"):                     # own stop + target per signal (strategies/_setups.py)
+            st = mod.setups(d)
+            pos = days.get_indexer(st.index)
+            for (dte, row), p in zip(st.iterrows(), pos):
+                if p < 0 or p + 1 >= len(days):
+                    continue
+                rows.append({"slot": first_slot[p + 1], "col": col, "sym": sym, "dl": True, "ds": False,
+                             "il": False, "is": False, "atr": float(atr.at[dte]), "score": 0.0,
+                             "stop": float(row["stop"]), "target": float(row["target"]),
+                             "pattern": str(row.get("name", "setup"))})
+            if hasattr(mod, "exits"):
+                ex = pd.Series(mod.exits(d), index=d.index).reindex(days).fillna(False).astype(bool)
+                exit_cols.append(ex.values)
+            continue
         ent = pd.Series(mod.entries(d), index=d.index).fillna(False).astype(bool)
         dates = d.index[ent.values]
         pos = days.get_indexer(dates)
@@ -902,7 +916,12 @@ def strategy_signals(mod, daily, syms, days, first_slot, intraday=None, slots=No
         if hasattr(mod, "exits"):
             ex = pd.Series(mod.exits(d), index=d.index).reindex(days).fillna(False).astype(bool)
             exit_cols.append(ex.values)
-    sig = pd.DataFrame(rows, columns=["slot", "col", "sym", "dl", "ds", "il", "is", "atr", "score"])
+    cols = ["slot", "col", "sym", "dl", "ds", "il", "is", "atr", "score"]
+    if hasattr(mod, "setups"):
+        cols += ["stop", "target", "pattern"]
+    sig = pd.DataFrame(rows, columns=cols)
+    sig = sig.astype({"slot": int, "col": int, "dl": bool, "ds": bool, "il": bool, "is": bool,
+                      "atr": float, "score": float})             # also when there are no signals
     return sig, (np.column_stack(exit_cols) if exit_cols else None)
 
 
@@ -1355,7 +1374,11 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
         tools.MARKET = spy["Close"] if spy is not None else None      # for tools.market_up()
         tools.MARKET_MA = FILTER_MA
         first_slot = np.flatnonzero(np.r_[True, slot_day[1:] != slot_day[:-1]])
-        for name, mod in (strategies if strategies is not None else load_strategies()).items():
+        only = os.environ.get("ONLY", "").split()     # e.g. ONLY="early" = only strategy files starting with "early"
+        mods = strategies if strategies is not None else load_strategies()
+        if only:
+            mods = {k: v for k, v in mods.items() if any(k.startswith(o) for o in only)}
+        for name, mod in mods.items():
             if MARKET not in getattr(mod, "MARKETS", ("stocks", "crypto")):
                 continue                               # a strategy made for the other market
             try:
@@ -1365,8 +1388,9 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
                 continue
             ex = {"stop_atr": T.STOP_ATR, "target_r": None, "trail_days": None, "max_days": None,
                   **getattr(mod, "EXIT", {})}
+            to_target = ex.pop("to_target", False)      # setups(): sell at the setup's own target
             cfg = {"kinds": ("daily",), "shorts": False, "exit": "custom", "margin": T.MAX_INVESTED,
-                   "exit_matrix": s_exit, **ex}
+                   "exit_matrix": s_exit, "pattern_target": to_target, **ex}
             if ex["trail_days"]:
                 extra.setdefault("low", {})[ex["trail_days"]], extra.setdefault("high", {})[ex["trail_days"]] = \
                     lows_highs(ex["trail_days"])
