@@ -18,19 +18,19 @@ max drop -17.2% (worst -17.2%) · profit factor 5.77
 ~21 trades, win 38%, avg +0.08R, worst streak 4, hold 14d, invested 14%, interest ~$17,986
 
 <b>2x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)</b>
-+nan%/yr (+nan% to +nan%), beat BTC in 0/10 runs
-max drop -100.3% (worst -100.3%) · profit factor 0.00
-~4 trades, win 0%, avg -0.32R, worst streak 4, hold 7d, invested 3%, interest ~$1,488
++42.4%/yr (+41.7% to +43.2%), beat BTC in 10/10 runs
+max drop -30.5% (worst -30.5%) · profit factor 5.29
+~21 trades, win 38%, avg +0.16R, worst streak 4, hold 14d, invested 26%, interest ~$55,416
 
 <b>3x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)</b>
-+nan%/yr (+nan% to +nan%), beat BTC in 0/10 runs
-max drop -100.4% (worst -100.4%) · profit factor 0.00
-~4 trades, win 0%, avg -0.36R, worst streak 4, hold 7d, invested 4%, interest ~$1,974
++57.2%/yr (+56.2% to +58.3%), beat BTC in 10/10 runs
+max drop -41.0% (worst -41.0%) · profit factor 4.80
+~21 trades, win 38%, avg +0.23R, worst streak 4, hold 14d, invested 35%, interest ~$114,367
 
 <b>5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)</b>
-+nan%/yr (+nan% to +nan%), beat BTC in 0/10 runs
-max drop -100.6% (worst -100.6%) · profit factor 0.00
-~4 trades, win 0%, avg -0.43R, worst streak 4, hold 7d, invested 5%, interest ~$2,522
++76.3%/yr (+74.8% to +77.8%), beat BTC in 10/10 runs
+max drop -60.4% (worst -60.4%) · profit factor 4.01
+~21 trades, win 38%, avg +0.39R, worst streak 4, hold 14d, invested 52%, interest ~$267,853
 
 <b>Your rule (50-day rising) + close below the 50-day, lower high after 1 day</b>
 +25.5%/yr (+25.1% to +26.0%), beat BTC in 10/10 runs
