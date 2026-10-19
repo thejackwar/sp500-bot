@@ -1,0 +1,155 @@
+version,symbol,direction,signal,entry_time,exit_time,entry,stop,target,exit,qty,result,pnl,R,days_held
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2021-08-09 18:45,2021-09-21 00:30,46381.78,41401.8,,41381.1,0.20174326,stop,-1053.12,-1.05,43
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2021-10-01 10:30,2021-10-21 11:45,46507.6,41175.4,,41154.81,0.18637852,stop,-1038.49,-1.05,20
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2021-10-23 11:45,2021-11-19 00:00,61705.1,48908.6,,56671.29,0.07669675000000001,trend exit,-408.77,-0.42,26
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2021-11-19 14:15,2021-11-27 00:00,58007.46,51044.2,,53636.17,0.14060454,trend exit,-653.87,-0.67,7
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2021-11-27 08:15,2021-12-04 05:15,55085.21,48725.0,,48700.64,0.15293063,stop,-1016.08,-1.05,7
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2021-12-06 22:00,2022-01-05 22:45,50179.98,42747.7,,42726.33,0.12937309,stop,-994.35,-1.04,30
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2023-01-13 21:45,2023-02-06 11:15,19770.56,18876.2,,18866.76,0.95983865,stop,-960.21,-1.13,24
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2023-02-07 18:00,2023-03-09 00:00,23294.3,20918.9,,21685.13,0.3971496,trend exit,-683.74,-0.73,29
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2023-03-12 17:30,2023-05-26 01:45,20853.63,18703.9,,18694.55,0.43560814000000003,stop,-983.58,-1.06,75
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2023-05-26 14:30,2023-05-27 01:30,26804.8,23018.8,,23007.29,0.24441347,stop,-958.6,-1.04,1
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2023-05-28 00:45,2023-05-28 01:30,27032.07,22600.8,,22589.5,0.20654964,stop,-943.23,-1.03,0
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2023-05-30 10:45,2023-07-25 00:00,28009.02,22827.7,,29170.76,0.17476293,trend exit,178.05,0.2,55
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2023-07-25 13:45,2023-08-17 21:00,29343.15,27539.9,,27526.13,0.50588252,stop,-991.12,-1.1,23
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2023-10-02 14:00,2023-10-11 02:45,28568.87,27109.4,,27095.85,0.61923991,stop,-998.33,-1.12,9
+"Bot now: breakout, trailing exit",BTC/USD,LONG,daily,2023-10-16 13:30,2023-10-16 13:45,29222.54,27587.2,,27573.41,0.54602091,stop,-977.99,-1.11,0
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2023-10-18 05:00,2024-05-02 00:00,28772.03,27090.6,,58297.89,0.52498707,trend exit,15386.42,17.58,196
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2024-05-02 12:00,2024-06-15 00:00,58552.34,52353.7,,65971.3,0.16679498,trend exit,1185.52,1.15,43
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2024-06-16 07:00,2024-06-19 00:00,66316.64,62427.3,,65051.18,0.26992837000000003,trend exit,-430.23,-0.41,2
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2024-06-20 07:30,2024-06-24 00:00,65890.57,62073.2,,63290.18,0.27390445,trend exit,-800.72,-0.77,3
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2024-06-25 14:30,2024-07-04 02:15,62144.21,58096.4,,58067.35,0.25607138,stop,-1120.92,-1.09,9
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2024-07-13 23:00,2024-08-05 00:00,59574.38,54996.1,,58344.45,0.22367178000000001,trend exit,-341.04,-0.34,22
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2024-08-08 23:00,2024-09-06 07:30,62395.68,55457.0,,55429.27,0.14679101,stop,-1065.85,-1.05,29
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2024-09-20 04:15,2024-10-10 18:15,63972.72,59352.5,,59322.82,0.21866502000000002,stop,-1084.17,-1.08,20
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2024-10-12 15:15,2025-02-25 00:00,63463.54,59337.1,,91980.64,0.24237405,trend exit,6817.62,6.87,135
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-02-27 11:00,2025-02-28 02:45,87031.14,79678.8,,79638.96,0.1451153,stop,-1133.18,-1.07,1
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-02-28 15:30,2025-04-07 00:00,84304.95,76346.9,,78139.64,0.13255565,trend exit,-871.08,-0.83,37
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-04-21 14:30,2025-06-06 00:00,88546.6,82177.8,,101485.19,0.16453128,trend exit,2050.64,1.97,45
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-06-06 13:45,2025-06-22 20:15,104481.51,98514.2,,98464.94,0.17938774,stop,-1170.31,-1.1,16
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-06-23 14:00,2025-08-02 00:00,102535.36,96295.4,,113264.53,0.16956654000000002,trend exit,1727.83,1.65,39
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-08-03 11:00,2025-08-26 00:00,114012.42,108490.0,,110150.73,0.18720837,trend exit,-827.85,-0.81,22
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-08-27 14:30,2025-08-30 00:00,112319.03,105815.0,,108423.55,0.16414055,trend exit,-729.99,-0.69,2
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-08-30 08:30,2025-09-26 00:00,108860.2,102380.0,,109061.19,0.16356258,trend exit,-56.23,-0.05,26
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-09-28 20:30,2025-10-10 21:30,110683.16,105962.0,,105909.02,0.18992141,stop,-1009.55,-1.14,12
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-10-12 16:15,2025-10-17 08:00,114069.38,105666.0,,105613.17,0.12465043,stop,-1122.53,-1.08,5
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-10-20 04:00,2025-11-04 17:00,110237.24,102207.0,,102155.9,0.12905092,stop,-1111.43,-1.08,15
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2026-08-20 08:15,2026-09-16 00:00,71266.71,67893.4,,75589.52,0.28585686,trend exit,1130.76,1.19,26
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2026-09-18 03:15,2026-10-19 11:00,77284.7,73123.3,,82332.52,0.24968527000000001,still open,1160.73,1.13,31
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2021-08-09 18:45,2021-09-21 00:30,46381.78,41401.8,,41381.1,0.20174326,stop,-1053.12,-1.05,43
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2021-10-03 18:00,2021-10-21 11:45,48950.27,43731.3,,43709.43,0.19048254,stop,-1042.41,-1.05,18
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2021-10-23 11:45,2021-11-19 00:00,61705.1,48908.6,,56671.29,0.07669368,trend exit,-408.76,-0.42,26
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2023-01-13 21:45,2023-02-06 11:15,19770.56,18876.2,,18866.76,0.98676473,stop,-987.15,-1.13,24
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2023-02-07 18:00,2023-03-09 00:00,23294.3,20918.9,,21685.13,0.40829073,trend exit,-702.92,-0.73,29
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2023-03-14 05:15,2023-05-25 07:15,24793.2,22140.6,,22129.53,0.36286794,stop,-1009.13,-1.05,72
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2023-06-21 01:15,2023-07-25 00:00,28890.38,25875.2,,29170.76,0.3159066,trend exit,42.72,0.05,33
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2023-07-25 13:45,2023-08-17 21:00,29343.15,27539.9,,27526.13,0.5302319600000001,stop,-1038.83,-1.1,23
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2023-10-02 14:00,2023-10-11 02:45,28568.87,27109.4,,27095.85,0.64904554,stop,-1046.38,-1.12,9
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,daily,2023-10-16 13:30,2023-10-16 13:45,29222.54,27587.2,,27573.41,0.57230232,stop,-1025.07,-1.11,0
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2023-10-18 05:00,2024-05-02 00:00,28772.03,27090.6,,58297.89,0.55025607,trend exit,16127.01,17.58,196
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,daily,2024-05-17 15:00,2024-06-15 00:00,66849.24,61457.1,,65971.3,0.20127257,trend exit,-243.54,-0.23,28
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2024-06-16 07:00,2024-06-19 00:00,66316.64,62427.3,,65051.18,0.27906683,trend exit,-444.8,-0.41,2
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2024-07-19 13:45,2024-08-03 19:30,64681.16,59945.5,,59915.53,0.22785473,stop,-1156.85,-1.08,15
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2024-08-25 22:15,2024-08-27 22:15,64686.23,59366.6,,59336.92,0.20050104,stop,-1134.71,-1.07,2
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2024-09-20 04:15,2024-10-10 18:15,63972.72,59352.5,,59322.82,0.22857358,stop,-1133.3,-1.08,20
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2024-10-12 15:15,2025-02-25 00:00,63463.54,59337.1,,91980.64,0.25335696,trend exit,7126.55,6.87,135
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2025-04-21 14:30,2025-06-06 00:00,88546.6,82177.8,,101485.19,0.17529944,trend exit,2184.85,1.97,45
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2025-06-06 13:45,2025-06-22 20:15,104481.51,98514.2,,98464.94,0.19112823,stop,-1246.91,-1.1,16
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2025-06-24 17:00,2025-08-02 00:00,106304.91,99678.6,,113264.53,0.17009481,trend exit,1090.43,0.98,38
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2025-08-03 11:00,2025-08-26 00:00,114012.42,108490.0,,110150.73,0.19814354,trend exit,-876.21,-0.81,22
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2025-09-12 17:30,2025-09-25 17:15,115943.16,110417.0,,110361.79,0.19333176,stop,-1188.44,-1.12,13
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2025-10-01 08:30,2025-10-10 21:15,115187.54,110379.0,,110323.81,0.19253549,stop,-1044.99,-1.14,9
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2026-08-20 08:15,2026-09-16 00:00,71266.71,67893.4,,75589.52,0.30825878,trend exit,1219.37,1.19,26
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2026-09-18 03:15,2026-10-19 11:00,77284.7,73123.3,,82332.52,0.2692525,still open,1251.7,1.13,31
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2021-07-22 00:00,2021-07-31 00:00,32171.51,28515.1,42235.1,42235.1,0.2747027,target,2713.4,2.71,8
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2021-07-31 00:00,2021-09-29 00:15,42245.8,37240.0,57225.9,40997.5,0.20605888,time exit,-300.11,-0.29,60
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2021-10-01 00:00,2021-10-06 13:15,43846.91,40119.1,54959.5,54959.5,0.27635445000000003,target,3002.75,2.93,5
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2021-10-26 00:00,2021-11-18 17:15,63105.28,56982.4,81347.2,56953.91,0.17305999,stop,-1116.5,-1.06,23
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2022-01-12 00:00,2022-01-21 01:45,42766.03,40130.8,52363.0,40110.73,0.39902034000000003,stop,-1142.19,-1.1,9
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2022-02-08 00:00,2022-02-17 21:15,43900.07,40602.6,52363.0,40582.3,0.31492875,stop,-1111.38,-1.08,9
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Fibonacci 50-62%,2022-02-20 00:00,2022-02-20 08:30,40131.3,38385.9,43601.3,38366.71,0.50881484,stop,-997.7,-1.14,0
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2022-03-02 00:00,2022-03-04 01:00,44460.53,41526.8,52363.0,41506.04,0.34706929000000003,stop,-1100.0,-1.09,2
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2022-03-28 00:00,2022-04-06 17:15,46866.48,43494.5,52363.0,43472.75,0.29847802,stop,-1080.36,-1.08,9
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2022-04-10 00:00,2022-04-11 10:15,42780.62,41255.9,45272.0,41235.27,0.46243994,stop,-811.76,-1.17,1
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Fibonacci 50-62%,2022-08-21 00:00,2022-08-27 05:15,21153.44,19974.9,45548.1,19964.91,0.8395452600000001,stop,-1084.13,-1.11,6
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Fibonacci 50-62%,2022-09-10 00:00,2022-09-19 02:30,21376.65,18827.9,28960.1,18818.49,0.38207462000000003,stop,-1015.8,-1.05,9
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2022-09-20 00:00,2022-11-08 19:45,19548.43,17774.8,24837.1,17765.91,0.54399827,stop,-1020.43,-1.06,49
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Fibonacci 50-62%,2022-12-30 00:00,2023-01-12 01:00,16634.47,16300.7,18169.6,18169.6,1.1420048600000001,target,1653.76,4.45,13
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2023-01-13 00:00,2023-01-20 21:00,18853.36,17709.3,22244.2,22244.2,0.8512849,target,2799.1,2.9,7
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2023-03-12 00:00,2023-03-13 15:15,20622.61,19347.9,24418.2,24418.2,0.78604427,target,2894.99,2.91,1
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2023-03-15 00:00,2023-03-30 02:45,24740.78,23284.0,29072.2,29072.2,0.7081514,target,2972.03,2.91,15
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Fibonacci 50-62%,2023-05-26 00:00,2023-05-26 01:45,26510.4,20470.3,44571.1,20460.06,0.17464445,stop,-1077.17,-1.02,0
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Fibonacci 50-62%,2023-05-28 00:00,2023-07-27 00:15,26903.55,17890.4,53878.0,29336.68,0.11575751000000001,time exit,265.38,0.25,60
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Fibonacci 50-62%,2023-09-13 00:00,2023-10-21 13:15,25845.06,24495.8,30374.0,30374.0,0.78154182,target,3429.71,3.28,38
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Fibonacci 50-62%,2023-10-26 00:00,2023-12-04 05:00,34505.11,32364.6,40931.3,40931.3,0.50806118,target,3169.08,2.94,39
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2024-01-03 00:00,2024-01-03 12:15,44996.48,43044.4,50713.0,43022.88,0.49380838,stop,-1083.24,-1.14,0
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2024-01-11 00:00,2024-01-12 22:15,46725.57,34422.7,83426.9,34405.49,0.08954729,stop,-1121.39,-1.02,1
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2024-02-09 00:00,2024-02-14 09:00,45344.3,43487.4,50719.8,50719.8,0.48029173000000003,target,2466.46,2.8,5
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Fibonacci 50-62%,2024-06-23 00:00,2024-06-24 00:15,64292.23,63012.3,72092.3,62980.79,0.34641871,stop,-564.53,-1.31,1
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Fibonacci 50-62%,2024-07-01 00:00,2024-07-03 10:45,62735.0,59647.0,72092.3,59617.18,0.35321698,stop,-1209.31,-1.12,2
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2024-07-17 00:00,2024-08-02 23:00,65167.72,61165.4,72432.6,61134.82,0.27591049,stop,-1199.84,-1.1,16
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2024-09-25 00:00,2024-10-01 17:30,64328.25,61684.1,72432.6,61653.26,0.33697476,stop,-1007.54,-1.14,6
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2024-10-16 00:00,2024-10-29 16:15,67146.16,63703.9,72432.6,72432.6,0.31484749,target,1554.56,1.45,13
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2024-10-30 00:00,2024-11-03 02:15,72770.76,68680.6,84907.7,68646.26,0.26857972,stop,-1202.71,-1.1,4
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2025-04-24 00:00,2025-05-08 21:30,93687.28,89679.2,102857.0,102857.0,0.22997564,target,1995.81,2.19,14
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2025-05-11 00:00,2025-06-22 14:30,104811.93,99732.2,120115.0,99682.33,0.2093765,stop,-1181.06,-1.12,42
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2025-07-04 00:00,2025-07-11 05:15,109715.3,107158.0,117122.0,117122.0,0.19786507,target,1353.32,2.73,7
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2025-08-27 00:00,2025-10-06 19:00,111793.81,107096.0,125897.0,125897.0,0.1966086,target,2655.98,2.91,40
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2025-10-21 00:00,2025-11-04 05:45,110718.54,105312.0,124661.0,105259.34,0.20331812,stop,-1219.73,-1.12,14
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Fibonacci 50-62%,2026-01-27 00:00,2026-01-29 15:45,88297.28,84900.0,98348.2,84857.55,0.25218235,stop,-976.61,-1.15,2
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Fibonacci 50-62%,2026-04-06 00:00,2026-06-03 20:00,69051.6,65289.9,107822.0,65257.26,0.29594141,stop,-1222.27,-1.11,58
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2026-06-27 00:00,2026-08-21 02:00,60034.7,57019.4,75008.9,75008.9,0.3635734,target,5321.47,4.9,55
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2026-09-17 00:00,2026-09-19 15:45,76189.42,73872.8,81837.1,81837.1,0.30045967,target,1578.2,2.31,2
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2026-10-10 00:00,2026-10-15 02:30,82595.48,80411.2,88969.1,80370.99,0.28097962,stop,-739.51,-1.23,5
+Early: all 3 setups together → next resistance,BTC/USD,LONG,Major support,2026-10-16 00:00,2026-10-19 11:00,82171.12,78555.8,92865.3,82332.52,0.28062987,still open,-70.12,-0.07,3
+Early: bottom pattern forming near its lows → target = neckline,BTC/USD,LONG,Falling wedge,2022-09-29 00:00,2022-11-08 19:45,19424.04,17725.1,21549.6,17716.24,0.5919919100000001,stop,-1065.97,-1.07,40
+"Early: bottom pattern forming, pattern stop + 20-day-low trail",BTC/USD,LONG,Falling wedge,2022-09-29 00:00,2022-11-08 19:45,19424.04,17725.1,,17716.24,0.5919919100000001,stop,-1065.97,-1.07,40
+Early: retest of the 200-day MA after crossing above → next resistance,BTC/USD,LONG,200-day MA retest,2021-08-28 00:00,2021-09-07 15:15,49116.83,44874.6,61680.0,44852.16,0.23709538,stop,-1066.83,-1.07,10
+Early: retest of the 200-day MA after crossing above → next resistance,BTC/USD,LONG,200-day MA retest,2021-09-10 00:00,2021-09-10 22:00,46407.43,44183.6,53063.4,44161.51,0.42658096,stop,-1054.66,-1.12,0
+Early: retest of the 200-day MA after crossing above → next resistance,BTC/USD,LONG,200-day MA retest,2023-03-12 00:00,2023-03-14 12:45,20622.61,19148.1,25017.7,25017.7,0.66845783,target,2861.66,2.92,2
+Early: retest of the 200-day MA after crossing above → next resistance,BTC/USD,LONG,200-day MA retest,2023-10-20 00:00,2023-10-21 13:15,28724.42,27613.3,30543.0,30543.0,0.70177614,target,1172.26,1.52,1
+"Early: retest of the 200-day MA after crossing above, 20-day-low trail",BTC/USD,LONG,200-day MA retest,2021-08-28 00:00,2021-09-07 15:15,49116.83,44874.6,,44852.16,0.23709538,stop,-1066.83,-1.07,10
+"Early: retest of the 200-day MA after crossing above, 20-day-low trail",BTC/USD,LONG,200-day MA retest,2021-09-10 00:00,2021-09-10 22:00,46407.43,44183.6,,44161.51,0.42658096,stop,-1054.66,-1.12,0
+"Early: retest of the 200-day MA after crossing above, 20-day-low trail",BTC/USD,LONG,200-day MA retest,2023-03-12 00:00,2023-05-26 01:45,20622.61,19148.1,,19138.53,0.66845783,stop,-1058.49,-1.08,75
+"Early: retest of the 200-day MA after crossing above, 20-day-low trail",BTC/USD,LONG,200-day MA retest,2023-10-20 00:00,2024-05-02 00:00,28724.42,27613.3,,58297.89,0.67446756,trend exit,19799.61,26.77,194
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Major support,2021-10-26 00:00,2021-11-18 17:15,63105.28,56982.4,81347.2,56953.91,0.16416856,stop,-1059.14,-1.06,23
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Major support,2023-03-12 00:00,2023-03-13 15:15,20622.61,19347.9,24418.2,24418.2,0.7825029,target,2881.95,2.91,1
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Major support,2023-03-15 00:00,2023-03-30 02:45,24740.78,23284.0,29072.2,29072.2,0.70496096,target,2958.64,2.91,15
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Fibonacci 50-62%,2023-05-26 00:00,2023-05-26 01:45,26510.4,20470.3,44571.1,20460.06,0.17385763,stop,-1072.31,-1.02,0
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Fibonacci 50-62%,2023-05-28 00:00,2023-07-27 00:15,26903.55,17890.4,53878.0,29336.68,0.11523599,time exit,264.18,0.25,60
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Major support,2023-10-20 00:00,2023-10-21 13:15,28724.42,27725.5,30543.0,30543.0,0.7242989,target,1209.88,1.7,1
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Fibonacci 50-62%,2023-10-26 00:00,2023-12-04 05:00,34505.11,32364.6,40931.3,40931.3,0.49539008,target,3090.05,2.94,39
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Major support,2024-01-03 00:00,2024-01-03 12:15,44996.48,43044.4,50713.0,43022.88,0.48149275,stop,-1056.23,-1.14,0
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Major support,2024-01-11 00:00,2024-01-12 22:15,46725.57,34422.7,83426.9,34405.49,0.08731397,stop,-1093.43,-1.02,1
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Major support,2024-02-09 00:00,2024-02-14 09:00,45344.3,43487.4,50719.8,50719.8,0.4683132,target,2404.95,2.8,5
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Fibonacci 50-62%,2024-06-23 00:00,2024-06-24 00:15,64292.23,63012.3,72092.3,62980.79,0.33777898,stop,-550.45,-1.31,1
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Fibonacci 50-62%,2024-07-01 00:00,2024-07-03 10:45,62735.0,59647.0,72092.3,59617.18,0.34440771000000003,stop,-1179.15,-1.12,2
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Major support,2024-07-17 00:00,2024-08-02 23:00,65167.72,61165.4,72432.6,61134.82,0.26902925,stop,-1169.92,-1.1,16
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Major support,2024-09-25 00:00,2024-10-01 17:30,64328.25,61684.1,72432.6,61653.26,0.32857058,stop,-982.41,-1.14,6
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Major support,2024-10-16 00:00,2024-10-29 16:15,67146.16,63703.9,72432.6,72432.6,0.30699516,target,1515.79,1.45,13
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Major support,2024-10-30 00:00,2024-11-03 02:15,72770.76,68680.6,84907.7,68646.26,0.26188131,stop,-1172.71,-1.1,4
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Major support,2025-04-24 00:00,2025-05-08 21:30,93687.28,89679.2,102857.0,102857.0,0.22424002,target,1946.03,2.19,14
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Major support,2025-05-11 00:00,2025-06-22 14:30,104811.93,99732.2,120115.0,99682.33,0.20415463,stop,-1151.6,-1.12,42
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Major support,2025-07-04 00:00,2025-07-11 05:15,109715.3,107158.0,117122.0,117122.0,0.19293029,target,1319.57,2.73,7
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Major support,2025-08-27 00:00,2025-10-06 19:00,111793.81,107096.0,125897.0,125897.0,0.19170516,target,2589.74,2.91,40
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Major support,2025-10-21 00:00,2025-11-04 05:45,110718.54,105312.0,124661.0,105259.34,0.19824734,stop,-1189.31,-1.12,14
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Major support,2026-09-17 00:00,2026-09-19 15:45,76189.42,73872.8,81837.1,81837.1,0.28496968,target,1496.84,2.31,2
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Major support,2026-10-10 00:00,2026-10-15 02:30,82595.48,80411.2,88969.1,80370.99,0.26649391,stop,-701.39,-1.23,5
+"Early: bounce at major support / Fib 50-62%, above 200-day MA → next resistance",BTC/USD,LONG,Major support,2026-10-16 00:00,2026-10-19 11:00,82171.12,78555.8,92865.3,82332.52,0.26616219,still open,-66.5,-0.07,3
+"Early: bounce at support / Fib, above 200-day MA, 20-day-low trail",BTC/USD,LONG,Major support,2021-10-26 00:00,2021-11-18 17:15,63105.28,56982.4,,56953.91,0.16416856,stop,-1059.14,-1.06,23
+"Early: bounce at support / Fib, above 200-day MA, 20-day-low trail",BTC/USD,LONG,Major support,2023-03-12 00:00,2023-05-26 01:45,20622.61,19347.9,,19338.23,0.7825029,stop,-1083.2,-1.09,75
+"Early: bounce at support / Fib, above 200-day MA, 20-day-low trail",BTC/USD,LONG,Fibonacci 50-62%,2023-05-28 00:00,2023-07-25 00:00,26903.55,17890.4,,29170.76,0.10873414,trend exit,231.28,0.24,57
+"Early: bounce at support / Fib, above 200-day MA, 20-day-low trail",BTC/USD,LONG,Major support,2023-10-20 00:00,2024-05-02 00:00,28724.42,27725.5,,58297.89,0.6833071000000001,trend exit,20059.11,29.82,194
+"Early: bounce at support / Fib, above 200-day MA, 20-day-low trail",BTC/USD,LONG,Fibonacci 50-62%,2024-06-23 00:00,2024-06-24 00:00,64292.23,63012.3,,63290.18,0.36771823000000003,trend exit,-485.76,-1.06,0
+"Early: bounce at support / Fib, above 200-day MA, 20-day-low trail",BTC/USD,LONG,Fibonacci 50-62%,2024-07-01 00:00,2024-07-03 10:45,62735.0,59647.0,,59617.18,0.37529647,stop,-1284.9,-1.12,2
+"Early: bounce at support / Fib, above 200-day MA, 20-day-low trail",BTC/USD,LONG,Major support,2024-07-17 00:00,2024-08-02 23:00,65167.72,61165.4,,61134.82,0.29315757,stop,-1274.84,-1.1,16
+"Early: bounce at support / Fib, above 200-day MA, 20-day-low trail",BTC/USD,LONG,Major support,2024-09-25 00:00,2024-10-01 17:30,64328.25,61684.1,,61653.26,0.35803895,stop,-1070.52,-1.14,6
+"Early: bounce at support / Fib, above 200-day MA, 20-day-low trail",BTC/USD,LONG,Major support,2024-10-16 00:00,2025-02-25 00:00,67146.16,63703.9,,91980.64,0.33452851,trend exit,8174.76,7.17,131
+"Early: bounce at support / Fib, above 200-day MA, 20-day-low trail",BTC/USD,LONG,Major support,2025-04-24 00:00,2025-06-06 00:00,93687.28,89679.2,,101485.19,0.26101278,trend exit,1908.0,1.85,42
+"Early: bounce at support / Fib, above 200-day MA, 20-day-low trail",BTC/USD,LONG,Major support,2025-06-07 00:00,2025-06-22 14:30,104390.66,99639.8,,99589.98,0.23790796,stop,-1263.44,-1.13,15
+"Early: bounce at support / Fib, above 200-day MA, 20-day-low trail",BTC/USD,LONG,Major support,2025-07-04 00:00,2025-08-02 00:00,109715.3,107158.0,,113264.53,0.22405767000000001,trend exit,670.33,1.2,28
+"Early: bounce at support / Fib, above 200-day MA, 20-day-low trail",BTC/USD,LONG,Major support,2025-08-27 00:00,2025-08-30 00:00,111793.81,107096.0,,108423.55,0.22109173000000001,trend exit,-866.86,-0.84,2
+"Early: bounce at support / Fib, above 200-day MA, 20-day-low trail",BTC/USD,LONG,Major support,2025-09-03 00:00,2025-09-26 00:00,111349.92,106852.0,,109061.19,0.22041533,trend exit,-625.93,-0.64,22
+"Early: bounce at support / Fib, above 200-day MA, 20-day-low trail",BTC/USD,LONG,Major support,2025-09-27 00:00,2025-10-10 21:30,109812.78,107406.0,,107352.3,0.22236011,stop,-667.84,-1.28,13
+"Early: bounce at support / Fib, above 200-day MA, 20-day-low trail",BTC/USD,LONG,Major support,2025-10-21 00:00,2025-11-04 05:45,110718.54,105312.0,,105259.34,0.21933406,stop,-1315.82,-1.12,14
+"Early: bounce at support / Fib, above 200-day MA, 20-day-low trail",BTC/USD,LONG,Major support,2026-09-17 00:00,2026-10-19 11:00,76189.42,73872.8,,82332.52,0.31528069000000003,still open,1811.85,2.52,32
