@@ -1,0 +1,514 @@
+📊 Each stock on its own: strategies vs buy & hold of that stock (S&P 100 + SPY for the S&P 500)
+01 Jan 2021 → 19 Oct 2026; 10 start dates a week apart; whole account in that one stock when holding (strategy SIZE); no commission, 0.02% slippage; leverage versions pay their FUNDING rate on the position and are liquidated as in the crypto test. 'final' = money from $100,000 (first run).
+
+Across 100 S&P 100 stocks (median of the stocks; buy & hold median +13.0%/yr, max drop -41.1%):
+ Lev 5x   median   -8.8%/yr, median max drop -75.5%, beat buy & hold on 13/100 stocks, lost money on 69, best AMAT +35.7%, worst GEV -67.1%
+ Lev 7x   median  -17.4%/yr, median max drop -87.9%, beat buy & hold on 11/100 stocks, lost money on 75, best COST +33.5%, worst SNDK -78.6%
+ MA f1    median   +1.0%/yr, median max drop -19.2%, beat buy & hold on 8/100 stocks, lost money on 36, best NVDA +20.8%, worst GEV -12.1%
+
+SPY (from 2021-01-01): buy & hold +15.0%/yr, max drop -24.5%, final $224,756
+    MA f1      -1.3%/yr (-1.9% to -1.3%)  drop -18.5%  final $      92,808  beat 0/10  ~37 trades
+    Lev 5x    -23.0%/yr (-24.8% to -22.7%)  drop -84.4%  final $      22,613  beat 0/10  ~37 trades
+    Lev 7x    -32.4%/yr (-34.6% to -32.0%)  drop -93.5%  final $      10,735  beat 0/10  ~37 trades
+
+AAPL (from 2021-01-01): buy & hold +18.9%/yr, max drop -33.4%, final $272,996
+    Lev 5x     +6.5%/yr (+6.4% to +6.6%)  drop -63.5%  final $     143,163  beat 0/10  ~22 trades
+    Lev 7x     +6.2%/yr (+6.1% to +6.3%)  drop -76.6%  final $     141,227  beat 0/10  ~22 trades
+    MA f1      +4.2%/yr (+4.2% to +4.3%)  drop -16.0%  final $     126,591  beat 0/10  ~22 trades
+
+ABBV (from 2021-01-01): buy & hold +23.3%/yr, max drop -21.9%, final $336,820
+    MA f1      +0.1%/yr (+0.0% to +0.5%)  drop -11.7%  final $     100,278  beat 0/10  ~16 trades
+    Lev 5x     -7.2%/yr (-7.7% to -5.3%)  drop -54.9%  final $      63,243  beat 0/10  ~16 trades
+    Lev 7x    -11.7%/yr (-12.3% to -9.1%)  drop -68.0%  final $      47,147  beat 0/10  ~16 trades
+
+ABT (from 2021-01-01): buy & hold +1.2%/yr, max drop -39.6%, final $107,109
+ ✅ MA f1      +0.2%/yr (+0.2% to +1.4%)  drop -20.1%  final $     108,411  beat 8/10  ~16 trades
+    Lev 5x     -7.4%/yr (-7.5% to -3.4%)  drop -74.0%  final $      81,618  beat 0/10  ~16 trades
+    Lev 7x    -13.2%/yr (-13.4% to -8.1%)  drop -86.0%  final $      61,333  beat 0/10  ~16 trades
+
+ACN (from 2021-01-01): buy & hold +0.2%/yr, max drop -68.0%, final $101,068
+ ✅ Lev 7x    +22.4%/yr (+21.2% to +26.1%)  drop -71.4%  final $     304,732  beat 10/10  ~22 trades
+ ✅ Lev 5x    +19.1%/yr (+18.2% to +21.6%)  drop -59.4%  final $     263,630  beat 10/10  ~22 trades
+ ✅ MA f1      +6.6%/yr (+6.5% to +7.0%)  drop -15.5%  final $     143,694  beat 10/10  ~22 trades
+
+ADBE (from 2021-01-01): buy & hold -11.0%/yr, max drop -71.9%, final $50,907
+ ✅ Lev 5x    +14.1%/yr (+11.7% to +16.6%)  drop -69.1%  final $     189,415  beat 10/10  ~18 trades
+ ✅ Lev 7x    +12.4%/yr (+9.0% to +15.8%)  drop -81.2%  final $     164,880  beat 10/10  ~18 trades
+ ✅ MA f1      +7.1%/yr (+6.7% to +7.6%)  drop -19.0%  final $     145,378  beat 10/10  ~18 trades
+
+AMAT (from 2021-01-01): buy & hold +32.1%/yr, max drop -55.1%, final $501,472
+ ✅ Lev 5x    +35.7%/yr (+35.1% to +36.3%)  drop -65.9%  final $     569,288  beat 10/10  ~23 trades
+    Lev 7x    +23.7%/yr (+23.3% to +24.1%)  drop -87.1%  final $     335,989  beat 0/10  ~23 trades
+    MA f1     +16.7%/yr (+16.5% to +17.0%)  drop -23.4%  final $     241,551  beat 0/10  ~23 trades
+
+AMD (from 2021-01-01): buy & hold +35.7%/yr, max drop -65.4%, final $585,791
+    MA f1      +7.2%/yr (+6.2% to +7.8%)  drop -26.6%  final $     141,344  beat 0/10  ~17 trades
+    Lev 5x     -6.9%/yr (-11.5% to -4.8%)  drop -85.1%  final $      49,576  beat 0/10  ~17 trades
+    Lev 7x    -30.9%/yr (-35.9% to -28.9%)  drop -96.5%  final $       7,771  beat 0/10  ~17 trades
+
+AMGN (from 2021-01-01): buy & hold +15.0%/yr, max drop -24.9%, final $224,731
+    MA f1      +1.3%/yr (+1.2% to +1.5%)  drop -16.2%  final $     107,434  beat 0/10  ~22 trades
+    Lev 5x     -7.0%/yr (-7.1% to -5.9%)  drop -71.1%  final $      65,868  beat 0/10  ~22 trades
+    Lev 7x    -12.3%/yr (-12.5% to -10.9%)  drop -84.0%  final $      46,891  beat 0/10  ~22 trades
+
+AMT (from 2021-01-01): buy & hold -0.2%/yr, max drop -45.3%, final $98,831
+    MA f1      -3.8%/yr (-3.9% to -3.5%)  drop -22.6%  final $      80,065  beat 0/10  ~12 trades
+    Lev 5x    -20.5%/yr (-20.8% to -19.1%)  drop -75.8%  final $      26,822  beat 0/10  ~12 trades
+    Lev 7x    -28.3%/yr (-28.6% to -26.4%)  drop -87.1%  final $      14,869  beat 0/10  ~12 trades
+
+AMZN (from 2021-01-01): buy & hold +9.1%/yr, max drop -56.1%, final $165,198
+    MA f1      -1.9%/yr (-1.9% to -1.9%)  drop -22.7%  final $      89,632  beat 0/10  ~32 trades
+    Lev 5x    -24.3%/yr (-24.7% to -24.0%)  drop -82.8%  final $      20,432  beat 0/10  ~32 trades
+    Lev 7x    -35.7%/yr (-36.1% to -35.3%)  drop -93.3%  final $       8,075  beat 0/10  ~32 trades
+
+ANET (from 2021-01-01): buy & hold +49.8%/yr, max drop -50.4%, final $1,037,627
+    MA f1      +7.7%/yr (+7.5% to +7.8%)  drop -28.2%  final $     152,383  beat 0/10  ~30 trades
+    Lev 5x     -5.5%/yr (-5.6% to -5.5%)  drop -87.7%  final $      72,284  beat 0/10  ~30 trades
+    Lev 7x     +nan%/yr (+nan% to +nan%)  drop -104.2%  final $      -3,026  beat 0/10  ~30 trades
+
+AVGO (from 2021-01-01): buy & hold +45.7%/yr, max drop -41.1%, final $881,782
+    MA f1      +6.3%/yr (+6.2% to +6.4%)  drop -27.3%  final $     141,909  beat 0/10  ~36 trades
+    Lev 5x    -14.8%/yr (-15.0% to -14.6%)  drop -87.7%  final $      40,163  beat 0/10  ~36 trades
+    Lev 7x    -35.9%/yr (-36.3% to -35.4%)  drop -96.8%  final $       7,939  beat 0/10  ~36 trades
+
+AXP (from 2021-01-01): buy & hold +20.1%/yr, max drop -31.5%, final $288,271
+ ✅ Lev 7x    +31.6%/yr (+21.3% to +42.2%)  drop -56.8%  final $     745,400  beat 10/10  ~26 trades
+ ✅ Lev 5x    +26.1%/yr (+18.3% to +34.2%)  drop -45.1%  final $     535,116  beat 8/10  ~26 trades
+    MA f1      +9.1%/yr (+7.2% to +11.1%)  drop -11.2%  final $     182,417  beat 0/10  ~26 trades
+
+BA (from 2021-01-01): buy & hold -0.9%/yr, max drop -57.0%, final $94,818
+    MA f1      -3.3%/yr (-3.4% to -3.1%)  drop -18.9%  final $      81,715  beat 2/10  ~14 trades
+    Lev 5x    -21.4%/yr (-22.0% to -20.4%)  drop -76.3%  final $      23,824  beat 0/10  ~14 trades
+    Lev 7x    -31.1%/yr (-31.8% to -29.9%)  drop -89.1%  final $      10,973  beat 0/10  ~14 trades
+
+BAC (from 2021-01-01): buy & hold +12.0%/yr, max drop -46.7%, final $192,268
+ ✅ Lev 7x    +25.0%/yr (+14.6% to +35.8%)  drop -55.2%  final $     572,737  beat 10/10  ~14 trades
+ ✅ Lev 5x    +20.1%/yr (+12.1% to +28.4%)  drop -44.6%  final $     415,950  beat 10/10  ~14 trades
+    MA f1      +7.5%/yr (+5.4% to +9.6%)  drop -10.8%  final $     168,890  beat 0/10  ~14 trades
+
+BKNG (from 2021-01-01): buy & hold +12.0%/yr, max drop -39.5%, final $192,263
+    MA f1      -2.0%/yr (-4.0% to -2.0%)  drop -27.8%  final $      89,028  beat 0/10  ~17 trades
+    Lev 5x    -21.0%/yr (-27.2% to -20.8%)  drop -88.6%  final $      26,018  beat 0/10  ~17 trades
+    Lev 7x    -35.8%/yr (-42.3% to -35.4%)  drop -97.3%  final $       8,009  beat 0/10  ~17 trades
+
+BLK (from 2021-01-01): buy & hold +10.8%/yr, max drop -43.9%, final $181,472
+    MA f1      -4.3%/yr (-4.6% to -4.2%)  drop -25.5%  final $      76,260  beat 0/10  ~24 trades
+    Lev 5x    -26.8%/yr (-28.0% to -25.9%)  drop -85.1%  final $      15,249  beat 0/10  ~24 trades
+    Lev 7x    -36.3%/yr (-37.8% to -35.2%)  drop -93.6%  final $       6,564  beat 0/10  ~24 trades
+
+BMY (from 2021-01-01): buy & hold +3.4%/yr, max drop -47.7%, final $121,307
+    MA f1      +0.7%/yr (+0.6% to +0.9%)  drop  -8.4%  final $     103,399  beat 0/10  ~14 trades
+    Lev 5x     -2.2%/yr (-2.9% to -1.6%)  drop -37.3%  final $      84,718  beat 0/10  ~14 trades
+    Lev 7x     -3.9%/yr (-4.8% to -3.0%)  drop -48.3%  final $      75,610  beat 0/10  ~14 trades
+
+BNY (from 2021-01-01): buy & hold +33.0%/yr, max drop -38.5%, final $520,588
+    MA f1      +3.4%/yr (+1.6% to +5.3%)  drop -18.5%  final $     134,097  beat 0/10  ~24 trades
+    Lev 5x     -1.1%/yr (-7.0% to +4.7%)  drop -67.8%  final $     130,147  beat 0/10  ~24 trades
+    Lev 7x     -5.6%/yr (-12.8% to +1.4%)  drop -80.6%  final $     108,310  beat 0/10  ~24 trades
+
+BRK-B (from 2021-01-01): buy & hold +15.7%/yr, max drop -26.6%, final $233,099
+    Lev 5x     +1.4%/yr (-1.7% to +4.5%)  drop -58.8%  final $     128,573  beat 0/10  ~28 trades
+    Lev 7x     +0.0%/yr (-4.0% to +4.2%)  drop -69.8%  final $     126,225  beat 0/10  ~28 trades
+    MA f1      +2.9%/yr (+2.1% to +3.8%)  drop -15.8%  final $     123,902  beat 0/10  ~28 trades
+
+C (from 2021-01-01): buy & hold +16.8%/yr, max drop -47.8%, final $245,985
+    MA f1      -1.2%/yr (-2.4% to +0.3%)  drop -26.8%  final $      99,595  beat 0/10  ~28 trades
+    Lev 5x    -24.4%/yr (-27.8% to -19.9%)  drop -89.0%  final $      25,111  beat 0/10  ~28 trades
+    Lev 7x    -37.5%/yr (-41.1% to -32.5%)  drop -96.9%  final $       8,911  beat 0/10  ~28 trades
+
+CAT (from 2021-01-01): buy & hold +29.3%/yr, max drop -34.0%, final $441,632
+    Lev 5x     -3.0%/yr (-3.1% to +8.1%)  drop -82.2%  final $     156,195  beat 0/10  ~15 trades
+    MA f1      +2.3%/yr (+2.3% to +5.4%)  drop -27.3%  final $     134,857  beat 0/10  ~15 trades
+    Lev 7x     -9.6%/yr (-9.7% to +3.9%)  drop -91.9%  final $     124,483  beat 0/10  ~15 trades
+
+CMCSA (from 2021-01-01): buy & hold -9.4%/yr, max drop -57.3%, final $56,618
+ ✅ MA f1      -1.4%/yr (-1.5% to -1.1%)  drop -14.3%  final $      92,846  beat 10/10  ~16 trades
+    Lev 5x    -12.9%/yr (-13.2% to -11.9%)  drop -61.3%  final $      45,847  beat 0/10  ~16 trades
+    Lev 7x    -18.4%/yr (-18.8% to -17.1%)  drop -74.2%  final $      31,639  beat 0/10  ~16 trades
+
+COF (from 2021-01-01): buy & hold +15.2%/yr, max drop -50.4%, final $226,339
+    MA f1      -2.6%/yr (-2.6% to -2.5%)  drop -22.6%  final $      86,239  beat 0/10  ~24 trades
+    Lev 5x    -20.6%/yr (-20.9% to -20.3%)  drop -81.7%  final $      26,854  beat 0/10  ~24 trades
+    Lev 7x    -29.5%/yr (-29.9% to -29.1%)  drop -91.9%  final $      13,612  beat 0/10  ~24 trades
+
+COP (from 2021-01-01): buy & hold +29.7%/yr, max drop -36.3%, final $449,814
+    Lev 5x     +3.9%/yr (-2.6% to +10.5%)  drop -67.9%  final $     177,236  beat 0/10  ~22 trades
+    Lev 7x     -0.8%/yr (-8.8% to +7.1%)  drop -81.1%  final $     148,081  beat 0/10  ~22 trades
+    MA f1      +4.9%/yr (+3.0% to +6.9%)  drop -19.0%  final $     145,977  beat 0/10  ~22 trades
+
+COST (from 2021-01-01): buy & hold +19.3%/yr, max drop -31.4%, final $277,881
+ ✅ Lev 7x    +33.5%/yr (+32.9% to +34.1%)  drop -62.5%  final $     518,018  beat 10/10  ~26 trades
+ ✅ Lev 5x    +27.8%/yr (+27.3% to +28.3%)  drop -49.8%  final $     405,197  beat 10/10  ~26 trades
+    MA f1     +10.5%/yr (+10.4% to +10.7%)  drop -11.3%  final $     176,869  beat 0/10  ~26 trades
+
+CRM (from 2021-01-01): buy & hold +2.0%/yr, max drop -58.7%, final $111,988
+    MA f1      -3.3%/yr (-3.4% to -3.3%)  drop -22.6%  final $      82,502  beat 0/10  ~10 trades
+    Lev 5x    -20.9%/yr (-21.2% to -20.6%)  drop -79.8%  final $      26,220  beat 0/10  ~10 trades
+    Lev 7x    -31.3%/yr (-31.7% to -30.9%)  drop -91.7%  final $      11,781  beat 0/10  ~10 trades
+
+CSCO (from 2021-01-01): buy & hold +19.9%/yr, max drop -36.7%, final $285,242
+    Lev 5x    +12.0%/yr (+5.5% to +14.1%)  drop -60.0%  final $     191,652  beat 0/10  ~20 trades
+    MA f1      +8.5%/yr (+6.7% to +8.9%)  drop -18.1%  final $     159,267  beat 0/10  ~20 trades
+    Lev 7x     +5.6%/yr (-2.4% to +8.1%)  drop -73.2%  final $     136,400  beat 0/10  ~20 trades
+
+CVS (from 2021-01-01): buy & hold +8.3%/yr, max drop -56.8%, final $158,769
+    MA f1      +0.0%/yr (+0.0% to +0.3%)  drop -21.6%  final $     100,007  beat 0/10  ~22 trades
+    Lev 5x    -17.2%/yr (-17.5% to -16.2%)  drop -79.0%  final $      33,634  beat 0/10  ~22 trades
+    Lev 7x    -30.6%/yr (-31.0% to -29.4%)  drop -92.8%  final $      12,236  beat 0/10  ~22 trades
+
+CVX (from 2021-01-01): buy & hold +23.4%/yr, max drop -24.9%, final $337,686
+    MA f1      +1.7%/yr (-1.3% to +1.7%)  drop -16.7%  final $     110,310  beat 0/10  ~26 trades
+    Lev 5x     -8.5%/yr (-18.1% to -8.3%)  drop -73.7%  final $      60,393  beat 0/10  ~26 trades
+    Lev 7x    -15.7%/yr (-26.9% to -15.5%)  drop -86.9%  final $      37,767  beat 0/10  ~26 trades
+
+DE (from 2021-01-01): buy & hold +17.4%/yr, max drop -33.8%, final $252,615
+    Lev 5x     +7.9%/yr (+7.8% to +8.0%)  drop -66.4%  final $     154,241  beat 0/10  ~31 trades
+    Lev 7x     +6.1%/yr (+6.0% to +6.2%)  drop -77.0%  final $     139,968  beat 0/10  ~31 trades
+    MA f1      +5.3%/yr (+5.2% to +5.4%)  drop -23.1%  final $     134,152  beat 0/10  ~31 trades
+
+DELL (from 2021-01-01): buy & hold +56.9%/yr, max drop -59.6%, final $1,355,153
+    MA f1      +4.9%/yr (+4.8% to +5.0%)  drop -28.2%  final $     131,518  beat 0/10  ~16 trades
+    Lev 5x     -0.3%/yr (-0.3% to -0.2%)  drop -90.3%  final $      98,562  beat 0/10  ~16 trades
+    Lev 7x    -49.8%/yr (-50.4% to -49.3%)  drop -99.9%  final $       1,964  beat 0/10  ~16 trades
+
+DHR (from 2021-01-01): buy & hold +3.1%/yr, max drop -42.9%, final $119,181
+ ✅ Lev 7x     +6.8%/yr (+6.7% to +6.9%)  drop -73.4%  final $     145,213  beat 10/10  ~18 trades
+ ✅ Lev 5x     +6.8%/yr (+6.6% to +6.9%)  drop -60.7%  final $     145,132  beat 10/10  ~18 trades
+ ✅ MA f1      +3.5%/yr (+3.4% to +3.5%)  drop -14.9%  final $     121,424  beat 9/10  ~18 trades
+
+DIS (from 2021-01-01): buy & hold -7.5%/yr, max drop -60.7%, final $63,807
+ ✅ MA f1      -0.6%/yr (-0.6% to +1.5%)  drop -17.4%  final $     108,846  beat 10/10  ~17 trades
+ ✅ Lev 5x    -12.1%/yr (-12.3% to -5.1%)  drop -68.7%  final $      73,719  beat 4/10  ~17 trades
+    Lev 7x    -19.5%/yr (-19.8% to -11.0%)  drop -83.1%  final $      51,004  beat 0/10  ~17 trades
+
+DUK (from 2021-01-01): buy & hold +9.2%/yr, max drop -24.2%, final $166,038
+    MA f1      +1.7%/yr (+1.6% to +1.7%)  drop -13.8%  final $     109,785  beat 0/10  ~26 trades
+    Lev 5x     -3.8%/yr (-3.9% to -3.8%)  drop -57.7%  final $      80,030  beat 0/10  ~26 trades
+    Lev 7x     -7.1%/yr (-7.2% to -7.0%)  drop -70.5%  final $      65,709  beat 0/10  ~26 trades
+
+EMR (from 2021-01-01): buy & hold +15.7%/yr, max drop -29.6%, final $232,468
+    MA f1      -0.4%/yr (-0.5% to -0.2%)  drop -16.6%  final $      98,654  beat 0/10  ~22 trades
+    Lev 5x    -13.4%/yr (-13.9% to -12.7%)  drop -74.0%  final $      44,992  beat 0/10  ~22 trades
+    Lev 7x    -21.0%/yr (-21.7% to -20.1%)  drop -87.0%  final $      26,864  beat 0/10  ~22 trades
+
+FDX (from 2021-01-01): buy & hold +8.5%/yr, max drop -53.7%, final $160,383
+    MA f1      -0.6%/yr (-0.6% to -0.6%)  drop -24.1%  final $      96,785  beat 0/10  ~27 trades
+    Lev 5x    -25.6%/yr (-25.9% to -25.2%)  drop -88.1%  final $      18,602  beat 0/10  ~27 trades
+    Lev 7x    -56.2%/yr (-56.8% to -55.7%)  drop -99.4%  final $         901  beat 0/10  ~27 trades
+
+GD (from 2021-01-01): buy & hold +18.5%/yr, max drop -22.5%, final $267,691
+    MA f1      +0.1%/yr (-1.6% to +2.3%)  drop -18.0%  final $     111,979  beat 0/10  ~44 trades
+    Lev 5x    -17.5%/yr (-21.8% to -11.2%)  drop -79.6%  final $      45,049  beat 0/10  ~44 trades
+    Lev 7x    -26.8%/yr (-31.5% to -19.5%)  drop -90.8%  final $      24,405  beat 0/10  ~44 trades
+
+GE (from 2021-01-01): buy & hold +37.0%/yr, max drop -46.5%, final $617,820
+    MA f1      +2.6%/yr (+1.2% to +4.0%)  drop -13.8%  final $     125,360  beat 0/10  ~20 trades
+    Lev 5x     -3.3%/yr (-8.3% to +1.6%)  drop -64.3%  final $     109,554  beat 0/10  ~20 trades
+    Lev 7x     -9.8%/yr (-15.8% to -3.9%)  drop -79.0%  final $      79,607  beat 0/10  ~20 trades
+
+GEV (from 2024-04-23): buy & hold +107.7%/yr, max drop -38.3%, final $616,582
+    MA f1     -12.1%/yr (-12.5% to -11.7%)  drop -26.6%  final $      73,436  beat 0/10  ~9 trades
+    Lev 5x    -67.1%/yr (-68.5% to -65.8%)  drop -93.1%  final $       6,924  beat 0/10  ~9 trades
+    Lev 7x     +nan%/yr (+nan% to +nan%)  drop -121.2%  final $      -2,820  beat 0/10  ~9 trades
+
+GILD (from 2021-01-01): buy & hold +22.0%/yr, max drop -26.6%, final $316,130
+    Lev 5x     +9.7%/yr (+9.5% to +11.7%)  drop -60.4%  final $     169,348  beat 0/10  ~26 trades
+    MA f1      +7.5%/yr (+7.4% to +7.9%)  drop -14.3%  final $     151,045  beat 0/10  ~26 trades
+    Lev 7x     +5.7%/yr (+5.6% to +8.3%)  drop -74.1%  final $     137,027  beat 0/10  ~26 trades
+
+GM (from 2021-01-01): buy & hold +14.0%/yr, max drop -59.0%, final $213,186
+ ✅ Lev 7x     +2.2%/yr (+2.2% to +24.1%)  drop -66.3%  final $     348,301  beat 1/10  ~15 trades
+ ✅ Lev 5x     +5.3%/yr (+5.2% to +23.0%)  drop -53.1%  final $     331,809  beat 1/10  ~15 trades
+    MA f1      +4.6%/yr (+4.5% to +9.5%)  drop -11.6%  final $     168,742  beat 0/10  ~15 trades
+
+GOOGL (from 2021-01-01): buy & hold +27.3%/yr, max drop -44.3%, final $404,322
+    MA f1      -1.5%/yr (-1.5% to +0.2%)  drop -18.6%  final $      99,769  beat 0/10  ~22 trades
+    Lev 5x    -18.1%/yr (-18.4% to -12.5%)  drop -76.5%  final $      42,512  beat 0/10  ~22 trades
+    Lev 7x    -27.7%/yr (-28.1% to -21.2%)  drop -88.7%  final $      22,396  beat 0/10  ~22 trades
+
+GS (from 2021-01-01): buy & hold +25.8%/yr, max drop -32.8%, final $377,260
+    MA f1      -2.8%/yr (-2.8% to -2.7%)  drop -22.2%  final $      85,224  beat 0/10  ~27 trades
+    Lev 5x    -29.3%/yr (-29.7% to -28.9%)  drop -89.0%  final $      13,880  beat 0/10  ~27 trades
+    Lev 7x    -42.7%/yr (-43.2% to -42.2%)  drop -96.9%  final $       4,169  beat 0/10  ~27 trades
+
+HD (from 2021-01-01): buy & hold +5.4%/yr, max drop -34.7%, final $135,904
+ ✅ Lev 7x    +10.2%/yr (+6.9% to +13.5%)  drop -50.7%  final $     147,198  beat 10/10  ~22 trades
+ ✅ Lev 5x     +8.7%/yr (+6.5% to +11.0%)  drop -39.8%  final $     143,951  beat 10/10  ~22 trades
+    MA f1      +4.2%/yr (+3.8% to +4.6%)  drop  -9.5%  final $     124,431  beat 1/10  ~22 trades
+
+IBM (from 2021-01-01): buy & hold +16.4%/yr, max drop -37.5%, final $241,105
+    MA f1      -3.1%/yr (-3.1% to -3.0%)  drop -29.9%  final $      83,642  beat 0/10  ~13 trades
+    Lev 5x    -30.5%/yr (-30.9% to -30.1%)  drop -95.1%  final $      12,565  beat 0/10  ~13 trades
+    Lev 7x     +nan%/yr (+nan% to +nan%)  drop -100.5%  final $        -802  beat 0/10  ~13 trades
+
+INTC (from 2021-01-01): buy & hold +13.3%/yr, max drop -70.8%, final $206,370
+    MA f1      -4.8%/yr (-4.8% to -4.7%)  drop -34.1%  final $      75,679  beat 0/10  ~20 trades
+    Lev 5x    -38.4%/yr (-38.9% to -38.0%)  drop -93.7%  final $       6,311  beat 0/10  ~20 trades
+    Lev 7x    -57.8%/yr (-58.4% to -57.2%)  drop -99.3%  final $         732  beat 0/10  ~20 trades
+
+INTU (from 2021-01-01): buy & hold -1.5%/yr, max drop -68.2%, final $91,865
+ ✅ MA f1      +0.2%/yr (+0.1% to +0.3%)  drop -24.0%  final $     101,360  beat 10/10  ~22 trades
+    Lev 5x    -12.2%/yr (-12.4% to -11.8%)  drop -79.4%  final $      47,287  beat 0/10  ~22 trades
+    Lev 7x    -20.4%/yr (-20.7% to -19.9%)  drop -90.0%  final $      27,007  beat 0/10  ~22 trades
+
+ISRG (from 2021-01-01): buy & hold +8.8%/yr, max drop -49.9%, final $162,754
+    MA f1      -5.5%/yr (-5.6% to -5.3%)  drop -32.3%  final $      72,238  beat 0/10  ~17 trades
+    Lev 5x    -37.0%/yr (-37.4% to -36.4%)  drop -94.5%  final $       6,940  beat 0/10  ~17 trades
+    Lev 7x    -59.3%/yr (-59.8% to -59.0%)  drop -99.6%  final $         557  beat 0/10  ~17 trades
+
+JNJ (from 2021-01-01): buy & hold +11.8%/yr, max drop -18.4%, final $190,272
+    MA f1      +1.0%/yr (+0.9% to +1.0%)  drop -11.4%  final $     105,613  beat 0/10  ~21 trades
+    Lev 5x     -5.8%/yr (-5.9% to -5.7%)  drop -58.8%  final $      71,253  beat 0/10  ~21 trades
+    Lev 7x     -9.7%/yr (-9.9% to -9.6%)  drop -72.6%  final $      55,820  beat 0/10  ~21 trades
+
+JPM (from 2021-01-01): buy & hold +21.4%/yr, max drop -38.8%, final $307,708
+    MA f1      +2.6%/yr (+2.6% to +2.7%)  drop -20.3%  final $     116,016  beat 0/10  ~18 trades
+    Lev 5x     +0.7%/yr (+0.6% to +0.7%)  drop -67.4%  final $     103,817  beat 0/10  ~18 trades
+    Lev 7x     -0.4%/yr (-0.4% to -0.3%)  drop -78.3%  final $      97,996  beat 0/10  ~18 trades
+
+KO (from 2021-01-01): buy & hold +13.7%/yr, max drop -17.3%, final $209,960
+    MA f1      +2.4%/yr (+2.3% to +2.4%)  drop -12.7%  final $     114,220  beat 0/10  ~24 trades
+    Lev 5x     +1.5%/yr (+1.5% to +1.5%)  drop -58.6%  final $     108,951  beat 0/10  ~24 trades
+    Lev 7x     +0.5%/yr (+0.5% to +0.5%)  drop -71.1%  final $     103,063  beat 0/10  ~24 trades
+
+LIN (from 2021-01-01): buy & hold +13.8%/yr, max drop -22.8%, final $211,136
+    MA f1      +0.9%/yr (+0.9% to +1.3%)  drop -16.3%  final $     105,272  beat 0/10  ~25 trades
+    Lev 5x     -9.1%/yr (-9.3% to -7.6%)  drop -62.8%  final $      57,728  beat 0/10  ~25 trades
+    Lev 7x    -14.8%/yr (-15.0% to -12.7%)  drop -75.9%  final $      39,919  beat 0/10  ~25 trades
+
+LLY (from 2021-01-01): buy & hold +43.2%/yr, max drop -34.5%, final $799,053
+    MA f1      -1.3%/yr (-1.3% to -1.3%)  drop -30.1%  final $      92,828  beat 0/10  ~25 trades
+    Lev 5x    -17.2%/yr (-17.4% to -16.9%)  drop -86.4%  final $      34,224  beat 0/10  ~25 trades
+    Lev 7x    -25.5%/yr (-25.9% to -25.2%)  drop -94.1%  final $      18,642  beat 0/10  ~25 trades
+
+LMT (from 2021-01-01): buy & hold +11.8%/yr, max drop -31.8%, final $190,325
+    MA f1      +1.4%/yr (+1.4% to +1.4%)  drop  -8.7%  final $     108,407  beat 0/10  ~15 trades
+    Lev 5x     -2.1%/yr (-2.1% to -2.1%)  drop -43.5%  final $      88,591  beat 0/10  ~15 trades
+    Lev 7x     -5.2%/yr (-5.3% to -5.1%)  drop -55.7%  final $      73,646  beat 0/10  ~15 trades
+
+LOW (from 2021-01-01): buy & hold +5.5%/yr, max drop -36.9%, final $136,417
+    MA f1      -3.2%/yr (-3.2% to -3.1%)  drop -19.0%  final $      83,238  beat 0/10  ~21 trades
+    Lev 5x    -22.4%/yr (-22.8% to -22.1%)  drop -76.5%  final $      23,484  beat 0/10  ~21 trades
+    Lev 7x    -32.0%/yr (-32.4% to -31.6%)  drop -88.9%  final $      11,088  beat 0/10  ~21 trades
+
+LRCX (from 2021-01-01): buy & hold +36.5%/yr, max drop -56.4%, final $605,429
+    Lev 5x    +21.0%/yr (+14.9% to +23.6%)  drop -86.0%  final $     334,970  beat 0/10  ~24 trades
+    MA f1     +18.7%/yr (+17.3% to +19.4%)  drop -34.3%  final $     275,553  beat 0/10  ~24 trades
+    Lev 7x     +nan%/yr (+nan% to +nan%)  drop -102.6%  final $     -52,595  beat 0/10  ~24 trades
+
+MA (from 2021-01-01): buy & hold +10.8%/yr, max drop -28.3%, final $181,457
+    MA f1      -0.1%/yr (-0.1% to -0.1%)  drop -17.3%  final $      99,310  beat 0/10  ~18 trades
+    Lev 5x     -7.9%/yr (-8.0% to -7.8%)  drop -62.9%  final $      62,497  beat 0/10  ~18 trades
+    Lev 7x    -13.0%/yr (-13.2% to -12.8%)  drop -75.2%  final $      45,314  beat 0/10  ~18 trades
+
+MCD (from 2021-01-01): buy & hold +4.9%/yr, max drop -31.0%, final $132,232
+    MA f1      -1.8%/yr (-1.8% to -1.7%)  drop -19.3%  final $      90,348  beat 0/10  ~37 trades
+    Lev 5x    -19.9%/yr (-20.1% to -19.6%)  drop -78.3%  final $      28,229  beat 0/10  ~37 trades
+    Lev 7x    -27.7%/yr (-28.0% to -27.4%)  drop -88.9%  final $      15,634  beat 0/10  ~37 trades
+
+MDLZ (from 2021-01-01): buy & hold +4.3%/yr, max drop -29.1%, final $127,788
+    MA f1      -3.7%/yr (-3.7% to -3.6%)  drop -25.5%  final $      80,516  beat 0/10  ~19 trades
+    Lev 5x    -23.3%/yr (-23.5% to -23.1%)  drop -82.9%  final $      21,529  beat 0/10  ~19 trades
+    Lev 7x    -32.7%/yr (-32.9% to -32.4%)  drop -92.3%  final $      10,154  beat 0/10  ~19 trades
+
+MDT (from 2021-01-01): buy & hold -1.3%/yr, max drop -45.3%, final $92,833
+    MA f1      -3.0%/yr (-3.3% to -2.4%)  drop -24.5%  final $      82,369  beat 0/10  ~22 trades
+    Lev 5x    -22.0%/yr (-23.5% to -19.2%)  drop -79.8%  final $      21,590  beat 0/10  ~22 trades
+    Lev 7x    -30.7%/yr (-32.6% to -27.1%)  drop -90.0%  final $      10,469  beat 0/10  ~22 trades
+
+META (from 2021-01-01): buy & hold +18.4%/yr, max drop -76.7%, final $265,151
+    MA f1      +4.4%/yr (+4.3% to +4.5%)  drop -26.7%  final $     127,686  beat 0/10  ~18 trades
+    Lev 5x    -20.4%/yr (-20.7% to -20.1%)  drop -93.0%  final $      27,254  beat 0/10  ~18 trades
+    Lev 7x     +nan%/yr (+nan% to +nan%)  drop -126.0%  final $     -30,004  beat 0/10  ~18 trades
+
+MMM (from 2021-01-01): buy & hold +6.5%/yr, max drop -54.1%, final $144,286
+    MA f1      -0.7%/yr (-0.7% to -0.5%)  drop -15.4%  final $      96,899  beat 0/10  ~18 trades
+    Lev 5x    -13.4%/yr (-13.6% to -13.0%)  drop -66.2%  final $      44,772  beat 0/10  ~18 trades
+    Lev 7x    -21.5%/yr (-21.8% to -20.9%)  drop -82.7%  final $      25,733  beat 0/10  ~18 trades
+
+MO (from 2021-01-01): buy & hold +19.6%/yr, max drop -25.8%, final $281,975
+    Lev 5x     +3.5%/yr (-3.5% to +10.5%)  drop -66.0%  final $     176,804  beat 0/10  ~30 trades
+    MA f1      +6.3%/yr (+4.2% to +8.4%)  drop -15.8%  final $     158,623  beat 0/10  ~30 trades
+    Lev 7x     -3.6%/yr (-11.9% to +4.5%)  drop -78.8%  final $     128,708  beat 0/10  ~30 trades
+
+MRK (from 2021-01-01): buy & hold +14.0%/yr, max drop -43.4%, final $213,121
+    Lev 7x    +10.2%/yr (+7.7% to +10.4%)  drop -66.5%  final $     153,651  beat 0/10  ~25 trades
+    Lev 5x     +9.4%/yr (+7.6% to +9.6%)  drop -54.0%  final $     153,052  beat 0/10  ~25 trades
+    MA f1      +4.6%/yr (+4.3% to +4.7%)  drop -13.7%  final $     127,360  beat 0/10  ~25 trades
+
+MS (from 2021-01-01): buy & hold +21.8%/yr, max drop -32.4%, final $312,589
+    Lev 5x     +6.8%/yr (+2.3% to +11.5%)  drop -56.3%  final $     185,922  beat 0/10  ~28 trades
+    Lev 7x     +4.5%/yr (-1.2% to +10.4%)  drop -69.5%  final $     176,152  beat 0/10  ~28 trades
+    MA f1      +5.3%/yr (+4.1% to +6.7%)  drop -13.4%  final $     144,485  beat 0/10  ~28 trades
+
+MSFT (from 2021-01-01): buy & hold +17.7%/yr, max drop -37.1%, final $257,446
+    MA f1      +2.1%/yr (+2.0% to +2.7%)  drop -21.3%  final $     112,505  beat 0/10  ~29 trades
+    Lev 5x     -5.8%/yr (-7.0% to -4.0%)  drop -75.2%  final $      65,631  beat 0/10  ~29 trades
+    Lev 7x    -11.9%/yr (-13.6% to -9.5%)  drop -86.7%  final $      43,006  beat 0/10  ~29 trades
+
+MU (from 2021-01-01): buy & hold +54.9%/yr, max drop -57.6%, final $1,258,961
+    MA f1      +1.7%/yr (+1.7% to +1.8%)  drop -46.0%  final $     110,262  beat 0/10  ~25 trades
+    Lev 5x    -44.5%/yr (-45.1% to -44.0%)  drop -99.5%  final $       3,477  beat 0/10  ~25 trades
+    Lev 7x     +nan%/yr (+nan% to +nan%)  drop -105.7%  final $      -2,981  beat 0/10  ~25 trades
+
+NEE (from 2021-01-01): buy & hold +3.5%/yr, max drop -45.0%, final $122,200
+    MA f1      -5.3%/yr (-5.4% to -4.7%)  drop -34.2%  final $      75,865  beat 0/10  ~21 trades
+    Lev 5x    -32.4%/yr (-32.8% to -30.4%)  drop -92.6%  final $      12,244  beat 0/10  ~21 trades
+    Lev 7x    -45.8%/yr (-46.3% to -43.6%)  drop -98.1%  final $       3,632  beat 0/10  ~21 trades
+
+NFLX (from 2021-01-01): buy & hold +5.1%/yr, max drop -75.9%, final $133,515
+    MA f1      +4.1%/yr (+2.0% to +4.1%)  drop -31.3%  final $     111,859  beat 2/10  ~15 trades
+    Lev 5x     -5.6%/yr (-16.2% to -5.5%)  drop -88.7%  final $      36,006  beat 0/10  ~15 trades
+    Lev 7x    -18.6%/yr (-32.1% to -18.3%)  drop -96.7%  final $      10,683  beat 0/10  ~15 trades
+
+NOW (from 2021-01-01): buy & hold +5.7%/yr, max drop -64.5%, final $137,563
+    MA f1      +4.8%/yr (+3.9% to +5.4%)  drop -23.8%  final $     124,715  beat 3/10  ~31 trades
+    Lev 5x     -4.5%/yr (-9.4% to -2.0%)  drop -85.9%  final $      56,596  beat 0/10  ~31 trades
+    Lev 7x    -16.4%/yr (-22.3% to -13.1%)  drop -96.2%  final $      23,247  beat 0/10  ~31 trades
+
+NVDA (from 2021-01-01): buy & hold +62.6%/yr, max drop -66.3%, final $1,668,123
+    Lev 5x    +25.5%/yr (+21.2% to +30.1%)  drop -94.2%  final $     304,753  beat 0/10  ~25 trades
+    MA f1     +20.8%/yr (+19.8% to +21.9%)  drop -37.7%  final $     284,363  beat 0/10  ~25 trades
+    Lev 7x     -4.2%/yr (-8.4% to +0.3%)  drop -99.3%  final $      60,260  beat 0/10  ~25 trades
+
+ORCL (from 2021-01-01): buy & hold +14.8%/yr, max drop -64.6%, final $221,851
+    MA f1      -3.8%/yr (-4.6% to -3.6%)  drop -37.9%  final $      81,002  beat 0/10  ~24 trades
+    Lev 5x    -37.6%/yr (-40.0% to -36.9%)  drop -97.4%  final $       6,953  beat 0/10  ~24 trades
+    Lev 7x    -57.8%/yr (-60.1% to -57.0%)  drop -99.8%  final $         754  beat 0/10  ~24 trades
+
+PANW (from 2021-01-01): buy & hold +36.0%/yr, max drop -36.0%, final $592,203
+    MA f1      +1.6%/yr (+1.6% to +2.3%)  drop -29.0%  final $     109,462  beat 0/10  ~27 trades
+    Lev 5x    -25.8%/yr (-26.2% to -23.5%)  drop -90.8%  final $      18,037  beat 0/10  ~27 trades
+    Lev 7x    -63.5%/yr (-64.0% to -62.2%)  drop -99.8%  final $         310  beat 0/10  ~27 trades
+
+PEP (from 2021-01-01): buy & hold +1.8%/yr, max drop -30.3%, final $111,150
+    MA f1      +0.8%/yr (+0.4% to +0.8%)  drop -17.5%  final $     102,612  beat 0/10  ~16 trades
+    Lev 5x     -5.6%/yr (-7.0% to -5.5%)  drop -70.6%  final $      65,670  beat 0/10  ~16 trades
+    Lev 7x    -10.6%/yr (-12.4% to -10.4%)  drop -83.4%  final $      46,445  beat 0/10  ~16 trades
+
+PFE (from 2021-01-01): buy & hold +1.2%/yr, max drop -59.0%, final $107,437
+    MA f1      -2.0%/yr (-2.0% to -2.0%)  drop -31.4%  final $      89,150  beat 0/10  ~30 trades
+    Lev 5x    -20.5%/yr (-20.8% to -20.2%)  drop -88.4%  final $      27,031  beat 0/10  ~30 trades
+    Lev 7x    -29.5%/yr (-29.9% to -29.1%)  drop -95.2%  final $      13,670  beat 0/10  ~30 trades
+
+PG (from 2021-01-01): buy & hold +5.0%/yr, max drop -23.8%, final $132,622
+    MA f1      -6.1%/yr (-6.2% to -6.0%)  drop -30.6%  final $      69,794  beat 0/10  ~19 trades
+    Lev 5x    -31.4%/yr (-31.9% to -31.0%)  drop -88.6%  final $      11,634  beat 0/10  ~19 trades
+    Lev 7x    -42.9%/yr (-43.4% to -42.4%)  drop -96.0%  final $       4,103  beat 0/10  ~19 trades
+
+PLTR (from 2021-01-01): buy & hold +44.2%/yr, max drop -84.6%, final $831,536
+    MA f1      -4.0%/yr (-4.1% to -1.6%)  drop -52.6%  final $      79,111  beat 0/10  ~24 trades
+    Lev 5x    -40.5%/yr (-41.0% to -28.2%)  drop -95.4%  final $       5,012  beat 0/10  ~24 trades
+    Lev 7x    -66.7%/yr (-67.3% to -45.9%)  drop -99.8%  final $         179  beat 0/10  ~24 trades
+
+PM (from 2021-01-01): buy & hold +22.5%/yr, max drop -22.8%, final $323,926
+    MA f1      -1.5%/yr (-1.6% to -1.1%)  drop -18.4%  final $      91,026  beat 0/10  ~18 trades
+    Lev 5x    -13.1%/yr (-14.1% to -11.8%)  drop -69.8%  final $      41,826  beat 0/10  ~18 trades
+    Lev 7x    -18.8%/yr (-20.2% to -17.1%)  drop -82.1%  final $      27,373  beat 0/10  ~18 trades
+
+QCOM (from 2021-01-01): buy & hold +5.1%/yr, max drop -44.3%, final $133,042
+    MA f1      +1.8%/yr (+1.8% to +1.8%)  drop -12.1%  final $     110,738  beat 0/10  ~19 trades
+    Lev 5x     -2.1%/yr (-2.2% to -2.1%)  drop -52.0%  final $      88,517  beat 0/10  ~19 trades
+    Lev 7x     -6.4%/yr (-6.5% to -6.3%)  drop -65.4%  final $      68,549  beat 0/10  ~19 trades
+
+RTX (from 2021-01-01): buy & hold +22.3%/yr, max drop -32.8%, final $320,567
+    Lev 5x     +5.0%/yr (+4.3% to +5.6%)  drop -66.7%  final $     136,610  beat 0/10  ~24 trades
+    MA f1      +4.2%/yr (+4.1% to +4.4%)  drop -16.5%  final $     127,781  beat 0/10  ~24 trades
+    Lev 7x     +2.8%/yr (+2.0% to +3.7%)  drop -79.3%  final $     123,328  beat 0/10  ~24 trades
+
+SBUX (from 2021-01-01): buy & hold +1.4%/yr, max drop -43.7%, final $108,278
+    MA f1      -3.1%/yr (-3.6% to -3.0%)  drop -30.0%  final $      83,194  beat 0/10  ~24 trades
+    Lev 5x    -22.8%/yr (-23.9% to -21.7%)  drop -87.2%  final $      22,592  beat 0/10  ~24 trades
+    Lev 7x    -32.3%/yr (-33.7% to -31.0%)  drop -94.9%  final $      10,547  beat 0/10  ~24 trades
+
+SCHW (from 2021-01-01): buy & hold +11.0%/yr, max drop -49.7%, final $183,163
+    MA f1      -0.9%/yr (-2.6% to +0.8%)  drop -28.5%  final $     104,482  beat 0/10  ~18 trades
+    Lev 5x    -17.7%/yr (-22.9% to -12.6%)  drop -87.0%  final $      45,960  beat 0/10  ~18 trades
+    Lev 7x    -31.3%/yr (-36.9% to -25.8%)  drop -96.3%  final $      17,839  beat 0/10  ~18 trades
+
+SNDK (from 2025-03-06): buy & hold +710.2%/yr, max drop -56.5%, final $2,969,048
+    MA f1     +13.9%/yr (+13.1% to +14.8%)  drop -16.2%  final $     122,134  beat 0/10  ~8 trades
+    Lev 5x     +6.4%/yr (+6.0% to +6.8%)  drop -66.8%  final $     109,941  beat 0/10  ~8 trades
+    Lev 7x    -78.6%/yr (-80.5% to -76.7%)  drop -97.8%  final $       9,410  beat 0/10  ~8 trades
+
+SO (from 2021-01-01): buy & hold +11.4%/yr, max drop -23.3%, final $186,632
+    MA f1      +2.3%/yr (+0.9% to +2.4%)  drop -13.6%  final $     105,575  beat 0/10  ~16 trades
+    Lev 5x     +1.5%/yr (-5.7% to +1.5%)  drop -58.2%  final $      71,071  beat 0/10  ~16 trades
+    Lev 7x     +0.1%/yr (-10.2% to +0.1%)  drop -71.6%  final $      53,817  beat 0/10  ~16 trades
+
+T (from 2021-01-01): buy & hold +7.0%/yr, max drop -37.3%, final $147,660
+ ✅ Lev 7x     +8.9%/yr (+8.7% to +14.1%)  drop -48.0%  final $     162,160  beat 10/10  ~20 trades
+ ✅ Lev 5x     +7.7%/yr (+7.6% to +11.3%)  drop -36.1%  final $     152,797  beat 10/10  ~20 trades
+    MA f1      +3.7%/yr (+3.6% to +4.3%)  drop  -7.5%  final $     122,967  beat 0/10  ~20 trades
+
+TMO (from 2021-01-01): buy & hold +6.8%/yr, max drop -41.0%, final $146,669
+    MA f1      +3.3%/yr (+3.2% to +4.1%)  drop -15.8%  final $     120,109  beat 0/10  ~17 trades
+    Lev 5x     +1.1%/yr (+1.1% to +5.4%)  drop -63.1%  final $     106,368  beat 0/10  ~17 trades
+    Lev 7x     -2.5%/yr (-2.6% to +3.6%)  drop -76.4%  final $      86,223  beat 0/10  ~17 trades
+
+TMUS (from 2021-01-01): buy & hold +3.9%/yr, max drop -44.0%, final $125,016
+    MA f1      -4.6%/yr (-5.5% to -4.5%)  drop -29.7%  final $      72,129  beat 0/10  ~18 trades
+    Lev 5x    -27.3%/yr (-30.8% to -26.8%)  drop -88.0%  final $      12,053  beat 0/10  ~18 trades
+    Lev 7x    -38.0%/yr (-42.3% to -37.4%)  drop -95.8%  final $       4,232  beat 0/10  ~18 trades
+
+TSLA (from 2021-01-01): buy & hold +7.4%/yr, max drop -73.6%, final $151,416
+    MA f1      +0.8%/yr (+0.8% to +0.8%)  drop -33.7%  final $     104,513  beat 0/10  ~24 trades
+    Lev 5x    -25.2%/yr (-25.5% to -24.9%)  drop -92.6%  final $      19,124  beat 0/10  ~24 trades
+    Lev 7x    -63.8%/yr (-64.4% to -63.3%)  drop -99.9%  final $         304  beat 0/10  ~24 trades
+
+TXN (from 2021-01-01): buy & hold +12.7%/yr, max drop -33.4%, final $200,108
+    MA f1      -3.2%/yr (-3.2% to -2.2%)  drop -39.5%  final $      87,791  beat 0/10  ~47 trades
+    Lev 5x    -35.2%/yr (-35.6% to -32.2%)  drop -96.2%  final $      10,582  beat 0/10  ~47 trades
+    Lev 7x    -50.9%/yr (-51.5% to -47.7%)  drop -99.2%  final $       2,344  beat 0/10  ~47 trades
+
+UBER (from 2021-01-01): buy & hold +5.6%/yr, max drop -67.6%, final $137,417
+    MA f1      -8.3%/yr (-8.4% to -8.0%)  drop -48.0%  final $      60,767  beat 0/10  ~34 trades
+    Lev 5x    -42.9%/yr (-43.3% to -41.8%)  drop -97.8%  final $       3,910  beat 0/10  ~34 trades
+    Lev 7x    -57.5%/yr (-58.0% to -56.4%)  drop -99.7%  final $         707  beat 0/10  ~34 trades
+
+UNH (from 2021-01-01): buy & hold +4.4%/yr, max drop -61.4%, final $128,626
+    MA f1      -4.2%/yr (-4.3% to -4.2%)  drop -29.0%  final $      78,111  beat 0/10  ~27 trades
+    Lev 5x    -29.6%/yr (-30.0% to -29.2%)  drop -88.2%  final $      13,536  beat 0/10  ~27 trades
+    Lev 7x    -42.1%/yr (-42.6% to -41.6%)  drop -96.3%  final $       4,449  beat 0/10  ~27 trades
+
+UNP (from 2021-01-01): buy & hold +8.6%/yr, max drop -31.8%, final $161,473
+    MA f1      +0.9%/yr (+0.9% to +1.6%)  drop -23.9%  final $     105,214  beat 0/10  ~34 trades
+    Lev 5x    -10.4%/yr (-10.5% to -7.1%)  drop -78.7%  final $      53,137  beat 0/10  ~34 trades
+    Lev 7x    -17.1%/yr (-17.2% to -12.8%)  drop -89.1%  final $      34,000  beat 0/10  ~34 trades
+
+UPS (from 2021-01-01): buy & hold -4.5%/yr, max drop -57.9%, final $76,657
+ ✅ MA f1      +0.8%/yr (+0.8% to +0.8%)  drop -17.4%  final $     104,579  beat 10/10  ~14 trades
+    Lev 5x     -7.8%/yr (-7.9% to -7.7%)  drop -69.7%  final $      63,083  beat 0/10  ~14 trades
+    Lev 7x    -17.5%/yr (-17.8% to -17.3%)  drop -86.8%  final $      33,301  beat 0/10  ~14 trades
+
+USB (from 2021-01-01): buy & hold +8.5%/yr, max drop -52.1%, final $160,279
+ ✅ Lev 5x     +8.8%/yr (+5.1% to +12.5%)  drop -60.2%  final $     195,821  beat 5/10  ~22 trades
+ ✅ Lev 7x     +7.4%/yr (+2.7% to +12.2%)  drop -73.3%  final $     193,137  beat 5/10  ~22 trades
+    MA f1      +4.8%/yr (+3.9% to +5.7%)  drop -15.5%  final $     137,381  beat 0/10  ~22 trades
+
+V (from 2021-01-01): buy & hold +12.1%/yr, max drop -28.6%, final $193,349
+ ✅ Lev 7x    +26.9%/yr (+26.4% to +27.4%)  drop -70.8%  final $     388,784  beat 10/10  ~25 trades
+ ✅ Lev 5x    +22.1%/yr (+21.7% to +22.5%)  drop -58.8%  final $     312,206  beat 10/10  ~25 trades
+    MA f1      +8.3%/yr (+8.1% to +8.4%)  drop -15.9%  final $     157,253  beat 0/10  ~25 trades
+
+VZ (from 2021-01-01): buy & hold +1.4%/yr, max drop -40.3%, final $108,476
+    MA f1      -1.7%/yr (-1.7% to -1.7%)  drop -15.8%  final $      90,727  beat 0/10  ~24 trades
+    Lev 5x    -14.6%/yr (-14.8% to -14.4%)  drop -65.7%  final $      40,791  beat 0/10  ~24 trades
+    Lev 7x    -20.8%/yr (-21.1% to -20.5%)  drop -79.1%  final $      26,520  beat 0/10  ~24 trades
+
+WFC (from 2021-01-01): buy & hold +21.9%/yr, max drop -37.1%, final $314,535
+    MA f1      +1.0%/yr (-0.9% to +2.9%)  drop -19.0%  final $     117,651  beat 0/10  ~30 trades
+    Lev 5x    -10.0%/yr (-16.2% to -4.0%)  drop -78.4%  final $      79,060  beat 0/10  ~30 trades
+    Lev 7x    -17.3%/yr (-24.5% to -10.3%)  drop -89.8%  final $      53,338  beat 0/10  ~30 trades
+
+WMT (from 2021-01-01): buy & hold +18.1%/yr, max drop -25.7%, final $261,885
+    MA f1      +1.7%/yr (+0.8% to +1.7%)  drop -12.8%  final $     104,955  beat 0/10  ~30 trades
+    Lev 5x     -9.2%/yr (-12.9% to -9.1%)  drop -66.4%  final $      44,840  beat 0/10  ~30 trades
+    Lev 7x    -15.3%/yr (-20.1% to -15.1%)  drop -80.4%  final $      27,199  beat 0/10  ~30 trades
+
+XOM (from 2021-01-01): buy & hold +33.7%/yr, max drop -20.5%, final $536,827
+    MA f1      +1.5%/yr (+1.5% to +1.5%)  drop -34.5%  final $     108,856  beat 0/10  ~33 trades
+    Lev 5x    -15.9%/yr (-16.1% to -15.7%)  drop -92.2%  final $      37,297  beat 0/10  ~33 trades
+    Lev 7x    -28.9%/yr (-29.3% to -28.6%)  drop -97.8%  final $      14,266  beat 0/10  ~33 trades
+
+Versions: Lev 5x = 5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation); Lev 7x = 7x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation); MA f1 = Your rule (50-day rising) + close below the 50-day, lower high after 1 day
