@@ -30,6 +30,8 @@ breaks with a LOWER LOW. Shared by the swing_*.py strategy files (starts with "_
                DOWN on a lower high (a new swing high below the previous one) or a close below the last swing
                low. Buy = the first close above the 50-day while the trend is UP.
     above200   the buy also needs the close above the 200-day average (the sell rule is unchanged).
+               True = that close only; "rising" = and the 200-day higher than 20 days ago; an int N = the last N
+               closes all above the 200-day (no buying on a one-day poke above it).
 """
 import numpy as np
 import pandas as pd
@@ -80,11 +82,22 @@ def run(d, pivot=5, mode="close", trail="pivot", pull_min=0.0, hh_entry=False, t
         if np.isfinite(sl) and c[i] < sl:
             up = False                               # a lower low
         last_sh[i], last_sl[i], trend_up[i] = sh, sl, up
+    def ok200(i):
+        if not above200:
+            return True
+        if not (np.isfinite(sma200[i]) and c[i] > sma200[i]):
+            return False
+        if above200 == "rising":
+            return i >= 20 and np.isfinite(sma200[i - 20]) and sma200[i] > sma200[i - 20]
+        if not isinstance(above200, bool) and isinstance(above200, int):
+            k = max(0, i - above200 + 1)
+            return bool(np.all(c[k:i + 1] > sma200[k:i + 1]))
+        return True
     ok_buy = np.zeros(n, bool)                       # buy condition at each close
     for i in range(n):
         above50 = np.isfinite(sma50[i]) and c[i] > sma50[i]
         ok_buy[i] = above50 and (not hh_entry or (np.isfinite(last_sh[i]) and c[i] > last_sh[i])) \
-            and (not trend_entry or trend_up[i]) and (not above200 or (np.isfinite(sma200[i]) and c[i] > sma200[i]))
+            and (not trend_entry or trend_up[i]) and ok200(i)
 
     entry, exit_ = np.zeros(n, bool), np.zeros(n, bool)
     stop_s = np.full(n, np.nan)
