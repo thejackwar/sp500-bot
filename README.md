@@ -17,9 +17,10 @@ message with a chart whenever a signal appears. ⭐ Strong LONG signals are also
 | `strategies/` | Other strategies to compare in the backtest (one file each, `_template.py` to start) |
 | `pattern_trader.py` + `.github/workflows/pattern-trade.yml` | Paper trades your selected chart patterns in a second Alpaca paper account (section *Pattern paper trader*) |
 | `paper_report.py` + `.github/workflows/paper-report.yml` | Daily report of both paper accounts, saved in `reports/paper/` (section *Paper report*) |
-| `crypto_scanner.py` + `.github/workflows/crypto-scan.yml` | The same strategy on the top 10 cryptocurrencies, run by hand (section *Crypto*) |
+| `btc_bot.py` + `.github/workflows/crypto-scan.yml` | **Bitcoin bot**: trades only Bitcoin with the 50-day rule, once a day after 00:00 UTC (section *Crypto*) |
+| `crypto_scanner.py` | Chart-pattern alerts on the top 10 cryptocurrencies (*Crypto scan* → patterns only); its top-10 breakout trading was replaced by the Bitcoin bot |
 | `crypto.py` | Picks the top 10 coins and downloads their prices |
-| `crypto_trader.py` | Crypto paper trading with Alpaca (same rules, adapted to crypto) |
+| `crypto_trader.py` | Crypto paper-trading helpers (Alpaca orders, crypto budget); used by the Bitcoin bot |
 
 ## 1. Create your Telegram bot (5 min)
 1. In Telegram, open **@BotFather** and send `/newbot`. Pick a name. It replies with a **token** like `123456:ABC-xyz`.
@@ -112,13 +113,19 @@ The live bot stays as it is; new ideas are tested in the backtest first. Each fi
   - Removed on 19 Oct: every crypto / Bitcoin strategy that ended below buy & hold (crypto breakout, MA cross, momentum, rotation, Turtle, squeeze, ADX, Chandelier, early entries near support, short-term Bitcoin, the other 50-day / lower-high and trend-holding variants, take profits). Their results stay in `reports/backtest/`.
 - **Be careful with the results:** the more ideas you try, the more likely one looks good by luck. Check a winner on years it wasn't tuned on before changing the live bot.
 
-## Crypto (top 10 coins)
-The same strategy, alerts, charts and paper trading on the **10 biggest cryptocurrencies by market cap**. It only runs when you start it (no timer), so it uses GitHub minutes only when you want.
-- **Run it:** Actions → **Crypto scan** → **Run workflow** → pick the candles (**15m** like the stock bot, **1h** or **4h**; the daily chart is always checked) and, if you like, **Dry run** (shows what it would trade, places no orders) → **Run**. A ✅ message at the end says how many coins were checked, even when nothing was found.
+## Crypto: the Bitcoin bot
+Since 19 Oct 2026 the crypto bot trades **only Bitcoin** with the best Bitcoin strategy of the backtests, `strategies/btc50_uprise_ma_f1.py` (+23.7%/yr from Jan 2021 vs +17.3% for holding Bitcoin, worst drop −16.9% vs −76.7%; see *Testing new strategies*). `btc_bot.py`:
+- **Buys** when Bitcoin's daily close crosses above its 50-day average while the 50-day average is rising (higher than 10 days ago).
+- **Sells** when a bounce fails below the highest high since the buy (a lower high: a high above the 3 days before it, then one lower day), when a close falls below the 50-day average, or when a close falls below the starting stop (the last swing low before the buy, 1-3 ATR below). No buying back until the next fresh cross; no take profit.
+- **When:** every decision uses the completed daily candle (UTC day) and is carried out by the next run, **once a day at ~00:07 UTC** (02:07 Milan in summer) on a GitHub timer — exactly like the backtest (decide on the close, trade at the next open). If a run is missed, it still buys the next day; a cross older than that is skipped (it waits for the next one). There is no stop order in Alpaca: all exits are judged on daily closes.
+- **Money:** Alpaca paper account #1 (shared with the stock bot). A buy puts the whole crypto budget into Bitcoin: 50% of the account equity (`CRYPTO_BUDGET` in `crypto_trader.py`), minus any other crypto held. Orders are tagged `crypto-btcrule-…` ("Bitcoin 50-day rule" in the paper report).
+- **Telegram:** one message a day in the crypto chat: buy / sell with the reason, or the status (holding: entry, highest high, stop; in cash: the 50-day average and what the next buy needs).
+- **Run by hand / dry run:** Actions → **Crypto scan** → *strategy* **bot**, tick **Dry run** to see what it would do without placing orders.
+- **Patterns only** (same workflow, *strategy* **patterns only**): chart-pattern alerts on the top 10 coins, no trades (`crypto_scanner.py`).
 - **Separate Telegram chat (optional):** add a repository secret `TELEGRAM_CHAT_ID_CRYPTO` with the chat ID of another group (the same bot must be a member). Crypto scans and crypto backtests then go there; without it they go to your usual chat.
 - **Which coins:** the ranking is read from CoinGecko every run (CoinPaprika, then a built-in list as backups). **Stablecoins** (USDT, USDC...) and gold tokens are skipped because their price doesn't move, and coins **Alpaca doesn't trade** (e.g. BNB, TRX) are skipped because they can't be paper traded; the next coins in the ranking take their place. Coins too new for the 200-day MA still get the other alerts.
 - **Prices:** Alpaca's crypto data (real-time, 24/7, free), Yahoo Finance as backup. Crypto never closes, so a "day" is a **UTC day** (02:00 → 02:00 Milan in summer, 01:00 → 01:00 in winter), the daily candle most crypto charts use. Every run analyzes the candle that has just closed, at any hour, weekends included.
-- **Paper trading** (`crypto_trader.py`), ⭐ STRONG LONG signals only, same rules as the stocks: 1% risk per trade, stop 2× daily ATR, trailing exit below the 20-day low. Differences:
+- **Old top-10 breakout trading (replaced by the Bitcoin bot on 19 Oct 2026; `crypto_scanner.py` no longer trades)** — ⭐ STRONG LONG signals only, same rules as the stocks: 1% risk per trade, stop 2× daily ATR, trailing exit below the 20-day low. Differences:
   - **Fractional amounts** (e.g. 0.0123 BTC). Alpaca's crypto fee is **0.25%** per buy or sell for small accounts, taken from the coin you receive; the stop order uses the amount actually in the account, so it always matches.
   - **Stop:** Alpaca has no bracket orders for crypto, so the stop is a separate **stop-limit** sell (limit 1% below the stop) placed right after the entry fills. It stays active between runs. If the entry hasn't filled yet, the next run places the stop.
   - **Trend exit:** checked at **every run** (the bot doesn't run on a timer), not at a fixed time.

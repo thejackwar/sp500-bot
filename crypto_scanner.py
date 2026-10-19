@@ -27,6 +27,9 @@ import scanner
 import trader
 from fmt import px
 
+# Top-10 breakout paper trading was replaced by the Bitcoin bot (btc_bot.py) on 19 Oct 2026; this scanner
+# now only sends alerts (the workflow runs it for "patterns only"). True = trade the old way again.
+OLD_TOP10_TRADING = False
 STATE_FILE = os.environ.get("STATE_FILE", "crypto_state.json")   # sent alerts and the paper-trade book
 MODES = {
     "15m": {"minutes": 15, "name": "15-min", "days": 12},
@@ -197,7 +200,7 @@ def main():
 
     scanner.send_watchlist(watch, state, now, title="👀 Crypto patterns forming")
 
-    if not patterns_only:
+    if not patterns_only and OLD_TOP10_TRADING:
         for line in crypto_trader.run(found, state, scanner.send_telegram, dry_run=dry_run,
                                       chart_fn=lambda it, tr: trade_chart(it, tr, m), daily=daily, prices=live,
                                       tf_name=m["name"]):

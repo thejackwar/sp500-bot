@@ -12,7 +12,7 @@ open positions), so a missed day loses nothing. Writes:
 and sends a short Telegram summary. The workflow (paper-report.yml) commits the files to the repo.
 
 R = profit divided by the money risked at the entry (entry to the first stop). "What opened it" comes
-from the order's client_order_id: bot-daily / bot-intraday (breakout bot), crypto-... (crypto bot),
+from the order's client_order_id: bot-daily / bot-intraday (breakout bot), crypto-btcrule (Bitcoin bot), crypto-... (old crypto breakout bot),
 pat-<pattern> (pattern trader); trades placed before this tagging existed show "unknown".
 """
 import datetime as dt
@@ -55,6 +55,7 @@ def source(client_id):
     if c.startswith("pat-"):
         return c[4:].rsplit("-", 1)[0].replace("_", " ")
     for prefix, name in (("bot-daily", "breakout (daily)"), ("bot-intraday", "breakout (15-min)"),
+                         ("crypto-btcrule", "Bitcoin 50-day rule"),
                          ("crypto-daily", "crypto breakout (daily)"), ("crypto-", "crypto breakout (intraday)")):
         if c.startswith(prefix):
             return name
