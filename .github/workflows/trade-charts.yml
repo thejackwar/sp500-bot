@@ -1,0 +1,46 @@
+name: Trade charts
+
+# Pictures of a backtest's trades (overview + a close-up of every trade), committed to
+# reports/backtest/<results>/charts/. Made for the Bitcoin trend rule; see trade_charts.py.
+on:
+  workflow_dispatch:
+    inputs:
+      results:
+        description: "Results folder in reports/backtest/"
+        type: string
+        default: "crypto-btc-strategies-btc_trend-8y"
+      version:
+        description: "Start of the version's name in trades.csv"
+        type: string
+        default: "Hold BTC while above BOTH"
+
+permissions:
+  contents: write              # to commit the pictures
+
+jobs:
+  charts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Draw the charts
+        run: python trade_charts.py
+        env:
+          PYTHONUNBUFFERED: "1"
+          RESULTS: ${{ inputs.results }}
+          VERSION: ${{ inputs.version }}
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+      - name: Commit the charts
+        run: |
+          git config user.name "trade-charts bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/backtest
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "Trade charts: ${{ inputs.results }}"
+          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done
