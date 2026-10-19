@@ -1,0 +1,29 @@
+📅 Return by year (middle of 10 runs)
+Version    2021   2022   2023   2024   2025   2026
+Bot         -5%    -0%    -0%   +13%    -4%    +2%
+Bot+BTC     -3%    +0%    +2%   +12%    -1%    +2%
+LHnoRe     +10%   -51%   +52%   +72%    -4%    +5%
+Up200      +11%    +0%   +12%   +14%   -21%    +0%
+Up200+2    +17%    +0%   +12%    +2%   -22%    +0%
+UpGold     +26%    +0%   +12%   +36%   -21%    +0%
+UpGol+2    +33%    +0%   +12%   +22%   -22%    +0%
+UpRise     -11%    -5%    +2%  +145%    -8%   +18%
+UpRis+2     -6%    -5%    +2%   +57%    -9%    +5%
+BTC>bot    -13%    +0%   +86%   +64%    -6%   +19%
+Bot+MA      -3%    +0%    +2%   +12%    -1%    +2%
+Bot+MAf     -3%    +0%    +2%   +12%    -1%    +2%
+BTC        +40%   -64%  +156%  +121%    -6%    -6%
+
+Long vs short (first run)
+Bot: long 36× +0.12R $+3k
+Bot+BTC: long 24× +0.49R $+11k
+LHnoRe: long 37× +0.02R $+27k
+Up200: long 16× -0.01R $+12k
+Up200+2R: long 16× -0.01R $+4k
+UpGold: long 14× +0.01R $+53k
+UpGol+2R: long 14× +0.00R $+42k
+UpRise: long 16× +0.06R $+131k
+UpRis+2R: long 16× +0.01R $+36k
+BTC>both: long 33× +0.04R $+151k
+Bot+MA: long 24× +0.49R $+11k
+Bot+MAf: long 24× +0.49R $+11k
