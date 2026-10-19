@@ -2,6 +2,7 @@
 sell when it crosses back below (the "death cross"). Slow, long-term trend following."""
 from strategies import tools
 
+MARKETS = ("stocks",)          # far below buy & hold on crypto (19 Oct 2026)
 NAME = "Golden cross (50/200-day averages)"
 SHORT = "GoldX"
 EXIT = {"stop_atr": 4.0, "target_r": None, "trail_days": None, "max_days": None}

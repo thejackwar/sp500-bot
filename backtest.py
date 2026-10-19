@@ -895,7 +895,7 @@ def strategy_signals(mod, daily, syms, days, first_slot, intraday=None, slots=No
                              "il": False, "is": False, "atr": float(prev_atr.at[dte]),
                              "score": float(sc) if pd.notna(sc) else 0.0})
             continue
-        if hasattr(mod, "setups"):                     # own stop + target per signal (strategies/_setups.py)
+        if hasattr(mod, "setups"):                     # own stop + target per signal
             st = mod.setups(d)
             pos = days.get_indexer(st.index)
             for (dte, row), p in zip(st.iterrows(), pos):
@@ -1400,16 +1400,6 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
                     lows_highs(ex["trail_days"])
             jobs.append((name, getattr(mod, "NAME", name), getattr(mod, "SHORT", name[:7]), s_sig, cfg))
             print(f"Strategy {name}: {len(s_sig)} buy signals", flush=True)
-        if MARKET == "crypto" and spy is not None:
-            # the bot + the 200-day MA retest as a second way in, one account, same money rules
-            from strategies import early_ma200_trail as retest
-            r_sig, _ = strategy_signals(retest, daily, syms, days, first_slot, intraday, slots)
-            print(f"200-day MA retests for the combined versions: {len(r_sig)}", flush=True)
-            for key, label, short, nofilt in (
-                    ("bot_ma200", "Bot + BTC filter + 200-day MA retest (filter on both)", "Bot+MA", False),
-                    ("bot_ma200_free", "Bot + BTC filter + 200-day MA retest (retest without the filter)", "Bot+MAf", True)):
-                comb = pd.concat([sig, r_sig.assign(nofilt=nofilt)], ignore_index=True)
-                jobs.append((key, label, short, comb, {**BOT_NOW, "spy_filter": True}))
     elif mode == "patterns":
         first_slot = np.flatnonzero(np.r_[True, slot_day[1:] != slot_day[:-1]])
         if PATTERN_TF == "daily":

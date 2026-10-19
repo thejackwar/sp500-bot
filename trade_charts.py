@@ -7,7 +7,7 @@ reports/backtest/<folder>/charts/. Settings (environment variables):
     RESULTS   results folder in reports/backtest/   (default crypto-btc-strategies-btc_trend-8y)
     VERSION   start of the version's name in trades.csv (default: the 50 & 200-day Bitcoin rule)
     SYMBOL    coin                                   (default BTC/USD)
-    RULE      optional: a btc50_*.py strategy file (e.g. btc50_lh). Draws that rule's stop, the highest
+    RULE      optional: a btc50_*.py strategy file (e.g. btc50_uprise_ma_f1). Draws that rule's stop, the highest
               high since entry and the lower highs instead of the averages' exit line; the pictures go to
               charts/<RULE>/
 

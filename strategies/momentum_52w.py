@@ -2,6 +2,7 @@
 leading), ride the trend and sell when the price falls below its 50-day low."""
 from strategies import tools
 
+MARKETS = ("stocks",)          # far below buy & hold on crypto (19 Oct 2026)
 NAME = "52-week-high momentum"
 SHORT = "52wHi"
 EXIT = {"stop_atr": 3.0, "target_r": None, "trail_days": 50, "max_days": None}
