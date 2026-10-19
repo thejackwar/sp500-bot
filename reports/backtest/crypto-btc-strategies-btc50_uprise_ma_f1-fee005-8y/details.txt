@@ -1,0 +1,15 @@
+📅 Return by year (middle of 10 runs)
+Version    2021   2022   2023   2024   2025   2026
+Bot         -5%    -0%    +0%   +13%    -4%    +2%
+Bot+BTC     -2%    +0%    +2%   +13%    -1%    +2%
+MA f1      +13%    -4%   +11%  +150%    +3%   +17%
+HL clos    +30%    +0%    +0%    +0%    +0%    +0%
+HL wick    +30%    -4%    +0%   +64%    +0%   +18%
+BTC        +40%   -64%  +156%  +121%    -6%    -6%
+
+Long vs short (first run)
+Bot: long 36× +0.18R $+5k
+Bot+BTC: long 24× +0.55R $+13k
+MA f1: long 21× +0.07R $+261k
+HL close: long 1× +0.18R $+30k
+HL wick: long 5× +0.20R $+143k
