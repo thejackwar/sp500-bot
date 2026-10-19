@@ -31,6 +31,11 @@ exit, lh_right sets how many lower days after a high confirm it (default PIVOT =
     re-entry     after a lower-high / trend-break sell, buy again when a close is above the high that
                  failed (the trend resumed) while above the 50-day average; after a starting stop or a
                  take profit, wait for a new cross
+    side         "long" (default) or "short": the short rule is the long rule run on the chart turned
+                 upside down (every price x -1), so it is the exact mirror: sell short when the close
+                 crosses BELOW the 50-day while the 50-day is FALLING; cover on a higher low (a low below
+                 the 3 days before it, then lh_right higher days), a close back above the 50-day, or the
+                 starting stop above the last swing high
 """
 import numpy as np
 import pandas as pd
@@ -42,10 +47,23 @@ _cache = {}
 
 
 def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False, line="50", ma_exit=False,
-        start_stop=True, trend=None, lh_right=None):
+        start_stop=True, trend=None, lh_right=None, side="long"):
     """Replays the rule on daily candles. Returns a DataFrame indexed like d with columns
     entry (signal on that close), exit (signal on that close), stop (starting/trailing stop while in a
-    trade), peak (highest high since entry), lh (a lower high was confirmed that day), reason."""
+    trade), peak (highest high since entry), lh (a lower high was confirmed that day), reason.
+    side="short": the same rule on the mirrored chart; stop/peak come back in real prices (the stop
+    ABOVE the entry, peak = lowest low since the short), lh = a higher low."""
+    if side == "short":
+        m = pd.DataFrame({"Open": -d["Open"], "High": -d["Low"], "Low": -d["High"], "Close": -d["Close"]},
+                         index=d.index)
+        out = run(m, exit_mode, tp_r, stretch, reentry, above200, line, ma_exit, start_stop, trend, lh_right).copy()
+        out["stop"], out["peak"] = -out["stop"], -out["peak"]
+        flip = {"lower high": "higher low", "close below the 50-day": "close above the 50-day",
+                "close below the line": "close above the line", "came back to the 50-day": "came back up to the 50-day",
+                "broke the pullback low": "broke the bounce high", "below higher low": "above lower high",
+                "new high": "new low"}
+        out["reason"] = out["reason"].map(lambda r: flip.get(r, r))
+        return out
     key = (exit_mode, tp_r, stretch, reentry, above200, line, ma_exit, start_stop, trend, lh_right,
            d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
     if key in _cache:

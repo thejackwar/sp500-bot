@@ -110,6 +110,7 @@ The live bot stays as it is; new ideas are tested in the backtest first. Each fi
     - `btc50_uprise_maonly.py`: close below the 50-day only (no lower-high exit).
     - `btc50_uprise_f1.py`: lower high after 1 day only (no 50-day exit).
   - `btc_trend_50_200.py`: hold Bitcoin while its daily close is above both its 50- and 200-day averages, else cash (+21.3%/yr, −26.6%).
+  - **Shorts (backtest only, added 19 Oct 2026; Alpaca can't short crypto):** `btc50_short_ma_f1.py` is the exact mirror of `btc50_uprise_ma_f1.py` (the rule run on the chart turned upside down, `side="short"` in `_structure.py`): sell short when the close crosses below a falling 50-day; cover on a higher low after 1 day, a close back above the 50-day, or the starting stop above the last swing high. `btc50_both_ma_f1.py` trades both directions with the whole account, one position at a time. A strategy file sets `SIDE = "short"` or `"both"` (with `short_entries()` / `short_exits()`) for the backtest to take shorts. No borrow or funding fees are charged on shorts.
   - Removed on 19 Oct: every crypto / Bitcoin strategy that ended below buy & hold (crypto breakout, MA cross, momentum, rotation, Turtle, squeeze, ADX, Chandelier, early entries near support, short-term Bitcoin, the other 50-day / lower-high and trend-holding variants, take profits). Their results stay in `reports/backtest/`.
 - **Be careful with the results:** the more ideas you try, the more likely one looks good by luck. Check a winner on years it wasn't tuned on before changing the live bot.
 

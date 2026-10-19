@@ -492,6 +492,7 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
         phase 1 = during the candle (stop, target). Same order as a candle-by-candle replay."""
         long_, stop, tgt = p["dir"] == "LONG", p["stop"], p["target"]
         sign = 1 if long_ else -1
+        em = exit_m.get(p["dir"]) if isinstance(exit_m, dict) else exit_m    # "both" strategies: per direction
         start, step = s, 1500
         while start < n_slots:
             end = min(n_slots, start + step)
@@ -501,9 +502,9 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
             old = valid & (idx != s)
             c1 = np.zeros(len(idx), bool)
             reason1 = None
-            if exit_m is not None or max_days:
+            if em is not None or max_days:
                 fd = old & first_of_day[start:end] & (di[start:end] > 0)
-                sig_ex = fd & exit_m[np.maximum(di[start:end] - 1, 0), col] if exit_m is not None else np.zeros(len(idx), bool)
+                sig_ex = fd & em[np.maximum(di[start:end] - 1, 0), col] if em is not None else np.zeros(len(idx), bool)
                 time_ex = fd & (di[start:end] - di[s] >= max_days) if max_days else np.zeros(len(idx), bool)
                 c1 = sig_ex | time_ex
                 reason1 = (sig_ex, time_ex)
@@ -862,7 +863,7 @@ def strategy_signals(mod, daily, syms, days, first_slot, intraday=None, slots=No
     Strategies with entry_level(d) instead buy DURING the day: the first 15-min candle that closes
     above that day's level, bought at the next candle's open (like the live bot checking every 15 min)."""
     from strategies import tools
-    rows, exit_cols = [], []
+    rows, exit_cols, short_exit_cols = [], [], []
     for col, sym in enumerate(syms):
         d = daily[sym][["Open", "High", "Low", "Close"]].copy()
         atr = tools.atr(d)
@@ -910,24 +911,37 @@ def strategy_signals(mod, daily, syms, days, first_slot, intraday=None, slots=No
                 ex = pd.Series(mod.exits(d), index=d.index).reindex(days).fillna(False).astype(bool)
                 exit_cols.append(ex.values)
             continue
-        ent = pd.Series(mod.entries(d), index=d.index).fillna(False).astype(bool)
-        dates = d.index[ent.values]
-        pos = days.get_indexer(dates)
-        ok = (pos >= 0) & (pos + 1 < len(days))
-        for dte, p in zip(dates[ok], pos[ok]):
-            rows.append({"slot": first_slot[p + 1], "col": col, "sym": sym, "dl": True, "ds": False,
-                         "il": False, "is": False, "atr": float(atr.at[dte]),
-                         "score": float(score.at[dte]) if pd.notna(score.at[dte]) else 0.0})
+        # SIDE = "long" (default): entries() buys; "short": entries() sells short; "both": entries() buys
+        # and short_entries() sells short, each with its own exits (exits() / short_exits())
+        side = getattr(mod, "SIDE", "long")
+        sets = [(mod.entries, side != "short")]
+        if side == "both":
+            sets.append((mod.short_entries, False))
+        for fn, is_long in sets:
+            ent = pd.Series(fn(d), index=d.index).fillna(False).astype(bool)
+            dates = d.index[ent.values]
+            pos = days.get_indexer(dates)
+            ok = (pos >= 0) & (pos + 1 < len(days))
+            for dte, p in zip(dates[ok], pos[ok]):
+                rows.append({"slot": first_slot[p + 1], "col": col, "sym": sym, "dl": is_long, "ds": not is_long,
+                             "il": False, "is": False, "atr": float(atr.at[dte]),
+                             "score": float(score.at[dte]) if pd.notna(score.at[dte]) else 0.0})
         if hasattr(mod, "exits"):
             ex = pd.Series(mod.exits(d), index=d.index).reindex(days).fillna(False).astype(bool)
             exit_cols.append(ex.values)
+        if side == "both":
+            ex = pd.Series(mod.short_exits(d), index=d.index).reindex(days).fillna(False).astype(bool)
+            short_exit_cols.append(ex.values)
     cols = ["slot", "col", "sym", "dl", "ds", "il", "is", "atr", "score"]
     if hasattr(mod, "setups"):
         cols += ["stop", "target", "pattern"]
     sig = pd.DataFrame(rows, columns=cols)
     sig = sig.astype({"slot": int, "col": int, "dl": bool, "ds": bool, "il": bool, "is": bool,
                       "atr": float, "score": float})             # also when there are no signals
-    return sig, (np.column_stack(exit_cols) if exit_cols else None)
+    ex_m = np.column_stack(exit_cols) if exit_cols else None
+    if short_exit_cols:                                # "both": exits per direction
+        ex_m = {"LONG": ex_m, "SHORT": np.column_stack(short_exit_cols)}
+    return sig, ex_m
 
 
 # ---------------------------------------------------------------- chart patterns (patterns.py)
@@ -1395,7 +1409,8 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
             ex = {"stop_atr": T.STOP_ATR, "target_r": None, "trail_days": None, "max_days": None,
                   **getattr(mod, "EXIT", {})}
             to_target = ex.pop("to_target", False)      # setups(): sell at the setup's own target
-            cfg = {"kinds": ("daily",), "shorts": False, "exit": "custom", "margin": T.MAX_INVESTED,
+            cfg = {"kinds": ("daily",), "shorts": getattr(mod, "SIDE", "long") != "long",
+                   "exit": "custom", "margin": T.MAX_INVESTED,
                    "exit_matrix": s_exit, "pattern_target": to_target, "size": getattr(mod, "SIZE", None), **ex}
             if ex["trail_days"]:
                 extra.setdefault("low", {})[ex["trail_days"]], extra.setdefault("high", {})[ex["trail_days"]] = \
@@ -1458,7 +1473,9 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
             ex = slice_extra(extra, d0)
             ex["day_idx"] = extra["day_idx"][k:] - d0
             c = {**cfg, "seed": i if runs > 1 else None}
-            if c.get("exit_matrix") is not None:
+            if isinstance(c.get("exit_matrix"), dict):
+                c["exit_matrix"] = {k: (m[d0:] if m is not None else None) for k, m in c["exit_matrix"].items()}
+            elif c.get("exit_matrix") is not None:
                 c["exit_matrix"] = c["exit_matrix"][d0:]
             trades, eq, info = simulate(sub, O[k:], H[k:], L[k:], C[k:], slots[k:], syms, c, ex)
             st = {**stats(trades, eq), "interest": info["interest"]}
