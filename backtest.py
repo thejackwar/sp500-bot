@@ -1593,6 +1593,8 @@ def main():
         return each_coin(start, end, mode, runs)
     if market == "stocks" and os.environ.get("COINS", "").strip().lower().startswith("each"):
         return each_stock(start, end, mode, runs)
+    if market == "stocks" and os.environ.get("COINS", "").strip().lower().startswith("spy"):
+        return each_stock(start, end, mode, runs, only=["SPY"])
     if market == "crypto":
         import crypto
         use_crypto()
@@ -1695,7 +1697,7 @@ def main():
                  caption="Every pattern breakout traded on its own (the scorecard's trades).")
 
 
-def each_stock(start, end, mode, runs):
+def each_stock(start, end, mode, runs, only=None):
     """COINS="each stock" with MARKET=stocks: the strategy files tested on every S&P 100 stock ON ITS OWN, and
     on SPY (the S&P 500 index), each compared with buying and holding THAT stock. Whole account in that one
     stock when holding (strategy SIZE). One table for all stocks + a summary across them."""
@@ -1703,8 +1705,7 @@ def each_stock(start, end, mode, runs):
     import scanner
     SKIP_BOT = True
     os.makedirs(OUT, exist_ok=True)
-    tickers = scanner.get_tickers()
-    tickers = ["SPY"] + [t for t in tickers if t != "SPY"]
+    tickers = only or (["SPY"] + [t for t in scanner.get_tickers() if t != "SPY"])
     print(f"Each-stock test {start:%Y-%m-%d} → {end:%Y-%m-%d}: {len(tickers)} symbols", flush=True)
     daily, intraday = download(tickers, start, end)
     rows, trades, eqs, lines = [], [], {}, []
@@ -1758,9 +1759,10 @@ def each_stock(start, end, mode, runs):
            "position and are liquidated as in the crypto test. 'final' = money from $100,000 (first run).", ""]
     # summary across the S&P 100 stocks (SPY separately)
     stocks = [s for s in bh.index if s != "SPY"]
-    out.append(f"<b>Across {len(stocks)} S&P 100 stocks</b> (median of the stocks; buy & hold median "
+    if stocks:
+      out.append(f"<b>Across {len(stocks)} S&P 100 stocks</b> (median of the stocks; buy & hold median "
                f"{pct(bh.loc[stocks, 'cagr'].median())}/yr, max drop {pct(bh.loc[stocks, 'max_dd'].median())}):")
-    for short, name in vers.itertuples(index=False):
+    for short, name in (vers.itertuples(index=False) if stocks else []):
         g = tab[(tab.short == short) & tab.stock.isin(stocks)].set_index("stock")
         if g.empty:
             continue

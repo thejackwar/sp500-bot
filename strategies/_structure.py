@@ -35,6 +35,11 @@ exit, lh_right sets how many lower days after a high confirm it (default PIVOT =
                  last confirmed swing low is above the one before it AND nothing since has gone below it
                  (a lower low = downtrend: wait for a new higher low). "wick" judges swing lows on the
                  days' lows, "close" on the daily closes
+    cross_atr    a "real" cross: the close must be at least this many ATRs above the line, within cross_window
+                 days of a close at or below it (None = any cross, however small)
+    rise_min     with trend="rising50": the 50-day must be at least this much higher than 10 days ago (0.005 = 0.5%)
+    turn         also buy when the 50-day TURNS rising (rising today, not yesterday) while the close is already
+                 above the line - the cross that came while the average still fell is otherwise lost
     side         "long" (default) or "short": the short rule is the long rule run on the chart turned
                  upside down (every price x -1), so it is the exact mirror: sell short when the close
                  crosses BELOW the 50-day while the 50-day is FALLING; cover on a higher low (a low below
@@ -51,7 +56,8 @@ _cache = {}
 
 
 def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False, line="50", ma_exit=False,
-        start_stop=True, trend=None, lh_right=None, side="long", structure=None):
+        start_stop=True, trend=None, lh_right=None, side="long", structure=None, cross_atr=None, cross_window=5,
+        rise_min=0.0, turn=False):
     """Replays the rule on daily candles. Returns a DataFrame indexed like d with columns
     entry (signal on that close), exit (signal on that close), stop (starting/trailing stop while in a
     trade), peak (highest high since entry), lh (a lower high was confirmed that day), reason.
@@ -61,7 +67,8 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
         m = pd.DataFrame({"Open": -d["Open"], "High": -d["Low"], "Low": -d["High"], "Close": -d["Close"]},
                          index=d.index)
         out = run(m, exit_mode, tp_r, stretch, reentry, above200, line, ma_exit, start_stop, trend, lh_right,
-                  structure=structure).copy()
+                  structure=structure, cross_atr=cross_atr, cross_window=cross_window, rise_min=rise_min,
+                  turn=turn).copy()
         out["stop"], out["peak"] = -out["stop"], -out["peak"]
         flip = {"lower high": "higher low", "close below the 50-day": "close above the 50-day",
                 "close below the line": "close above the line", "came back to the 50-day": "came back up to the 50-day",
@@ -70,6 +77,7 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
         out["reason"] = out["reason"].map(lambda r: flip.get(r, r))
         return out
     key = (exit_mode, tp_r, stretch, reentry, above200, line, ma_exit, start_stop, trend, lh_right, structure,
+           cross_atr, cross_window, rise_min, turn,
            d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
     if key in _cache:
         return _cache[key]
@@ -139,7 +147,9 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
         if not pos:
             if not np.isfinite(ln[i]) or (above200 and not (np.isfinite(sma200[i]) and c[i] > sma200[i])):
                 continue
-            if trend == "rising50" and not (i >= 10 and np.isfinite(sma50[i - 10]) and sma50[i] > sma50[i - 10]):
+            def rising(k):
+                return k >= 10 and np.isfinite(sma50[k - 10]) and sma50[k] > sma50[k - 10] * (1 + rise_min)
+            if trend == "rising50" and not rising(i):
                 continue
             if trend == "golden" and not (np.isfinite(sma200[i]) and sma50[i] > sma200[i]):
                 continue
@@ -148,6 +158,12 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
             # "both": the first day the line exists counts too (that is when the hold rule can first buy);
             # "50": only a real cross from below
             cross = c[i] > ln[i] and (c[i - 1] <= ln[i - 1] or (line != "50" and not np.isfinite(ln[i - 1])))
+            if cross_atr:                            # a real cross: clear of the line, soon after being below it
+                lo_k = max(0, i - cross_window)
+                cross = (c[i] > ln[i] + cross_atr * atr[i] and c[i - 1] <= ln[i - 1] + cross_atr * atr[i - 1]
+                         and bool(np.any(c[lo_k:i] <= ln[lo_k:i])))
+            if turn and not cross and trend == "rising50" and c[i] > ln[i] and not rising(i - 1):
+                cross = True                         # the 50-day just turned up with price already above it
             resume = reentry and failed_high is not None and c[i] > failed_high and c[i] > ln[i]
             if cross or resume:
                 entry[i] = True

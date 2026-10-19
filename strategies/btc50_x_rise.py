@@ -1,0 +1,18 @@
+"""Your rule (btc50_uprise_ma_f1) + stronger rise (50-day up 0.5%+ in 10 days). Everything else as the live Bitcoin rule; tested on SPY
+(each-stock mode) to filter out the small crosses in pullbacks. Rules in strategies/_structure.py."""
+from strategies import _structure
+
+MARKETS = ("crypto", "stocks")
+NAME = "Your rule + stronger rise (50-day up 0.5%+ in 10 days)"
+SHORT = "R rise"
+SIZE = 1.0
+KW = dict(exit_mode='lh', trend='rising50', reentry=False, ma_exit='close', lh_right=1, rise_min=0.005)
+EXIT = {"stop_atr": 30.0, "target_r": None, "trail_days": None, "max_days": None}   # exits come from exits()
+
+
+def entries(d):
+    return _structure.run(d, **KW)["entry"]
+
+
+def exits(d):
+    return _structure.run(d, **KW)["exit"]
