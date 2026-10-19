@@ -14,7 +14,9 @@ only known PIVOT days later (no look-ahead). Swing lows the same way with lows.
                  above the HIGHER of the 50- and 200-day averages
     trend        uptrend filter for the entry: None, "rising50" (50-day average higher than 10 days
                  ago) or "golden" (50-day average above the 200-day); above200=True = close above the 200-day
-    ma_exit      also sell after a close below that line (the hold rule's exit, which keeps losses small)
+    ma_exit      True / "close": also sell after a close below that line (the hold rule's exit);
+                 "touch": also sell after a day whose low comes back down to the line, once price has
+                 traded fully above it since the entry (the user's "came back down and hit the 50-day")
     start stop   sell if a close falls below the last swing low before the entry, kept between
                  1 and 3 ATR below the entry (protection before any high has formed)
     exit "lh"    LOWER HIGH: after the entry, the highest high so far is the "previous high"; a new
@@ -85,7 +87,7 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
             a = atr[i - 1]
             stop = min(max(sl, e_price - 3 * a), e_price - a)
             risk = e_price - stop
-            peak, peak_day, brk, trailed = h[i], i, None, False
+            peak, peak_day, brk, trailed, lifted = h[i], i, None, False, False
         if not pos:
             if not np.isfinite(ln[i]) or (above200 and not (np.isfinite(sma200[i]) and c[i] > sma200[i])):
                 continue
@@ -120,8 +122,12 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
                 stop, trailed = l[j], True
         if why is None and exit_mode == "break" and brk is not None and c[i] < brk:
             why = "broke the pullback low"
-        if why is None and ma_exit and c[i] < ln[i]:
-            why = "close below the line"
+        if l[i] > ln[i]:
+            lifted = True                            # traded fully above the line since the entry
+        if why is None and ma_exit == "touch" and lifted and l[i] <= ln[i]:
+            why = "came back to the 50-day" if line == "50" else "came back to the line"
+        if why is None and ma_exit and ma_exit != "touch" and c[i] < ln[i]:
+            why = "close below the 50-day" if line == "50" else "close below the line"
         if why is None and start_stop and c[i] < stop:
             why = "below higher low" if trailed else "starting stop"
         if why is None and tp_r and c[i] >= e_price + tp_r * risk:
