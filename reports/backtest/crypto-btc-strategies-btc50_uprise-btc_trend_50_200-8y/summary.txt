@@ -8,7 +8,7 @@ max drop -14.9% (worst -14.9%) · profit factor 1.12
 ~36 trades, win 19%, avg +0.12R, worst streak 11, hold 29d, invested 9%
 
 <b>Bot now + BTC filter (BTC above its 50-day MA)</b>
-+2.1%/yr (+2.1% to +2.1%), beat BTC in 0/10 runs
++2.1%/yr (+2.0% to +2.1%), beat BTC in 0/10 runs
 max drop -10.8% (worst -10.8%) · profit factor 1.66
 ~24 trades, win 25%, avg +0.49R, worst streak 6, hold 35d, invested 8%
 
@@ -17,13 +17,23 @@ max drop -10.8% (worst -10.8%) · profit factor 1.66
 max drop -31.4% (worst -31.4%) · profit factor 2.44
 ~16 trades, win 44%, avg +0.06R, worst streak 3, hold 25d, invested 19%, interest ~$0
 
+<b>Your rule (50-day rising), lower high confirmed after 1 day</b>
++17.9%/yr (+17.6% to +18.2%), beat BTC in 10/10 runs
+max drop -31.4% (worst -31.4%) · profit factor 2.59
+~17 trades, win 41%, avg +0.07R, worst streak 3, hold 22d, invested 18%, interest ~$0
+
 <b>Your rule (50-day rising) + sell on a close below the 50-day</b>
 +21.5%/yr (+21.1% to +21.8%), beat BTC in 10/10 runs
 max drop -16.9% (worst -16.9%) · profit factor 3.93
 ~21 trades, win 29%, avg +0.06R, worst streak 4, hold 15d, invested 15%, interest ~$0
 
+<b>Your rule (50-day rising) + close below the 50-day, lower high after 1 day</b>
++23.7%/yr (+23.3% to +24.1%), beat BTC in 10/10 runs
+max drop -16.9% (worst -16.9%) · profit factor 4.68
+~21 trades, win 33%, avg +0.07R, worst streak 4, hold 14d, invested 14%, interest ~$0
+
 <b>50-day cross (50-day rising), sell on a close below the 50-day or starting stop, no lower-high exit</b>
-+18.3%/yr (+18.0% to +18.6%), beat BTC in 10/10 runs
++18.2%/yr (+17.9% to +18.6%), beat BTC in 10/10 runs
 max drop -22.2% (worst -22.2%) · profit factor 2.69
 ~20 trades, win 25%, avg +0.04R, worst streak 4, hold 19d, invested 22%, interest ~$0
 
@@ -32,18 +42,28 @@ max drop -22.2% (worst -22.2%) · profit factor 2.69
 max drop -18.9% (worst -18.9%) · profit factor 3.61
 ~19 trades, win 47%, avg +0.06R, worst streak 4, hold 16d, invested 15%, interest ~$0
 
+<b>Your rule (50-day rising) + back to the 50-day, lower high after 1 day</b>
++23.7%/yr (+23.3% to +24.1%), beat BTC in 10/10 runs
+max drop -18.1% (worst -18.1%) · profit factor 3.56
+~20 trades, win 45%, avg +0.07R, worst streak 4, hold 14d, invested 14%, interest ~$0
+
+<b>Your rule (50-day rising) + back to the 50-day, lower high after 2 days</b>
++23.5%/yr (+23.1% to +23.9%), beat BTC in 10/10 runs
+max drop -18.4% (worst -18.4%) · profit factor 3.58
+~19 trades, win 47%, avg +0.06R, worst streak 4, hold 16d, invested 14%, interest ~$0
+
 <b>Your rule (uptrend = 50-day rising) + take profit at 2R</b>
 +5.6%/yr (+5.5% to +5.7%), beat BTC in 0/10 runs
 max drop -31.4% (worst -31.4%) · profit factor 1.48
 ~16 trades, win 44%, avg +0.01R, worst streak 3, hold 16d, invested 13%, interest ~$0
 
 <b>Hold BTC while above BOTH its 50- and 200-day MAs, else cash (100% in)</b>
-+21.3%/yr (+20.9% to +21.7%), beat BTC in 10/10 runs
++21.3%/yr (+20.9% to +21.6%), beat BTC in 10/10 runs
 max drop -26.6% (worst -26.6%) · profit factor 2.22
 ~33 trades, win 27%, avg +0.04R, worst streak 5, hold 21d, invested 36%, interest ~$0
 
 <b>Bot + BTC filter + 200-day MA retest (filter on both)</b>
-+2.1%/yr (+2.1% to +2.1%), beat BTC in 0/10 runs
++2.1%/yr (+2.0% to +2.1%), beat BTC in 0/10 runs
 max drop -10.8% (worst -10.8%) · profit factor 1.66
 ~24 trades, win 25%, avg +0.49R, worst streak 6, hold 35d, invested 8%
 
@@ -53,6 +73,6 @@ max drop -10.8% (worst -10.8%) · profit factor 1.65
 ~24 trades, win 25%, avg +0.49R, worst streak 6, hold 35d, invested 8%
 
 <b>Buy & hold BTC</b>
-+150.1% (+17.3%/yr) · max drop -76.7%
++149.9% (+17.3%/yr) · max drop -76.7%
 
 <i>BTC only (no coin-picking bias); fees 0.25% per buy and sell; fills at the next 15-min open with 0.05% slippage. Past results don't guarantee future ones.</i>

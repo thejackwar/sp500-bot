@@ -35,7 +35,7 @@ version,symbol,direction,signal,entry_time,exit_time,entry,stop,target,exit,qty,
 "Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-10-12 16:15,2025-10-17 08:00,114069.38,105666.0,,105613.17,0.12465043,stop,-1122.53,-1.08,5
 "Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2025-10-20 04:00,2025-11-04 17:00,110237.24,102207.0,,102155.9,0.12905092,stop,-1111.43,-1.08,15
 "Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2026-08-20 08:15,2026-09-16 00:00,71266.71,67893.4,,75589.52,0.28585686,trend exit,1130.76,1.19,26
-"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2026-09-18 03:15,2026-10-19 13:00,77284.7,73123.3,,82504.8,0.24968527000000001,still open,1203.64,1.17,31
+"Bot now: breakout, trailing exit",BTC/USD,LONG,15-min,2026-09-18 03:15,2026-10-19 13:15,77284.7,73123.3,,82435.73,0.24968527000000001,still open,1186.44,1.15,31
 Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2021-08-09 18:45,2021-09-21 00:30,46381.78,41401.8,,41381.1,0.20174326,stop,-1053.12,-1.05,43
 Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2021-10-03 18:00,2021-10-21 11:45,48950.27,43731.3,,43709.43,0.19048254,stop,-1042.41,-1.05,18
 Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2021-10-23 11:45,2021-11-19 00:00,61705.1,48908.6,,56671.29,0.07669368,trend exit,-408.76,-0.42,26
@@ -60,7 +60,7 @@ Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2025-08-03 11
 Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2025-09-12 17:30,2025-09-25 17:15,115943.16,110417.0,,110361.79,0.19333176,stop,-1188.44,-1.12,13
 Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2025-10-01 08:30,2025-10-10 21:15,115187.54,110379.0,,110323.81,0.19253549,stop,-1044.99,-1.14,9
 Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2026-08-20 08:15,2026-09-16 00:00,71266.71,67893.4,,75589.52,0.30825878,trend exit,1219.37,1.19,26
-Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2026-09-18 03:15,2026-10-19 13:00,77284.7,73123.3,,82504.8,0.2692525,still open,1297.97,1.17,31
+Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2026-09-18 03:15,2026-10-19 13:15,77284.7,73123.3,,82435.73,0.2692525,still open,1279.41,1.15,31
 "Your rule: 50-day cross + uptrend (50-day rising), lower-high exit, no re-entry",BTC/USD,LONG,daily,2021-05-01 00:00,2021-05-16 00:15,57821.1,-47532.2,,46734.97,1.7251596764765678,exit signal,-19576.28,-0.11,15
 "Your rule: 50-day cross + uptrend (50-day rising), lower-high exit, no re-entry",BTC/USD,LONG,daily,2021-09-13 00:00,2021-09-22 00:15,46047.97,-29714.8,,40685.71,1.742165000870156,exit signal,-9719.71,-0.07,9
 "Your rule: 50-day cross + uptrend (50-day rising), lower-high exit, no re-entry",BTC/USD,LONG,daily,2021-10-02 00:00,2021-11-06 00:15,48187.62,-34790.1,,60976.47,1.4636060021284756,exit signal,18318.4,0.15,35
@@ -77,6 +77,23 @@ Bot now + BTC filter (BTC above its 50-day MA),BTC/USD,LONG,15-min,2026-09-18 03
 "Your rule: 50-day cross + uptrend (50-day rising), lower-high exit, no re-entry",BTC/USD,LONG,daily,2025-10-13 00:00,2025-10-17 00:15,115145.54,-12960.8,,108176.52,1.8131614250132184,exit signal,-13648.27,-0.06,4
 "Your rule: 50-day cross + uptrend (50-day rising), lower-high exit, no re-entry",BTC/USD,LONG,daily,2026-05-24 00:00,2026-05-28 00:15,76704.59,12844.9,,74268.83,2.544348859952261,exit signal,-7157.74,-0.04,4
 "Your rule: 50-day cross + uptrend (50-day rising), lower-high exit, no re-entry",BTC/USD,LONG,daily,2026-08-03 00:00,2026-09-15 00:15,63526.69,13658.8,,78143.38,2.9597535576516196,exit signal,42213.54,0.29,43
+"Your rule (50-day rising), lower high confirmed after 1 day",BTC/USD,LONG,daily,2021-05-01 00:00,2021-05-16 00:15,57821.1,-47532.2,,46734.97,1.7251596764765678,exit signal,-19576.28,-0.11,15
+"Your rule (50-day rising), lower high confirmed after 1 day",BTC/USD,LONG,daily,2021-09-13 00:00,2021-09-22 00:15,46047.97,-29714.8,,40685.71,1.742165000870156,exit signal,-9719.71,-0.07,9
+"Your rule (50-day rising), lower high confirmed after 1 day",BTC/USD,LONG,daily,2021-10-02 00:00,2021-11-04 00:15,48187.62,-34790.1,,62899.66,1.4636060021284756,exit signal,21126.16,0.17,33
+"Your rule (50-day rising), lower high confirmed after 1 day",BTC/USD,LONG,daily,2022-03-17 00:00,2022-04-23 00:15,41153.01,-29314.4,,39689.01,2.225868315952822,exit signal,-3708.53,-0.02,37
+"Your rule (50-day rising), lower high confirmed after 1 day",BTC/USD,LONG,daily,2023-03-14 00:00,2023-04-07 00:15,24185.61,-16374.3,,28036.08,3.6344711087752617,exit signal,13519.96,0.09,24
+"Your rule (50-day rising), lower high confirmed after 1 day",BTC/USD,LONG,daily,2023-05-03 00:00,2023-05-13 00:15,28765.27,-6622.4,,26798.86,3.5246721346579974,exit signal,-7420.53,-0.06,10
+"Your rule (50-day rising), lower high confirmed after 1 day",BTC/USD,LONG,daily,2023-08-02 00:00,2023-08-16 00:15,29707.8,6491.69,,29175.26,3.1636838367163995,exit signal,-2150.52,-0.03,14
+"Your rule (50-day rising), lower high confirmed after 1 day",BTC/USD,LONG,daily,2024-01-17 00:00,2024-01-28 00:15,43166.8,-52594.9,,42123.55,2.1275829618680238,exit signal,-2673.26,-0.01,11
+"Your rule (50-day rising), lower high confirmed after 1 day",BTC/USD,LONG,daily,2024-02-07 00:00,2024-03-29 00:15,43101.66,-8993.19,,70782.11,2.0689306086593837,exit signal,56679.89,0.53,51
+"Your rule (50-day rising), lower high confirmed after 1 day",BTC/USD,LONG,daily,2024-10-12 00:00,2024-12-01 00:15,62569.36,-1333.15,,96399.96,2.3288218618748324,exit signal,77859.92,0.52,50
+"Your rule (50-day rising), lower high confirmed after 1 day",BTC/USD,LONG,daily,2025-01-03 00:00,2025-02-01 00:15,96970.22,-15204.5,,102322.91,2.303579975072817,exit signal,11182.64,0.04,29
+"Your rule (50-day rising), lower high confirmed after 1 day",BTC/USD,LONG,daily,2025-02-04 00:00,2025-02-06 00:15,101571.07,-36393.6,,96534.96,2.3090572327614423,exit signal,-12772.25,-0.04,2
+"Your rule (50-day rising), lower high confirmed after 1 day",BTC/USD,LONG,daily,2025-06-24 00:00,2025-07-24 00:15,105494.49,2934.43,,118776.48,2.102413098836994,exit signal,26745.46,0.12,30
+"Your rule (50-day rising), lower high confirmed after 1 day",BTC/USD,LONG,daily,2025-08-23 00:00,2025-08-26 00:15,117069.07,25256.3,,110192.97,2.1224373716842226,exit signal,-15799.96,-0.08,3
+"Your rule (50-day rising), lower high confirmed after 1 day",BTC/USD,LONG,daily,2025-10-13 00:00,2025-10-17 00:15,115145.54,-12960.8,,108176.52,2.021017861502522,exit signal,-15212.87,-0.06,4
+"Your rule (50-day rising), lower high confirmed after 1 day",BTC/USD,LONG,daily,2026-05-24 00:00,2026-05-28 00:15,76704.59,12844.9,,74268.83,2.836026853935308,exit signal,-7978.29,-0.04,4
+"Your rule (50-day rising), lower high confirmed after 1 day",BTC/USD,LONG,daily,2026-08-03 00:00,2026-09-13 00:15,63526.69,13658.8,,77226.5,3.299052540573408,exit signal,44035.54,0.27,41
 Your rule (50-day rising) + sell on a close below the 50-day,BTC/USD,LONG,daily,2021-05-01 00:00,2021-05-03 00:15,57821.1,-47532.2,,56573.35,1.7251596764765678,exit signal,-2645.93,-0.01,2
 Your rule (50-day rising) + sell on a close below the 50-day,BTC/USD,LONG,daily,2021-09-13 00:00,2021-09-14 00:15,46047.97,-29714.8,,44928.3,2.1089155973532487,exit signal,-2840.94,-0.02,1
 Your rule (50-day rising) + sell on a close below the 50-day,BTC/USD,LONG,daily,2021-09-15 00:00,2021-09-21 00:15,47143.48,-30694.5,,42980.83,1.9997979327016413,exit signal,-8775.04,-0.06,6
@@ -98,6 +115,27 @@ Your rule (50-day rising) + sell on a close below the 50-day,BTC/USD,LONG,daily,
 Your rule (50-day rising) + sell on a close below the 50-day,BTC/USD,LONG,daily,2026-05-24 00:00,2026-05-27 00:15,76704.59,12844.9,,75793.98,3.340493306686158,exit signal,-4315.42,-0.02,3
 Your rule (50-day rising) + sell on a close below the 50-day,BTC/USD,LONG,daily,2026-08-03 00:00,2026-08-15 00:15,63526.69,13658.8,,62952.54,3.965679768158517,exit signal,-3530.83,-0.02,12
 Your rule (50-day rising) + sell on a close below the 50-day,BTC/USD,LONG,daily,2026-08-18 00:00,2026-09-15 00:15,64518.05,25758.4,,78143.38,3.8501548776186074,exit signal,51086.47,0.34,28
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2021-05-01 00:00,2021-05-03 00:15,57821.1,-47532.2,,56573.35,1.7251596764765678,exit signal,-2645.93,-0.01,2
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2021-09-13 00:00,2021-09-14 00:15,46047.97,-29714.8,,44928.3,2.1089155973532487,exit signal,-2840.94,-0.02,1
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2021-09-15 00:00,2021-09-21 00:15,47143.48,-30694.5,,42980.83,1.9997979327016413,exit signal,-8775.04,-0.06,6
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2021-10-02 00:00,2021-11-04 00:15,48187.62,-34790.1,,62899.66,1.77481843631587,exit signal,25618.31,0.17,33
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2022-03-17 00:00,2022-04-12 00:15,41153.01,-29314.4,,39511.03,2.699163653482783,exit signal,-4976.26,-0.03,26
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2023-03-14 00:00,2023-04-07 00:15,24185.61,-16374.3,,28036.08,4.387520461002401,exit signal,16321.24,0.09,24
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2023-05-03 00:00,2023-05-09 00:15,28765.27,-6622.4,,28144.85,4.254971534042046,exit signal,-3245.23,-0.02,6
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2023-08-02 00:00,2023-08-03 00:15,29707.8,6491.69,,29149.34,4.011008420274638,exit signal,-2830.21,-0.03,1
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2024-01-17 00:00,2024-01-18 00:15,43166.8,-52594.9,,42708.77,2.695013418471982,exit signal,-1812.99,-0.01,1
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2024-02-07 00:00,2024-03-29 00:15,43101.66,-8993.19,,70782.11,2.6571277493924317,exit signal,72793.98,0.53,51
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2024-10-12 00:00,2024-12-01 00:15,62569.36,-1333.15,,96399.96,2.9909061070873824,exit signal,99995.5,0.52,50
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2025-01-03 00:00,2025-01-08 00:15,96970.22,-15204.5,,96828.31,2.9584879498094456,exit signal,-1853.2,-0.01,5
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2025-01-16 00:00,2025-02-01 00:15,100578.12,-8551.26,,102322.91,2.8339824640298037,exit signal,3507.15,0.01,16
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2025-02-04 00:00,2025-02-05 00:15,101571.07,-36393.6,,97827.38,2.8407208679092024,exit signal,-12050.85,-0.03,1
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2025-06-24 00:00,2025-07-02 00:15,105494.49,2934.43,,105728.08,2.6211250122325933,exit signal,-771.82,-0.0,8
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2025-07-03 00:00,2025-07-24 00:15,108858.9,25195.1,,118776.48,2.5330436364939293,exit signal,23680.14,0.11,21
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2025-08-23 00:00,2025-08-24 00:15,117069.07,25256.3,,115441.29,2.557169416978815,exit signal,-5648.91,-0.02,1
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2025-10-13 00:00,2025-10-15 00:15,115145.54,-12960.8,,113055.33,2.5509507670732643,exit signal,-6787.35,-0.02,2
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2026-05-24 00:00,2026-05-27 00:15,76704.59,12844.9,,75793.98,3.7411086131204843,exit signal,-4832.96,-0.02,3
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2026-08-03 00:00,2026-08-15 00:15,63526.69,13658.8,,62952.54,4.441271804927862,exit signal,-3954.27,-0.02,12
+"Your rule (50-day rising) + close below the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2026-08-18 00:00,2026-09-13 00:15,64518.05,25758.4,,77226.5,4.311892362028333,exit signal,53269.54,0.32,26
 "50-day cross (50-day rising), sell on a close below the 50-day or starting stop, no lower-high exit",BTC/USD,LONG,daily,2021-05-01 00:00,2021-05-03 00:15,57821.1,-47532.2,,56573.35,1.7251596764765678,exit signal,-2645.93,-0.01,2
 "50-day cross (50-day rising), sell on a close below the 50-day or starting stop, no lower-high exit",BTC/USD,LONG,daily,2021-09-13 00:00,2021-09-14 00:15,46047.97,-29714.8,,44928.3,2.1089155973532487,exit signal,-2840.94,-0.02,1
 "50-day cross (50-day rising), sell on a close below the 50-day or starting stop, no lower-high exit",BTC/USD,LONG,daily,2021-09-15 00:00,2021-09-21 00:15,47143.48,-30694.5,,42980.83,1.9997979327016413,exit signal,-8775.04,-0.06,6
@@ -118,7 +156,7 @@ Your rule (50-day rising) + sell on a close below the 50-day,BTC/USD,LONG,daily,
 "50-day cross (50-day rising), sell on a close below the 50-day or starting stop, no lower-high exit",BTC/USD,LONG,daily,2025-10-13 00:00,2025-10-15 00:15,115145.54,-12960.8,,113055.33,1.8504623745150997,exit signal,-4923.55,-0.02,2
 "50-day cross (50-day rising), sell on a close below the 50-day or starting stop, no lower-high exit",BTC/USD,LONG,daily,2026-05-24 00:00,2026-05-27 00:15,76704.59,12844.9,,75793.98,2.713804130173947,exit signal,-3505.83,-0.02,3
 "50-day cross (50-day rising), sell on a close below the 50-day or starting stop, no lower-high exit",BTC/USD,LONG,daily,2026-08-03 00:00,2026-08-15 00:15,63526.69,13658.8,,62952.54,3.221703247312314,exit signal,-2868.43,-0.02,12
-"50-day cross (50-day rising), sell on a close below the 50-day or starting stop, no lower-high exit",BTC/USD,LONG,daily,2026-08-18 00:00,2026-10-19 13:00,64518.05,25758.4,,82504.8,3.1278512630986075,still open,55110.23,0.45,62
+"50-day cross (50-day rising), sell on a close below the 50-day or starting stop, no lower-high exit",BTC/USD,LONG,daily,2026-08-18 00:00,2026-10-19 13:15,64518.05,25758.4,,82435.73,3.1278512630986075,still open,54894.71,0.45,62
 Your rule (50-day rising) + sell when it comes back to the 50-day,BTC/USD,LONG,daily,2021-05-01 00:00,2021-05-03 00:15,57821.1,-47532.2,,56573.35,1.7251596764765678,exit signal,-2645.93,-0.01,2
 Your rule (50-day rising) + sell when it comes back to the 50-day,BTC/USD,LONG,daily,2021-09-13 00:00,2021-09-21 00:15,46047.97,-29714.8,,42980.83,2.1089155973532487,exit signal,-6937.73,-0.04,8
 Your rule (50-day rising) + sell when it comes back to the 50-day,BTC/USD,LONG,daily,2021-10-02 00:00,2021-10-22 00:15,48187.62,-34790.1,,62173.34,1.8716602420726012,exit signal,25660.11,0.17,20
@@ -138,6 +176,45 @@ Your rule (50-day rising) + sell when it comes back to the 50-day,BTC/USD,LONG,d
 Your rule (50-day rising) + sell when it comes back to the 50-day,BTC/USD,LONG,daily,2026-05-24 00:00,2026-05-28 00:15,76704.59,12844.9,,74268.83,3.694977666198854,exit signal,-10394.68,-0.04,4
 Your rule (50-day rising) + sell when it comes back to the 50-day,BTC/USD,LONG,daily,2026-08-03 00:00,2026-08-12 00:15,63526.69,13658.8,,63507.21,4.298240490960243,exit signal,-1448.79,-0.01,9
 Your rule (50-day rising) + sell when it comes back to the 50-day,BTC/USD,LONG,daily,2026-08-18 00:00,2026-09-15 00:15,64518.05,25758.4,,78143.38,4.209795781877507,exit signal,55858.43,0.34,28
+"Your rule (50-day rising) + back to the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2021-05-01 00:00,2021-05-03 00:15,57821.1,-47532.2,,56573.35,1.7251596764765678,exit signal,-2645.93,-0.01,2
+"Your rule (50-day rising) + back to the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2021-09-13 00:00,2021-09-21 00:15,46047.97,-29714.8,,42980.83,2.1089155973532487,exit signal,-6937.73,-0.04,8
+"Your rule (50-day rising) + back to the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2021-10-02 00:00,2021-10-22 00:15,48187.62,-34790.1,,62173.34,1.8716602420726012,exit signal,25660.11,0.17,20
+"Your rule (50-day rising) + back to the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2022-03-17 00:00,2022-03-19 00:15,41153.01,-29314.4,,41760.23,2.8135727913347424,exit signal,1125.26,0.01,2
+"Your rule (50-day rising) + back to the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2023-03-14 00:00,2023-04-07 00:15,24185.61,-16374.3,,28036.08,4.833843296814145,exit signal,17981.53,0.09,24
+"Your rule (50-day rising) + back to the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2023-05-03 00:00,2023-05-07 00:15,28765.27,-6622.4,,29119.21,4.687810760263686,exit signal,980.86,0.01,4
+"Your rule (50-day rising) + back to the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2023-08-02 00:00,2023-08-16 00:15,29707.8,6491.69,,29175.26,4.572015293568764,exit signal,-3107.84,-0.03,14
+"Your rule (50-day rising) + back to the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2024-01-17 00:00,2024-01-28 00:15,43166.8,-52594.9,,42123.55,3.0746883513154653,exit signal,-3863.27,-0.01,11
+"Your rule (50-day rising) + back to the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2024-02-07 00:00,2024-03-29 00:15,43101.66,-8993.19,,70782.11,2.9899265768418113,exit signal,81911.25,0.53,51
+"Your rule (50-day rising) + back to the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2024-10-12 00:00,2024-12-01 00:15,62569.36,-1333.15,,96399.96,3.365509866984688,exit signal,112519.7,0.52,50
+"Your rule (50-day rising) + back to the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2025-01-03 00:00,2025-01-08 00:15,96970.22,-15204.5,,96828.31,3.3290314138731634,exit signal,-2085.31,-0.01,5
+"Your rule (50-day rising) + back to the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2025-01-16 00:00,2025-01-28 00:15,100578.12,-8551.26,,102069.28,3.188931916970813,exit signal,3139.64,0.01,12
+"Your rule (50-day rising) + back to the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2025-02-04 00:00,2025-02-06 00:15,101571.07,-36393.6,,96534.96,3.1885911420308295,exit signal,-17637.28,-0.04,2
+"Your rule (50-day rising) + back to the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2025-06-24 00:00,2025-07-02 00:15,105494.49,2934.43,,105728.08,2.9032350037613015,exit signal,-854.89,-0.0,8
+"Your rule (50-day rising) + back to the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2025-07-03 00:00,2025-07-24 00:15,108858.9,25195.1,,118776.48,2.805673486462237,exit signal,26228.81,0.11,21
+"Your rule (50-day rising) + back to the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2025-08-23 00:00,2025-08-26 00:15,117069.07,25256.3,,110192.97,2.832395909112777,exit signal,-21085.07,-0.08,3
+"Your rule (50-day rising) + back to the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2025-10-13 00:00,2025-10-17 00:15,115145.54,-12960.8,,108176.52,2.697051418116126,exit signal,-20301.6,-0.06,4
+"Your rule (50-day rising) + back to the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2026-05-24 00:00,2026-05-28 00:15,76704.59,12844.9,,74268.83,3.7846821613615376,exit signal,-10647.03,-0.04,4
+"Your rule (50-day rising) + back to the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2026-08-03 00:00,2026-08-12 00:15,63526.69,13658.8,,63507.21,4.402590646268771,exit signal,-1483.96,-0.01,9
+"Your rule (50-day rising) + back to the 50-day, lower high after 1 day",BTC/USD,LONG,daily,2026-08-18 00:00,2026-09-13 00:15,64518.05,25758.4,,77226.5,4.311998728543707,exit signal,53270.85,0.32,26
+"Your rule (50-day rising) + back to the 50-day, lower high after 2 days",BTC/USD,LONG,daily,2021-05-01 00:00,2021-05-03 00:15,57821.1,-47532.2,,56573.35,1.7251596764765678,exit signal,-2645.93,-0.01,2
+"Your rule (50-day rising) + back to the 50-day, lower high after 2 days",BTC/USD,LONG,daily,2021-09-13 00:00,2021-09-21 00:15,46047.97,-29714.8,,42980.83,2.1089155973532487,exit signal,-6937.73,-0.04,8
+"Your rule (50-day rising) + back to the 50-day, lower high after 2 days",BTC/USD,LONG,daily,2021-10-02 00:00,2021-10-22 00:15,48187.62,-34790.1,,62173.34,1.8716602420726012,exit signal,25660.11,0.17,20
+"Your rule (50-day rising) + back to the 50-day, lower high after 2 days",BTC/USD,LONG,daily,2022-03-17 00:00,2022-03-19 00:15,41153.01,-29314.4,,41760.23,2.8135727913347424,exit signal,1125.26,0.01,2
+"Your rule (50-day rising) + back to the 50-day, lower high after 2 days",BTC/USD,LONG,daily,2023-03-14 00:00,2023-04-08 00:15,24185.61,-16374.3,,27914.78,4.833843296814145,exit signal,17396.61,0.09,25
+"Your rule (50-day rising) + back to the 50-day, lower high after 2 days",BTC/USD,LONG,daily,2023-05-03 00:00,2023-05-07 00:15,28765.27,-6622.4,,29119.21,4.667527075387826,exit signal,976.62,0.01,4
+"Your rule (50-day rising) + back to the 50-day, lower high after 2 days",BTC/USD,LONG,daily,2023-08-02 00:00,2023-08-17 00:15,29707.8,6491.69,,28688.58,4.552232644011225,exit signal,-5304.33,-0.05,15
+"Your rule (50-day rising) + back to the 50-day, lower high after 2 days",BTC/USD,LONG,daily,2024-01-17 00:00,2024-03-30 00:15,43166.8,-52594.9,,69867.56,3.0103168195788386,exit signal,79527.09,0.28,73
+"Your rule (50-day rising) + back to the 50-day, lower high after 2 days",BTC/USD,LONG,daily,2024-10-12 00:00,2024-12-02 00:15,62569.36,-1333.15,,97285.98,3.3446803028939533,exit signal,114779.33,0.54,51
+"Your rule (50-day rising) + back to the 50-day, lower high after 2 days",BTC/USD,LONG,daily,2025-01-03 00:00,2025-01-08 00:15,96970.22,-15204.5,,96828.31,3.3388354708430508,exit signal,-2091.45,-0.01,5
+"Your rule (50-day rising) + back to the 50-day, lower high after 2 days",BTC/USD,LONG,daily,2025-01-16 00:00,2025-01-28 00:15,100578.12,-8551.26,,102069.28,3.1983233784201666,exit signal,3148.89,0.01,12
+"Your rule (50-day rising) + back to the 50-day, lower high after 2 days",BTC/USD,LONG,daily,2025-02-04 00:00,2025-02-06 00:15,101571.07,-36393.6,,96534.96,3.1979815998918992,exit signal,-17689.23,-0.04,2
+"Your rule (50-day rising) + back to the 50-day, lower high after 2 days",BTC/USD,LONG,daily,2025-06-24 00:00,2025-07-02 00:15,105494.49,2934.43,,105728.08,2.911785082698747,exit signal,-857.41,-0.0,8
+"Your rule (50-day rising) + back to the 50-day, lower high after 2 days",BTC/USD,LONG,daily,2025-07-03 00:00,2025-07-25 00:15,108858.9,25195.1,,118375.4,2.8139362449888012,exit signal,25180.27,0.11,22
+"Your rule (50-day rising) + back to the 50-day, lower high after 2 days",BTC/USD,LONG,daily,2025-08-23 00:00,2025-08-26 00:15,117069.07,25256.3,,110192.97,2.831144884842993,exit signal,-21075.76,-0.08,3
+"Your rule (50-day rising) + back to the 50-day, lower high after 2 days",BTC/USD,LONG,daily,2025-10-13 00:00,2025-10-17 00:15,115145.54,-12960.8,,108176.52,2.695860173357559,exit signal,-20292.63,-0.06,4
+"Your rule (50-day rising) + back to the 50-day, lower high after 2 days",BTC/USD,LONG,daily,2026-05-24 00:00,2026-05-28 00:15,76704.59,12844.9,,74268.83,3.7830105273847883,exit signal,-10642.33,-0.04,4
+"Your rule (50-day rising) + back to the 50-day, lower high after 2 days",BTC/USD,LONG,daily,2026-08-03 00:00,2026-08-12 00:15,63526.69,13658.8,,63507.21,4.40064609193204,exit signal,-1483.31,-0.01,9
+"Your rule (50-day rising) + back to the 50-day, lower high after 2 days",BTC/USD,LONG,daily,2026-08-18 00:00,2026-09-14 00:15,64518.05,25758.4,,76777.04,4.31009418721764,exit signal,51314.91,0.31,27
 Your rule (uptrend = 50-day rising) + take profit at 2R,BTC/USD,LONG,daily,2021-05-01 00:00,2021-05-16 00:15,57821.1,-47532.2,,46734.97,1.7251596764765678,exit signal,-19576.28,-0.11,15
 Your rule (uptrend = 50-day rising) + take profit at 2R,BTC/USD,LONG,daily,2021-09-13 00:00,2021-09-22 00:15,46047.97,-29714.8,,40685.71,1.742165000870156,exit signal,-9719.71,-0.07,9
 Your rule (uptrend = 50-day rising) + take profit at 2R,BTC/USD,LONG,daily,2021-10-02 00:00,2021-10-20 00:15,48187.62,-34790.1,,64263.89,1.4636060021284756,exit signal,23117.86,0.19,18
@@ -187,7 +264,7 @@ Your rule (uptrend = 50-day rising) + take profit at 2R,BTC/USD,LONG,daily,2026-
 "Hold BTC while above BOTH its 50- and 200-day MAs, else cash (100% in)",BTC/USD,LONG,daily,2025-09-30 00:00,2025-10-11 00:15,114403.68,39536.7,,112939.4,2.3051563224667104,exit signal,-4685.54,-0.03,11
 "Hold BTC while above BOTH its 50- and 200-day MAs, else cash (100% in)",BTC/USD,LONG,daily,2025-10-13 00:00,2025-10-15 00:15,115145.54,-12960.8,,113055.33,2.249713701291738,exit signal,-5985.85,-0.02,2
 "Hold BTC while above BOTH its 50- and 200-day MAs, else cash (100% in)",BTC/USD,LONG,daily,2025-10-27 00:00,2025-10-28 00:15,114746.35,-2339.93,,114038.55,2.205504413719384,exit signal,-2822.52,-0.01,1
-"Hold BTC while above BOTH its 50- and 200-day MAs, else cash (100% in)",BTC/USD,LONG,daily,2026-08-20 00:00,2026-10-19 13:00,69358.31,21117.1,,82504.8,3.6081919677933785,still open,46065.17,0.26,60
+"Hold BTC while above BOTH its 50- and 200-day MAs, else cash (100% in)",BTC/USD,LONG,daily,2026-08-20 00:00,2026-10-19 13:15,69358.31,21117.1,,82435.73,3.6081919677933785,still open,45816.56,0.26,60
 Bot + BTC filter + 200-day MA retest (filter on both),BTC/USD,LONG,15-min,2021-08-09 18:45,2021-09-21 00:30,46381.78,41401.8,,41381.1,0.20174326,stop,-1053.12,-1.05,43
 Bot + BTC filter + 200-day MA retest (filter on both),BTC/USD,LONG,15-min,2021-10-03 18:00,2021-10-21 11:45,48950.27,43731.3,,43709.43,0.19048254,stop,-1042.41,-1.05,18
 Bot + BTC filter + 200-day MA retest (filter on both),BTC/USD,LONG,15-min,2021-10-23 11:45,2021-11-19 00:00,61705.1,48908.6,,56671.29,0.07669368,trend exit,-408.76,-0.42,26
@@ -212,7 +289,7 @@ Bot + BTC filter + 200-day MA retest (filter on both),BTC/USD,LONG,15-min,2025-0
 Bot + BTC filter + 200-day MA retest (filter on both),BTC/USD,LONG,15-min,2025-09-12 17:30,2025-09-25 17:15,115943.16,110417.0,,110361.79,0.19333176,stop,-1188.44,-1.12,13
 Bot + BTC filter + 200-day MA retest (filter on both),BTC/USD,LONG,15-min,2025-10-01 08:30,2025-10-10 21:15,115187.54,110379.0,,110323.81,0.19253549,stop,-1044.99,-1.14,9
 Bot + BTC filter + 200-day MA retest (filter on both),BTC/USD,LONG,15-min,2026-08-20 08:15,2026-09-16 00:00,71266.71,67893.4,,75589.52,0.30825878,trend exit,1219.37,1.19,26
-Bot + BTC filter + 200-day MA retest (filter on both),BTC/USD,LONG,15-min,2026-09-18 03:15,2026-10-19 13:00,77284.7,73123.3,,82504.8,0.2692525,still open,1297.97,1.17,31
+Bot + BTC filter + 200-day MA retest (filter on both),BTC/USD,LONG,15-min,2026-09-18 03:15,2026-10-19 13:15,77284.7,73123.3,,82435.73,0.2692525,still open,1279.41,1.15,31
 Bot + BTC filter + 200-day MA retest (retest without the filter),BTC/USD,LONG,15-min,2021-08-09 18:45,2021-09-21 00:30,46381.78,41401.8,,41381.1,0.20174326,stop,-1053.12,-1.05,43
 Bot + BTC filter + 200-day MA retest (retest without the filter),BTC/USD,LONG,15-min,2021-10-03 18:00,2021-10-21 11:45,48950.27,43731.3,,43709.43,0.19048254,stop,-1042.41,-1.05,18
 Bot + BTC filter + 200-day MA retest (retest without the filter),BTC/USD,LONG,15-min,2021-10-23 11:45,2021-11-19 00:00,61705.1,48908.6,,56671.29,0.07669368,trend exit,-408.76,-0.42,26
@@ -237,4 +314,4 @@ Bot + BTC filter + 200-day MA retest (retest without the filter),BTC/USD,LONG,15
 Bot + BTC filter + 200-day MA retest (retest without the filter),BTC/USD,LONG,15-min,2025-09-12 17:30,2025-09-25 17:15,115943.16,110417.0,,110361.79,0.1932768,stop,-1188.1,-1.12,13
 Bot + BTC filter + 200-day MA retest (retest without the filter),BTC/USD,LONG,15-min,2025-10-01 08:30,2025-10-10 21:15,115187.54,110379.0,,110323.81,0.19248076,stop,-1044.69,-1.14,9
 Bot + BTC filter + 200-day MA retest (retest without the filter),BTC/USD,LONG,15-min,2026-08-20 08:15,2026-09-16 00:00,71266.71,67893.4,,75589.52,0.30817115,trend exit,1219.02,1.19,26
-Bot + BTC filter + 200-day MA retest (retest without the filter),BTC/USD,LONG,15-min,2026-09-18 03:15,2026-10-19 13:00,77284.7,73123.3,,82504.8,0.26917596,still open,1297.6,1.17,31
+Bot + BTC filter + 200-day MA retest (retest without the filter),BTC/USD,LONG,15-min,2026-09-18 03:15,2026-10-19 13:15,77284.7,73123.3,,82435.73,0.26917596,still open,1279.05,1.15,31
