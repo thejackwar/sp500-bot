@@ -1,0 +1,15 @@
+📅 Return by year (middle of 10 runs)
+Version    2021   2022   2023   2024   2025   2026
+Bot         -5%    -0%    +0%   +13%    -4%    +2%
+Bot+BTC     -2%    +0%    +2%   +13%    -1%    +2%
+Lev 10x    -99%    +0%   -20%    +0%    +0%  +186%
+Lev 20x   -100%    +0%    +0%    +0%    +0%    +0%
+Lev 5x      +3%   -25%   +38% +1287%    -2%   +68%
+BTC        +40%   -64%  +156%  +121%    -6%    -7%
+
+Long vs short (first run)
+Bot: long 36× +0.18R $+5k
+Bot+BTC: long 24× +0.55R $+13k
+Lev 10x: long 5× +0.06R $-96k
+Lev 20x: long 3× -0.86R $-99k
+Lev 5x: long 21× +0.39R $+2,632k

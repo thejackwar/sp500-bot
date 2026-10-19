@@ -1,0 +1,33 @@
+📊 <b>Backtest BTC only: strategies</b>
+22 Jan 2021 → 19 Oct 2026 (5.7 years), BTC only (1 coins), $100,000 start. Strategy comparison, same money rules for all: risk 1%/trade, max 5 positions of max 20% each, max 100% invested. Daily strategies buy at the next day's open. 'Invested' = average money in the market (BTC = 100%)
+Each version is tested from 10 start dates a week apart (ties between signals in random order); figures are the middle run, with the range in brackets.
+
+<b>Bot now: breakout, trailing exit</b>
++1.0%/yr (+1.0% to +1.1%), beat BTC in 0/10 runs
+max drop -14.4% (worst -14.4%) · profit factor 1.20
+~36 trades, win 22%, avg +0.18R, worst streak 11, hold 29d, invested 9%
+
+<b>Bot now + BTC filter (BTC above its 50-day MA)</b>
++2.3%/yr (+2.3% to +2.4%), beat BTC in 0/10 runs
+max drop -10.5% (worst -10.5%) · profit factor 1.80
+~24 trades, win 25%, avg +0.55R, worst streak 6, hold 35d, invested 8%
+
+<b>10x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)</b>
+-49.1%/yr (-49.7% to -48.6%), beat BTC in 0/10 runs
+max drop -99.2% (worst -99.2%) · profit factor 0.02
+~5 trades, win 20%, avg +0.06R, worst streak 4, hold 7d, invested 10%, interest ~$1,761
+
+<b>20x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)</b>
+-70.3%/yr (-70.9% to -69.8%), beat BTC in 0/10 runs
+max drop -99.9% (worst -99.9%) · profit factor 0.00
+~3 trades, win 0%, avg -0.86R, worst streak 3, hold 2d, invested 7%, interest ~$1,288
+
+<b>5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)</b>
++76.3%/yr (+74.8% to +77.8%), beat BTC in 10/10 runs
+max drop -60.4% (worst -60.4%) · profit factor 4.01
+~21 trades, win 38%, avg +0.39R, worst streak 4, hold 14d, invested 52%, interest ~$267,853
+
+<b>Buy & hold BTC</b>
++147.7% (+17.1%/yr) · max drop -76.7%
+
+<i>BTC only (no coin-picking bias); fees 0.05% per buy and sell; fills at the next 15-min open with 0.05% slippage. Past results don't guarantee future ones.</i>
