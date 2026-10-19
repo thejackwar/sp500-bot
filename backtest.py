@@ -1466,8 +1466,8 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
                 extra.setdefault("low", {})[ex["trail_days"]], extra.setdefault("high", {})[ex["trail_days"]] = \
                     lows_highs(ex["trail_days"])
             if getattr(mod, "LEVERAGE", None):        # perpetual futures with leverage (LEVERAGE = 1, 2, 3, 5 ...)
-                L = mod.LEVERAGE
-                cfg.update(margin=L, size=L, leverage=L, funding=getattr(mod, "FUNDING", 0.1095))
+                lev = mod.LEVERAGE                     # (not "L": that name holds the price lows here)
+                cfg.update(margin=lev, size=lev, leverage=lev, funding=getattr(mod, "FUNDING", 0.1095))
             if getattr(mod, "TF", None):
                 cfg["once_per_day"] = False            # intraday-candle strategies can trade several times a day
             jobs.append((name, getattr(mod, "NAME", name), getattr(mod, "SHORT", name[:7]), s_sig, cfg))
