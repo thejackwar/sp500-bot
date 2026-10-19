@@ -5,7 +5,7 @@ input, 0.05% = futures taker), funding while long (FUNDING a year on the whole p
 margin) below the entry, the position is closed there and the margin is gone. Backtest only."""
 from strategies import _structure
 
-MARKETS = ("crypto",)
+MARKETS = ("crypto", "stocks")   # stocks: the each-stock test
 NAME = "5x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)"
 SHORT = "Lev 5x"
 SIZE = 1.0

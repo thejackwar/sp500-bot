@@ -601,6 +601,9 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
                         (_round(price + sign * cfg["target_r"] * dist) if cfg["target_r"] else None)
                 else:
                     plan = T.plan_trade(r_dir, price, r_atr * stop_scale, equity, bp)
+                    if not plan and cfg.get("size"):    # fixed account share (SIZE): sized below, not by the
+                        plan = {"qty": 0.0, "target": None, "risk": 0.0, "risk_pct": 0.0,    # stop distance
+                                "stop": price - sign * cfg["stop_atr"] * r_atr}
                     if not plan:
                         continue
                     dist = cfg["stop_atr"] * r_atr
@@ -1588,6 +1591,8 @@ def main():
 
     if market == "crypto" and os.environ.get("COINS", "").strip().lower().startswith("each"):
         return each_coin(start, end, mode, runs)
+    if market == "stocks" and os.environ.get("COINS", "").strip().lower().startswith("each"):
+        return each_stock(start, end, mode, runs)
     if market == "crypto":
         import crypto
         use_crypto()
@@ -1688,6 +1693,104 @@ def main():
     if card is not None:
         telegram(document=os.path.join(OUT, "patterns.csv"),
                  caption="Every pattern breakout traded on its own (the scorecard's trades).")
+
+
+def each_stock(start, end, mode, runs):
+    """COINS="each stock" with MARKET=stocks: the strategy files tested on every S&P 100 stock ON ITS OWN, and
+    on SPY (the S&P 500 index), each compared with buying and holding THAT stock. Whole account in that one
+    stock when holding (strategy SIZE). One table for all stocks + a summary across them."""
+    global SKIP_BOT, BENCHMARK, UNIVERSE, FOOTER
+    import scanner
+    SKIP_BOT = True
+    os.makedirs(OUT, exist_ok=True)
+    tickers = scanner.get_tickers()
+    tickers = ["SPY"] + [t for t in tickers if t != "SPY"]
+    print(f"Each-stock test {start:%Y-%m-%d} → {end:%Y-%m-%d}: {len(tickers)} symbols", flush=True)
+    daily, intraday = download(tickers, start, end)
+    rows, trades, eqs, lines = [], [], {}, []
+    for sym in tickers:
+        if sym not in intraday:
+            lines.append(f"{sym}: no prices, skipped")
+            continue
+        first = intraday[sym].index[0]
+        st = max(pd.Timestamp(start), first + pd.Timedelta(days=21)).to_pydatetime()
+        if (pd.Timestamp(end) - pd.Timestamp(st)).days < 365:
+            lines.append(f"{sym}: prices only from {first:%Y-%m-%d}, less than a year to test, skipped")
+            continue
+        BENCHMARK = sym
+        print(f"\n=== {sym} from {st:%Y-%m-%d}", flush=True)
+        try:
+            res, _ = run({sym: daily[sym]}, {sym: intraday[sym]}, st, end, spy=daily[sym], mode=mode, runs=runs)
+        except Exception as e:
+            lines.append(f"{sym}: failed ({e})")
+            continue
+        bench = benchmark(daily[sym], pd.Timestamp(st.date()))
+        b_yrs = (bench.index[-1] - bench.index[0]).days / 365.25
+        b_cagr = (bench.iat[-1] / START_EQUITY) ** (1 / b_yrs) - 1
+        b_dd = (bench / bench.cummax() - 1).min()
+        rows.append({"stock": sym, "version": f"Buy & hold {sym}", "short": "B&H", "from": f"{st:%Y-%m-%d}",
+                     "cagr": b_cagr, "cagr_min": np.nan, "cagr_max": np.nan, "max_dd": b_dd, "beat": np.nan,
+                     "runs": np.nan, "final": bench.iat[-1], "trades": np.nan})
+        for key, r in res.items():
+            a = r["agg"]
+            rows.append({"stock": sym, "version": r["name"], "short": r["short"], "from": f"{st:%Y-%m-%d}",
+                         "cagr": a["cagr"], "cagr_min": a["cagr_min"], "cagr_max": a["cagr_max"],
+                         "max_dd": a.get("dd_worst", np.nan), "beat": a["beat"], "runs": a["spy_runs"],
+                         "final": r["equity"]["equity"].iat[-1], "trades": a.get("trades", np.nan)})
+            trades.append(r["trades"].assign(stock=sym, version=r["name"]))
+            eqs[f"{sym} {r['short']}"] = r["equity"]["equity"]
+        eqs[f"{sym} B&H"] = bench
+    tab = pd.DataFrame(rows)
+    tab.to_csv(os.path.join(OUT, "each_stock.csv"), index=False)
+    if trades:
+        t = pd.concat(trades, ignore_index=True)
+        t = t[["stock", "version"] + [c for c in t.columns if c not in ("stock", "version")]]
+        for c in ("entry_time", "exit_time"):
+            t[c] = pd.to_datetime(t[c]).dt.strftime("%Y-%m-%d %H:%M")
+        t.to_csv(os.path.join(OUT, "trades.csv"), index=False)
+    pd.DataFrame(eqs).round(0).to_csv(os.path.join(OUT, "equity.csv"), index_label="date")
+
+    vers = tab[tab.short != "B&H"].drop_duplicates("short")[["short", "version"]]
+    bh = tab[tab.short == "B&H"].set_index("stock")
+    out = ["📊 Each stock on its own: strategies vs buy & hold of that stock (S&P 100 + SPY for the S&P 500)",
+           f"{start:%d %b %Y} → {end:%d %b %Y}; {runs} start dates a week apart; whole account in that one stock when "
+           "holding (strategy SIZE); no commission, 0.02% slippage; leverage versions pay their FUNDING rate on the "
+           "position and are liquidated as in the crypto test. 'final' = money from $100,000 (first run).", ""]
+    # summary across the S&P 100 stocks (SPY separately)
+    stocks = [s for s in bh.index if s != "SPY"]
+    out.append(f"<b>Across {len(stocks)} S&P 100 stocks</b> (median of the stocks; buy & hold median "
+               f"{pct(bh.loc[stocks, 'cagr'].median())}/yr, max drop {pct(bh.loc[stocks, 'max_dd'].median())}):")
+    for short, name in vers.itertuples(index=False):
+        g = tab[(tab.short == short) & tab.stock.isin(stocks)].set_index("stock")
+        if g.empty:
+            continue
+        beat = int((g.final >= bh.loc[g.index, "final"]).sum())
+        liq = 0
+        out.append(f" {short:8s} median {pct(g.cagr.median()):>7}/yr, median max drop {pct(g.max_dd.median()):>6}, "
+                   f"beat buy & hold on {beat}/{len(g)} stocks, lost money on {int((g.final < START_EQUITY).sum())}, "
+                   f"best {g.cagr.idxmax()} {pct(g.cagr.max())}, worst {g.cagr.idxmin()} {pct(g.cagr.min())}")
+    out.append("")
+    for sym, g in tab.groupby("stock", sort=False):
+        b = g[g.short == "B&H"].iloc[0]
+        out.append(f"{sym} (from {b['from']}): buy & hold {pct(b.cagr)}/yr, max drop {pct(b.max_dd)}, final ${b.final:,.0f}")
+        for _, r in g[g.short != "B&H"].sort_values("final", ascending=False).iterrows():
+            mark = "✅" if r.final >= b.final else "  "
+            out.append(f" {mark} {r.short:8s} {pct(r.cagr):>7}/yr ({pct(r.cagr_min)} to {pct(r.cagr_max)})  "
+                       f"drop {pct(r.max_dd):>6}  final ${r.final:>12,.0f}  beat {int(r.beat)}/{int(r.runs)}  ~{r.trades:.0f} trades")
+        out.append("")
+    if lines:
+        out += lines + [""]
+    out.append("Versions: " + "; ".join(f"{a} = {b}" for a, b in vers.itertuples(index=False)))
+    text = "\n".join(out)
+    print("\n" + html.unescape(text.replace("<b>", "").replace("</b>", "")))
+    with open(os.path.join(OUT, "summary.txt"), "w") as f:
+        f.write(html.unescape(text.replace("<b>", "").replace("</b>", "")))
+    with open(os.path.join(OUT, "details.txt"), "w") as f:
+        f.write(tab.round(4).to_string(index=False))
+    try:
+        telegram("\n".join(text.split("\n")[:12])[:3900])
+    except Exception as e:
+        print(f"Telegram failed ({e})", flush=True)
 
 
 def each_coin(start, end, mode, runs):

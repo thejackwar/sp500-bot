@@ -6,7 +6,7 @@ days before it, followed by lh_right lower day(s)), at the starting stop, or whe
 (SIZE = 1.0); decisions on daily closes, executed at the next 00:00 UTC open."""
 from strategies import _structure
 
-MARKETS = ("crypto",)
+MARKETS = ("crypto", "stocks")   # stocks: the each-stock test
 NAME = "Your rule (50-day rising) + close below the 50-day, lower high after 1 day"
 SHORT = "MA f1"
 SIZE = 1.0
