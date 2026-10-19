@@ -25,6 +25,10 @@ breaks with a LOWER LOW. Shared by the swing_*.py strategy files (starts with "_
                are zigzag turns of at least pull_min (a high counts once the price fell that far from it, a low
                once it rose that far). The buy is the first close where both hold; the low to hold at the buy
                is the last swing low before it.
+    trend_entry (the user's full trend read, 20 Oct 2026): the same zigzag swings give a trend state. It turns
+               UP on a higher low (a new swing low above the previous one) or a close above the last swing high;
+               DOWN on a lower high (a new swing high below the previous one) or a close below the last swing
+               low. Buy = the first close above the 50-day while the trend is UP.
 """
 import numpy as np
 import pandas as pd
@@ -34,10 +38,10 @@ from strategies import tools
 _cache = {}
 
 
-def run(d, pivot=5, mode="close", trail="pivot", pull_min=0.0, hh_entry=False):
+def run(d, pivot=5, mode="close", trail="pivot", pull_min=0.0, hh_entry=False, trend_entry=False):
     """Daily candles -> DataFrame: entry (signal on that close), exit (signal on that close; mode "close"
     only), stop (the low to hold after that day's close, while in a trade), reason."""
-    key = (pivot, mode, trail, pull_min, hh_entry, d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
+    key = (pivot, mode, trail, pull_min, hh_entry, trend_entry, d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
     if key in _cache:
         return _cache[key]
     o, h, l, c = (d[k].values.astype(float) for k in ("Open", "High", "Low", "Close"))
@@ -52,22 +56,33 @@ def run(d, pivot=5, mode="close", trail="pivot", pull_min=0.0, hh_entry=False):
     zz = pull_min or 0.005
     last_sh, last_sl = np.full(n, np.nan), np.full(n, np.nan)
     leg, ch, cl, sh, sl = "up", h[0], l[0], np.nan, np.nan
+    trend_up = np.zeros(n, bool)                     # trend_entry: UP after a higher low / higher high
+    up = False
     for i in range(n):
         if leg == "up":
             if h[i] > ch:
                 ch = h[i]
             elif l[i] <= ch * (1 - zz):              # fell zz from the high: that high is a swing high
+                if np.isfinite(sh) and ch < sh:
+                    up = False                       # a lower high: downtrend
                 sh, leg, cl = ch, "down", l[i]
         else:
             if l[i] < cl:
                 cl = l[i]
             elif h[i] >= cl * (1 + zz):              # rose zz from the low: that low is a swing low
+                if np.isfinite(sl) and cl > sl:
+                    up = True                        # a higher low: uptrend
                 sl, leg, ch = cl, "up", h[i]
-        last_sh[i], last_sl[i] = sh, sl
+        if np.isfinite(sh) and c[i] > sh:
+            up = True                                # a higher high
+        if np.isfinite(sl) and c[i] < sl:
+            up = False                               # a lower low
+        last_sh[i], last_sl[i], trend_up[i] = sh, sl, up
     ok_buy = np.zeros(n, bool)                       # buy condition at each close
     for i in range(n):
         above50 = np.isfinite(sma50[i]) and c[i] > sma50[i]
-        ok_buy[i] = above50 and (not hh_entry or (np.isfinite(last_sh[i]) and c[i] > last_sh[i]))
+        ok_buy[i] = above50 and (not hh_entry or (np.isfinite(last_sh[i]) and c[i] > last_sh[i])) \
+            and (not trend_entry or trend_up[i])
 
     entry, exit_ = np.zeros(n, bool), np.zeros(n, bool)
     stop_s = np.full(n, np.nan)
@@ -81,9 +96,10 @@ def run(d, pivot=5, mode="close", trail="pivot", pull_min=0.0, hh_entry=False):
         if not pos:
             if ok_buy[i] and not ok_buy[i - 1]:
                 entry[i], pending = True, True
-                reason[i] = "higher high above the 50-day" if hh_entry else "cross above the 50-day"
+                reason[i] = ("uptrend + above the 50-day" if trend_entry else
+                             "higher high above the 50-day" if hh_entry else "cross above the 50-day")
                 # the low to hold, known at this close: the last swing low below the close
-                if hh_entry and np.isfinite(last_sl[i]) and last_sl[i] < c[i]:
+                if (hh_entry or trend_entry) and np.isfinite(last_sl[i]) and last_sl[i] < c[i]:
                     protect = last_sl[i]                 # the last swing low before the breakout
                 elif trail == "pullback":                # the low of the dip before the cross
                     protect = l[max(0, i - 9):i + 1].min()
