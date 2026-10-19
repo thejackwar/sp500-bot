@@ -13,6 +13,10 @@ on:
         description: "Start of the version's name in trades.csv"
         type: string
         default: "Hold BTC while above BOTH"
+      rule:
+        description: "Optional: a btc50_*.py rule to draw its stop / lower highs (e.g. btc50_lh)"
+        type: string
+        default: ""
 
 permissions:
   contents: write              # to commit the pictures
@@ -34,6 +38,7 @@ jobs:
           PYTHONUNBUFFERED: "1"
           RESULTS: ${{ inputs.results }}
           VERSION: ${{ inputs.version }}
+          RULE: ${{ inputs.rule }}
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
       - name: Commit the charts

@@ -7,12 +7,13 @@ MARKETS = ("crypto",)
 NAME = "50-day cross, sell on a lower high, no re-entry on a new high"
 SHORT = "LHnoRe"
 SIZE = 1.0
+KW = dict(exit_mode='lh', reentry=False)          # the rule's settings (also used by trade_charts.py)
 EXIT = {"stop_atr": 30.0, "target_r": None, "trail_days": None, "max_days": None}   # exits come from exits()
 
 
 def entries(d):
-    return _structure.run(d, exit_mode='lh', reentry=False)["entry"]
+    return _structure.run(d, **KW)["entry"]
 
 
 def exits(d):
-    return _structure.run(d, exit_mode='lh', reentry=False)["exit"]
+    return _structure.run(d, **KW)["exit"]
