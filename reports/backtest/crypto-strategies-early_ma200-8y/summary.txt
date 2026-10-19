@@ -1,0 +1,38 @@
+📊 <b>Backtest top 10 crypto: strategies</b>
+22 Jan 2021 → 19 Oct 2026 (5.7 years), top 10 crypto (8 coins), $100,000 start. Strategy comparison, same money rules for all: risk 1%/trade, max 5 positions of max 20% each, max 100% invested. Daily strategies buy at the next day's open. 'Invested' = average money in the market (BTC = 100%)
+Each version is tested from 10 start dates a week apart (ties between signals in random order); figures are the middle run, with the range in brackets.
+
+<b>Bot now: breakout, trailing exit</b>
++13.3%/yr (+13.2% to +13.6%), beat BTC in 7/10 runs
+max drop -34.8% (worst -35.2%) · profit factor 1.62
+~154 trades, win 25%, avg +0.58R, worst streak 22, hold 33d, invested 29%
+
+<b>Bot now + BTC filter (BTC above its 50-day MA)</b>
++16.8%/yr (+16.6% to +17.1%), beat BTC in 9/10 runs
+max drop -31.5% (worst -31.5%) · profit factor 2.01
+~114 trades, win 29%, avg +0.92R, worst streak 19, hold 36d, invested 26%
+
+<b>Early: retest of the 200-day MA after crossing above → next resistance</b>
++3.5%/yr (+3.4% to +3.5%), beat BTC in 0/10 runs
+max drop -7.0% (worst -7.0%) · profit factor 1.92
+~39 trades, win 46%, avg +0.53R, worst streak 7, hold 12d, invested 2%
+
+<b>Early: retest of the 200-day MA after crossing above, 20-day-low trail</b>
++4.9%/yr (+4.9% to +5.0%), beat BTC in 0/10 runs
+max drop -23.2% (worst -23.2%) · profit factor 2.36
+~34 trades, win 26%, avg +1.21R, worst streak 11, hold 38d, invested 10%
+
+<b>Bot + BTC filter + 200-day MA retest (filter on both)</b>
++17.1%/yr (+16.9% to +17.5%), beat BTC in 9/10 runs
+max drop -31.5% (worst -31.5%) · profit factor 2.03
+~113 trades, win 29%, avg +0.94R, worst streak 19, hold 37d, invested 26%
+
+<b>Bot + BTC filter + 200-day MA retest (retest without the filter)</b>
++17.4%/yr (+17.1% to +17.7%), beat BTC in 9/10 runs
+max drop -31.5% (worst -31.5%) · profit factor 2.06
+~117 trades, win 29%, avg +0.92R, worst streak 20, hold 37d, invested 28%
+
+<b>Buy & hold BTC</b>
++148.9% (+17.2%/yr) · max drop -76.7%
+
+<i>Today's top 10 coins only (coins that dropped out aren't tested, which flatters results); fees 0.25% per buy and sell; fills at the next 15-min open with 0.05% slippage. Past results don't guarantee future ones.</i>

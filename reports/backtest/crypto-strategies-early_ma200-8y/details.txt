@@ -1,0 +1,17 @@
+📅 Return by year (middle of 10 runs)
+Version    2021   2022   2023   2024   2025   2026
+Bot        +13%   -10%   +15%   +80%   -15%   +13%
+Bot+BTC    +22%    -5%   +12%   +83%   -11%   +13%
+EMA200      +1%    -1%   +14%    -1%    +4%    +2%
+EMA2Tr      -3%    -0%    +5%   +27%    +0%    +1%
+Bot+MA     +23%    -5%   +12%   +83%   -11%   +14%
+Bot+MAf    +22%    -6%   +12%   +83%   -10%   +15%
+BTC        +40%   -64%  +156%  +121%    -6%    -6%
+
+Long vs short (first run)
+Bot: long 154× +0.58R $+87k
+Bot+BTC: long 114× +0.92R $+122k
+EMA200: long 39× +0.53R $+22k
+EMA2Tr: long 34× +1.21R $+32k
+Bot+MA: long 113× +0.94R $+126k
+Bot+MAf: long 117× +0.92R $+128k
