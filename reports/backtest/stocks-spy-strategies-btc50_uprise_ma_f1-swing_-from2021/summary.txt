@@ -1,0 +1,14 @@
+📊 Each stock on its own: strategies vs buy & hold of that stock (S&P 100 + SPY for the S&P 500)
+01 Jan 2021 → 19 Oct 2026; 10 start dates a week apart; whole account in that one stock when holding (strategy SIZE); no commission, 0.02% slippage; leverage versions pay their FUNDING rate on the position and are liquidated as in the crypto test. 'final' = money from $100,000 (first run).
+
+
+SPY (from 2021-01-01): buy & hold +15.0%/yr, max drop -24.5%, final $224,287
+    Sw c10     +9.7%/yr (+9.6% to +9.9%)  drop -24.8%  final $     169,638  beat 0/10  ~8 trades
+    Sw c5      +8.5%/yr (+7.5% to +8.7%)  drop -18.9%  final $     159,577  beat 0/10  ~21 trades
+    Sw t5      +8.1%/yr (+7.0% to +8.2%)  drop -17.1%  final $     156,121  beat 0/10  ~24 trades
+    Sw c3      +7.0%/yr (+6.0% to +7.1%)  drop -14.3%  final $     147,446  beat 0/10  ~27 trades
+    Sw t10     +6.5%/yr (+6.4% to +6.7%)  drop -23.0%  final $     143,547  beat 0/10  ~12 trades
+    Sw t3      +4.5%/yr (+4.4% to +4.6%)  drop -17.8%  final $     128,506  beat 0/10  ~30 trades
+    MA f1      -1.3%/yr (-1.9% to -1.3%)  drop -18.5%  final $      92,808  beat 0/10  ~37 trades
+
+Versions: MA f1 = Your rule (50-day rising) + close below the 50-day, lower high after 1 day; Sw c10 = Swing rule: buy the 50-day cross, sell on a lower low (close, swing ±10 days); Sw c3 = Swing rule: buy the 50-day cross, sell on a lower low (close, swing ±3 days); Sw c5 = Swing rule: buy the 50-day cross, sell on a lower low (close, swing ±5 days); Sw t10 = Swing rule: buy the 50-day cross, sell on a lower low (touch, swing ±10 days); Sw t3 = Swing rule: buy the 50-day cross, sell on a lower low (touch, swing ±3 days); Sw t5 = Swing rule: buy the 50-day cross, sell on a lower low (touch, swing ±5 days)

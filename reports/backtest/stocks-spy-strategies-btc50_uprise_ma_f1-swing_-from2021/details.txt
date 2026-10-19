@@ -1,0 +1,9 @@
+stock                                                                       version  short       from    cagr  cagr_min  cagr_max  max_dd  beat  runs       final  trades
+  SPY                                                                Buy & hold SPY    B&H 2021-01-01  0.1498       NaN       NaN -0.2450   NaN   NaN 224287.4700     NaN
+  SPY    Your rule (50-day rising) + close below the 50-day, lower high after 1 day  MA f1 2021-01-01 -0.0130   -0.0185   -0.0128 -0.1845   0.0  10.0  92808.4295    37.0
+  SPY Swing rule: buy the 50-day cross, sell on a lower low (close, swing ±10 days) Sw c10 2021-01-01  0.0972    0.0956    0.0988 -0.2478   0.0  10.0 169637.6771     8.0
+  SPY  Swing rule: buy the 50-day cross, sell on a lower low (close, swing ±3 days)  Sw c3 2021-01-01  0.0703    0.0604    0.0714 -0.1426   0.0  10.0 147446.4422    27.0
+  SPY  Swing rule: buy the 50-day cross, sell on a lower low (close, swing ±5 days)  Sw c5 2021-01-01  0.0852    0.0754    0.0866 -0.1888   0.0  10.0 159576.9932    21.0
+  SPY Swing rule: buy the 50-day cross, sell on a lower low (touch, swing ±10 days) Sw t10 2021-01-01  0.0655    0.0644    0.0666 -0.2301   0.0  10.0 143547.3876    12.0
+  SPY  Swing rule: buy the 50-day cross, sell on a lower low (touch, swing ±3 days)  Sw t3 2021-01-01  0.0448    0.0443    0.0456 -0.1784   0.0  10.0 128506.3383    30.0
+  SPY  Swing rule: buy the 50-day cross, sell on a lower low (touch, swing ±5 days)  Sw t5 2021-01-01  0.0810    0.0696    0.0824 -0.1710   0.0  10.0 156121.3880    24.0
