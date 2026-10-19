@@ -1,0 +1,6 @@
+stock,version,short,from,cagr,cagr_min,cagr_max,max_dd,beat,runs,final,trades
+SPY,Buy & hold SPY,B&H,2021-01-01,0.14976991762071878,,,-0.24496487119437949,,,224287.47000643762,
+SPY,"Swing rule: buy the 50-day cross, sell on a lower low (close, pullbacks of 2%+)",Sw pb2,2021-01-01,0.10523535549926277,0.09568728766230494,0.10698451446567758,-0.18875833166024847,0.0,10.0,177204.07176699582,15.0
+SPY,"Swing rule: buy the 50-day cross, sell on a lower low (close, pullbacks of 2%+) + buy only in an uptrend, 10 closes in a row above the 200-day",Sw 200x10,2021-01-01,0.06549215882238202,0.06095627503817713,0.07013377878889071,-0.19641718929491636,0.0,10.0,147246.4560137701,10.5
+SPY,"Swing rule: buy the 50-day cross, sell on a lower low (close, pullbacks of 2%+) + buy only in an uptrend, above the 200-day",Sw tr2+200,2021-01-01,0.06484634096878472,0.06031224621589093,0.06948635922727253,-0.2630511745853271,0.0,10.0,146738.65928490588,12.5
+SPY,"Swing rule: buy the 50-day cross, sell on a lower low (close, pullbacks of 2%+) + buy only in an uptrend, above the 200-day and the 200-day rising",Sw 200r,2021-01-01,0.09171976869492349,0.0871116380742547,0.09642574084171107,-0.14530742600732294,0.0,10.0,169129.0274319689,9.5
