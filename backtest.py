@@ -586,6 +586,9 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
                         continue
                     dist = cfg["stop_atr"] * r_atr
                     plan["target"] = _round(price + sign * cfg["target_r"] * dist) if cfg["target_r"] else None
+                if cfg.get("size"):                    # fixed share of the account (strategy SIZE), not 1% risk
+                    plan["qty"] = min(cfg["size"] * equity, bp) / (price * (1 + SLIPPAGE) * (1 + FEE))
+                    plan["risk"] = plan["qty"] * abs(price - plan["stop"])
                 fill = price * (1 + sign * SLIPPAGE)
                 cash -= sign * plan["qty"] * fill + FEE * plan["qty"] * fill
                 pid = len(trades) + len(pos) + s * 1000
@@ -1391,7 +1394,7 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
                   **getattr(mod, "EXIT", {})}
             to_target = ex.pop("to_target", False)      # setups(): sell at the setup's own target
             cfg = {"kinds": ("daily",), "shorts": False, "exit": "custom", "margin": T.MAX_INVESTED,
-                   "exit_matrix": s_exit, "pattern_target": to_target, **ex}
+                   "exit_matrix": s_exit, "pattern_target": to_target, "size": getattr(mod, "SIZE", None), **ex}
             if ex["trail_days"]:
                 extra.setdefault("low", {})[ex["trail_days"]], extra.setdefault("high", {})[ex["trail_days"]] = \
                     lows_highs(ex["trail_days"])
