@@ -1,0 +1,21 @@
+📅 Return by year (middle of 10 runs)
+Version    2021   2022   2023   2024   2025   2026
+Bot         -5%    -0%    -0%   +13%    -4%    +2%
+Bot+BTC     -3%    +0%    +2%   +12%    -1%    +2%
+Short 1    -95%   -98%   -44%    +0%    +0%    +0%
+Short 1    +10%   -64%   -55%   -49%   -44%   -50%
+Short 2    -17%   -33%   -28%   -44%   -34%   -21%
+Short 3    -67%   -79%   -81%   -74%   -65%   -26%
+Short f    +16%   -15%    -3%    -6%    -6%    -7%
+MA f1      +11%    -4%   +10%  +147%    +0%   +15%
+BTC        +40%   -64%  +156%  +121%    -6%    -6%
+
+Long vs short (first run)
+Bot: long 36× +0.12R $+3k
+Bot+BTC: long 24× +0.49R $+11k
+Short 15m: short 1238× -0.06R $-100k
+Short 1h: short 709× -0.03R $-98k
+Short 2h: short 346× -0.02R $-89k
+Short 30m: short 1254× -0.05R $-100k
+Short f1: short 25× -0.01R $-20k
+MA f1: long 21× +0.07R $+232k
