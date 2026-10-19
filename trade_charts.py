@@ -35,7 +35,8 @@ SMA50_C, SMA200_C, EXIT_C = "#2a78d6", "#eb6834", "#e34948"
 UP_C, DOWN_C = "#b9b8b1", "#52514e"          # candles stay neutral so the lines carry the meaning
 WIN_BG, LOSS_BG = "#e3f4ec", "#fbe7e6"
 PER_PAGE = 12
-RULE = {"name": None, "st": None}        # set by main() for a btc50_*.py rule
+RULE = {"name": None, "st": None}
+SHORTS = [False]                         # set by load_trades(): every trade is a short (labels, markers)        # set by main() for a btc50_*.py rule
 STOP_C, PEAK_C, LH_C = "#e34948", "#8c8b85", "#6250d6"
 SPIKE = 0.15                 # wicks more than 15% beyond the candle body are bad ticks: clipped
 
@@ -52,6 +53,9 @@ def load_trades(results, version):
     t["entry_day"] = pd.to_datetime(t["entry_time"]).dt.normalize()
     t["exit_day"] = pd.to_datetime(t["exit_time"]).dt.normalize()
     t["ret"] = t["exit"] * (1 - 0.0025) / (t["entry"] * (1 + 0.0025)) - 1
+    short = t["direction"] == "SHORT"                  # shorts win when the price falls
+    t.loc[short, "ret"] = (t["pnl"] / (t["qty"] * t["entry"]))[short]
+    SHORTS[0] = bool(short.all())
     t["open"] = t["result"] == "still open"
     return t.sort_values("entry_day").reset_index(drop=True)
 
@@ -158,18 +162,22 @@ def trade_panel(ax, d, r, n):
         from strategies import _structure
         for day in sh.index[sh["lh"].fillna(False).astype(bool)]:
             k = w.index.get_loc(day) - (RULE.get("right") or _structure.PIVOT)
-            if k >= 0:
-                ax.scatter([w.index[k]], [w["High"].iat[k]], marker="x", s=45, color=LH_C, lw=1.8, zorder=6)
+            if k >= 0:                            # shorts: the higher low that covered
+                y = w["Low"].iat[k] if r["direction"] == "SHORT" else w["High"].iat[k]
+                ax.scatter([w.index[k]], [y], marker="x", s=45, color=LH_C, lw=1.8, zorder=6)
         sig_day = r["exit_day"] - pd.Timedelta(days=1)
         if not r["open"] and sig_day in RULE["st"].index:
             why = RULE["st"].at[sig_day, "reason"]
-    ax.scatter([r["entry_day"]], [r["entry"]], marker="^", s=70, color=INK, edgecolor=SURFACE, lw=1.2, zorder=6)
-    ax.annotate(f"Buy {money(r['entry'])}", (r["entry_day"], r["entry"]), xytext=(-6, -10),
+    is_short = r["direction"] == "SHORT"
+    in_m, out_m = ("v", "^") if is_short else ("^", "v")
+    in_w, out_w = ("Short", "Cover") if is_short else ("Buy", "Sell")
+    ax.scatter([r["entry_day"]], [r["entry"]], marker=in_m, s=70, color=INK, edgecolor=SURFACE, lw=1.2, zorder=6)
+    ax.annotate(f"{in_w} {money(r['entry'])}", (r["entry_day"], r["entry"]), xytext=(-6, -10),
                 textcoords="offset points", ha="right", va="top", fontsize=7.5, color=INK,
                 bbox=dict(boxstyle="square,pad=0.15", fc=SURFACE, ec="none", alpha=0.85), zorder=7)
     if not r["open"]:
-        ax.scatter([r["exit_day"]], [r["exit"]], marker="v", s=70, color=INK, edgecolor=SURFACE, lw=1.2, zorder=6)
-        ax.annotate(f"Sell {money(r['exit'])}", (r["exit_day"], r["exit"]), xytext=(6, 10),
+        ax.scatter([r["exit_day"]], [r["exit"]], marker=out_m, s=70, color=INK, edgecolor=SURFACE, lw=1.2, zorder=6)
+        ax.annotate(f"{out_w} {money(r['exit'])}", (r["exit_day"], r["exit"]), xytext=(6, 10),
                     textcoords="offset points", ha="left", va="bottom", fontsize=7.5, color=INK,
                     bbox=dict(boxstyle="square,pad=0.15", fc=SURFACE, ec="none", alpha=0.85), zorder=7)
     lo = min(w["Low"].min(), r["entry"], r["exit"])
@@ -207,11 +215,18 @@ def pages(d, t, folder, title):
             handles.append(plt.Line2D([], [], color=EXIT_C, lw=1.8, ls=(0, (4, 2)),
                                       label="Exit line (higher average; a close below it = sell next open)"))
         else:
-            handles += [plt.Line2D([], [], color=STOP_C, lw=1.8, ls=(0, (4, 2)), label="Stop (a close below = sell)"),
-                        plt.Line2D([], [], color=PEAK_C, lw=1.4, ls=(0, (1, 1.5)), label="Highest high since entry"),
-                        plt.Line2D([], [], marker="x", color=LH_C, ls="", mew=1.8, label="Lower high")]
-        handles += [plt.Line2D([], [], marker="^", color=INK, ls="", label="Buy (next 00:00 UTC open)"),
-                    plt.Line2D([], [], marker="v", color=INK, ls="", label="Sell")]
+            sh = SHORTS[0]
+            handles += [plt.Line2D([], [], color=STOP_C, lw=1.8, ls=(0, (4, 2)),
+                                   label="Stop (a close above = cover)" if sh else "Stop (a close below = sell)"),
+                        plt.Line2D([], [], color=PEAK_C, lw=1.4, ls=(0, (1, 1.5)),
+                                   label="Lowest low since entry" if sh else "Highest high since entry"),
+                        plt.Line2D([], [], marker="x", color=LH_C, ls="", mew=1.8, label="Higher low" if sh else "Lower high")]
+        if SHORTS[0]:
+            handles += [plt.Line2D([], [], marker="v", color=INK, ls="", label="Sell short (next 00:00 UTC open)"),
+                        plt.Line2D([], [], marker="^", color=INK, ls="", label="Cover")]
+        else:
+            handles += [plt.Line2D([], [], marker="^", color=INK, ls="", label="Buy (next 00:00 UTC open)"),
+                        plt.Line2D([], [], marker="v", color=INK, ls="", label="Sell")]
         last = min(p + PER_PAGE, len(t))
         H = fig.get_figheight()
         note = f"; {d.attrs['clipped']} bad price spikes clipped" if d.attrs.get("clipped") else ""
