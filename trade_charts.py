@@ -13,6 +13,7 @@ reports/backtest/<folder>/charts/. Settings (environment variables):
               close-ups use candles of that size, like the backtest did.
     PICK      optional: which trades get close-ups (default: all, 12 per picture). Space-separated:
                 extremes:6           the 6 best and the 6 worst trades in one picture
+                random:5             5 random winners and 5 random losers (one row each; random:5:7 = seed 7)
                 from:2022-05-01:24   24 trades in a row from that date (12 per picture)
 
 Made for the Bitcoin trend rule (hold while the daily close is above the 50- and 200-day averages):
@@ -104,7 +105,9 @@ def load_prices(symbol, first):
     now = dt.datetime.now(dt.timezone.utc)
     h = None
     try:
-        h = crypto.bars([symbol], "1Hour", first, now)[symbol][["Open", "High", "Low", "Close", "Volume"]]
+        small = TF["rule"] and TF["unit"] < pd.Timedelta(hours=1)      # 30/15-min candles need 15-min prices
+        h = crypto.bars([symbol], "15Min" if small else "1Hour", first, now)[symbol][
+            ["Open", "High", "Low", "Close", "Volume"]]
         d = crypto.daily_from(h)
         print(f"Alpaca: {len(d)} days from {d.index[0]:%Y-%m-%d}", flush=True)
     except Exception as e:
@@ -117,8 +120,6 @@ def load_prices(symbol, first):
     daily = clean(d, "daily")
     if not TF["rule"]:
         return daily, daily
-    if TF["unit"] < pd.Timedelta(hours=1):
-        raise SystemExit("Close-ups below 1-hour candles need 15-min prices; use a 1h or bigger TF")
     b = crypto.resample(h, TF["rule"])
     b.index = b.index.tz_convert("UTC").tz_localize(None)
     return daily, clean(b, TF["label"])
@@ -143,7 +144,10 @@ def duration(td):
     if TF["rule"] is None:
         days = td.days
         return f"{days} day{'' if days == 1 else 's'}"
-    h = int(round(td.total_seconds() / 3600))
+    m = int(round(td.total_seconds() / 60))
+    if m < 120:
+        return f"{m} min"
+    h = int(round(m / 60))
     return f"{h}h" if h < 48 else f"{h // 24}d {h % 24}h"
 
 
@@ -247,9 +251,9 @@ def trade_panel(ax, d, r):
                  loc="left", fontsize=9, color=INK)
 
 
-def page(d, chunk, path, heading):
-    rows = int(np.ceil(len(chunk) / 3))
-    fig, axes = plt.subplots(rows, 3, figsize=(15, 3.5 * rows + 1.2), dpi=120)
+def page(d, chunk, path, heading, cols=3):
+    rows = int(np.ceil(len(chunk) / cols))
+    fig, axes = plt.subplots(rows, cols, figsize=(5 * cols, 3.5 * rows + 1.2), dpi=120)
     axes = np.atleast_2d(axes)
     for k, ax in enumerate(axes.flat):
         if k < len(chunk):
@@ -309,6 +313,17 @@ def picks(t, pick, title):
             out.append((f"best{n}_worst{n}.png",
                         f"{title} · the {n} best trades (first rows) and the {n} worst (last rows) of {len(t)}",
                         pd.concat([best, worst])))
+        elif kind == "random":
+            # n random winners (first row) and n random losers (second row); fixed seed = same picks every run
+            n, _, seed = rest.partition(":")
+            n, rng = int(n or 5), np.random.default_rng(int(seed or 1))
+            wins, losses = done[done["ret"] > 0], done[done["ret"] <= 0]
+            pw = wins.iloc[np.sort(rng.choice(len(wins), min(n, len(wins)), replace=False))]
+            pl = losses.iloc[np.sort(rng.choice(len(losses), min(n, len(losses)), replace=False))]
+            out.append((f"random{n}_wins_losses.png",
+                        f"{title} · {len(pw)} random winners (top row) and {len(pl)} random losers (bottom row) "
+                        f"of {len(t)} trades ({len(wins)} won, {len(losses)} lost)",
+                        pd.concat([pw, pl]), n))
         elif kind == "from":
             day, _, n = rest.rpartition(":")
             n = int(n)
@@ -322,7 +337,7 @@ def picks(t, pick, title):
                             f"{title} · {len(seq)} trades in a row from {day} "
                             f"(#{chunk['n'].iat[0]}-#{chunk['n'].iat[-1]} of {len(t)})", chunk))
         else:
-            raise SystemExit(f"Unknown PICK {item!r} (use extremes:6 or from:2022-05-01:24)")
+            raise SystemExit(f"Unknown PICK {item!r} (use extremes:6, random:5 or from:2022-05-01:24)")
     return out
 
 
@@ -349,8 +364,8 @@ def main():
     os.makedirs(folder, exist_ok=True)
     overview(daily, t, os.path.join(folder, "overview.png"), title)
     print("saved", os.path.join(folder, "overview.png"), flush=True)
-    for name, heading, chunk in picks(t, os.environ.get("PICK", "").strip(), title):
-        print("saved", page(d, chunk, os.path.join(folder, name), heading), flush=True)
+    for name, heading, chunk, *cols in picks(t, os.environ.get("PICK", "").strip(), title):
+        print("saved", page(d, chunk, os.path.join(folder, name), heading, *cols), flush=True)
 
 
 if __name__ == "__main__":
