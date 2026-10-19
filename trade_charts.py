@@ -41,6 +41,7 @@ UP_C, DOWN_C = "#b9b8b1", "#52514e"          # candles stay neutral so the lines
 WIN_BG, LOSS_BG = "#e3f4ec", "#fbe7e6"
 PER_PAGE = 12
 RULE = {"name": None, "st": None}        # set by main() for a btc50_*.py rule
+NAME = ["BTC/USD"]                       # the symbol drawn (SYMBOL): a coin, or a stock / SPY
 SHORTS = [False]                         # set by load_trades(): every trade is a short (labels, markers)
 TF = {"rule": None, "unit": pd.Timedelta(days=1), "label": "daily", "candle": "day"}   # candle size of the close-ups
 STOP_C, PEAK_C, LH_C = "#e34948", "#8c8b85", "#6250d6"
@@ -64,6 +65,8 @@ def set_tf(rule):
 def load_trades(results, version):
     t = pd.read_csv(os.path.join("reports", "backtest", results, "trades.csv"))
     t = t[t["version"].str.startswith(version)].copy()
+    if "stock" in t.columns:                          # each-stock results: one stock's trades (SYMBOL)
+        t = t[t["stock"] == NAME[0]].copy()
     if t.empty:
         raise SystemExit(f"No trades of a version starting with {version!r} in {results}")
     et, xt = pd.to_datetime(t["entry_time"]), pd.to_datetime(t["exit_time"])
@@ -163,7 +166,8 @@ def overview(d, t, path, title):
     for _, r in t.iterrows():
         end = w.index[-1] if r["open"] else r["exit_day"] + (TF["unit"] if TF["rule"] else pd.Timedelta(0))
         ax.axvspan(r["entry_day"], end, color=WIN_BG if r["ret"] > 0 else LOSS_BG, zorder=0, lw=0)
-    ax.plot(w.index, w["Close"], color=INK, lw=1.2, label="Bitcoin daily close", zorder=3)
+    label = "Bitcoin" if NAME[0] == "BTC/USD" else NAME[0]
+    ax.plot(w.index, w["Close"], color=INK, lw=1.2, label=f"{label} daily close", zorder=3)
     ax.plot(w.index, w["SMA50"], color=SMA50_C, lw=1.4, label="50-day average", zorder=2)
     ax.plot(w.index, w["SMA200"], color=SMA200_C, lw=1.4, label="200-day average", zorder=2)
     for _, r in t.iterrows():                    # number the big trades (|return| >= 9%) above the line
@@ -175,10 +179,12 @@ def overview(d, t, path, title):
                             fontsize=8, color=INK2)
     ax.set_yscale("log")
     lo, hi = w["Low"].min(), w["High"].max()
-    ticks = [v for v in (5e3, 7e3, 10e3, 15e3, 20e3, 30e3, 40e3, 50e3, 70e3, 100e3, 150e3, 200e3, 300e3)
+    ticks = [v for v in (10, 15, 20, 30, 50, 70, 100, 150, 200, 300, 400, 500, 700, 1e3, 1.5e3, 2e3, 3e3, 5e3,
+                         7e3, 10e3, 15e3, 20e3, 30e3, 40e3, 50e3, 70e3, 100e3, 150e3, 200e3, 300e3)
              if lo * 0.9 <= v <= hi * 1.15]
     ax.yaxis.set_major_locator(matplotlib.ticker.FixedLocator(ticks))
-    ax.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"${v / 1000:,.0f}k"))
+    ax.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(
+        lambda v, _: f"${v / 1000:,.0f}k" if hi >= 5e3 else f"${v:,.0f}"))
     ax.yaxis.set_minor_locator(matplotlib.ticker.NullLocator())
     ax.grid(True, color=GRID, lw=0.6, zorder=0)
     ax.set_xlim(w.index[0], w.index[-1])
@@ -243,7 +249,8 @@ def trade_panel(ax, d, r):
     ax.set_ylim(lo - (hi - lo) * 0.12, hi + (hi - lo) * 0.16)          # room for the labels
     ax.grid(True, color=GRID, lw=0.5, zorder=0)
     digits = 1 if hi - lo < 8000 else 0
-    ax.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"${v / 1000:,.{digits}f}k"))
+    ax.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(
+        (lambda v, _: f"${v / 1000:,.{digits}f}k") if hi >= 5e3 else (lambda v, _: f"${v:,.0f}")))
     loc = mdates.AutoDateLocator(minticks=3, maxticks=5)
     ax.xaxis.set_major_locator(loc)
     ax.xaxis.set_major_formatter(mdates.ConciseDateFormatter(loc))
@@ -350,6 +357,7 @@ def main():
     results = os.environ.get("RESULTS") or "crypto-btc-strategies-btc_trend-8y"
     version = os.environ.get("VERSION") or "Hold BTC while above BOTH"
     symbol = os.environ.get("SYMBOL") or "BTC/USD"
+    NAME[0] = symbol
     rule = os.environ.get("RULE")
     mod = None
     if rule:
@@ -361,6 +369,8 @@ def main():
     daily, d = load_prices(symbol, first)
     title = f"{t['version'].iat[0]} — {symbol}"
     folder = os.path.join("reports", "backtest", results, "charts")
+    if symbol != "BTC/USD":
+        folder = os.path.join(folder, symbol.replace("/", "-"))
     if mod is not None:
         from strategies import _structure
         RULE["name"], RULE["st"] = rule, _structure.run(d[["Open", "High", "Low", "Close"]], **mod.KW)

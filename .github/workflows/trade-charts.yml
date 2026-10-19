@@ -17,6 +17,10 @@ on:
         description: "Optional: a btc50_*.py rule to draw its stop / lower highs (e.g. btc50_uprise_ma_f1)"
         type: string
         default: ""
+      symbol:
+        description: "Coin or stock to draw (BTC/USD, or a stock / SPY from an each-stock test)"
+        type: string
+        default: "BTC/USD"
       pick:
         description: "Optional: which trades get close-ups (empty = all). e.g. extremes:6 (6 best + 6 worst) from:2022-05-01:24 (24 in a row)"
         type: string
@@ -44,6 +48,7 @@ jobs:
           VERSION: ${{ inputs.version }}
           RULE: ${{ inputs.rule }}
           PICK: ${{ inputs.pick }}
+          SYMBOL: ${{ inputs.symbol }}
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
       - name: Commit the charts
