@@ -6,8 +6,8 @@ open after a daily close below it. The whole account goes in (SIZE = 1.0), no st
 from strategies import tools
 
 MARKETS = ("crypto",)
-NAME = "Hold BTC while above BOTH its 50- and 200-day MAs, else cash (100% in)"
-SHORT = "BTC>both"
+NAME = "Hold while above BOTH the 50- and 200-day averages, else cash (100% in)"
+SHORT = "50&200"
 SIZE = 1.0
 EXIT = {"stop_atr": 30.0, "target_r": None, "trail_days": None, "max_days": None}
 

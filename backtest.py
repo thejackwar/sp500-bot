@@ -95,6 +95,7 @@ BOT_TF = "15m"              # bot versions / strategies: the bot's intraday char
 PATTERN_TF = "daily"        # patterns test: which candles the patterns are found on ("daily", "1h", "15m")
 NEED_INTRADAY_VOLUME = False  # True for intraday pattern tests (re-downloads saved 15-min prices without volume)
 FILTER_MA = 200             # market trend filter: benchmark (SPY / BTC) above its N-day average
+SKIP_BOT = False            # strategies mode without the live bot's rows (each-coin test)
 DAYS_PER_YEAR = 252
 OPENING_CHECK = True        # stocks: a check at 9:30 with the opening price
 OVERNIGHT_FILLS = False     # crypto never closes: a signal at a day's last candle fills at the next candle
@@ -1325,8 +1326,8 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
     slots = pd.DatetimeIndex(sorted(set().union(*(intraday[s].index for s in syms))))
     keep = slots >= pd.Timestamp(start).tz_convert(slots.tz)
     slots = slots[keep]
-    if mode == "patterns":
-        sig = None                                     # pattern breakouts are found below, per day
+    if mode == "patterns" or (mode == "strategies" and SKIP_BOT):
+        sig = None                                     # patterns: found below, per day; SKIP_BOT: no bot rows
     else:
         sig = []
         for col, sym in enumerate(syms):
@@ -1370,8 +1371,9 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
     # what to simulate: (key, name, short label, signals, settings)
     jobs = []
     if mode == "strategies":
-        jobs.append(("bot", "Bot now: breakout, trailing exit", "Bot", sig, BOT_NOW))
-        if MARKET == "crypto" and spy is not None:
+        if not SKIP_BOT:
+            jobs.append(("bot", "Bot now: breakout, trailing exit", "Bot", sig, BOT_NOW))
+        if MARKET == "crypto" and spy is not None and not SKIP_BOT:
             jobs.append(("bot_btc", f"Bot now + BTC filter (BTC above its {FILTER_MA}-day MA)", "Bot+BTC", sig,
                          {**BOT_NOW, "spy_filter": True}))
         from strategies import tools
@@ -1493,6 +1495,8 @@ def main():
     start = max(start, dt.datetime(2016, 3, 1, tzinfo=dt.timezone.utc))      # Alpaca history starts 2016
     os.makedirs(OUT, exist_ok=True)
 
+    if market == "crypto" and os.environ.get("COINS", "").strip().lower().startswith("each"):
+        return each_coin(start, end, mode, runs)
     if market == "crypto":
         import crypto
         use_crypto()
@@ -1576,6 +1580,92 @@ def main():
     if card is not None:
         telegram(document=os.path.join(OUT, "patterns.csv"),
                  caption="Every pattern breakout traded on its own (the scorecard's trades).")
+
+
+def each_coin(start, end, mode, runs):
+    """COINS="each coin": the strategy files tested on every top coin ON ITS OWN (one coin per test, from
+    that coin's first day of prices), each compared with buying and holding THAT coin. The live bot's rows
+    are left out (they need BTC as their market filter). One table for all coins."""
+    global SKIP_BOT, BENCHMARK, UNIVERSE, FOOTER
+    import crypto
+    use_crypto()
+    SKIP_BOT = True
+    os.makedirs(OUT, exist_ok=True)
+    tickers = crypto.top_coins()
+    print(f"Each-coin test {start:%Y-%m-%d} → {end:%Y-%m-%d}: {' '.join(crypto.coin_of(t) for t in tickers)}", flush=True)
+    daily, intraday = crypto.history(tickers, start, end, CACHE_DIR)
+    rows, trades, eqs, lines = [], [], {}, []
+    for sym in tickers:
+        if sym not in intraday:
+            lines.append(f"{crypto.coin_of(sym)}: no prices, skipped")
+            continue
+        coin = crypto.coin_of(sym)
+        first = intraday[sym].index[0]
+        st = max(pd.Timestamp(start), first + pd.Timedelta(days=21)).to_pydatetime()
+        if (pd.Timestamp(end) - pd.Timestamp(st)).days < 365:
+            lines.append(f"{coin}: prices only from {first:%Y-%m-%d}, less than a year to test, skipped")
+            continue
+        BENCHMARK = coin
+        print(f"\n=== {coin} from {st:%Y-%m-%d}", flush=True)
+        res, _ = run({sym: daily[sym]}, {sym: intraday[sym]}, st, end, spy=daily[sym], mode=mode, runs=runs)
+        bench = benchmark(daily[sym], pd.Timestamp(st.date()))
+        b_yrs = (bench.index[-1] - bench.index[0]).days / 365.25
+        b_cagr = (bench.iat[-1] / START_EQUITY) ** (1 / b_yrs) - 1
+        b_dd = (bench / bench.cummax() - 1).min()
+        rows.append({"coin": coin, "version": f"Buy & hold {coin}", "short": "B&H", "from": f"{st:%Y-%m-%d}",
+                     "cagr": b_cagr, "cagr_min": np.nan, "cagr_max": np.nan, "max_dd": b_dd, "beat": np.nan,
+                     "runs": np.nan, "final": bench.iat[-1], "trades": np.nan})
+        for key, r in res.items():
+            a = r["agg"]
+            rows.append({"coin": coin, "version": r["name"], "short": r["short"], "from": f"{st:%Y-%m-%d}",
+                         "cagr": a["cagr"], "cagr_min": a["cagr_min"], "cagr_max": a["cagr_max"],
+                         "max_dd": a.get("max_dd", np.nan), "beat": a["beat"], "runs": a["spy_runs"],
+                         "final": r["equity"]["equity"].iat[-1], "trades": a.get("trades", np.nan)})
+            trades.append(r["trades"].assign(coin=coin, version=r["name"]))
+            eqs[f"{coin} {r['short']}"] = r["equity"]["equity"]
+        eqs[f"{coin} B&H"] = bench
+    tab = pd.DataFrame(rows)
+    tab.to_csv(os.path.join(OUT, "each_coin.csv"), index=False)
+    if trades:
+        t = pd.concat(trades, ignore_index=True)
+        t = t[["coin", "version"] + [c for c in t.columns if c not in ("coin", "version")]]
+        for c in ("entry_time", "exit_time"):
+            t[c] = pd.to_datetime(t[c]).dt.strftime("%Y-%m-%d %H:%M")
+        t.to_csv(os.path.join(OUT, "trades.csv"), index=False)
+    pd.DataFrame(eqs).round(0).to_csv(os.path.join(OUT, "equity.csv"), index_label="date")
+
+    # the table: per coin, every version vs buying and holding that coin
+    out = ["📊 Each coin on its own: strategies vs buy & hold of that coin",
+           f"Until {end:%d %b %Y}; each coin from its first day of prices (+21 days), {runs} start dates a week apart; "
+           "whole account in that one coin when holding (strategy SIZE); fees 0.25% per buy and sell, 0.05% slippage. "
+           "'final' = money from $100,000 in the first run; 'beat' = start dates where it ended above buy & hold.", ""]
+    for coin, g in tab.groupby("coin", sort=False):
+        bh = g[g.short == "B&H"].iloc[0]
+        out.append(f"{coin} (from {bh['from']}): buy & hold {pct(bh.cagr)}/yr, max drop {pct(bh.max_dd)}, final ${bh.final:,.0f}")
+        for _, r in g[g.short != "B&H"].sort_values("final", ascending=False).iterrows():
+            mark = "✅" if r.final >= bh.final else "  "
+            out.append(f" {mark} {r.short:8s} {pct(r.cagr):>7}/yr ({pct(r.cagr_min)} to {pct(r.cagr_max)})  "
+                       f"drop {pct(r.max_dd):>6}  final ${r.final:>10,.0f}  beat {int(r.beat)}/{int(r.runs)}  ~{r.trades:.0f} trades")
+        out.append("")
+    if lines:
+        out += lines + [""]
+    names = tab[tab.short != "B&H"].drop_duplicates("short")[["short", "version"]]
+    out.append("Versions: " + "; ".join(f"{a} = {b}" for a, b in names.itertuples(index=False)))
+    wins = tab[tab.short != "B&H"].merge(tab[tab.short == "B&H"][["coin", "final"]].rename(columns={"final": "bh"}), on="coin")
+    score = wins.assign(won=wins.final >= wins.bh).groupby("short").won.agg(["sum", "count"])
+    out.append("Coins where the version ended at or above buy & hold: " +
+               ", ".join(f"{k} {int(v['sum'])}/{int(v['count'])}" for k, v in score.sort_values("sum", ascending=False).iterrows()))
+    text = "\n".join(out)
+    print("\n" + text)
+    with open(os.path.join(OUT, "summary.txt"), "w") as f:
+        f.write(text)
+    with open(os.path.join(OUT, "details.txt"), "w") as f:
+        f.write(tab.round(4).to_string(index=False))
+    if os.environ.get("GITHUB_STEP_SUMMARY"):
+        with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as f:
+            f.write("```\n" + text + "\n```\n")
+    for k in range(0, len(text), 3800):                # Telegram messages are limited to 4096 characters
+        telegram("<pre>" + html.escape(text[k:k + 3800]) + "</pre>")
 
 
 if __name__ == "__main__":
