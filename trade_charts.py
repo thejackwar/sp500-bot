@@ -117,6 +117,11 @@ def load_prices(symbol, first):
         y = crypto.yahoo([symbol], "10y", "1d")[symbol]
         d = y.copy()
         d.index = d.index.tz_localize(None).normalize()
+    if not TF["rule"] and d.index[0] > pd.Timestamp(first).tz_localize(None) + pd.Timedelta(days=30):
+        # trades before Alpaca's crypto history (2021): daily candles from Yahoo/Coinbase, like the backtest
+        dl = crypto.daily_long(symbol, first)
+        dl.index = dl.index.tz_localize(None)
+        d = dl[["Open", "High", "Low", "Close", "Volume"]].copy()
     daily = clean(d, "daily")
     if not TF["rule"]:
         return daily, daily

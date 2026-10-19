@@ -1454,7 +1454,9 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
         only = os.environ.get("ONLY", "").split()     # e.g. ONLY="early" = only strategy files starting with "early"
         mods = strategies if strategies is not None else load_strategies()
         if only:
-            mods = {k: v for k, v in mods.items() if any(k.startswith(o) for o in only)}
+            # a name ending in "!" must match exactly (e.g. "btc50_uprise_ma_f1!" without its _hlw/_hlc variants)
+            mods = {k: v for k, v in mods.items()
+                    if any(k == o[:-1] if o.endswith("!") else k.startswith(o) for o in only)}
         for name, mod in mods.items():
             if MARKET not in getattr(mod, "MARKETS", ("stocks", "crypto")):
                 continue                               # a strategy made for the other market
@@ -1560,11 +1562,15 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
 
 
 def main():
-    years = float(os.environ.get("YEARS", "5"))
+    years_in = os.environ.get("YEARS", "5").strip()
+    if years_in.lower().startswith("from"):        # "from 2018" = start on 1 Jan 2018
+        os.environ.setdefault("START", f"{''.join(ch for ch in years_in if ch.isdigit())}-01-01")
+        years_in = "20"
+    years = float(years_in)
     mode = os.environ.get("TEST", "strategies")
     runs = int(os.environ.get("RUNS") or RUNS)
     market = os.environ.get("MARKET", "stocks")
-    global PATTERN_TF, NEED_INTRADAY_VOLUME, BOT_TF, UNIVERSE, FOOTER
+    global PATTERN_TF, NEED_INTRADAY_VOLUME, BOT_TF, UNIVERSE, FOOTER, SKIP_BOT
     BOT_TF = os.environ.get("BOT_TF", "15m") if mode != "patterns" else "15m"
     PATTERN_TF = os.environ.get("PATTERN_TF", "daily") if mode == "patterns" else "daily"
     NEED_INTRADAY_VOLUME = PATTERN_TF != "daily" or mode == "bot versions"   # volume versions need it
@@ -1573,7 +1579,11 @@ def main():
         years = 5.0
     end = dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=20)
     start = end - dt.timedelta(days=round(365.25 * years))
-    start = max(start, dt.datetime(2016, 3, 1, tzinfo=dt.timezone.utc))      # Alpaca history starts 2016
+    if os.environ.get("START"):                    # a fixed start date (workflow input "start", e.g. 2018-01-01)
+        start = dt.datetime.fromisoformat(os.environ["START"]).replace(tzinfo=dt.timezone.utc)
+    long_hist = market == "crypto" and os.environ.get("SOURCE", "").lower().startswith("daily")
+    if not long_hist:
+        start = max(start, dt.datetime(2016, 3, 1, tzinfo=dt.timezone.utc))  # Alpaca history starts 2016
     os.makedirs(OUT, exist_ok=True)
 
     if market == "crypto" and os.environ.get("COINS", "").strip().lower().startswith("each"):
@@ -1590,7 +1600,24 @@ def main():
         else:
             tickers = crypto.top_coins()
         print(f"Crypto backtest {start:%Y-%m-%d} → {end:%Y-%m-%d}, {len(tickers)} coins", flush=True)
-        daily, intraday = crypto.history(tickers, start, end, CACHE_DIR)
+        if long_hist:
+            # SOURCE "daily (from 2018)": daily candles from Yahoo/Coinbase, for years before Alpaca's history
+            # (2021). Each "check" is a day: trades fill at the daily open, and leverage liquidation is judged
+            # on the day's low. Strategy files only (the live breakout bot needs 15-min candles).
+            SKIP_BOT = True
+            daily, intraday = {}, {}
+            for sym in tickers:
+                dd = crypto.daily_long(sym, start - dt.timedelta(days=450))
+                if dd is None or not len(dd):
+                    continue
+                intraday[sym] = dd[dd.index >= pd.Timestamp(start) - pd.Timedelta(days=21)]
+                d2 = dd.copy()
+                d2.index = d2.index.tz_localize(None)
+                daily[sym] = d2
+            FOOTER = FOOTER.replace("fills at the next 15-min open", "daily candles (Yahoo/Coinbase): fills at the "
+                                    "next daily open, leverage liquidation judged on daily lows")
+        else:
+            daily, intraday = crypto.history(tickers, start, end, CACHE_DIR)
         if not intraday:
             sys.exit("No crypto prices could be downloaded.")
         first = min(h.index[0] for h in intraday.values())

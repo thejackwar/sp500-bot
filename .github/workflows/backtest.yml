@@ -11,7 +11,7 @@ on:
       years:
         description: "How many years to test"
         type: choice
-        options: ["1", "3", "5", "8"]
+        options: ["1", "3", "5", "8", "from 2018"]
         default: "5"
       test:
         description: "What to compare"
@@ -42,6 +42,11 @@ on:
         type: choice
         options: ["0.05% futures", "0.25% Alpaca"]
         default: "0.05% futures"
+      source:
+        description: "Crypto only: price history. Alpaca 15-min (from 2021, like live) or daily candles from Yahoo/Coinbase (back to 2015; strategy files only)"
+        type: choice
+        options: ["alpaca 15-min", "daily (from 2015)"]
+        default: "alpaca 15-min"
       runs:
         description: "Start dates per version (more = more reliable, slower)"
         type: choice
@@ -85,6 +90,7 @@ jobs:
           BOT_TF: ${{ inputs.bot_candles }}
           COINS: ${{ inputs.coins }}
           ONLY: ${{ inputs.only }}
+          SOURCE: ${{ inputs.source }}
           CRYPTO_FEE: ${{ startsWith(inputs.fee, '0.25') && '0.0025' || '0.0005' }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ inputs.market == 'crypto' && secrets.TELEGRAM_CHAT_ID_CRYPTO || secrets.TELEGRAM_CHAT_ID }}
@@ -114,9 +120,11 @@ jobs:
           [ "${{ inputs.test }}" != "patterns" ] && [ "${{ inputs.bot_candles }}" = "1h" ] && tf="-1h"
           yrs="${{ inputs.years }}"; [ "$tf" = "-15m" ] && [ "$yrs" -gt 5 ] && yrs=5
           coins=""; [ "${{ inputs.market }}" = "crypto" ] && [ "${{ inputs.coins }}" != "top 10" ] && coins="-$(echo '${{ inputs.coins }}' | tr 'A-Z ' 'a-z-')"
-          only=""; [ -n "${{ inputs.only }}" ] && [ "${{ inputs.test }}" = "strategies" ] && only="-$(echo '${{ inputs.only }}' | tr 'A-Z ' 'a-z-')"
+          only=""; [ -n "${{ inputs.only }}" ] && [ "${{ inputs.test }}" = "strategies" ] && only="-$(echo '${{ inputs.only }}' | tr -d '!' | tr 'A-Z ' 'a-z-')"
           fee=""; [ "${{ inputs.market }}" = "crypto" ] && ! echo "${{ inputs.fee }}" | grep -q '^0.25' && fee="-fee005"
-          dir="reports/backtest/${{ inputs.market }}${coins}-$(echo '${{ inputs.test }}' | tr ' ' '-')${only}${tf}${fee}-${yrs}y"
+          span="${yrs}y"; case "$yrs" in from*) span="from$(echo "$yrs" | tr -dc 0-9)";; esac
+          src=""; [ "${{ inputs.market }}" = "crypto" ] && echo "${{ inputs.source }}" | grep -q '^daily' && src="-daily"
+          dir="reports/backtest/${{ inputs.market }}${coins}-$(echo '${{ inputs.test }}' | tr ' ' '-')${only}${tf}${fee}${src}-${span}"
           mkdir -p "$dir"
           cp backtest-results/summary.txt backtest-results/trades.csv "$dir"/
           for f in details.txt patterns.csv equity.csv each_coin.csv; do [ -f "backtest-results/$f" ] && cp "backtest-results/$f" "$dir"/; done

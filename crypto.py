@@ -176,6 +176,33 @@ def yahoo(symbols, period, interval):
     return out
 
 
+def daily_long(symbol, start):
+    """Daily candles (UTC days, index = UTC midnight) from `start`, for history older than Alpaca's (Alpaca's
+    crypto history starts in 2021). Yahoo Finance first, Coinbase as a backup (both have BTC from 2014-15)."""
+    start = pd.Timestamp(start).tz_localize("UTC") if pd.Timestamp(start).tz is None else pd.Timestamp(start).tz_convert("UTC")
+    y = yahoo([symbol], "max", "1d").get(symbol)
+    if y is not None and len(y) and y.index[0] <= start + pd.Timedelta(days=5):
+        y.index = y.index.normalize()
+        print(f"{symbol}: {len(y)} daily candles from Yahoo, from {y.index[0]:%Y-%m-%d}", flush=True)
+        return y[y.index >= start]
+    print(f"{symbol}: Yahoo history unavailable or too short; trying Coinbase", flush=True)
+    rows, t = [], start
+    end = pd.Timestamp.now(tz="UTC")
+    while t < end:                                   # Coinbase: 300 candles per request
+        t2 = min(t + pd.Timedelta(days=299), end)
+        r = requests.get(f"https://api.exchange.coinbase.com/products/{symbol.replace('/', '-')}/candles", timeout=30,
+                         params={"granularity": 86400, "start": t.isoformat(), "end": t2.isoformat()})
+        r.raise_for_status()
+        rows += r.json()                             # [time, low, high, open, close, volume]
+        t = t2 + pd.Timedelta(days=1)
+        time.sleep(0.4)
+    df = pd.DataFrame(rows, columns=["t", "Low", "High", "Open", "Close", "Volume"]).drop_duplicates("t")
+    df.index = pd.to_datetime(df.pop("t"), unit="s", utc=True)
+    df = df.sort_index()[["Open", "High", "Low", "Close", "Volume"]].astype(float)
+    print(f"{symbol}: {len(df)} daily candles from Coinbase, from {df.index[0]:%Y-%m-%d}", flush=True)
+    return df
+
+
 def resample(df, rule):
     """Bigger candles from smaller ones, aligned to UTC (days start at 00:00 UTC, 4-hour candles at
     00:00, 04:00 ...)."""
