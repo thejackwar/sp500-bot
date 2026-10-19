@@ -441,7 +441,8 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
     exit_m, max_days = cfg["exit_matrix"], cfg["max_days"]
     use["kind"] = np.where((use["dl"] | use["ds"]) & ("daily" in kinds), "daily", "hourly" if BOT_TF == "1h" else "15-min")
     if "pattern" in use:                               # chart-pattern trades: named after the pattern
-        use["kind"] = use["pattern"].fillna("daily").values
+        use["kind"] = use["pattern"].where(use["pattern"].notna(), use["kind"]).values
+    use["nofilt"] = use["nofilt"].fillna(False).astype(bool) if "nofilt" in use else False
     for c in ("stop", "target"):                       # the pattern's own stop/target prices (NaN = none)
         if c not in use:
             use[c] = np.nan
@@ -451,10 +452,10 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
         use["tie"] = np.random.default_rng(cfg["seed"]).random(len(use))
     use = use.sort_values(["slot", "n", "score", "tie"], ascending=[True, False, False, True])
     by_slot = {}
-    for slot, col, dr, atr, kind, stp, tgt in zip(use["slot"].values, use["col"].values, use["dir"].values,
+    for slot, col, dr, atr, kind, stp, tgt, nf in zip(use["slot"].values, use["col"].values, use["dir"].values,
                                         use["atr"].values, use["kind"].values, use["stop"].values,
-                                        use["target"].values):
-        by_slot.setdefault(int(slot), []).append((int(col), dr, float(atr), kind, float(stp), float(tgt)))
+                                        use["target"].values, use["nofilt"].values):
+        by_slot.setdefault(int(slot), []).append((int(col), dr, float(atr), kind, float(stp), float(tgt), bool(nf)))
     stop_scale = cfg["stop_atr"] / T.STOP_ATR
 
     Cf = pd.DataFrame(C).ffill().values
@@ -557,10 +558,10 @@ def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
             equity = cash + value
             bp = max(0.0, cfg["margin"] * equity - gross)
             placed, free = 0, T.MAX_OPEN_POSITIONS - len(pos)
-            for col, r_dir, r_atr, r_kind, r_stop, r_tgt in by_slot[s]:
+            for col, r_dir, r_atr, r_kind, r_stop, r_tgt, r_nofilt in by_slot[s]:
                 if col in pos or traded_on.get(col) == day[s]:
                     continue
-                if spy_up is not None and spy_up[di[s]] != (r_dir == "LONG"):
+                if spy_up is not None and not r_nofilt and spy_up[di[s]] != (r_dir == "LONG"):
                     continue                           # against the market's trend
                 if placed >= T.MAX_NEW_PER_RUN or free <= 0:
                     skipped += 1
@@ -1396,6 +1397,16 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
                     lows_highs(ex["trail_days"])
             jobs.append((name, getattr(mod, "NAME", name), getattr(mod, "SHORT", name[:7]), s_sig, cfg))
             print(f"Strategy {name}: {len(s_sig)} buy signals", flush=True)
+        if MARKET == "crypto" and spy is not None:
+            # the bot + the 200-day MA retest as a second way in, one account, same money rules
+            from strategies import early_ma200_trail as retest
+            r_sig, _ = strategy_signals(retest, daily, syms, days, first_slot, intraday, slots)
+            print(f"200-day MA retests for the combined versions: {len(r_sig)}", flush=True)
+            for key, label, short, nofilt in (
+                    ("bot_ma200", "Bot + BTC filter + 200-day MA retest (filter on both)", "Bot+MA", False),
+                    ("bot_ma200_free", "Bot + BTC filter + 200-day MA retest (retest without the filter)", "Bot+MAf", True)):
+                comb = pd.concat([sig, r_sig.assign(nofilt=nofilt)], ignore_index=True)
+                jobs.append((key, label, short, comb, {**BOT_NOW, "spy_filter": True}))
     elif mode == "patterns":
         first_slot = np.flatnonzero(np.r_[True, slot_day[1:] != slot_day[:-1]])
         if PATTERN_TF == "daily":
