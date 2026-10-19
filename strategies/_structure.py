@@ -10,7 +10,9 @@ Swing points: a swing high is a day whose high is above the PIVOT days before an
 only known PIVOT days later (no look-ahead). Swing lows the same way with lows.
 
     entry        close crosses above the 50-day average (yesterday's close at or below it),
-                 optionally only while the close is above the 200-day average
+                 optionally only while the close is above the 200-day average; line="both": crosses
+                 above the HIGHER of the 50- and 200-day averages
+    ma_exit      also sell after a close below that line (the hold rule's exit, which keeps losses small)
     start stop   sell if a close falls below the last swing low before the entry, kept between
                  1 and 3 ATR below the entry (protection before any high has formed)
     exit "lh"    LOWER HIGH: after the entry, the highest high so far is the "previous high"; a new
@@ -34,11 +36,13 @@ PIVOT = 3
 _cache = {}
 
 
-def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False):
+def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False, line="50", ma_exit=False,
+        start_stop=True):
     """Replays the rule on daily candles. Returns a DataFrame indexed like d with columns
     entry (signal on that close), exit (signal on that close), stop (starting/trailing stop while in a
     trade), peak (highest high since entry), lh (a lower high was confirmed that day), reason."""
-    key = (exit_mode, tp_r, stretch, reentry, above200, d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
+    key = (exit_mode, tp_r, stretch, reentry, above200, line, ma_exit, start_stop,
+           d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
     if key in _cache:
         return _cache[key]
     o, h, l, c = (d[k].values.astype(float) for k in ("Open", "High", "Low", "Close"))
@@ -46,6 +50,8 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
     sma50 = tools.sma(d["Close"], 50).values
     sma200 = tools.sma(d["Close"], 200).values
     atr = tools.atr(d).values
+    # the line to cross: the 50-day average, or "both" = the higher of the 50- and 200-day averages
+    ln = sma50 if line == "50" else np.where(np.isfinite(sma200), np.maximum(sma50, sma200), np.nan)
     P = PIVOT
     piv_hi = np.zeros(n, bool)                       # day j is a swing high (known at day j + P)
     piv_lo = np.zeros(n, bool)
@@ -79,10 +85,10 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
             risk = e_price - stop
             peak, peak_day, brk, trailed = h[i], i, None, False
         if not pos:
-            if not np.isfinite(sma50[i]) or (above200 and not (np.isfinite(sma200[i]) and c[i] > sma200[i])):
+            if not np.isfinite(ln[i]) or (above200 and not (np.isfinite(sma200[i]) and c[i] > sma200[i])):
                 continue
-            cross = c[i] > sma50[i] and c[i - 1] <= sma50[i - 1]
-            resume = reentry and failed_high is not None and c[i] > failed_high and c[i] > sma50[i]
+            cross = c[i] > ln[i] and (c[i - 1] <= ln[i - 1] or not np.isfinite(ln[i - 1]))
+            resume = reentry and failed_high is not None and c[i] > failed_high and c[i] > ln[i]
             if cross or resume:
                 entry[i] = True
                 pending_entry = True
@@ -106,7 +112,9 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
                 stop, trailed = l[j], True
         if why is None and exit_mode == "break" and brk is not None and c[i] < brk:
             why = "broke the pullback low"
-        if why is None and c[i] < stop:
+        if why is None and ma_exit and c[i] < ln[i]:
+            why = "close below the line"
+        if why is None and start_stop and c[i] < stop:
             why = "below higher low" if trailed else "starting stop"
         if why is None and tp_r and c[i] >= e_price + tp_r * risk:
             why = f"take profit {tp_r:g}R"

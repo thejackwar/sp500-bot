@@ -1,0 +1,20 @@
+"""Bitcoin only: Hold above 50 & 200-day + also sell on a lower high (re-enter on a new high).
+Buys when the close crosses above the line; sells after a close below it (the hold rule's exit) OR on a
+lower high (a swing high below the highest high since entry), whichever comes first. Rules in
+strategies/_structure.py. Whole account in (SIZE = 1.0); decisions on daily closes, executed at the
+next 00:00 UTC open. Run with coins = BTC."""
+from strategies import _structure
+
+MARKETS = ("crypto",)
+NAME = "Hold above 50 & 200-day + also sell on a lower high (re-enter on a new high)"
+SHORT = "Both+LH"
+SIZE = 1.0
+EXIT = {"stop_atr": 30.0, "target_r": None, "trail_days": None, "max_days": None}   # exits come from exits()
+
+
+def entries(d):
+    return _structure.run(d, exit_mode='lh', line='both', ma_exit=True)["entry"]
+
+
+def exits(d):
+    return _structure.run(d, exit_mode='lh', line='both', ma_exit=True)["exit"]
