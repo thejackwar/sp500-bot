@@ -18,7 +18,8 @@ breaks with a LOWER LOW. Shared by the swing_*.py strategy files (starts with "_
                the lowest low of the last 10 days (the dip before the cross). Then, whenever a day's high beats
                the highest high so far, the lowest low of the pullback since that previous high (at least one
                day that made no new high) becomes the new low to hold, if it is higher. A close (or touch) below
-               it is the lower low that ends the trend.
+               it is the lower low that ends the trend. pull_min (e.g. 0.01): a pullback only counts if its low
+               is at least that far below the high before it, so 1-day pauses don't move the low to hold.
 """
 import numpy as np
 import pandas as pd
@@ -28,10 +29,10 @@ from strategies import tools
 _cache = {}
 
 
-def run(d, pivot=5, mode="close", trail="pivot"):
+def run(d, pivot=5, mode="close", trail="pivot", pull_min=0.0):
     """Daily candles -> DataFrame: entry (signal on that close), exit (signal on that close; mode "close"
     only), stop (the low to hold after that day's close, while in a trade), reason."""
-    key = (pivot, mode, trail, d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
+    key = (pivot, mode, trail, pull_min, d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
     if key in _cache:
         return _cache[key]
     o, h, l, c = (d[k].values.astype(float) for k in ("Open", "High", "Low", "Close"))
@@ -73,7 +74,8 @@ def run(d, pivot=5, mode="close", trail="pivot"):
             if h[i] > hi:                            # a new high: lock the pullback low since the last high
                 if i - hi_day >= 2:                  # at least one day in between that made no new high
                     pull = l[hi_day + 1:i].min()
-                    if pull > protect:
+                    # pull_min: only a real pullback counts (at least this far below the high before it)
+                    if pull > protect and pull <= hi * (1 - pull_min):
                         protect = pull               # a higher low: the uptrend goes on
                 hi, hi_day = h[i], i
         else:
