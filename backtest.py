@@ -117,14 +117,17 @@ def use_crypto():
     global T, FEE, SLIPPAGE, MARGIN, BENCHMARK, RUN_STEP_DAYS, UNIVERSE, UNIT, DAYS_PER_YEAR
     global OPENING_CHECK, OVERNIGHT_FILLS, VARIANTS, SHORT, FOOTER, MARKET, FILTER_MA
     import crypto_trader
-    T, FEE, SLIPPAGE, MARGIN = crypto_trader, crypto_trader.FEE, 0.0005, 1.0
+    # CRYPTO_FEE (workflow input "fee"): 0.0005 = futures exchange taker fee (Binance ~0.05%, the default for
+    # tests since 19 Oct 2026), 0.0025 = Alpaca's spot fee for small accounts (what the live bot pays)
+    fee = float(os.environ.get("CRYPTO_FEE") or crypto_trader.FEE)
+    T, FEE, SLIPPAGE, MARGIN = crypto_trader, fee, 0.0005, 1.0
     BENCHMARK, RUN_STEP_DAYS, DAYS_PER_YEAR = "BTC", 7, 365
     UNIVERSE, UNIT = "top 10 crypto", "coins"
     OPENING_CHECK, OVERNIGHT_FILLS = False, True
     MARKET, FILTER_MA = "crypto", 50          # BTC filter: BTC above its 50-day average (crypto turns fast)
     VARIANTS, SHORT = CRYPTO_VARIANTS, CRYPTO_SHORT
     FOOTER = ("Today's top 10 coins only (coins that dropped out aren't tested, which flatters results); "
-              f"fees {crypto_trader.FEE:.2%} per buy and sell; fills at the next 15-min open with 0.05% slippage.")
+              f"fees {fee:.2%} per buy and sell; fills at the next 15-min open with 0.05% slippage.")
 
 
 def _round(x):

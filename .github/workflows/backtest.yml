@@ -37,6 +37,11 @@ on:
         description: "Strategies test only: strategy files whose name starts with this (e.g. early); empty = all"
         type: string
         default: ""
+      fee:
+        description: "Crypto only: fee per buy and per sell (futures exchange like Binance, or Alpaca spot like the live bot)"
+        type: choice
+        options: ["0.05% futures", "0.25% Alpaca"]
+        default: "0.05% futures"
       runs:
         description: "Start dates per version (more = more reliable, slower)"
         type: choice
@@ -80,6 +85,7 @@ jobs:
           BOT_TF: ${{ inputs.bot_candles }}
           COINS: ${{ inputs.coins }}
           ONLY: ${{ inputs.only }}
+          CRYPTO_FEE: ${{ startsWith(inputs.fee, '0.25') && '0.0025' || '0.0005' }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ inputs.market == 'crypto' && secrets.TELEGRAM_CHAT_ID_CRYPTO || secrets.TELEGRAM_CHAT_ID }}
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
@@ -109,7 +115,8 @@ jobs:
           yrs="${{ inputs.years }}"; [ "$tf" = "-15m" ] && [ "$yrs" -gt 5 ] && yrs=5
           coins=""; [ "${{ inputs.market }}" = "crypto" ] && [ "${{ inputs.coins }}" != "top 10" ] && coins="-$(echo '${{ inputs.coins }}' | tr 'A-Z ' 'a-z-')"
           only=""; [ -n "${{ inputs.only }}" ] && [ "${{ inputs.test }}" = "strategies" ] && only="-$(echo '${{ inputs.only }}' | tr 'A-Z ' 'a-z-')"
-          dir="reports/backtest/${{ inputs.market }}${coins}-$(echo '${{ inputs.test }}' | tr ' ' '-')${only}${tf}-${yrs}y"
+          fee=""; [ "${{ inputs.market }}" = "crypto" ] && ! echo "${{ inputs.fee }}" | grep -q '^0.25' && fee="-fee005"
+          dir="reports/backtest/${{ inputs.market }}${coins}-$(echo '${{ inputs.test }}' | tr ' ' '-')${only}${tf}${fee}-${yrs}y"
           mkdir -p "$dir"
           cp backtest-results/summary.txt backtest-results/trades.csv "$dir"/
           for f in details.txt patterns.csv equity.csv each_coin.csv; do [ -f "backtest-results/$f" ] && cp "backtest-results/$f" "$dir"/; done
