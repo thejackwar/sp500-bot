@@ -31,6 +31,10 @@ exit, lh_right sets how many lower days after a high confirm it (default PIVOT =
     re-entry     after a lower-high / trend-break sell, buy again when a close is above the high that
                  failed (the trend resumed) while above the 50-day average; after a starting stop or a
                  take profit, wait for a new cross
+    structure    entry filter on market structure (None = off): buy only while the lows are rising, i.e. the
+                 last confirmed swing low is above the one before it AND nothing since has gone below it
+                 (a lower low = downtrend: wait for a new higher low). "wick" judges swing lows on the
+                 days' lows, "close" on the daily closes
     side         "long" (default) or "short": the short rule is the long rule run on the chart turned
                  upside down (every price x -1), so it is the exact mirror: sell short when the close
                  crosses BELOW the 50-day while the 50-day is FALLING; cover on a higher low (a low below
@@ -47,7 +51,7 @@ _cache = {}
 
 
 def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False, line="50", ma_exit=False,
-        start_stop=True, trend=None, lh_right=None, side="long"):
+        start_stop=True, trend=None, lh_right=None, side="long", structure=None):
     """Replays the rule on daily candles. Returns a DataFrame indexed like d with columns
     entry (signal on that close), exit (signal on that close), stop (starting/trailing stop while in a
     trade), peak (highest high since entry), lh (a lower high was confirmed that day), reason.
@@ -56,7 +60,8 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
     if side == "short":
         m = pd.DataFrame({"Open": -d["Open"], "High": -d["Low"], "Low": -d["High"], "Close": -d["Close"]},
                          index=d.index)
-        out = run(m, exit_mode, tp_r, stretch, reentry, above200, line, ma_exit, start_stop, trend, lh_right).copy()
+        out = run(m, exit_mode, tp_r, stretch, reentry, above200, line, ma_exit, start_stop, trend, lh_right,
+                  structure=structure).copy()
         out["stop"], out["peak"] = -out["stop"], -out["peak"]
         flip = {"lower high": "higher low", "close below the 50-day": "close above the 50-day",
                 "close below the line": "close above the line", "came back to the 50-day": "came back up to the 50-day",
@@ -64,7 +69,7 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
                 "new high": "new low"}
         out["reason"] = out["reason"].map(lambda r: flip.get(r, r))
         return out
-    key = (exit_mode, tp_r, stretch, reentry, above200, line, ma_exit, start_stop, trend, lh_right,
+    key = (exit_mode, tp_r, stretch, reentry, above200, line, ma_exit, start_stop, trend, lh_right, structure,
            d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
     if key in _cache:
         return _cache[key]
@@ -91,6 +96,16 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
         if h[j] > h[j - P:j].max() and h[j] >= h[j + 1:j + R + 1].max():
             piv_hr[j] = True
 
+    # market-structure filter: swing lows on the lows ("wick") or on the closes ("close"), confirmed P days later
+    if structure:
+        sv = l if structure == "wick" else c
+        piv_s = np.zeros(n, bool)
+        for j in range(P, n - P):
+            if sv[j] < sv[j - P:j].min() and sv[j] <= sv[j + 1:j + P + 1].min():
+                piv_s[j] = True
+    swings = []                                      # confirmed swing lows so far: (day, value)
+    struct_ok = np.zeros(n, bool)
+
     entry = np.zeros(n, bool)
     exit_ = np.zeros(n, bool)
     stop_s = np.full(n, np.nan)
@@ -105,6 +120,13 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
     brk = None                                       # "break": level to watch after a lower high
     failed_high = None                               # after a sell on a failed high: re-entry level
     for i in range(1, n):
+        if structure:
+            j = i - P
+            if j >= P and piv_s[j]:
+                swings.append((j, sv[j]))
+            if len(swings) >= 2:
+                (j1, v1), (_, v0) = swings[-1], swings[-2]
+                struct_ok[i] = v1 > v0 and sv[j1 + 1:i + 1].min() >= v1   # higher low, not broken since
         if pending_entry:                            # bought at today's open
             pos, pending_entry = True, False
             e_day, e_price = i, o[i]
@@ -121,6 +143,8 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
                 continue
             if trend == "golden" and not (np.isfinite(sma200[i]) and sma50[i] > sma200[i]):
                 continue
+            if structure and not struct_ok[i]:
+                continue                             # lower low: the lows say downtrend
             # "both": the first day the line exists counts too (that is when the hold rule can first buy);
             # "50": only a real cross from below
             cross = c[i] > ln[i] and (c[i - 1] <= ln[i - 1] or (line != "50" and not np.isfinite(ln[i - 1])))
