@@ -32,6 +32,7 @@ SMA50_C, SMA200_C, EXIT_C = "#2a78d6", "#eb6834", "#e34948"
 UP_C, DOWN_C = "#b9b8b1", "#52514e"          # candles stay neutral so the lines carry the meaning
 WIN_BG, LOSS_BG = "#e3f4ec", "#fbe7e6"
 PER_PAGE = 12
+SPIKE = 0.15                 # wicks more than 15% beyond the candle body are bad ticks: clipped
 
 plt.rcParams.update({"font.family": "DejaVu Sans", "font.size": 9, "axes.edgecolor": GRID,
                      "axes.labelcolor": INK2, "xtick.color": INK2, "ytick.color": INK2,
@@ -62,6 +63,15 @@ def load_prices(symbol, first):
         y = crypto.yahoo([symbol], "10y", "1d")[symbol]
         d = y.copy()
         d.index = d.index.tz_localize(None).normalize()
+    # bad ticks: Alpaca's crypto history has a few wicks far outside the real price (e.g. ~$8k in Oct 2021
+    # with BTC near $60k). The strategy only uses closes and opens, so only the pictures are cleaned up.
+    body_lo, body_hi = d[["Open", "Close"]].min(axis=1), d[["Open", "Close"]].max(axis=1)
+    bad = (d["Low"] < body_lo * (1 - SPIKE)) | (d["High"] > body_hi * (1 + SPIKE))
+    d["Low"] = d["Low"].clip(lower=body_lo * (1 - SPIKE))
+    d["High"] = d["High"].clip(upper=body_hi * (1 + SPIKE))
+    print(f"Clipped {int(bad.sum())} daily candles with a wick more than {SPIKE:.0%} beyond the body: "
+          + ", ".join(f"{x:%Y-%m-%d}" for x in d.index[bad]), flush=True)
+    d.attrs["clipped"] = int(bad.sum())
     d["SMA50"] = d["Close"].rolling(50).mean()
     d["SMA200"] = d["Close"].rolling(200).mean()
     d["EXIT"] = d[["SMA50", "SMA200"]].max(axis=1)
@@ -178,7 +188,8 @@ def pages(d, t, folder, title):
                    plt.Line2D([], [], marker="v", color=INK, ls="", label="Sell")]
         last = min(p + PER_PAGE, len(t))
         H = fig.get_figheight()
-        fig.suptitle(f"{title} · trades {p + 1}-{last} of {len(t)}  (no stop-loss: the red line is the exit)",
+        note = f"; {d.attrs['clipped']} bad price spikes clipped" if d.attrs.get("clipped") else ""
+        fig.suptitle(f"{title} · trades {p + 1}-{last} of {len(t)}  (no stop-loss: the red line is the exit{note})",
                      x=0.01, y=1 - 0.12 / H, ha="left", va="top", fontsize=11, color=INK)
         fig.legend(handles=handles, loc="upper left", ncol=5, frameon=False, fontsize=9,
                    bbox_to_anchor=(0.005, 1 - 0.42 / H))
