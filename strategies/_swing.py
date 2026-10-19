@@ -13,6 +13,12 @@ breaks with a LOWER LOW. Shared by the swing_*.py strategy files (starts with "_
                a stop order (the backtest fills at that level, or at the open if it opens below it).
                Nothing else sells: no 50-day exit, no lower-high exit.
     again      after a sell, buy again only on the next cross above the 50-day.
+
+    trail="pullback" (the user's refinement, 20 Oct 2026): no fixed swing size. At the buy, the low to hold is
+               the lowest low of the last 10 days (the dip before the cross). Then, whenever a day's high beats
+               the highest high so far, the lowest low of the pullback since that previous high (at least one
+               day that made no new high) becomes the new low to hold, if it is higher. A close (or touch) below
+               it is the lower low that ends the trend.
 """
 import numpy as np
 import pandas as pd
@@ -22,10 +28,10 @@ from strategies import tools
 _cache = {}
 
 
-def run(d, pivot=5, mode="close"):
+def run(d, pivot=5, mode="close", trail="pivot"):
     """Daily candles -> DataFrame: entry (signal on that close), exit (signal on that close; mode "close"
     only), stop (the low to hold after that day's close, while in a trade), reason."""
-    key = (pivot, mode, d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
+    key = (pivot, mode, trail, d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
     if key in _cache:
         return _cache[key]
     o, h, l, c = (d[k].values.astype(float) for k in ("Open", "High", "Low", "Close"))
@@ -40,16 +46,21 @@ def run(d, pivot=5, mode="close"):
     stop_s = np.full(n, np.nan)
     reason = np.full(n, "", dtype=object)
     pos, pending, protect, e_day = False, False, None, None
+    hi, hi_day = None, None                          # trail="pullback": highest high so far and its day
     for i in range(1, n):
         if pending:                                  # bought at today's open
             pos, pending, e_day = True, False, i
+            hi, hi_day = h[i - 1], i - 1             # the signal day's high is the first high to beat
         if not pos:
             if np.isfinite(sma50[i]) and np.isfinite(sma50[i - 1]) and c[i] > sma50[i] and c[i - 1] <= sma50[i - 1]:
                 entry[i], pending = True, True
                 reason[i] = "cross above the 50-day"
                 # the low to hold, known at this close: the last swing low below the close
-                known = [j for j in range(max(0, i - 120), i - P + 1) if piv[j] and l[j] < c[i]]
-                protect = l[known[-1]] if known else l[max(0, i - 19):i + 1].min()
+                if trail == "pullback":                  # the low of the dip before the cross
+                    protect = l[max(0, i - 9):i + 1].min()
+                else:
+                    known = [j for j in range(max(0, i - 120), i - P + 1) if piv[j] and l[j] < c[i]]
+                    protect = l[known[-1]] if known else l[max(0, i - 19):i + 1].min()
                 stop_s[i] = protect                  # in force from the buy (next open) on
             continue
         # in a trade: the low to hold as it stood at yesterday's close
@@ -58,9 +69,17 @@ def run(d, pivot=5, mode="close"):
             pos, protect = False, None
             reason[i] = "lower low (touched)"
             continue
-        j = i - P                                    # a swing low confirmed today, after the buy
-        if j > e_day and piv[j] and l[j] > protect:
-            protect = l[j]                           # a higher low: the uptrend goes on
+        if trail == "pullback":
+            if h[i] > hi:                            # a new high: lock the pullback low since the last high
+                if i - hi_day >= 2:                  # at least one day in between that made no new high
+                    pull = l[hi_day + 1:i].min()
+                    if pull > protect:
+                        protect = pull               # a higher low: the uptrend goes on
+                hi, hi_day = h[i], i
+        else:
+            j = i - P                                # a swing low confirmed today, after the buy
+            if j > e_day and piv[j] and l[j] > protect:
+                protect = l[j]                       # a higher low: the uptrend goes on
         if mode == "close" and c[i] < held:
             exit_[i], pos, protect = True, False, None
             reason[i] = "lower low (close)"
