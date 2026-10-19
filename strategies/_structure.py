@@ -93,7 +93,9 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
                 continue
             if trend == "golden" and not (np.isfinite(sma200[i]) and sma50[i] > sma200[i]):
                 continue
-            cross = c[i] > ln[i] and (c[i - 1] <= ln[i - 1] or not np.isfinite(ln[i - 1]))
+            # "both": the first day the line exists counts too (that is when the hold rule can first buy);
+            # "50": only a real cross from below
+            cross = c[i] > ln[i] and (c[i - 1] <= ln[i - 1] or (line != "50" and not np.isfinite(ln[i - 1])))
             resume = reentry and failed_high is not None and c[i] > failed_high and c[i] > ln[i]
             if cross or resume:
                 entry[i] = True
