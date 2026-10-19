@@ -1,0 +1,88 @@
+📊 Each coin on its own: strategies vs buy & hold of that coin
+Until 19 Oct 2026; each coin from its first day of prices (+21 days), 10 start dates a week apart; whole account in that one coin when holding (strategy SIZE); fees 0.25% per buy and sell, 0.05% slippage. 'final' = money from $100,000 in the first run; 'beat' = start dates where it ended above buy & hold.
+
+BTC (from 2021-01-22): buy & hold +17.3%/yr, max drop -76.7%, final $249,894
+ ✅ Tch f1    +23.7%/yr (+23.3% to +24.1%)  drop -18.1%  final $   332,168  beat 10/10  ~20 trades
+ ✅ MA f1     +23.7%/yr (+23.3% to +24.1%)  drop -16.9%  final $   332,160  beat 10/10  ~21 trades
+ ✅ Tch f2    +23.5%/yr (+23.1% to +23.9%)  drop -18.4%  final $   330,089  beat 10/10  ~19 trades
+ ✅ UpR+Tch   +23.4%/yr (+23.0% to +23.8%)  drop -18.9%  final $   328,145  beat 10/10  ~19 trades
+ ✅ UpR+MA    +21.5%/yr (+21.1% to +21.8%)  drop -16.9%  final $   300,112  beat 10/10  ~21 trades
+ ✅ 50&200    +21.3%/yr (+20.9% to +21.6%)  drop -26.6%  final $   297,444  beat 10/10  ~33 trades
+ ✅ UpR MA    +18.2%/yr (+17.9% to +18.6%)  drop -22.2%  final $   257,847  beat 10/10  ~20 trades
+ ✅ UpR f1    +17.9%/yr (+17.6% to +18.2%)  drop -31.4%  final $   254,137  beat 10/10  ~17 trades
+
+ETH (from 2021-01-22): buy & hold +12.4%/yr, max drop -79.3%, final $195,789
+ ✅ 50&200    +19.4%/yr (+19.1% to +19.7%)  drop -39.5%  final $   272,315  beat 10/10  ~33 trades
+ ✅ UpR f1    +17.3%/yr (+15.1% to +17.5%)  drop -49.8%  final $   248,908  beat 10/10  ~14 trades
+ ✅ UpR+Tch   +13.4%/yr (+12.4% to +13.6%)  drop -66.5%  final $   205,370  beat 10/10  ~20 trades
+ ✅ Tch f1    +12.7%/yr (+10.6% to +12.9%)  drop -59.7%  final $   198,649  beat 10/10  ~21 trades
+ ✅ UpR+MA    +12.9%/yr (+12.7% to +14.7%)  drop -62.5%  final $   198,513  beat 10/10  ~26 trades
+    MA f1     +11.9%/yr (+11.7% to +13.7%)  drop -59.8%  final $   188,624  beat 9/10  ~26 trades
+    Tch f2    +10.1%/yr (+9.1% to +10.3%)  drop -64.5%  final $   173,757  beat 8/10  ~20 trades
+    UpR MA     +9.8%/yr (+9.7% to +11.6%)  drop -62.5%  final $   169,721  beat 8/10  ~26 trades
+
+XRP (from 2024-01-22): buy & hold +39.3%/yr, max drop -72.1%, final $248,199
+    50&200    +35.8%/yr (+34.5% to +37.2%)  drop -56.9%  final $   225,204  beat 4/10  ~20 trades
+    MA f1     -15.2%/yr (-15.7% to -14.8%)  drop -35.8%  final $    64,533  beat 0/10  ~10 trades
+    UpR MA    -17.0%/yr (-17.6% to -16.6%)  drop -39.5%  final $    60,888  beat 0/10  ~10 trades
+    UpR+MA    -17.0%/yr (-17.6% to -16.6%)  drop -39.5%  final $    60,888  beat 0/10  ~10 trades
+    Tch f2    -28.3%/yr (-29.1% to -27.6%)  drop -59.0%  final $    41,311  beat 0/10  ~9 trades
+    Tch f1    -28.5%/yr (-29.4% to -27.8%)  drop -59.0%  final $    40,973  beat 0/10  ~9 trades
+    UpR f1    -29.6%/yr (-30.5% to -28.9%)  drop -60.7%  final $    39,335  beat 0/10  ~8 trades
+    UpR+Tch   -29.9%/yr (-30.7% to -29.1%)  drop -61.3%  final $    38,983  beat 0/10  ~9 trades
+
+SOL (from 2021-01-22): buy & hold +82.5%/yr, max drop -96.3%, final $3,159,131
+ ✅ 50&200    +93.0%/yr (+91.1% to +94.9%)  drop -51.6%  final $ 4,107,188  beat 10/10  ~17 trades
+    Tch f1     -7.8%/yr (-8.0% to -7.7%)  drop -59.9%  final $    63,056  beat 0/10  ~16 trades
+    Tch f2     -7.9%/yr (-8.0% to -7.7%)  drop -60.3%  final $    62,959  beat 0/10  ~16 trades
+    UpR+Tch    -9.3%/yr (-9.5% to -9.2%)  drop -62.8%  final $    57,484  beat 0/10  ~16 trades
+    MA f1     -13.4%/yr (-13.6% to -13.2%)  drop -66.2%  final $    44,404  beat 0/10  ~20 trades
+    UpR+MA    -13.6%/yr (-13.8% to -13.4%)  drop -66.6%  final $    43,815  beat 0/10  ~20 trades
+    UpR MA    -13.6%/yr (-13.8% to -13.4%)  drop -67.8%  final $    43,786  beat 0/10  ~20 trades
+    UpR f1    -14.2%/yr (-14.4% to -14.0%)  drop -68.0%  final $    42,080  beat 0/10  ~14 trades
+
+DOGE (from 2021-01-22): buy & hold +47.7%/yr, max drop -92.3%, final $937,585
+    UpR+MA     +3.1%/yr (+3.0% to +3.1%)  drop -49.0%  final $   118,607  beat 1/10  ~21 trades
+    UpR MA     -4.5%/yr (-4.5% to -4.4%)  drop -66.5%  final $    77,182  beat 0/10  ~21 trades
+    Tch f1     -7.8%/yr (-7.9% to -7.6%)  drop -54.6%  final $    63,378  beat 0/10  ~14 trades
+    Tch f2     -7.9%/yr (-8.0% to -7.8%)  drop -56.4%  final $    62,928  beat 0/10  ~14 trades
+    UpR+Tch    -8.5%/yr (-8.6% to -8.4%)  drop -56.6%  final $    60,464  beat 0/10  ~14 trades
+    UpR f1    -14.6%/yr (-14.8% to -14.4%)  drop -65.2%  final $    40,947  beat 0/10  ~12 trades
+    50&200    -16.5%/yr (-16.7% to -16.3%)  drop -83.9%  final $    36,138  beat 0/10  ~38 trades
+    MA f1     -18.0%/yr (-18.3% to -17.8%)  drop -68.0%  final $    32,575  beat 0/10  ~21 trades
+
+LINK (from 2021-01-22): buy & hold -9.7%/yr, max drop -90.2%, final $55,838
+ ✅ UpR f1     +6.9%/yr (+5.8% to +7.0%)  drop -60.5%  final $   146,732  beat 10/10  ~18 trades
+ ✅ 50&200     -9.7%/yr (-9.8% to -9.6%)  drop -82.8%  final $    56,177  beat 10/10  ~47 trades
+    Tch f1    -13.1%/yr (-13.3% to -12.3%)  drop -76.7%  final $    44,930  beat 6/10  ~28 trades
+    MA f1     -13.1%/yr (-13.2% to -11.0%)  drop -80.5%  final $    44,878  beat 6/10  ~31 trades
+    Tch f2    -14.8%/yr (-15.0% to -14.0%)  drop -77.9%  final $    40,269  beat 3/10  ~28 trades
+    UpR+Tch   -15.4%/yr (-15.6% to -14.6%)  drop -77.6%  final $    38,549  beat 2/10  ~28 trades
+    UpR+MA    -15.9%/yr (-16.0% to -13.9%)  drop -80.7%  final $    37,358  beat 2/10  ~31 trades
+    UpR MA    -18.1%/yr (-18.2% to -16.2%)  drop -80.7%  final $    32,130  beat 0/10  ~31 trades
+
+BCH (from 2021-01-22): buy & hold -7.7%/yr, max drop -94.3%, final $63,265
+ ✅ MA f1     +17.2%/yr (+16.9% to +18.8%)  drop -64.3%  final $   245,259  beat 10/10  ~34 trades
+ ✅ UpR f1    +13.1%/yr (+12.9% to +13.2%)  drop -75.1%  final $   200,658  beat 10/10  ~25 trades
+ ✅ UpR+MA     +6.2%/yr (+6.1% to +7.5%)  drop -79.8%  final $   140,772  beat 10/10  ~34 trades
+ ✅ UpR MA     +3.6%/yr (+3.6% to +4.9%)  drop -79.8%  final $   122,344  beat 10/10  ~34 trades
+ ✅ Tch f1     +3.1%/yr (+2.2% to +4.9%)  drop -71.7%  final $   119,045  beat 10/10  ~28 trades
+ ✅ Tch f2     +0.1%/yr (-0.7% to +1.8%)  drop -82.1%  final $   100,828  beat 10/10  ~27 trades
+ ✅ UpR+Tch    -3.3%/yr (-4.2% to -1.8%)  drop -83.1%  final $    82,582  beat 10/10  ~27 trades
+    50&200     -7.8%/yr (-7.9% to -7.7%)  drop -66.8%  final $    63,088  beat 8/10  ~48 trades
+
+LTC (from 2021-01-22): buy & hold -13.5%/yr, max drop -89.5%, final $43,458
+ ✅ UpR f1     +5.3%/yr (+3.4% to +5.4%)  drop -52.1%  final $   134,550  beat 10/10  ~22 trades
+ ✅ MA f1      +2.0%/yr (+1.2% to +2.0%)  drop -46.4%  final $   111,791  beat 10/10  ~34 trades
+ ✅ Tch f2     -0.9%/yr (-1.2% to -0.8%)  drop -50.9%  final $    95,257  beat 10/10  ~28 trades
+ ✅ Tch f1     -1.8%/yr (-2.2% to -1.8%)  drop -50.9%  final $    90,134  beat 10/10  ~29 trades
+ ✅ UpR+MA     -3.6%/yr (-4.5% to -3.5%)  drop -57.9%  final $    81,281  beat 10/10  ~34 trades
+ ✅ UpR+Tch    -4.0%/yr (-4.4% to -4.0%)  drop -51.6%  final $    79,163  beat 10/10  ~28 trades
+ ✅ UpR MA     -8.3%/yr (-9.2% to -8.2%)  drop -74.6%  final $    61,256  beat 10/10  ~34 trades
+    50&200    -27.2%/yr (-27.5% to -26.8%)  drop -86.4%  final $    16,663  beat 0/10  ~52 trades
+
+HYPE: no prices, skipped
+ADA: no prices, skipped
+
+Versions: UpR f1 = Your rule (50-day rising), lower high confirmed after 1 day; UpR+MA = Your rule (50-day rising) + sell on a close below the 50-day; MA f1 = Your rule (50-day rising) + close below the 50-day, lower high after 1 day; UpR MA = 50-day cross (50-day rising), sell on a close below the 50-day or starting stop, no lower-high exit; UpR+Tch = Your rule (50-day rising) + sell when it comes back to the 50-day; Tch f1 = Your rule (50-day rising) + back to the 50-day, lower high after 1 day; Tch f2 = Your rule (50-day rising) + back to the 50-day, lower high after 2 days; 50&200 = Hold while above BOTH the 50- and 200-day averages, else cash (100% in)
+Coins where the version ended at or above buy & hold: UpR f1 5/8, 50&200 4/8, UpR+MA 4/8, Tch f1 4/8, UpR+Tch 4/8, MA f1 3/8, Tch f2 3/8, UpR MA 3/8
