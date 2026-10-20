@@ -312,6 +312,107 @@ def page(d, chunk, path, heading, cols=3):
     return path
 
 
+def structure_pages(d, mod, folder, title, years=None):
+    """What the swing rule SEES, one picture per year: every swing high / low it detected (HH, HL, LH, LL), the
+    day each one became known (dotted line from the swing to that day), the trend state it was in (green = UP and
+    the 200-day condition met, so a close above the 50-day buys; yellow = UP but the 200-day condition not met;
+    red = DOWN), its buys / sells and the low to hold."""
+    from strategies import _swing
+    kw = mod.KW
+    zz = kw.get("pull_min") or 0.005
+    st = _swing.run(d[["Open", "High", "Low", "Close"]], **kw)
+    swings, events, trend_up, _, _ = _swing.zigzag(d["High"].values, d["Low"].values, d["Close"].values, zz)
+    c = d["Close"]
+    s200 = d["SMA200"]
+    a200 = kw.get("above200")
+    if not a200:
+        ok200 = pd.Series(True, index=d.index)
+    elif a200 == "rising":
+        ok200 = (c > s200) & (s200 > s200.shift(20))
+    elif isinstance(a200, int) and not isinstance(a200, bool):
+        ok200 = (c > s200).rolling(a200).min().fillna(0).astype(bool)
+    else:
+        ok200 = c > s200
+    state = np.where(~trend_up, 0, np.where(ok200.values, 2, 1))          # 0 down, 1 up but no 200, 2 up and 200
+    colors = {0: "#fbe7e6", 1: "#fbf1d3", 2: "#e3f4ec"}
+    idx = d.index
+    years = years or sorted({x.year for x in idx if x.year >= 2021})
+    paths = []
+    for yr in years:
+        w0, w1 = pd.Timestamp(f"{yr}-01-01"), pd.Timestamp(f"{yr}-12-31")
+        sel = (idx >= w0 - pd.Timedelta(days=10)) & (idx <= w1 + pd.Timedelta(days=10))
+        if sel.sum() < 5:
+            continue
+        w = d[sel]
+        k0, k1 = int(np.flatnonzero(sel)[0]), int(np.flatnonzero(sel)[-1])
+        fig, ax = plt.subplots(figsize=(18, 8), dpi=115)
+        k = k0                                                             # trend-state background
+        while k <= k1:
+            j = k
+            while j + 1 <= k1 and state[j + 1] == state[k]:
+                j += 1
+            ax.axvspan(idx[k] - pd.Timedelta(hours=12), idx[j] + pd.Timedelta(hours=12), color=colors[int(state[k])],
+                       lw=0, zorder=0)
+            k = j + 1
+        candles(ax, w, width=0.6)
+        ax.plot(w.index, w["SMA50"], color=SMA50_C, lw=1.4, zorder=4)
+        ax.plot(w.index, w["SMA200"], color=SMA200_C, lw=1.4, zorder=4)
+        stp = st["stop"][sel]
+        ax.plot(stp.index, stp.values, color=STOP_C, lw=1.6, ls=(0, (4, 2)), zorder=5, drawstyle="steps-post")
+        vis = [x for x in swings if k0 <= x["i"] <= k1]                   # swings and the zigzag between them
+        allsw = [x for x in swings if k0 - 40 <= x["i"] <= k1 + 40]
+        if len(allsw) > 1:
+            ax.plot([idx[x["i"]] for x in allsw], [x["price"] for x in allsw], color=MUTED, lw=0.9, zorder=3)
+        rng = w["High"].max() - w["Low"].min()
+        for x in vis:
+            good = x["label"] in ("HH", "HL")
+            col = "#1d8a55" if good else ("#c2342f" if x["label"] in ("LH", "LL") else INK2)
+            y = x["price"]
+            ax.scatter([idx[x["i"]]], [y], s=22, color=col, zorder=7)
+            if x["known"] <= k1 + 40 and x["known"] > x["i"]:             # when the rule found out
+                ax.plot([idx[x["i"]], idx[min(x["known"], len(idx) - 1)]], [y, y], color=col, lw=0.9, ls=":", zorder=6)
+            off = rng * 0.03 * (1 if x["kind"] == "H" else -1)
+            ax.annotate(x["label"], (idx[x["i"]], y + off), ha="center", va="bottom" if x["kind"] == "H" else "top",
+                        fontsize=8.5, color=col, fontweight="bold", zorder=8)
+        for i in np.flatnonzero(st["entry"].values):                       # buys / sells at the next open
+            if k0 <= i + 1 <= k1:
+                ax.scatter([idx[i + 1]], [d["Open"].iat[i + 1]], marker="^", s=120, color=INK, edgecolor=SURFACE, lw=1.2, zorder=9)
+                ax.annotate(f"BUY {money(d['Open'].iat[i + 1])}", (idx[i + 1], d["Open"].iat[i + 1]), xytext=(0, -22),
+                            textcoords="offset points", ha="center", fontsize=8, color=INK, fontweight="bold", zorder=9,
+                            bbox=dict(boxstyle="square,pad=0.15", fc=SURFACE, ec="none", alpha=0.85))
+        for i in np.flatnonzero(st["exit"].values):
+            if k0 <= i + 1 <= k1:
+                ax.scatter([idx[i + 1]], [d["Open"].iat[i + 1]], marker="v", s=120, color=INK, edgecolor=SURFACE, lw=1.2, zorder=9)
+                ax.annotate(f"SELL {money(d['Open'].iat[i + 1])}", (idx[i + 1], d["Open"].iat[i + 1]), xytext=(0, 14),
+                            textcoords="offset points", ha="center", fontsize=8, color=INK, fontweight="bold", zorder=9,
+                            bbox=dict(boxstyle="square,pad=0.15", fc=SURFACE, ec="none", alpha=0.85))
+        ax.set_xlim(max(w0 - pd.Timedelta(days=10), idx[k0]), min(w1 + pd.Timedelta(days=10), idx[k1]))
+        ax.set_ylim(w["Low"].min() - rng * 0.1, w["High"].max() + rng * 0.1)
+        ax.grid(True, color=GRID, lw=0.5, zorder=0)
+        ax.xaxis.set_major_locator(mdates.MonthLocator())
+        ax.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
+        ax.yaxis.set_major_formatter(matplotlib.ticker.FuncFormatter(lambda v, _: f"${v:,.0f}"))
+        for s_ in ("top", "right"):
+            ax.spines[s_].set_visible(False)
+        from matplotlib.patches import Patch
+        handles = [Patch(color=colors[2], label="Trend UP, 200-day OK: a close above the 50-day buys"),
+                   Patch(color=colors[1], label="Trend UP but 200-day condition not met"),
+                   Patch(color=colors[0], label="Trend DOWN: no buying"),
+                   plt.Line2D([], [], color=SMA50_C, lw=1.6, label="50-day"), plt.Line2D([], [], color=SMA200_C, lw=1.6, label="200-day"),
+                   plt.Line2D([], [], color=STOP_C, lw=1.6, ls=(0, (4, 2)), label="Low to hold (close below = sell)"),
+                   plt.Line2D([], [], color=INK2, ls=":", lw=1, label="Swing → day the rule knew it")]
+        ax.legend(handles=handles, loc="upper left", fontsize=8, frameon=True, framealpha=0.9, ncol=2)
+        ax.set_title(f"{title} — what the rule sees in {yr}\nSwings = turns of at least {zz:.0%}: HH higher high, HL higher low "
+                     f"(green), LH lower high, LL lower low (red). Trend turns UP on a HL or a close above the last high, "
+                     f"DOWN on a LH or a close below the last low.", loc="left", fontsize=10, color=INK)
+        fig.tight_layout()
+        path = os.path.join(folder, f"structure_{yr}.png")
+        fig.savefig(path, facecolor=SURFACE)
+        plt.close(fig)
+        paths.append(path)
+    return paths
+
+
 def picks(t, pick, title):
     """(file name, heading, trades) for each close-up picture."""
     out = []
@@ -398,6 +499,12 @@ def main():
         RULE["right"] = mod.KW.get("lh_right")
         folder = os.path.join(folder, rule)
     os.makedirs(folder, exist_ok=True)
+    pick_all = os.environ.get("PICK", "").strip()
+    if pick_all.startswith("structure"):                 # PICK="structure" (or "structure:2022 2025")
+        yrs = [int(y) for y in pick_all.partition(":")[2].split()] or None
+        for p in structure_pages(d, mod, folder, title.split(" — ")[0] + f" — {symbol}", yrs):
+            print("saved", p, flush=True)
+        return
     overview(daily, t, os.path.join(folder, "overview.png"), title)
     print("saved", os.path.join(folder, "overview.png"), flush=True)
     for name, heading, chunk, *cols in picks(t, os.environ.get("PICK", "").strip(), title):

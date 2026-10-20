@@ -41,6 +41,56 @@ from strategies import tools
 _cache = {}
 
 
+def zigzag(h, l, c, zz):
+    """Swing highs / lows as the rule sees them, day by day (no look-ahead). A high becomes a swing high once
+    the price has fallen zz below it (that day = when it is known), a low once the price has risen zz above it.
+    Returns (swings, events, trend_up, last_sh, last_sl):
+        swings   list of dicts: i (day of the high/low), price, kind "H"/"L", known (day it was confirmed),
+                 label HH / LH (vs the previous swing high) or HL / LL (vs the previous swing low)
+        events   list of (day, "up"/"down", why) when the trend state changed
+        trend_up bool per day: UP after a higher low or a close above the last swing high; DOWN after a lower
+                 high or a close below the last swing low
+        last_sh, last_sl  the last confirmed swing high / low at each day's close"""
+    n = len(c)
+    swings, events = [], []
+    last_sh, last_sl = np.full(n, np.nan), np.full(n, np.nan)
+    trend_up = np.zeros(n, bool)
+    leg, ch, chi, cl, cli, sh, sl, up = "up", h[0], 0, l[0], 0, np.nan, np.nan, False
+    for i in range(n):
+        if leg == "up":
+            if h[i] > ch:
+                ch, chi = h[i], i
+            elif l[i] <= ch * (1 - zz):              # fell zz from the high: that high is a swing high
+                lab = "H" if not np.isfinite(sh) else ("HH" if ch > sh else "LH")
+                if np.isfinite(sh) and ch < sh:
+                    if up:
+                        events.append((i, "down", "lower high"))
+                    up = False                       # a lower high: downtrend
+                swings.append({"i": chi, "price": ch, "kind": "H", "known": i, "label": lab})
+                sh, leg, cl, cli = ch, "down", l[i], i
+        else:
+            if l[i] < cl:
+                cl, cli = l[i], i
+            elif h[i] >= cl * (1 + zz):              # rose zz from the low: that low is a swing low
+                lab = "L" if not np.isfinite(sl) else ("HL" if cl > sl else "LL")
+                if np.isfinite(sl) and cl > sl:
+                    if not up:
+                        events.append((i, "up", "higher low"))
+                    up = True                        # a higher low: uptrend
+                swings.append({"i": cli, "price": cl, "kind": "L", "known": i, "label": lab})
+                sl, leg, ch, chi = cl, "up", h[i], i
+        if np.isfinite(sh) and c[i] > sh:
+            if not up:
+                events.append((i, "up", "close above the last high"))
+            up = True                                # a higher high
+        if np.isfinite(sl) and c[i] < sl:
+            if up:
+                events.append((i, "down", "close below the last low"))
+            up = False                               # a lower low
+        last_sh[i], last_sl[i], trend_up[i] = sh, sl, up
+    return swings, events, trend_up, last_sh, last_sl
+
+
 def run(d, pivot=5, mode="close", trail="pivot", pull_min=0.0, hh_entry=False, trend_entry=False, above200=False):
     """Daily candles -> DataFrame: entry (signal on that close), exit (signal on that close; mode "close"
     only), stop (the low to hold after that day's close, while in a trade), reason."""
@@ -56,32 +106,8 @@ def run(d, pivot=5, mode="close", trail="pivot", pull_min=0.0, hh_entry=False, t
         if l[j] < l[j - P:j].min() and l[j] <= l[j + 1:j + P + 1].min():
             piv[j] = True
 
-    # zigzag swing highs / lows (turns of at least zz), as known at each close (hh_entry)
-    zz = pull_min or 0.005
-    last_sh, last_sl = np.full(n, np.nan), np.full(n, np.nan)
-    leg, ch, cl, sh, sl = "up", h[0], l[0], np.nan, np.nan
-    trend_up = np.zeros(n, bool)                     # trend_entry: UP after a higher low / higher high
-    up = False
-    for i in range(n):
-        if leg == "up":
-            if h[i] > ch:
-                ch = h[i]
-            elif l[i] <= ch * (1 - zz):              # fell zz from the high: that high is a swing high
-                if np.isfinite(sh) and ch < sh:
-                    up = False                       # a lower high: downtrend
-                sh, leg, cl = ch, "down", l[i]
-        else:
-            if l[i] < cl:
-                cl = l[i]
-            elif h[i] >= cl * (1 + zz):              # rose zz from the low: that low is a swing low
-                if np.isfinite(sl) and cl > sl:
-                    up = True                        # a higher low: uptrend
-                sl, leg, ch = cl, "up", h[i]
-        if np.isfinite(sh) and c[i] > sh:
-            up = True                                # a higher high
-        if np.isfinite(sl) and c[i] < sl:
-            up = False                               # a lower low
-        last_sh[i], last_sl[i], trend_up[i] = sh, sl, up
+    # zigzag swing highs / lows (turns of at least zz), as known at each close (hh_entry / trend_entry)
+    _, _, trend_up, last_sh, last_sl = zigzag(h, l, c, pull_min or 0.005)
     def ok200(i):
         if not above200:
             return True
@@ -146,6 +172,7 @@ def run(d, pivot=5, mode="close", trail="pivot", pull_min=0.0, hh_entry=False, t
             reason[i] = "lower low (close)"
             continue
         stop_s[i] = protect
-    out = pd.DataFrame({"entry": entry, "exit": exit_, "stop": stop_s, "reason": reason}, index=d.index)
+    out = pd.DataFrame({"entry": entry, "exit": exit_, "stop": stop_s, "reason": reason, "trend_up": trend_up,
+                        "ok_buy": ok_buy}, index=d.index)
     _cache[key] = out
     return out
