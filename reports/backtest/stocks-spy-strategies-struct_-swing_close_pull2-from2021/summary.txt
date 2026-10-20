@@ -1,0 +1,14 @@
+📊 Each stock on its own: strategies vs buy & hold of that stock (S&P 100 + SPY for the S&P 500)
+01 Jan 2021 → 20 Oct 2026; 10 start dates a week apart; whole account in that one stock when holding (strategy SIZE); no commission, 0.02% slippage; leverage versions pay their FUNDING rate on the position and are liquidated as in the crypto test. 'final' = money from $100,000 (first run).
+
+
+SPY (from 2021-01-01): buy & hold +14.9%/yr, max drop -24.5%, final $224,007
+    Sw pb2    +10.5%/yr (+9.6% to +10.7%)  drop -18.9%  final $     177,204  beat 0/10  ~15 trades
+    St 5%      +9.2%/yr (+9.1% to +9.4%)  drop -20.9%  final $     165,294  beat 0/10  ~6 trades
+    St 3%      +7.8%/yr (+7.6% to +7.9%)  drop -26.6%  final $     153,090  beat 0/10  ~20 trades
+    St 2% strict   +7.5%/yr (+7.3% to +7.9%)  drop -16.0%  final $     150,694  beat 0/10  ~31 trades
+    St 5% strict   +5.6%/yr (+5.5% to +5.7%)  drop -14.7%  final $     136,259  beat 0/10  ~9 trades
+    St 2%      +5.3%/yr (+5.1% to +5.5%)  drop -28.8%  final $     133,683  beat 0/10  ~32 trades
+    St 3% strict   +1.9%/yr (+1.8% to +1.9%)  drop -19.9%  final $     111,084  beat 0/10  ~20 trades
+
+Versions: St 2% = Structure only: swings 2%, uptrend = any HL or HH; St 2% strict = Structure only: swings 2%, uptrend = strict HH + HL; St 3% = Structure only: swings 3%, uptrend = any HL or HH; St 3% strict = Structure only: swings 3%, uptrend = strict HH + HL; St 5% = Structure only: swings 5%, uptrend = any HL or HH; St 5% strict = Structure only: swings 5%, uptrend = strict HH + HL; Sw pb2 = Swing rule: buy the 50-day cross, sell on a lower low (close, pullbacks of 2%+)
