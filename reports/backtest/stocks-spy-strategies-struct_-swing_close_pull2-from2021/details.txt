@@ -1,9 +1,9 @@
 stock                                                                         version        short       from   cagr  cagr_min  cagr_max  max_dd  beat  runs       final  trades
-  SPY                                                                  Buy & hold SPY          B&H 2021-01-01 0.1494       NaN       NaN -0.2450   NaN   NaN 224006.5547     NaN
-  SPY                               Structure only: swings 2%, uptrend = any HL or HH        St 2% 2021-01-01 0.0532    0.0514    0.0551 -0.2884   0.0  10.0 133682.8868    31.5
-  SPY                             Structure only: swings 2%, uptrend = strict HH + HL St 2% strict 2021-01-01 0.0746    0.0734    0.0789 -0.1599   0.0  10.0 150693.6578    31.0
-  SPY                               Structure only: swings 3%, uptrend = any HL or HH        St 3% 2021-01-01 0.0776    0.0764    0.0789 -0.2663   0.0  10.0 153089.9384    20.0
-  SPY                             Structure only: swings 3%, uptrend = strict HH + HL St 3% strict 2021-01-01 0.0186    0.0183    0.0189 -0.1990   0.0  10.0 111084.2935    20.0
-  SPY                               Structure only: swings 5%, uptrend = any HL or HH        St 5% 2021-01-01 0.0922    0.0907    0.0937 -0.2089   0.0  10.0 165294.0285     6.0
-  SPY                             Structure only: swings 5%, uptrend = strict HH + HL St 5% strict 2021-01-01 0.0558    0.0549    0.0567 -0.1468   0.0  10.0 136258.5994     9.0
+  SPY                                                                  Buy & hold SPY          B&H 2021-01-01 0.1495       NaN       NaN -0.2450   NaN   NaN 224123.6027     NaN
+  SPY                               Structure only: swings 2%, uptrend = any HL or HH        St 2% 2021-01-01 0.0519    0.0463    0.0551 -0.2884   0.0  10.0 135671.5131    32.0
+  SPY                             Structure only: swings 2%, uptrend = strict HH + HL St 2% strict 2021-01-01 0.0749    0.0693    0.0789 -0.1599   0.0  10.0 153708.5351    31.0
+  SPY                               Structure only: swings 3%, uptrend = any HL or HH        St 3% 2021-01-01 0.0787    0.0756    0.0849 -0.2663   0.0  10.0 160300.1932    21.0
+  SPY                             Structure only: swings 3%, uptrend = strict HH + HL St 3% strict 2021-01-01 0.0189    0.0164    0.0265 -0.1990   0.0  10.0 116316.1597    21.0
+  SPY                               Structure only: swings 5%, uptrend = any HL or HH        St 5% 2021-01-01 0.1239    0.1210    0.1298 -0.2228   0.0  10.0 202666.2755     7.0
+  SPY                             Structure only: swings 5%, uptrend = strict HH + HL St 5% strict 2021-01-01 0.0861    0.0835    0.0927 -0.1738   0.0  10.0 167066.0647    10.0
   SPY Swing rule: buy the 50-day cross, sell on a lower low (close, pullbacks of 2%+)       Sw pb2 2021-01-01 0.1052    0.0957    0.1070 -0.1888   0.0  10.0 177204.0718    15.0
