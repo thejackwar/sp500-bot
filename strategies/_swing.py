@@ -29,6 +29,11 @@ breaks with a LOWER LOW. Shared by the swing_*.py strategy files (starts with "_
                UP on a higher low (a new swing low above the previous one) or a close above the last swing high;
                DOWN on a lower high (a new swing high below the previous one) or a close below the last swing
                low. Buy = the first close above the 50-day while the trend is UP.
+    structure_only (the user's idea, 20 Oct 2026): no moving averages at all, only the swings. Long while the
+               trend is UP, cash while it is DOWN (zigzag swings of pull_min): buy when it turns UP (a higher low,
+               or a close above the last swing high), sell when it turns DOWN (a lower high, or a close below the
+               last swing low). strict=True: UP only while the last swing high is a HH (or the close is above it)
+               AND the last swing low is a HL - both, the textbook uptrend.
     above200   the buy also needs the close above the 200-day average (the sell rule is unchanged).
                True = that close only; "rising" = and the 200-day higher than 20 days ago; an int N = the last N
                closes all above the 200-day (no buying on a one-day poke above it).
@@ -91,10 +96,11 @@ def zigzag(h, l, c, zz):
     return swings, events, trend_up, last_sh, last_sl
 
 
-def run(d, pivot=5, mode="close", trail="pivot", pull_min=0.0, hh_entry=False, trend_entry=False, above200=False):
+def run(d, pivot=5, mode="close", trail="pivot", pull_min=0.0, hh_entry=False, trend_entry=False, above200=False,
+        structure_only=False, strict=False):
     """Daily candles -> DataFrame: entry (signal on that close), exit (signal on that close; mode "close"
     only), stop (the low to hold after that day's close, while in a trade), reason."""
-    key = (pivot, mode, trail, pull_min, hh_entry, trend_entry, above200, d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
+    key = (pivot, mode, trail, pull_min, hh_entry, trend_entry, above200, structure_only, strict, d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
     if key in _cache:
         return _cache[key]
     o, h, l, c = (d[k].values.astype(float) for k in ("Open", "High", "Low", "Close"))
@@ -107,7 +113,44 @@ def run(d, pivot=5, mode="close", trail="pivot", pull_min=0.0, hh_entry=False, t
             piv[j] = True
 
     # zigzag swing highs / lows (turns of at least zz), as known at each close (hh_entry / trend_entry)
-    _, _, trend_up, last_sh, last_sl = zigzag(h, l, c, pull_min or 0.005)
+    swings, _, trend_up, last_sh, last_sl = zigzag(h, l, c, pull_min or 0.005)
+    if structure_only:
+        up = trend_up.copy()
+        if strict:                                   # both: last high a HH (or broken) and last low a HL
+            up = np.zeros(n, bool)
+            k, lab_h, lab_l = 0, "", ""
+            for i in range(n):
+                while k < len(swings) and swings[k]["known"] <= i:
+                    if swings[k]["kind"] == "H":
+                        lab_h = swings[k]["label"]
+                    else:
+                        lab_l = swings[k]["label"]
+                    k += 1
+                broke_up = np.isfinite(last_sh[i]) and c[i] > last_sh[i]
+                broke_dn = np.isfinite(last_sl[i]) and c[i] < last_sl[i]
+                up[i] = (lab_h == "HH" or broke_up) and lab_l == "HL" and not broke_dn
+        entry, exit_ = np.zeros(n, bool), np.zeros(n, bool)
+        stop_s = np.full(n, np.nan)
+        reason = np.full(n, "", dtype=object)
+        pos, pending = False, False
+        for i in range(1, n):
+            if pending:
+                pos, pending = True, False
+            if not pos:
+                if up[i] and not up[i - 1]:
+                    entry[i], pending = True, True
+                    reason[i] = "uptrend (HL or HH)" if not strict else "uptrend (HH + HL)"
+                    stop_s[i] = last_sl[i]
+                continue
+            if not up[i]:
+                exit_[i], pos = True, False
+                reason[i] = "downtrend (LH or LL)"
+                continue
+            stop_s[i] = last_sl[i]                   # the last swing low: a close below it ends the uptrend
+        out = pd.DataFrame({"entry": entry, "exit": exit_, "stop": stop_s, "reason": reason, "trend_up": up,
+                            "ok_buy": up}, index=d.index)
+        _cache[key] = out
+        return out
     def ok200(i):
         if not above200:
             return True
