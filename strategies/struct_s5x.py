@@ -12,8 +12,10 @@ EXIT = {"stop_atr": 30.0, "target_r": None, "trail_days": None, "max_days": None
 
 
 def entries(d):
-    return _swing.run(d, **KW)["entry"]
+    """Long while the trend is UP: a buy signal on every UP day (ignored while already holding), so a test that
+    starts in the middle of an uptrend buys on day one instead of waiting for the next turn."""
+    return _swing.run(d, **KW)["trend_up"]
 
 
 def exits(d):
-    return _swing.run(d, **KW)["exit"]
+    return ~_swing.run(d, **KW)["trend_up"]
