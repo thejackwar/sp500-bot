@@ -14,6 +14,7 @@ reports/backtest/<folder>/charts/. Settings (environment variables):
     PICK      optional: which trades get close-ups (default: all, 12 per picture). Space-separated:
                 extremes:6           the 6 best and the 6 worst trades in one picture
                 random:5             5 random winners and 5 random losers (one row each; random:5:7 = seed 7)
+                losers               every losing trade, 2 per row (bigger)
                 from:2022-05-01:24   24 trades in a row from that date (12 per picture)
 
 Made for the Bitcoin trend rule (hold while the daily close is above the 50- and 200-day averages):
@@ -341,6 +342,13 @@ def picks(t, pick, title):
                         f"{title} · {len(pw)} random winners (top row) and {len(pl)} random losers (bottom row) "
                         f"of {len(t)} trades ({len(wins)} won, {len(losses)} lost)",
                         pd.concat([pw, pl]), n))
+        elif kind == "losers":
+            # every losing trade (or break-even), bigger panels (2 per row) to look at them closely
+            lose = done[done["ret"] <= 0.001]
+            for p in range(0, len(lose), 6):
+                chunk = lose.iloc[p:p + 6]
+                out.append((f"losers_{p + 1:02d}-{p + len(chunk):02d}.png",
+                            f"{title} · losing trades {p + 1}-{p + len(chunk)} of {len(lose)} (of {len(t)} trades)", chunk, 2))
         elif kind == "from":
             day, _, n = rest.rpartition(":")
             n = int(n)
