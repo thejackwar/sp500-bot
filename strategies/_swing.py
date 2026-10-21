@@ -34,6 +34,9 @@ breaks with a LOWER LOW. Shared by the swing_*.py strategy files (starts with "_
                or a close above the last swing high), sell when it turns DOWN (a lower high, or a close below the
                last swing low). strict=True: UP only while the last swing high is a HH (or the close is above it)
                AND the last swing low is a HL - both, the textbook uptrend.
+               exit_pull (e.g. 0.02): a second, smaller swing size for the SELL. Long only while the big swings
+               (pull_min) say UP and the small swings say UP too: a small lower high or lower low sells, even when
+               the pullback was too small for the big swings to notice (the user's March 2022 example).
     above200   the buy also needs the close above the 200-day average (the sell rule is unchanged).
                True = that close only; "rising" = and the 200-day higher than 20 days ago; an int N = the last N
                closes all above the 200-day (no buying on a one-day poke above it).
@@ -97,10 +100,10 @@ def zigzag(h, l, c, zz):
 
 
 def run(d, pivot=5, mode="close", trail="pivot", pull_min=0.0, hh_entry=False, trend_entry=False, above200=False,
-        structure_only=False, strict=False):
+        structure_only=False, strict=False, exit_pull=None):
     """Daily candles -> DataFrame: entry (signal on that close), exit (signal on that close; mode "close"
     only), stop (the low to hold after that day's close, while in a trade), reason."""
-    key = (pivot, mode, trail, pull_min, hh_entry, trend_entry, above200, structure_only, strict, d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
+    key = (pivot, mode, trail, pull_min, hh_entry, trend_entry, above200, structure_only, strict, exit_pull, d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
     if key in _cache:
         return _cache[key]
     o, h, l, c = (d[k].values.astype(float) for k in ("Open", "High", "Low", "Close"))
@@ -129,6 +132,10 @@ def run(d, pivot=5, mode="close", trail="pivot", pull_min=0.0, hh_entry=False, t
                 broke_up = np.isfinite(last_sh[i]) and c[i] > last_sh[i]
                 broke_dn = np.isfinite(last_sl[i]) and c[i] < last_sl[i]
                 up[i] = (lab_h == "HH" or broke_up) and lab_l == "HL" and not broke_dn
+        lvl = last_sl
+        if exit_pull:                                # small swings: their lower high / lower low sells
+            _, _, up_small, _, lvl = zigzag(h, l, c, exit_pull)
+            up = up & up_small
         entry, exit_ = np.zeros(n, bool), np.zeros(n, bool)
         stop_s = np.full(n, np.nan)
         reason = np.full(n, "", dtype=object)
@@ -140,13 +147,13 @@ def run(d, pivot=5, mode="close", trail="pivot", pull_min=0.0, hh_entry=False, t
                 if up[i] and not up[i - 1]:
                     entry[i], pending = True, True
                     reason[i] = "uptrend (HL or HH)" if not strict else "uptrend (HH + HL)"
-                    stop_s[i] = last_sl[i]
+                    stop_s[i] = lvl[i]
                 continue
             if not up[i]:
                 exit_[i], pos = True, False
                 reason[i] = "downtrend (LH or LL)"
                 continue
-            stop_s[i] = last_sl[i]                   # the last swing low: a close below it ends the uptrend
+            stop_s[i] = lvl[i]                       # the last swing low: a close below it ends the uptrend
         out = pd.DataFrame({"entry": entry, "exit": exit_, "stop": stop_s, "reason": reason, "trend_up": up,
                             "ok_buy": up}, index=d.index)
         _cache[key] = out
