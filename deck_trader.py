@@ -10,9 +10,12 @@ effectiveness can be measured on real prices. Started 21 Oct 2026; replaces patt
     entry   market order at today's open (the first stock scan after 9:30 New York)
     stop    the deck's protective stop: just outside the breakout candle (slide 14); for gaps the pivot,
             for candlestick / pipe / NR patterns the other side of the pattern
-    target  the deck's measured move; patterns the deck gives no target for (gaps, candlesticks)
-            take profit at NO_TARGET_R x the risk
-    orders  bracket order (stop + target, good till cancelled): Alpaca closes the trade, nothing to watch
+    exit    EXIT = "trail" (since 22 Oct 2026, backtest version 6): no take profit; sold in the last 20
+            minutes before the close when the price is below the 20-day low (lowest low of the last 20
+            completed days), or at the next morning run if that check was missed
+            EXIT = "target" (21 Oct only): the deck's measured move as take profit (NO_TARGET_R x the
+            risk for patterns without a deck target)
+    orders  "trail": market entry + stop order (OTO, good till cancelled); "target": bracket order
     size    1% of equity at risk, max 10% of equity per stock, long + short value at most 100% of
             equity (no leverage), max 25 positions in the account, max 8 new trades a day
 Every order is tagged pat-deck_<pattern>_<up|down>-..., so the daily paper report shows the result of
@@ -27,6 +30,8 @@ import os
 import re
 import uuid
 
+import pandas as pd
+
 import deck_patterns as dp
 import pattern_scan
 import pattern_trader
@@ -40,7 +45,9 @@ MAX_POSITION_PCT = 0.10      # max 10% of equity in one stock
 MAX_GROSS = 1.0              # longs + shorts together at most 1 x equity (no leverage)
 MAX_OPEN_POSITIONS = 25      # whole account (old pattern trader's positions count too)
 MAX_NEW_PER_DAY = 8
-NO_TARGET_R = 2.0            # take profit for patterns without a deck target: 2 x the risk
+EXIT = "trail"               # "trail" = backtest version 6 (+20.8%/yr, 8y); "target" = version 2 (+13.4%/yr)
+NO_TARGET_R = 2.0            # EXIT "target": take profit for patterns without a deck target, 2 x the risk
+EXIT_CHECK_MINUTES = 20      # EXIT "trail": the 20-day-low check runs in the last 20 minutes before the close
 SHORTS = False               # 21 Oct 2026: off. Backtest 8y: every down pattern lost money (shorts −17%/yr)
 WINDOW = ((9, 30), (10, 30))  # New York time of the morning run (entries)
 STATE_FILE = os.environ.get("DECK_TRADER_STATE_FILE", "deck_trader_state.json")
@@ -103,6 +110,8 @@ def run(now=None, force=False, dry_run=False, send=None):
         acct = a.get("/account")
     except Exception as e:
         return [f"Deck trader: couldn't reach Alpaca ({e})"]
+    for t in book.values():                            # 21 Oct trades were bracket orders (target exit)
+        t.setdefault("exit", "target")
     # every run: report trades that hit their stop or target since the last check
     trader.check_closed(a, book, lambda m, *x: send("🧩 " + m, *x))
     for t in book.values():                            # remember which entries filled
@@ -112,7 +121,21 @@ def run(now=None, force=False, dry_run=False, send=None):
             except Exception:
                 pass
     in_window = WINDOW[0] <= (now.hour, now.minute) <= WINDOW[1]
-    if not force and (state.get("last_run") == today or not in_window):
+    if not force and not (state.get("last_run") != today and in_window):
+        # afternoon: the 20-day-low exits, once, in the last EXIT_CHECK_MINUTES minutes before the close
+        try:
+            close_in = (pd.Timestamp(clock["next_close"]) - pd.Timestamp(clock["timestamp"])).total_seconds() / 60
+        except Exception:
+            close_in = 999
+        if clock["is_open"] and close_in <= EXIT_CHECK_MINUTES and state.get("last_exit_run") != today:
+            trail = [s for s, t in book.items() if t.get("exit") == "trail" and t["status"] == "open"]
+            lines = []
+            if trail:
+                daily = pattern_trader.daily_prices([s.replace(".", "-") for s in trail], now)
+                lines = pattern_trader.trend_exits(a, book, a.get("/positions"), daily, send, dry_run, today=True)
+            state["last_exit_run"] = today
+            save_state(state)
+            return ["Deck trader: 20-day-low check"] + lines
         save_state(state)
         return [f"Deck trader: no entries now (last run {state.get('last_run')}, window {in_window})"]
     if not clock["is_open"] and not (force or dry_run):
@@ -121,6 +144,8 @@ def run(now=None, force=False, dry_run=False, send=None):
     live = clock["is_open"] and not dry_run
 
     daily = pattern_trader.daily_prices(scanner.get_tickers(), now)
+    # a missed afternoon check: sell trail positions whose close yesterday was below the 20-day low
+    pattern_trader.trend_exits(a, book, a.get("/positions"), daily, send, not live)
     found = find_signals(daily)
     positions = a.get("/positions")
     held = {p["symbol"] for p in positions}
@@ -166,7 +191,7 @@ def run(now=None, force=False, dry_run=False, send=None):
             continue
         deck_target = brk.get("target")
         target = deck_target if deck_target is not None else price + sign * NO_TARGET_R * dist
-        if sign * (target - price) <= 0.1 * dist:
+        if EXIT == "target" and sign * (target - price) <= 0.1 * dist:
             lines.append(f"• {sym}: {what}, skipped (opened at or beyond the target)")
             continue
         qty = min(int(equity * RISK_PER_TRADE / dist), int(equity * MAX_POSITION_PCT / price), int(room * 0.95 / price))
@@ -177,16 +202,25 @@ def run(now=None, force=False, dry_run=False, send=None):
         risk = qty * dist
         rr = abs(target - price) / dist
         tgt_txt = ("the deck's measured move" if deck_target is not None else f"no deck target: {NO_TARGET_R:g} x the risk")
+        if EXIT == "trail":
+            low20 = pattern_trader.trail_level(daily[f["t"]], today=True) if f["t"] in daily else None
+            exit_txt = (f"🎯 No target: sells when the price is below the 20-day low (now {px(low20 or 0)}) "
+                        f"in the last 20 min before the close")
+        else:
+            exit_txt = f"🎯 Target {px(target)} ({(target / price - 1) * 100:+.1f}%, {tgt_txt}) · R:R {rr:.1f}"
         msg = (f"🧩 <b>{('BUY' if long else 'SELL SHORT') if live else ('Would buy' if long else 'Would short')} "
                f"{qty} {sym}</b> @ ~{px(price)}: {p['name']} breakout {'↑' if long else '↓'} at yesterday's close\n"
-               f"🎯 Target {px(target)} ({(target / price - 1) * 100:+.1f}%, {tgt_txt})\n"
-               f"🛑 Stop {px(stop)} ({(stop / price - 1) * 100:+.1f}%, −${risk:,.0f} = {risk / equity:.1%} of equity) · R:R {rr:.1f}\n"
+               f"{exit_txt}\n"
+               f"🛑 Stop {px(stop)} ({(stop / price - 1) * 100:+.1f}%, −${risk:,.0f} = {risk / equity:.1%} of equity)\n"
                f'<a href="https://www.tradingview.com/chart/?symbol={sym}&interval=D">Open {sym} on TradingView</a>')
         if live:
             body = {"symbol": sym, "qty": str(qty), "side": "buy" if long else "sell", "type": "market",
-                    "time_in_force": "gtc", "order_class": "bracket",
-                    "take_profit": {"limit_price": f"{target:.2f}"}, "stop_loss": {"stop_price": f"{stop:.2f}"},
+                    "time_in_force": "gtc", "stop_loss": {"stop_price": f"{stop:.2f}"},
                     "client_order_id": f"pat-deck_{slug(p)}-{uuid.uuid4().hex[:10]}"}
+            if EXIT == "target":
+                body.update(order_class="bracket", take_profit={"limit_price": f"{target:.2f}"})
+            else:
+                body["order_class"] = "oto"                    # stop only: the 20-day-low check sells
             try:
                 order = a.post("/orders", body)
             except Exception as e:
@@ -194,7 +228,8 @@ def run(now=None, force=False, dry_run=False, send=None):
                 lines.append(f"• {sym}: {what}, order failed")
                 continue
             book[sym] = {"order_id": order["id"], "side": brk["dir"], "qty": qty, "entry": price, "stop": stop,
-                         "target": target, "pattern": p["name"], "status": "open", "filled": False,
+                         "target": target if EXIT == "target" else None, "exit": EXIT,
+                         "pattern": p["name"], "status": "open", "filled": False,
                          "opened": dt.datetime.utcnow().isoformat()}
         try:
             chart = pattern_scan.draw(f["t"], f["df"], p)
