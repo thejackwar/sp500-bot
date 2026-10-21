@@ -6,7 +6,7 @@ effectiveness can be measured on real prices. Started 21 Oct 2026; replaces patt
 
     signal  a pattern the pattern scan sends as a chart (ALERTS in pattern_scan.py: every multi-bar,
             short-term and activated candlestick pattern; not doji / NR4 / inside bar) breaks out on the
-            DAILY chart at yesterday's close. Up breakouts are bought, down breakouts are SOLD SHORT.
+            DAILY chart at yesterday's close. Up breakouts are bought (shorts: SHORTS, off since 21 Oct).
     entry   market order at today's open (the first stock scan after 9:30 New York)
     stop    the deck's protective stop: just outside the breakout candle (slide 14); for gaps the pivot,
             for candlestick / pipe / NR patterns the other side of the pattern
@@ -41,7 +41,7 @@ MAX_GROSS = 1.0              # longs + shorts together at most 1 x equity (no le
 MAX_OPEN_POSITIONS = 25      # whole account (old pattern trader's positions count too)
 MAX_NEW_PER_DAY = 8
 NO_TARGET_R = 2.0            # take profit for patterns without a deck target: 2 x the risk
-SHORTS = True                # down breakouts are sold short
+SHORTS = False               # 21 Oct 2026: off. Backtest 8y: every down pattern lost money (shorts −17%/yr)
 WINDOW = ((9, 30), (10, 30))  # New York time of the morning run (entries)
 STATE_FILE = os.environ.get("DECK_TRADER_STATE_FILE", "deck_trader_state.json")
 ET = scanner.ET

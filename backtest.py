@@ -1610,6 +1610,8 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
             ("d_multi", "4. Same, multi-bar patterns only (no flags, gaps, pipes, candlesticks)", "Multi", multi, live),
             ("d_trail", "5. Up + down, deck stop + trailing exit (20-day low / high), no target", "Trail", sig,
              {**live, "pattern_target": False, "target_r": None, "trail_days": 20}),
+            ("d_long_trail", "6. Up breakouts only, deck stop + trailing exit (20-day low), no target", "L Trail",
+             sig, {**live, "shorts": False, "pattern_target": False, "target_r": None, "trail_days": 20}),
         ]
     elif mode == "patterns":
         first_slot = np.flatnonzero(np.r_[True, slot_day[1:] != slot_day[:-1]])
