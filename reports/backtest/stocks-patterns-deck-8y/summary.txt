@@ -1,0 +1,33 @@
+📊 <b>Backtest S&P 100: Fidelity-deck chart patterns (daily candles)</b>
+21 Oct 2018 → 21 Oct 2026 (8.0 years), S&P 100 (100 stocks), $100,000 start. Fidelity-deck chart patterns (deck_patterns.py, daily chart, the patterns the pattern scan charts): a breakout on a day's close is traded at the next day's open with the deck's protective stop and target, like deck_trader.py; risk 1%/trade, limits per version. 'Invested' = average money in the market (SPY = 100%)
+Each version is tested from 10 start dates a week apart (ties between signals in random order); figures are the middle run, with the range in brackets.
+
+<b>1. Deck trader as live: up + down, deck stop + target (2R if none), 10%/stock, 25 positions, 8/day</b>
++1.6%/yr (-2.8% to +4.4%), beat SPY in 0/10 runs
+max drop -28.5% (worst -41.7%) · profit factor 1.02
+~3926 trades, win 26%, avg +0.04R, worst streak 31, hold 16d, invested 91%
+
+<b>2. Same, up breakouts only (no shorts)</b>
++13.4%/yr (+10.3% to +16.5%), beat SPY in 0/10 runs
+max drop -24.7% (worst -26.3%) · profit factor 1.24
+~3118 trades, win 31%, avg +0.21R, worst streak 38, hold 17d, invested 88%, interest ~$0
+
+<b>3. Same, down breakouts only (shorts)</b>
+-17.0%/yr (-18.5% to -14.9%), beat SPY in 0/10 runs
+max drop -79.9% (worst -82.0%) · profit factor 0.68
+~3106 trades, win 22%, avg -0.24R, worst streak 48, hold 15d, invested 87%
+
+<b>4. Same, multi-bar patterns only (no flags, gaps, pipes, candlesticks)</b>
++0.6%/yr (-1.8% to +4.3%), beat SPY in 0/10 runs
+max drop -28.7% (worst -36.7%) · profit factor 1.00
+~3888 trades, win 25%, avg +0.02R, worst streak 32, hold 15d, invested 91%
+
+<b>5. Up + down, deck stop + trailing exit (20-day low / high), no target</b>
++4.7%/yr (-0.7% to +8.1%), beat SPY in 0/10 runs
+max drop -28.7% (worst -38.3%) · profit factor 1.13
+~2358 trades, win 20%, avg +0.06R, worst streak 40, hold 28d, invested 95%
+
+<b>Buy & hold SPY</b>
++215.9% (+15.5%/yr) · max drop -33.8%
+
+<i>Today's S&P 100 members only (flatters results); no short-borrow fees; fills at the next 15-min open with 0.02% slippage. Past results don't guarantee future ones.</i>

@@ -1,0 +1,109 @@
+📅 Return by year (middle of 10 runs)
+Version    2018   2019   2020   2021   2022   2023   2024   2025   2026
+Live        +0%    +3%   +14%   +10%    -7%    +2%    -1%    -6%    -2%
+Long        -0%   +28%   +22%   +27%   -11%   +28%   +17%    +5%    -1%
+Short       +3%   -20%   -25%   -24%    +3%   -15%   -20%   -21%   -13%
+Multi       -2%    +6%   +11%    +4%    -5%    +4%    -2%    -5%    -6%
+Trail       +0%    -5%   +15%   +13%    -9%    +6%    +6%    -2%   +16%
+SPY         -9%   +31%   +18%   +29%   -18%   +26%   +25%   +18%   +14%
+
+Long vs short (first run)
+Live: long 2025× +0.23R $+62k, short 1984× -0.18R $-80k
+Long: long 3138× +0.19R $+181k
+Short: short 3172× -0.25R $-81k
+Multi: long 2067× +0.28R $+71k, short 1926× -0.20R $-52k
+Trail: long 1160× +0.59R $+62k, short 1138× -0.46R $-74k
+
+🧩 Pattern scorecard: every breakout traded on its own, costs included. daily candles. avgR = with the pattern's stop and target (sold after 60 days), trail = pattern's stop + sold below the 20-day low, no target. Above 0 = made money on average; fewer than ~20 trades = too few to trust.
+Pattern            n  win  avgR  tgt trail
+Sym. triangle ↑  955  26% +0.58  21% +0.67
+Desc. triangle ↑ 829  28% +0.43  26% +0.57
+Bull flag ↑      330  29% +0.37  29% +0.42
+Inv. H&S ↑       445  33% +0.32  31% +0.28
+Piercing line ↑  195  45% +0.26  38% +0.69
+Hammer ↑         275  43% +0.25  40% +0.48
+Harami ↑        1152  43% +0.24  39% +0.46
+Bull engulfing ↑ 601  43% +0.22  37% +0.29
+Gap up ↑         858  41% +0.21  38% +0.37
+Triple bottom ↑  862  36% +0.16  35% +0.65
+Falling wedge ↑  777  26% +0.15  23% +0.32
+Inverted hamme ↑  75  43% +0.10  37% +0.14
+Rising wedge ↑   323  26% +0.10  23% -0.07
+Rectangle ↑      472  36% +0.07  35% +0.81
+Pipe bottom ↑    178  58% +0.03  56% +0.68
+Bull pennant ↑   165  23% +0.02  22% +0.89
+Double bottom ↑  481  33% +0.01  31% -0.14
+Cup and handle ↑ 371  20% +0.01  15% +0.26
+Asc. triangle ↑  373  22% -0.04  21% +0.12
+Rising wedge ↓  1207  21% -0.07  19% -0.34
+Hanging man ↑     83  31% -0.08  29% +0.17
+Bear flag ↓      253  17% -0.09  17% -0.52
+Bear engulfing ↓ 825  31% -0.14  27% -0.40
+Pipe top ↓       253  47% -0.21  47% -0.52
+Rectangle ↓      399  30% -0.21  29% -0.48
+Asc. triangle ↓  891  21% -0.23  18% -0.49
+Shooting star ↓  622  28% -0.23  26% -0.51
+Gap down ↓       584  27% -0.24  26% -0.43
+Harami ↓         959  26% -0.25  24% -0.45
+Double top ↓     395  23% -0.26  23% -0.57
+Triple top ↓     728  26% -0.28  26% -0.41
+H&S top ↓        399  24% -0.28  22% -0.63
+Sym. triangle ↓  975  15% -0.31  12% -0.43
+Dark cloud ↓     261  25% -0.31  22% -0.50
+Desc. triangle ↓ 254  18% -0.34  17% -0.62
+Hanging man ↓     37  22% -0.38  19% -0.84
+Bear pennant ↓   118  14% -0.47  12% -0.56
+Falling wedge ↓  159  11% -0.58   8% -0.85
+All patterns    19119  29% +0.00  27% -0.01
+
+✂️ Split check: patterns chosen on Oct 2018–Oct 2022 only (at least 15 trades and avg R above +0.0), then tested on Oct 2022–Oct 2026, data they weren't chosen on. If the chosen ones still beat 'all patterns' in the second half, the choice is probably real, not luck.
+
+stop + target
+Chosen: Bull flag ↑, Bull engulfing ↑, Desc. triangle ↑, Double bottom ↑, Falling wedge ↑, Gap up ↑, Hammer ↑, Hanging man ↑, Harami ↑, Inv. H&S ↑, Inverted hammer ↑, Piercing line ↑, Pipe bottom ↑, Rectangle ↑, Rising wedge ↑, Sym. triangle ↑, Triple bottom ↑
+1st half: chosen 4500 trades, avg +0.24R | all 9605, -0.01R
+2nd half: chosen 4391 trades, avg +0.26R | all 9514, +0.02R
+
+stop + trailing exit
+Chosen: Bull flag ↑, Bull pennant ↑, Bull engulfing ↑, Desc. triangle ↑, Falling wedge ↑, Gap up ↑, Hammer ↑, Hanging man ↑, Harami ↑, Inv. H&S ↑, Inverted hammer ↑, Piercing line ↑, Pipe bottom ↑, Rectangle ↑, Sym. triangle ↑, Triple bottom ↑
+1st half: chosen 4178 trades, avg +0.38R | all 9605, -0.04R
+2nd half: chosen 4040 trades, avg +0.63R | all 9437, +0.02R
+
+Pattern         1st: n  avgR trail  2nd: n  avgR trail
+Sym. triangle ↑   500 +0.79 +0.89    455 +0.35 +0.42
+Hammer ↑          153 +0.39 +0.56    122 +0.07 +0.38
+Inv. H&S ↑        209 +0.34 +0.09    236 +0.29 +0.45
+Gap up ↑          396 +0.25 +0.18    462 +0.18 +0.53
+Harami ↑          590 +0.21 +0.43    562 +0.27 +0.49
+Triple bottom ↑   414 +0.18 +0.48    448 +0.14 +0.81
+Double bottom ↑   249 +0.16 -0.04    232 -0.15 -0.24
+Rising wedge ↑    166 +0.16 -0.11    157 +0.04 -0.03
+Bull engulfing ↑  309 +0.15 +0.10    292 +0.29 +0.50
+Piercing line ↑   114 +0.14 +0.11     81 +0.45 +1.53
+Bull flag ↑       143 +0.13 +0.22    187 +0.56 +0.58
+Falling wedge ↑   407 +0.12 +0.22    370 +0.19 +0.44
+Rectangle ↑       241 +0.11 +0.97    231 +0.03 +0.65
+Inverted hamme ↑   54 +0.09 +0.02     21 +0.14 +0.43
+Desc. triangle ↑  404 +0.04 +0.05    425 +0.81 +1.07
+Hanging man ↑      47 +0.03 +0.15     36 -0.23 +0.19
+Pipe bottom ↑     104 +0.03 +0.38     74 +0.04 +1.12
+Bull pennant ↑     93 -0.04 +0.70     72 +0.10 +1.14
+Cup and handle ↑  165 -0.10 -0.01    206 +0.09 +0.48
+Bear engulfing ↓  401 -0.12 -0.38    424 -0.16 -0.41
+Asc. triangle ↓   448 -0.20 -0.43    443 -0.25 -0.55
+Rising wedge ↓    589 -0.20 -0.28    618 +0.05 -0.40
+Gap down ↓        332 -0.21 -0.37    252 -0.28 -0.51
+Triple top ↓      377 -0.21 -0.15    351 -0.37 -0.71
+Pipe top ↓        120 -0.21 -0.44    133 -0.20 -0.58
+Sym. triangle ↓   479 -0.21 -0.30    496 -0.40 -0.56
+Rectangle ↓       208 -0.21 -0.27    191 -0.20 -0.72
+Hanging man ↓      23 -0.22 -0.75     14 -0.64 -0.99
+H&S top ↓         221 -0.22 -0.56    178 -0.36 -0.71
+Asc. triangle ↑   181 -0.23 -0.31    192 +0.13 +0.53
+Shooting star ↓   281 -0.24 -0.58    341 -0.22 -0.46
+Bear flag ↓       116 -0.26 -0.67    137 +0.04 -0.39
+Harami ↓          490 -0.30 -0.48    469 -0.19 -0.40
+Double top ↓      198 -0.34 -0.47    197 -0.18 -0.66
+Dark cloud ↓      127 -0.36 -0.40    134 -0.27 -0.61
+Desc. triangle ↓  114 -0.43 -0.66    140 -0.26 -0.59
+Bear pennant ↓     53 -0.46 -0.37     65 -0.47 -0.71
+Falling wedge ↓    89 -0.65 -0.96     70 -0.49 -0.72
