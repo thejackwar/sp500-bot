@@ -52,7 +52,7 @@ ALERTS = {
     "Doji": "list",                   # "extremely common" (deck): summary only
 }
 STAGES = {"forming": "🟡 forming", "breakout": "breakout"}
-TF_NAME = {"1d": "daily", "1h": "hourly"}[TIMEFRAME]
+TF_NAME = {"1d": "daily", "1h": "hourly"}.get(TIMEFRAME, "daily")
 UP, DOWN, PAT, BLUE, GREY = "#26a69a", "#ef5350", "#ffd54f", "#42a5f5", "#9e9e9e"
 
 

@@ -379,6 +379,24 @@ def stock_signals(h, D, debug=False, minutes=15):
 
 # ---------------------------------------------------------------- portfolio simulation
 def simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
+    """_simulate() with the account limits optionally changed for this version (cfg keys
+    max_positions, max_new, max_pos_pct override trader.py's MAX_OPEN_POSITIONS, MAX_NEW_PER_RUN,
+    MAX_POSITION_PCT)."""
+    over = {"max_positions": "MAX_OPEN_POSITIONS", "max_new": "MAX_NEW_PER_RUN", "max_pos_pct": "MAX_POSITION_PCT"}
+    saved = {}
+    if isinstance(cfg, dict):
+        for k, attr in over.items():
+            if k in cfg:
+                saved[attr] = getattr(T, attr)
+                setattr(T, attr, cfg[k])
+    try:
+        return _simulate(sig, O, H, L, C, slots, syms, cfg, extra)
+    finally:
+        for attr, v in saved.items():
+            setattr(T, attr, v)
+
+
+def _simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
     """Replays the trader's rules (trader.py) over time. sig: all signals with 'slot' and 'col'
     (optional 'score': higher = preferred when several signals arrive together).
     cfg (all optional; the defaults are the bot's rules):
@@ -724,7 +742,11 @@ def summary_text(res, bench, start, end, n_stocks, mode="bot versions"):
     years = (eq0.index[-1] - eq0.index[0]).days / 365.25
     money = (f"risk {T.RISK_PER_TRADE:.0%}/trade, max {T.MAX_OPEN_POSITIONS} positions of max "
              f"{T.MAX_POSITION_PCT:.0%} each")
-    if mode == "patterns":
+    if mode == "patterns" and PATTERN_SET == "deck":
+        rules_txt = ("Fidelity-deck chart patterns (deck_patterns.py, daily chart, the patterns the pattern scan "
+                     "charts): a breakout on a day's close is traded at the next day's open with the deck's "
+                     "protective stop and target, like deck_trader.py; risk 1%/trade, limits per version.")
+    elif mode == "patterns":
         import patterns
         sel_txt = (f" Versions 5-6 only trade your selected patterns: {patterns.selection_text(MARKET)}."
                    if patterns.selection(MARKET) else "")
@@ -739,7 +761,8 @@ def summary_text(res, bench, start, end, n_stocks, mode="bot versions"):
     else:
         rules_txt = (f"Bot versions: ⭐ STRONG signals (daily + {'hourly' if BOT_TF == '1h' else '15-min'}), stop 2×ATR, {money}; target 2:1 "
                      f"unless trailing. " + (f"Borrowed money pays {MARGIN_RATE:.1%}/yr interest." if MARGIN > 1 else "No borrowing."))
-    title = {"strategies": "strategies", "patterns": f"chart patterns ({tf_name()} candles)"}.get(mode, "bot versions")
+    title = {"strategies": "strategies", "patterns": f"{'Fidelity-deck ' if PATTERN_SET == 'deck' else ''}chart "
+             f"patterns ({tf_name()} candles)"}.get(mode, "bot versions")
     if mode != "patterns" and BOT_TF == "1h":
         title += " (bot on hourly candles)"
     lines = [f"📊 <b>Backtest {UNIVERSE}: {title}</b>",
@@ -1077,6 +1100,69 @@ def pattern_signals(daily, syms, days, first_slot, workers=4):
     return sig
 
 
+# ---------------------------------------------------------------- deck patterns (deck_patterns.py)
+PATTERN_SET = "old"         # patterns test: "old" = patterns.py, "deck" = deck_patterns.py (Fidelity deck)
+DECK_WINDOW = 290           # daily candles the detector sees each day (the live scan downloads ~290)
+DECK_NO_TARGET_R = 2.0      # patterns without a deck target take profit at 2 x the risk (deck_trader.py)
+
+
+def _deck_rows(args):
+    """Every deck-pattern breakout of one stock, found the way the live trader finds it: each day the
+    detector sees the last DECK_WINDOW candles, and a pattern counts when its breakout candle is that
+    day's candle. Only patterns the pattern scan charts (pattern_scan.ALERTS). Each pattern once."""
+    import deck_patterns as dp
+    import pattern_scan
+    sym, d, dates = args
+    d = dp.add_atr(d[["Open", "High", "Low", "Close"]].dropna())
+    pos = d.index.get_indexer(dates)
+    out, seen = [], set()
+    for date, i in zip(dates, pos):
+        if i < 120:
+            continue
+        w = d.iloc[max(0, i - DECK_WINDOW + 1):i + 1]
+        last = len(w) - 1
+        try:
+            pats = dp.detect(w)
+        except Exception:
+            continue
+        for p in pats:
+            brk = p.get("brk")
+            if p["stage"] != "breakout" or not brk or brk["bar"] != last or pattern_scan.mode_of(p) != "chart":
+                continue
+            key = (p["name"], brk["dir"], w.index[p["start"]])
+            if key in seen:
+                continue
+            seen.add(key)
+            tgt = brk["target"] if brk.get("target") is not None else np.nan
+            out.append((date, brk["dir"], brk["stop"], tgt, p["name"].split(" (")[0], float(d["ATR"].iat[i])))
+    return sym, out
+
+
+def deck_signals(daily, syms, days, first_slot, workers=4):
+    """Deck-pattern breakouts as simulator rows: a breakout on a day's close trades at the next open."""
+    from concurrent.futures import ProcessPoolExecutor
+    t0 = time.time()
+    jobs = [(sym, daily[sym], days[:-1]) for sym in syms]
+    rows = []
+    col_of = {sym: k for k, sym in enumerate(syms)}
+    with ProcessPoolExecutor(max_workers=workers) as pool:
+        for sym, found in pool.map(_deck_rows, jobs):
+            for date, direction, stop, target, name, atr in found:
+                p = days.get_loc(date)
+                rows.append({"slot": first_slot[p + 1], "col": col_of[sym], "sym": sym, "date": date,
+                             "dl": direction == "LONG", "ds": direction == "SHORT", "il": False, "is": False,
+                             "atr": atr, "score": 0.0, "stop": stop, "target": target,
+                             "family": __import__("deck_patterns").FAMILY.get(name, "multi"),
+                             "pattern": f"{name} {'↑' if direction == 'LONG' else '↓'}"})
+    sig = pd.DataFrame(rows, columns=["slot", "col", "sym", "date", "dl", "ds", "il", "is", "atr", "score",
+                                      "stop", "target", "family", "pattern"])
+    # same order of preference as the live trader: multi-bar, then short-term, then candlestick patterns
+    sig["score"] = -sig["family"].map({"multi": 0, "short": 1, "candle": 2}).fillna(1).astype(float)
+    print(f"Deck pattern breakouts: {len(sig)} ({int(sig['dl'].sum())} up, {int(sig['ds'].sum())} down) "
+          f"in {time.time() - t0:.0f}s", flush=True)
+    return sig
+
+
 PATTERN_MAX_DAYS_INTRADAY = 10   # intraday pattern trades still open after 10 trading days are sold
 TF_KEY = {"1h": "hourly", "15m": "15min"}               # patterns.SETTINGS key per candle size
 TF_MINUTES = {"1h": 60, "15m": 15}
@@ -1219,7 +1305,7 @@ def pattern_scorecard_intraday(sig, intraday, daily):
         fee = cost * entry / risk
         (x1, how1, d1), (x2, how2, d2) = res
         out.append({"pattern": r.pattern, "symbol": r.sym, "date": r.date, "entry": entry, "stop": r.stop,
-                    "target": r.target, "exit": x1, "result": how1, "R": sign * (x1 - entry) / risk - fee,
+                    "target": target, "exit": x1, "result": how1, "R": sign * (x1 - entry) / risk - fee,
                     "days": d1, "exit_trail": x2, "result_trail": how2,
                     "R_trail": sign * (x2 - entry) / risk - fee, "days_trail": d2})
     cols = ["pattern", "symbol", "date", "entry", "stop", "target", "exit", "result", "R", "days",
@@ -1278,13 +1364,16 @@ def pattern_scorecard(sig, daily):
         sign = 1 if r.dl else -1
         entry = o[i + 1]
         risk = sign * (entry - r.stop)
-        if risk <= 0 or sign * (r.target - entry) <= 0:
+        target = r.target
+        if PATTERN_SET == "deck" and not np.isfinite(target):
+            target = entry + sign * DECK_NO_TARGET_R * risk          # no deck target: 2R, like deck_trader.py
+        if risk <= 0 or sign * (target - entry) <= 0:
             continue                                   # opened beyond the stop or the target
-        x1, how1, j1 = _trade(o, h, l, c, low_n, high_n, i, sign, r.stop, r.target, trail=False)
-        x2, how2, j2 = _trade(o, h, l, c, low_n, high_n, i, sign, r.stop, r.target, trail=True)
+        x1, how1, j1 = _trade(o, h, l, c, low_n, high_n, i, sign, r.stop, target, trail=False)
+        x2, how2, j2 = _trade(o, h, l, c, low_n, high_n, i, sign, r.stop, target, trail=True)
         fee = cost * entry / risk
         out.append({"pattern": r.pattern, "symbol": r.sym, "date": r.date, "entry": entry, "stop": r.stop,
-                    "target": r.target, "exit": x1, "result": how1, "R": sign * (x1 - entry) / risk - fee,
+                    "target": target, "exit": x1, "result": how1, "R": sign * (x1 - entry) / risk - fee,
                     "days": j1 - i, "exit_trail": x2, "result_trail": how2,
                     "R_trail": sign * (x2 - entry) / risk - fee, "days_trail": j2 - i})
     cols = ["pattern", "symbol", "date", "entry", "stop", "target", "exit", "result", "R", "days",
@@ -1292,7 +1381,9 @@ def pattern_scorecard(sig, daily):
     return pd.DataFrame(out, columns=cols)
 
 
-SHORT_NAMES = {"Symmetrical triangle": "Sym. triangle", "Inverse head & shoulders": "Inv. H&S",
+SHORT_NAMES = {"Head & shoulders top": "H&S top", "Bullish engulfing": "Bull engulfing",
+               "Bearish engulfing": "Bear engulfing", "Dark cloud cover": "Dark cloud",
+               "Symmetrical triangle": "Sym. triangle", "Inverse head & shoulders": "Inv. H&S",
                "Head & shoulders": "H&S", "Bump & run reversal": "Bump & run", "Ascending triangle": "Asc. triangle",
                "Descending triangle": "Desc. triangle", "Rounding bottom": "Round. bottom"}
 
@@ -1501,6 +1592,25 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
                 cfg["once_per_day"] = False            # intraday-candle strategies can trade several times a day
             jobs.append((name, getattr(mod, "NAME", name), getattr(mod, "SHORT", name[:7]), s_sig, cfg))
             print(f"Strategy {name}: {len(s_sig)} buy signals", flush=True)
+    elif mode == "patterns" and PATTERN_SET == "deck":
+        import deck_trader as DT
+        first_slot = np.flatnonzero(np.r_[True, slot_day[1:] != slot_day[:-1]])
+        sig = deck_signals(daily, syms, days, first_slot)
+        live = {"kinds": ("daily",), "exit": "custom", "margin": DT.MAX_GROSS, "pattern_target": True,
+                "target_r": DT.NO_TARGET_R, "trail_days": None, "max_days": None, "shorts": True,
+                "max_positions": DT.MAX_OPEN_POSITIONS, "max_new": DT.MAX_NEW_PER_DAY,
+                "max_pos_pct": DT.MAX_POSITION_PCT}
+        multi = sig[sig["family"] == "multi"]
+        jobs += [
+            ("d_live", f"1. Deck trader as live: up + down, deck stop + target ({DT.NO_TARGET_R:g}R if none), "
+                       f"{DT.MAX_POSITION_PCT:.0%}/stock, {DT.MAX_OPEN_POSITIONS} positions, {DT.MAX_NEW_PER_DAY}/day",
+             "Live", sig, live),
+            ("d_long", "2. Same, up breakouts only (no shorts)", "Long", sig, {**live, "shorts": False}),
+            ("d_short", "3. Same, down breakouts only (shorts)", "Short", sig[sig["ds"]], live),
+            ("d_multi", "4. Same, multi-bar patterns only (no flags, gaps, pipes, candlesticks)", "Multi", multi, live),
+            ("d_trail", "5. Up + down, deck stop + trailing exit (20-day low / high), no target", "Trail", sig,
+             {**live, "pattern_target": False, "target_r": None, "trail_days": 20}),
+        ]
     elif mode == "patterns":
         first_slot = np.flatnonzero(np.r_[True, slot_day[1:] != slot_day[:-1]])
         if PATTERN_TF == "daily":
@@ -1574,7 +1684,7 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
             per.append({"trades": trades, "equity": eq, "info": info, "stats": st, "spy_cagr": spy_cagr,
                         "start": days[d0]})
         agg = aggregate(per)
-        res[key] = {"name": name, "short": short, "main": key in ("bot", "trail1x", "p_long", "p_mixed") or (T is not trader and key == "trail"), "runs": per, "agg": agg,
+        res[key] = {"name": name, "short": short, "main": key in ("bot", "trail1x", "p_long", "p_mixed", "d_live") or (T is not trader and key == "trail"), "runs": per, "agg": agg,
                     **per[0]}
         print(f"{name}: median {pct(agg['cagr'])}/yr (runs {pct(agg['cagr_min'])} to {pct(agg['cagr_max'])}), "
               f"beat {BENCHMARK} in {agg['beat']}/{agg['spy_runs']}, ~{agg['trades']:.0f} trades", flush=True)
@@ -1590,9 +1700,15 @@ def main():
     mode = os.environ.get("TEST", "strategies")
     runs = int(os.environ.get("RUNS") or RUNS)
     market = os.environ.get("MARKET", "stocks")
-    global PATTERN_TF, NEED_INTRADAY_VOLUME, BOT_TF, UNIVERSE, FOOTER, SKIP_BOT
+    global PATTERN_TF, NEED_INTRADAY_VOLUME, BOT_TF, UNIVERSE, FOOTER, SKIP_BOT, PATTERN_SET
+    PATTERN_SET = "deck" if os.environ.get("PATTERN_SET", "").lower().startswith("deck") else "old"
     BOT_TF = os.environ.get("BOT_TF", "15m") if mode != "patterns" else "15m"
     PATTERN_TF = os.environ.get("PATTERN_TF", "daily") if mode == "patterns" else "daily"
+    if PATTERN_TF == "deck":
+        PATTERN_SET, PATTERN_TF = "deck", "daily"
+    if PATTERN_SET == "deck" and PATTERN_TF != "daily":
+        print("Deck patterns: daily candles only (like the live trader)", flush=True)
+        PATTERN_TF = "daily"
     NEED_INTRADAY_VOLUME = PATTERN_TF != "daily" or mode == "bot versions"   # volume versions need it
     if PATTERN_TF == "15m" and years > 5:
         print("15-min patterns: testing 5 years at most (8 years would take more than the 2-hour limit)", flush=True)

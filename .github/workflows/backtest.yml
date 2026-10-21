@@ -24,9 +24,9 @@ on:
         options: ["15m", "1h"]
         default: "15m"
       pattern_candles:
-        description: "Patterns test only: which candles to find patterns on (15m: max 5 years)"
+        description: "Patterns test only: which candles to find patterns on (15m: max 5 years). deck = the Fidelity-deck patterns of the pattern scan / deck_trader.py (daily)"
         type: choice
-        options: ["daily", "1h", "15m"]
+        options: ["daily", "1h", "15m", "deck"]
         default: "daily"
       coins:
         description: "Crypto: which coins (BTC only = no coin-picking bias; each coin = every top coin on its own). Stocks: each stock = every S&P 100 stock + SPY on its own"
@@ -87,6 +87,7 @@ jobs:
           TEST: ${{ inputs.test }}
           RUNS: ${{ inputs.runs }}
           PATTERN_TF: ${{ inputs.pattern_candles }}
+          PATTERN_SET: ${{ inputs.pattern_candles == 'deck' && 'deck' || 'old' }}
           BOT_TF: ${{ inputs.bot_candles }}
           COINS: ${{ inputs.coins }}
           ONLY: ${{ inputs.only }}
@@ -126,7 +127,8 @@ jobs:
           fee=""; [ "${{ inputs.market }}" = "crypto" ] && ! echo "${{ inputs.fee }}" | grep -q '^0.25' && fee="-fee005"
           span="${yrs}y"; case "$yrs" in from*) span="from$(echo "$yrs" | tr -dc 0-9)";; esac
           src=""; [ "${{ inputs.market }}" = "crypto" ] && echo "${{ inputs.source }}" | grep -q '^daily' && src="-daily"
-          dir="reports/backtest/${{ inputs.market }}${coins}-$(echo '${{ inputs.test }}' | tr ' ' '-')${only}${tf}${fee}${src}-${span}"
+          deck=""; [ "${{ inputs.test }}" = "patterns" ] && [ "${{ inputs.pattern_candles }}" = "deck" ] && deck="-deck" && tf=""
+          dir="reports/backtest/${{ inputs.market }}${coins}-$(echo '${{ inputs.test }}' | tr ' ' '-')${deck}${only}${tf}${fee}${src}-${span}"
           mkdir -p "$dir"
           cp backtest-results/summary.txt backtest-results/trades.csv "$dir"/
           for f in details.txt patterns.csv equity.csv each_coin.csv each_stock.csv; do [ -f "backtest-results/$f" ] && cp "backtest-results/$f" "$dir"/; done
