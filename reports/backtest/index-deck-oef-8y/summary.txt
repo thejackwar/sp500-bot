@@ -1,0 +1,79 @@
+📊 Fidelity-deck patterns on OEF alone (S&P 100 index ETF): daily vs 4-hour vs 2-hour candles
+22 Oct 2018 → 21 Oct 2026 (8.0 years), $100,000, whole account in the trade, one trade at a time, next-candle open fills, 0.02% slippage per side, no leverage.
+Buy & hold OEF: +16.9%/yr, max drop -31.4%, final $348,088
+
+━━ 1d candles ━━ (199 pattern breakouts in the test period)
+   A. Long, deck stop + deck target: +1.2%/yr, max drop -15.1%, final $109,664
+     65 trades, win 34%, avg -0.04R, profit factor 1.12, in the market 40% of the time
+     by year: 2018: -5%  2019: +7%  2020: -5%  2021: +4%  2022: -5%  2023: +3%  2024: +20%  2025: +1%  2026: -8%
+   B. Long, deck stop + trailing exit (20 candles): +2.7%/yr, max drop -24.0%, final $123,956
+     42 trades, win 29%, avg +0.68R, profit factor 1.43, in the market 59% of the time
+     by year: 2018: -5%  2019: +9%  2020: +1%  2021: +5%  2022: -9%  2023: -6%  2024: +27%  2025: +15%  2026: -10%
+   C. Long + short, deck stop + deck target: -4.7%/yr, max drop -35.2%, final $68,317
+     96 trades, win 27%, avg -0.23R, profit factor 0.72, in the market 43% of the time
+     by year: 2018: +2%  2019: +0%  2020: -19%  2021: -8%  2022: -10%  2023: -1%  2024: +19%  2025: -7%  2026: -9%
+
+━━ 4h candles ━━ (393 pattern breakouts in the test period)
+   A. Long, deck stop + deck target: +8.6%/yr, max drop -12.5%, final $193,487
+     103 trades, win 37%, avg +0.40R, profit factor 1.72, in the market 44% of the time
+     by year: 2018: -6%  2019: +26%  2020: +41%  2021: +4%  2022: +5%  2023: -7%  2024: +6%  2025: +4%  2026: +5%
+   B. Long, deck stop + trailing exit (20 candles): +11.6%/yr, max drop -14.6%, final $240,499
+     74 trades, win 35%, avg +0.59R, profit factor 2.41, in the market 57% of the time
+     by year: 2018: -6%  2019: +20%  2020: +50%  2021: +4%  2022: -3%  2023: +11%  2024: +17%  2025: -0%  2026: +8%
+   C. Long + short, deck stop + deck target: -1.9%/yr, max drop -50.3%, final $85,662
+     165 trades, win 28%, avg -0.02R, profit factor 0.93, in the market 54% of the time
+     by year: 2018: -3%  2019: +32%  2020: -10%  2021: -13%  2022: +11%  2023: -11%  2024: -3%  2025: -11%  2026: +1%
+
+━━ 2h candles ━━ (862 pattern breakouts in the test period)
+   A. Long, deck stop + deck target: +10.4%/yr, max drop -17.7%, final $220,271
+     207 trades, win 35%, avg +0.52R, profit factor 1.54, in the market 47% of the time
+     by year: 2018: +1%  2019: +22%  2020: +21%  2021: +3%  2022: +10%  2023: +13%  2024: +16%  2025: -0%  2026: -1%
+   B. Long, deck stop + trailing exit (20 candles): +11.4%/yr, max drop -17.0%, final $237,670
+     170 trades, win 29%, avg +0.61R, profit factor 1.65, in the market 61% of the time
+     by year: 2018: -5%  2019: +28%  2020: +41%  2021: +6%  2022: +3%  2023: +6%  2024: +16%  2025: -1%  2026: +4%
+   C. Long + short, deck stop + deck target: -0.9%/yr, max drop -38.5%, final $93,090
+     335 trades, win 27%, avg +0.11R, profit factor 0.97, in the market 56% of the time
+     by year: 2018: +5%  2019: +20%  2020: -2%  2021: -11%  2022: -3%  2023: -7%  2024: +5%  2025: -8%  2026: -3%
+
+OEF buy & hold by year: 2018: -9%  2019: +32%  2020: +21%  2021: +29%  2022: -21%  2023: +33%  2024: +31%  2025: +20%  2026: +13%
+
+Per pattern (version C: every breakout taken, both directions): trades / avg R
+  Ascending triangle ↑               1d   3 +2.35R   4h   8 +3.04R   2h   2 -1.08R
+  Ascending triangle ↓               1d   2 -1.03R   4h   7 -0.28R   2h  11 -0.23R
+  Bear flag ↓                        1d   1 -1.01R   4h   2 -1.05R   2h   3 -1.03R
+  Bear pennant ↓                     1d   -          4h   -          2h   7 -0.58R
+  Bearish engulfing ↓                1d   5 -1.03R   4h   7 -0.19R   2h  12 -0.76R
+  Bull flag ↑                        1d   2 -1.42R   4h   5 -0.24R   2h   9 -0.02R
+  Bull pennant ↑                     1d   1 -1.50R   4h   2 -1.87R   2h   5 -1.03R
+  Bullish engulfing ↑                1d   4 -0.25R   4h   6 -0.10R   2h  11 +0.19R
+  Cup and handle ↑                   1d   1 -1.05R   4h   2 -1.01R   2h   5 +1.06R
+  Dark cloud cover ↓                 1d   1 -1.48R   4h   1 +2.00R   2h   2 +2.04R
+  Descending triangle ↑              1d   4 -0.54R   4h   8 +0.95R   2h  11 +1.35R
+  Descending triangle ↓              1d   1 -1.01R   4h   4 -0.49R   2h   3 +0.41R
+  Double bottom ↑                    1d   4 +0.06R   4h   5 +0.84R   2h  10 +1.62R
+  Double top ↓                       1d   2 -1.20R   4h   1 -1.01R   2h  11 -0.82R
+  Falling wedge ↑                    1d   3 +0.80R   4h   1 -1.01R   2h  11 +1.45R
+  Falling wedge ↓                    1d   1 -1.01R   4h   2 -1.04R   2h   5 -1.11R
+  Gap down ↓                         1d   5 -1.07R   4h  10 -0.45R   2h  22 -0.34R
+  Gap up ↑                           1d  12 +0.10R   4h  24 +0.36R   2h  34 +0.04R
+  Hammer ↑                           1d   1 -1.01R   4h   3 -1.02R   2h   4 -0.26R
+  Hanging man ↑                      1d   2 +2.04R   4h   1 +2.00R   2h   -       
+  Harami ↑                           1d   7 +0.71R   4h   5 +0.03R   2h  10 +1.12R
+  Harami ↓                           1d   1 -1.09R   4h   5 +0.93R   2h  11 -0.34R
+  Head & shoulders top ↓             1d   1 +8.43R   4h   3 +1.75R   2h   5 +0.23R
+  Inverse head & shoulders ↑         1d   1 -1.02R   4h   1 -1.01R   2h   4 +0.17R
+  Inverted hammer ↑                  1d   1 -1.01R   4h   -          2h   1 -1.04R
+  Piercing line ↑                    1d   1 -1.00R   4h   2 -1.02R   2h   3 +1.00R
+  Pipe bottom ↑                      1d   1 -1.01R   4h   2 -1.26R   2h   4 -0.23R
+  Pipe top ↓                         1d   1 +0.49R   4h   1 -1.07R   2h   2 -1.13R
+  Rectangle ↑                        1d   2 -2.03R   4h   5 -1.04R   2h   3 -0.20R
+  Rectangle ↓                        1d   2 +1.44R   4h   3 -0.38R   2h   6 -0.57R
+  Rising wedge ↑                     1d   7 -0.37R   4h   5 -1.08R   2h  10 +0.89R
+  Rising wedge ↓                     1d   6 -1.03R   4h  14 -0.77R   2h  24 -0.20R
+  Shooting star ↓                    1d   1 -1.03R   4h   3 -1.14R   2h   4 -1.09R
+  Symmetrical triangle ↑             1d   1 -1.02R   4h   4 +0.97R   2h  19 +0.15R
+  Symmetrical triangle ↓             1d   3 -0.46R   4h   5 -1.20R   2h  24 -0.19R
+  Triple bottom ↑                    1d   2 -1.05R   4h   2 -1.48R   2h  13 +1.14R
+  Triple top ↓                       1d   3 -0.37R   4h   6 +0.42R   2h  14 +0.63R
+
+Caveat: one symbol, so few trades per version: a handful of trades can change the result. Past results don't guarantee future ones.
