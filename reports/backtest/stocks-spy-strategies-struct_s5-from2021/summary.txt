@@ -1,0 +1,11 @@
+📊 Each stock on its own: strategies vs buy & hold of that stock (S&P 100 + SPY for the S&P 500)
+01 Jan 2021 → 21 Oct 2026; 10 start dates a week apart; whole account in that one stock when holding (strategy SIZE); no commission, 0.02% slippage; leverage versions pay their FUNDING rate on the position and are liquidated as in the crypto test. 'final' = money from $100,000 (first run).
+
+
+SPY (from 2021-01-01): buy & hold +15.0%/yr, max drop -24.5%, final $225,040
+    St 5%     +12.5%/yr (+12.2% to +13.0%)  drop -22.3%  final $     203,319  beat 0/10  ~7 trades
+    St 5%+3%   +9.5%/yr (+9.1% to +10.0%)  drop -18.4%  final $     173,975  beat 0/10  ~17 trades
+    St 5% strict   +8.7%/yr (+8.4% to +9.3%)  drop -17.4%  final $     167,604  beat 0/10  ~10 trades
+    St 5%+2%   +6.8%/yr (+6.2% to +7.1%)  drop -21.3%  final $     147,724  beat 0/10  ~27 trades
+
+Versions: St 5% = Structure only: swings 5%, uptrend = any HL or HH; St 5%+2% = Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low; St 5%+3% = Structure: buy on 5% swings (HL or HH), sell on a 3% lower high or lower low; St 5% strict = Structure only: swings 5%, uptrend = strict HH + HL

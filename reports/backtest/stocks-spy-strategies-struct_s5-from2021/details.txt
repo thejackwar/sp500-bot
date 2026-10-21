@@ -1,0 +1,6 @@
+stock                                                                      version        short       from   cagr  cagr_min  cagr_max  max_dd  beat  runs       final  trades
+  SPY                                                               Buy & hold SPY          B&H 2021-01-01 0.1504       NaN       NaN -0.2450   NaN   NaN 225039.5037     NaN
+  SPY                            Structure only: swings 5%, uptrend = any HL or HH        St 5% 2021-01-01 0.1245    0.1215    0.1304 -0.2228   0.0  10.0 203319.3212     7.0
+  SPY Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low     St 5%+2% 2021-01-01 0.0677    0.0619    0.0712 -0.2130   0.0  10.0 147724.3086    27.0
+  SPY Structure: buy on 5% swings (HL or HH), sell on a 3% lower high or lower low     St 5%+3% 2021-01-01 0.0945    0.0912    0.1004 -0.1836   0.0  10.0 173975.2690    17.0
+  SPY                          Structure only: swings 5%, uptrend = strict HH + HL St 5% strict 2021-01-01 0.0866    0.0840    0.0933 -0.1738   0.0  10.0 167604.3969    10.0

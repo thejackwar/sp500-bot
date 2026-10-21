@@ -1,0 +1,67 @@
+stock,version,symbol,direction,signal,entry_time,exit_time,entry,stop,target,exit,qty,result,pnl,R,days_held
+SPY,"Structure only: swings 5%, uptrend = any HL or HH",SPY,LONG,daily,2021-01-05 09:30,2022-01-21 09:45,341.0,215.86,,418.1,293.2566919872119,exit signal,22609.56,0.62,381
+SPY,"Structure only: swings 5%, uptrend = any HL or HH",SPY,LONG,daily,2022-03-18 09:30,2022-05-02 09:45,412.44,142.56,,387.87,297.2767475763777,exit signal,-7304.11,-0.09,45
+SPY,"Structure only: swings 5%, uptrend = any HL or HH",SPY,LONG,daily,2022-05-31 09:30,2022-06-14 09:45,389.42,97.13,,354.72,296.096964198395,exit signal,-10274.22,-0.12,14
+SPY,"Structure only: swings 5%, uptrend = any HL or HH",SPY,LONG,daily,2022-07-20 09:30,2022-09-15 09:45,371.1,136.95,,371.48,283.02355452032515,exit signal,105.14,0.0,57
+SPY,"Structure only: swings 5%, uptrend = any HL or HH",SPY,LONG,daily,2022-10-26 09:30,2025-03-07 09:45,362.37,110.68,,559.76,290.1334450241898,exit signal,57268.15,0.78,863
+SPY,"Structure only: swings 5%, uptrend = any HL or HH",SPY,LONG,daily,2025-04-14 09:30,2025-04-22 09:45,535.23,-56.08,,511.51,303.4310996660736,exit signal,-7197.19,-0.04,8
+SPY,"Structure only: swings 5%, uptrend = any HL or HH",SPY,LONG,daily,2025-04-25 09:30,2026-03-27 09:45,537.81,33.01,,639.16,288.5927133397569,exit signal,29250.2,0.2,336
+SPY,"Structure only: swings 5%, uptrend = any HL or HH",SPY,LONG,daily,2026-04-16 09:30,2026-10-20 16:00,697.67,413.87,,769.01,264.3909977969297,still open,18861.78,0.25,187
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2021-01-05 09:30,2021-02-01 09:45,341.0,215.86,,346.07,293.2566919872119,exit signal,1487.57,0.04,27
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2021-02-05 09:30,2021-02-26 09:45,359.63,213.38,,355.92,282.19845459704544,exit signal,-1047.83,-0.03,21
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2021-03-12 09:30,2021-05-13 09:45,363.21,185.34,,378.18,276.53150838806135,exit signal,4140.15,0.08,62
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2021-05-21 09:30,2021-09-21 09:45,387.45,246.33,,408.18,269.9201703950082,exit signal,5595.68,0.15,123
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2021-10-15 09:30,2021-12-15 09:45,416.04,262.81,,433.32,264.81762317531917,exit signal,4576.08,0.11,61
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2021-12-16 09:30,2021-12-21 09:45,442.06,266.97,,430.3,259.58482566265445,exit signal,-3051.28,-0.07,5
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2021-12-28 09:30,2022-01-14 09:45,448.45,267.16,,432.76,249.0811690778234,exit signal,-3907.15,-0.09,17
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2022-03-18 09:30,2022-04-25 09:45,412.44,142.56,,398.78,261.35334839746764,exit signal,-3570.67,-0.05,38
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2022-05-31 09:30,2022-06-10 09:45,389.42,97.13,,371.69,267.63678923563316,exit signal,-4745.79,-0.06,10
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2022-07-20 09:30,2022-09-07 09:45,371.1,136.95,,369.09,268.0561196217909,exit signal,-540.95,-0.01,49
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2022-09-12 09:30,2022-09-15 09:45,386.59,189.29,,371.48,255.92099245969658,exit signal,-3867.38,-0.08,3
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2022-10-26 09:30,2022-11-03 09:45,362.37,110.68,,352.6,262.3500341594684,exit signal,-2563.95,-0.04,8
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2022-11-11 09:30,2022-12-08 09:45,375.66,118.32,,375.07,246.24842843804188,exit signal,-142.86,-0.0,27
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2023-01-09 09:30,2023-02-21 09:45,372.39,174.61,,384.35,248.02093166708764,exit signal,2966.0,0.06,43
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2023-03-17 09:30,2023-08-28 09:45,376.55,180.67,,424.9,253.16374667910824,exit signal,12240.39,0.25,164
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2023-08-30 09:30,2023-09-22 09:45,432.07,288.59,,416.97,248.9617617887476,exit signal,-3759.27,-0.11,23
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2023-10-10 09:30,2023-10-26 09:45,417.59,264.72,,401.53,248.58800808985382,exit signal,-3993.27,-0.11,16
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2023-11-13 09:30,2024-05-02 09:45,423.65,270.26,,489.57,235.60569384572085,exit signal,15530.5,0.43,171
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2024-05-06 09:30,2024-08-05 09:45,499.09,315.77,,498.45,231.11265098913734,exit signal,-147.8,-0.0,91
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2024-08-20 09:30,2024-12-31 09:45,544.95,303.69,,578.39,211.3925792556126,exit signal,7070.09,0.14,133
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2025-01-22 09:30,2025-02-04 09:45,594.34,379.65,,586.13,205.72147305411426,exit signal,-1688.17,-0.04,13
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2025-02-19 09:30,2025-02-28 09:45,598.42,419.9,,574.14,201.49754561081585,exit signal,-4893.27,-0.14,9
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2025-04-14 09:30,2025-04-17 09:45,535.23,-56.08,,518.93,216.1453334499373,exit signal,-3523.35,-0.03,3
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2025-04-21 09:30,2025-04-22 09:45,512.73,-5.85,,511.51,218.75630967487493,exit signal,-267.94,-0.0,1
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2025-04-25 09:30,2025-11-14 09:45,537.81,33.01,,658.14,208.05868956326682,exit signal,25035.87,0.24,203
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2025-12-08 09:30,2026-02-13 09:45,679.38,447.92,,676.23,201.55470969891743,exit signal,-633.11,-0.01,67
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2026-04-16 09:30,2026-06-18 09:45,697.67,413.87,,745.77,195.36226352891074,exit signal,9397.18,0.17,63
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2026-07-13 09:30,2026-10-02 09:45,750.76,473.28,,770.43,194.063949879803,exit signal,3816.42,0.07,81
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 2% lower high or lower low",SPY,LONG,daily,2026-10-06 09:30,2026-10-20 16:00,778.32,575.35,,769.01,192.09673298541557,still open,-1787.58,-0.05,14
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 3% lower high or lower low",SPY,LONG,daily,2021-01-05 09:30,2021-03-01 09:45,341.0,215.86,,357.06,293.2566919872119,exit signal,4709.82,0.13,55
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 3% lower high or lower low",SPY,LONG,daily,2021-03-12 09:30,2021-10-01 09:45,363.21,185.34,,402.99,288.287928846216,exit signal,11467.16,0.22,203
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 3% lower high or lower low",SPY,LONG,daily,2021-10-18 09:30,2021-12-21 09:45,415.3,265.49,,430.3,279.7402453831961,exit signal,4196.35,0.1,64
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 3% lower high or lower low",SPY,LONG,daily,2021-12-23 09:30,2022-01-19 09:45,440.03,255.19,,429.92,273.5583372247487,exit signal,-2764.03,-0.05,27
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 3% lower high or lower low",SPY,LONG,daily,2022-03-18 09:30,2022-04-25 09:45,412.44,142.56,,398.78,285.1532080476333,exit signal,-3895.83,-0.05,38
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 3% lower high or lower low",SPY,LONG,daily,2022-05-31 09:30,2022-06-14 09:45,389.42,97.13,,354.72,292.0088436213376,exit signal,-10132.36,-0.12,14
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 3% lower high or lower low",SPY,LONG,daily,2022-07-20 09:30,2022-09-14 09:45,371.1,136.95,,372.9,279.115934527804,exit signal,499.95,0.01,56
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 3% lower high or lower low",SPY,LONG,daily,2022-10-26 09:30,2022-12-16 09:45,362.37,110.68,,367.31,287.221191496768,exit signal,1417.17,0.02,51
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 3% lower high or lower low",SPY,LONG,daily,2023-01-24 09:30,2023-03-10 09:45,380.52,197.36,,372.84,277.25034708076845,exit signal,-2129.47,-0.04,45
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 3% lower high or lower low",SPY,LONG,daily,2023-03-30 09:30,2023-09-21 09:45,386.96,204.4,,420.09,267.13213251813914,exit signal,8849.71,0.18,175
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 3% lower high or lower low",SPY,LONG,daily,2023-11-13 09:30,2024-08-05 09:45,423.65,270.26,,498.45,264.8818866642482,exit signal,19811.99,0.49,266
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 3% lower high or lower low",SPY,LONG,daily,2024-08-20 09:30,2025-01-03 09:45,544.95,303.69,,576.06,242.28039867311324,exit signal,7538.75,0.13,136
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 3% lower high or lower low",SPY,LONG,daily,2025-01-22 09:30,2025-02-28 09:45,594.34,379.65,,574.14,234.83102626126333,exit signal,-4744.45,-0.09,37
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 3% lower high or lower low",SPY,LONG,daily,2025-04-14 09:30,2025-04-17 09:45,535.23,-56.08,,518.93,251.90197886413966,exit signal,-4106.21,-0.03,3
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 3% lower high or lower low",SPY,LONG,daily,2025-04-25 09:30,2025-11-17 09:45,537.81,33.01,,662.39,243.05820471211027,exit signal,30280.18,0.25,206
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 3% lower high or lower low",SPY,LONG,daily,2025-12-08 09:30,2026-02-18 09:45,679.38,447.92,,678.54,236.98033433992507,exit signal,-197.07,-0.0,72
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 3% lower high or lower low",SPY,LONG,daily,2026-04-16 09:30,2026-06-25 09:45,697.67,413.87,,736.91,230.48398298084476,exit signal,9044.9,0.14,70
+SPY,"Structure: buy on 5% swings (HL or HH), sell on a 3% lower high or lower low",SPY,LONG,daily,2026-07-13 09:30,2026-10-20 16:00,750.76,473.28,,769.01,226.23277850519906,still open,4128.72,0.07,99
+SPY,"Structure only: swings 5%, uptrend = strict HH + HL",SPY,LONG,daily,2021-01-05 09:30,2022-01-21 09:45,341.0,215.86,,418.1,293.2566919872119,exit signal,22609.56,0.62,381
+SPY,"Structure only: swings 5%, uptrend = strict HH + HL",SPY,LONG,daily,2022-03-21 09:30,2022-05-02 09:45,418.41,152.38,,387.87,293.0343021791292,exit signal,-8949.64,-0.11,42
+SPY,"Structure only: swings 5%, uptrend = strict HH + HL",SPY,LONG,daily,2022-05-03 09:30,2022-05-05 09:45,390.79,131.14,,399.59,290.8479270051319,exit signal,2560.02,0.03,2
+SPY,"Structure only: swings 5%, uptrend = strict HH + HL",SPY,LONG,daily,2022-07-21 09:30,2022-07-27 09:45,372.76,144.75,,372.81,311.7784298139,exit signal,12.75,0.0,6
+SPY,"Structure only: swings 5%, uptrend = strict HH + HL",SPY,LONG,daily,2022-07-28 09:30,2022-09-15 09:45,380.08,159.21,,371.48,305.81433639804993,exit signal,-2630.1,-0.04,49
+SPY,"Structure only: swings 5%, uptrend = strict HH + HL",SPY,LONG,daily,2022-11-11 09:30,2025-03-07 09:45,375.66,118.32,,559.76,302.4119379365986,exit signal,55674.92,0.72,847
+SPY,"Structure only: swings 5%, uptrend = strict HH + HL",SPY,LONG,daily,2025-03-10 09:30,2025-03-11 09:45,556.74,286.08,,548.49,304.0505554606969,exit signal,-2508.74,-0.03,1
+SPY,"Structure only: swings 5%, uptrend = strict HH + HL",SPY,LONG,daily,2025-03-25 09:30,2025-03-26 09:45,566.0,281.96,,565.67,294.6428231871044,exit signal,-99.1,-0.0,1
+SPY,"Structure only: swings 5%, uptrend = strict HH + HL",SPY,LONG,daily,2025-12-01 09:30,2026-03-27 09:45,671.65,395.7,,639.16,248.14800546487584,exit signal,-8062.87,-0.12,116
+SPY,"Structure only: swings 5%, uptrend = strict HH + HL",SPY,LONG,daily,2026-04-01 09:30,2026-04-09 09:45,650.71,334.75,,671.31,243.74419085557565,exit signal,5020.06,0.07,8
+SPY,"Structure only: swings 5%, uptrend = strict HH + HL",SPY,LONG,daily,2026-07-13 09:30,2026-10-20 16:00,750.76,473.28,,769.01,217.94826708732154,still open,3977.53,0.07,99
