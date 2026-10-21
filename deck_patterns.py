@@ -217,6 +217,9 @@ def _tops_bottoms(df, a, piv, out):
                                  lower=(lambda x: brk_lvl) if top else (lambda x: ext))
             if b is not None and bd != d:
                 continue                                    # broke the wrong way: no longer this pattern
+            later = slice(x1 + 1, b if b is not None else n)
+            if len(c[later]) and (h[later].max() > ext + TOL * atr if top else l[later].min() < ext - TOL * atr):
+                continue                                    # a new, higher peak (lower trough): not this pattern
             if kind == "double":                            # deck: height peak->trough from the breakout price
                 target = brk_lvl - height if top else brk_lvl + height
             else:                                           # deck: from the lowest trough / highest peak
@@ -341,12 +344,12 @@ def _head_shoulders(df, a, piv, out):
         # head beyond both shoulders, shoulders at about the same level
         if top and hd[1] - max(ls[1], rs[1]) < 0.5 * atr or not top and min(ls[1], rs[1]) - hd[1] < 0.5 * atr:
             continue
-        if abs(ls[1] - rs[1]) > 1.5 * TOL * atr:
-            continue
         neck = Line(n1[0], n1[1], n2[0], n2[1])
         depth = (hd[1] - neck(hd[0])) * sgn
         if depth < MIN_HEIGHT * atr:
             continue
+        if abs(ls[1] - rs[1]) > min(1.5 * TOL * atr, 0.2 * depth):
+            continue                                        # shoulders at about the same level
         # shoulders must be clearly beyond the neckline
         if sgn * (ls[1] - neck(ls[0])) < 0.4 * depth or sgn * (rs[1] - neck(rs[0])) < 0.4 * depth:
             continue
