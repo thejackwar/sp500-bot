@@ -496,6 +496,8 @@ def _simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
     prev_same_day = np.r_[False, day[1:] == day[:-1]]
     if di is None:
         di = np.cumsum(first_of_day) - 1
+    dstart = np.maximum.accumulate(np.where(first_of_day, np.arange(n_slots), 0))   # first slot of each slot's day
+    move = cfg.get("move_stop")                        # "rise" / "be_floor": trade's own moving stop (deck test)
     cash, pos, trades, curve, traded_on = float(START_EQUITY), {}, [], [], {}
     exits_at = {}                                      # slot -> [(phase, col, price, reason)]
     skipped = 0
@@ -565,6 +567,28 @@ def _simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
                 lvl = sm[di[start:end], col]
                 ok = valid & np.isfinite(lvl)
                 c7 = ok & ((ll <= lvl) if long_ else (hh >= lvl))
+            elif move:
+                # the trade's own moving stop, set from COMPLETED days only (like a stop order replaced once a
+                # day): it keeps the starting distance (entry - first stop) below the
+                #   "rise":     highest daily close since the entry - never moves down
+                #   "be_floor": last daily close - moves up AND down, but never below the first stop, and
+                #               never below break-even (the entry) once it has reached it
+                risk = sign * (p["fill"] - stop)
+                cl = Cf[s:end, col]                        # closes from the entry slot on (forward-filled)
+                f = dstart[idx]                            # first slot of each candle's day
+                has_prev = f - 1 >= s                      # a completed day since the entry
+                pos_prev = np.clip(f - 1 - s, 0, None)
+                if move == "rise":
+                    best = (np.maximum.accumulate(cl) if long_ else np.minimum.accumulate(cl))[pos_prev]
+                    lvl = best - sign * risk
+                else:
+                    last = cl[pos_prev] - sign * risk
+                    reached = (np.maximum.accumulate(sign * (cl - sign * risk) >= sign * p["fill"]))[pos_prev]
+                    lvl = np.where(reached, (np.maximum(last, p["fill"]) if long_ else np.minimum(last, p["fill"])), last)
+                lvl = np.maximum(lvl, stop) if long_ else np.minimum(lvl, stop)
+                lvl = np.where(has_prev, lvl, stop)
+                ok = valid & has_prev & (lvl * sign > stop * sign)   # only where it is above the first stop
+                c7 = ok & ((ll <= lvl) if long_ else (hh >= lvl))
             else:
                 c7 = np.zeros(len(idx), bool)
             hit = c1 | c2 | c3 | c4 | c5 | c6 | c7
@@ -584,6 +608,9 @@ def _simulate(sig, O, H, L, C, slots, syms, cfg=None, extra=None):
                     return j, 1, stop * (1 - sign * SLIPPAGE), "liquidated" if lev else "stop"
                 if c7[k]:                              # moving stop: at the level, or the open if it gapped past
                     px = min(o[k], lvl[k]) if long_ else max(o[k], lvl[k])
+                    if move:
+                        why = "moving stop (profit)" if sign * (px - p["fill"]) > 0 else "moving stop"
+                        return j, 1, px * (1 - sign * SLIPPAGE), why
                     return j, 1, px * (1 - sign * SLIPPAGE), "stop (lower low)"
                 return j, 1, tgt, "target"
             start = end
@@ -1612,7 +1639,16 @@ def run(daily, intraday, start, end, spy=None, mode="bot versions", strategies=N
              {**live, "pattern_target": False, "target_r": None, "trail_days": 20}),
             ("d_long_trail", "6. Up breakouts only, deck stop + trailing exit (20-day low), no target", "L Trail",
              sig, {**live, "shorts": False, "pattern_target": False, "target_r": None, "trail_days": 20}),
+            ("d_rise", "7. = 6 + rising stop: follows the highest close up (same distance as the first stop), "
+                       "never down", "6+Rise", sig, {**live, "shorts": False, "pattern_target": False, "target_r": None, "trail_days": 20, "move_stop": "rise"}),
+            ("d_befloor", "8. = 6 + stop follows the close up AND down, never below break-even once reached",
+             "6+BE", sig, {**live, "shorts": False, "pattern_target": False, "target_r": None, "trail_days": 20, "move_stop": "be_floor"}),
+            ("d_rise_only", "9. (extra) Rising stop only, no 20-day exit", "Rise only", sig,
+             {**live, "shorts": False, "pattern_target": False, "target_r": None, "move_stop": "rise"}),
         ]
+        only = os.environ.get("ONLY", "").split()      # e.g. ONLY="d_long_trail d_rise" = just these versions
+        if only:
+            jobs = [j for j in jobs if j[0] in only]
     elif mode == "patterns":
         first_slot = np.flatnonzero(np.r_[True, slot_day[1:] != slot_day[:-1]])
         if PATTERN_TF == "daily":

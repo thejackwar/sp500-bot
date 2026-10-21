@@ -34,7 +34,7 @@ on:
         options: ["top 10", "BTC", "BTC ETH", "each coin", "each stock", "SPY only"]
         default: "top 10"
       only:
-        description: "Strategies test only: strategy files whose name starts with this (e.g. early); empty = all"
+        description: "Strategies test: strategy files whose name starts with this (e.g. early). Deck patterns test: version keys (e.g. d_long_trail d_rise). Empty = all"
         type: string
         default: ""
       fee:
@@ -123,7 +123,7 @@ jobs:
           coins=""; [ "${{ inputs.market }}" = "crypto" ] && [ "${{ inputs.coins }}" != "top 10" ] && coins="-$(echo '${{ inputs.coins }}' | tr 'A-Z ' 'a-z-')"
           [ "${{ inputs.market }}" = "stocks" ] && [ "${{ inputs.coins }}" = "each stock" ] && coins="-each-stock"
           [ "${{ inputs.market }}" = "stocks" ] && [ "${{ inputs.coins }}" = "SPY only" ] && coins="-spy"
-          only=""; [ -n "${{ inputs.only }}" ] && [ "${{ inputs.test }}" = "strategies" ] && only="-$(echo '${{ inputs.only }}' | tr -d '!' | tr 'A-Z ' 'a-z-')"
+          only=""; [ -n "${{ inputs.only }}" ] && only="-$(echo '${{ inputs.only }}' | tr -d '!' | tr 'A-Z ' 'a-z-')"
           fee=""; [ "${{ inputs.market }}" = "crypto" ] && ! echo "${{ inputs.fee }}" | grep -q '^0.25' && fee="-fee005"
           span="${yrs}y"; case "$yrs" in from*) span="from$(echo "$yrs" | tr -dc 0-9)";; esac
           src=""; [ "${{ inputs.market }}" = "crypto" ] && echo "${{ inputs.source }}" | grep -q '^daily' && src="-daily"
