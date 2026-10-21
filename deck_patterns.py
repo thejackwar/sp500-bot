@@ -34,6 +34,7 @@ MAX_BARS = 150            # ... and at most this many (about 7 months of daily c
 MIN_GAP = 4               # candles between two peaks (or troughs) of the same pattern
 MAX_AGE = 40              # forming: the last swing of the pattern must be this recent (candles)
 RECENT = 3                # breakout: must have happened in the last RECENT candles
+FLAG_POLE = 5.0           # flag / pennant pole: at least this many ATRs in at most 10 candles
 
 # The deck's comments on each pattern (shown in the alert). * = from the CMT textbook statistics.
 NOTES = {
@@ -455,14 +456,14 @@ def _flags(df, a, out):
             seg = l[t - 12:t] if bull else h[t - 12:t]
             ps = t - 12 + (int(np.argmin(seg)) if bull else int(np.argmax(seg)))
             pole = (h[t] - l[ps]) if bull else (h[ps] - l[t])
-            atr = a[t]
-            if pole < 4 * atr or t - ps > 12 or t - ps < 2:
-                continue
-            # consolidation: from t until a breakout (or now), 3-20 candles
-            for e in range(t + 3, min(n, t + 21)):
+            atr = a[ps]
+            if pole < FLAG_POLE * atr or t - ps > 10 or t - ps < 2:
+                continue                                        # the pole must be steep and sharp
+            # consolidation: from t until a breakout (or now), 4-15 candles, at most 40% of the pole
+            for e in range(t + 3, min(n, t + 16)):
                 cons_h, cons_l = h[t:e + 1], l[t:e + 1]
                 rng = cons_h.max() - cons_l.min()
-                if rng > 0.5 * pole:
+                if rng > 0.4 * pole:
                     break
                 xs = np.arange(t, e + 1)
                 up, lo = fit(list(zip(xs, cons_h))), fit(list(zip(xs, cons_l)))

@@ -36,7 +36,7 @@ TIMEFRAME = os.environ.get("PATTERN_TF", "1d")          # "1d" daily candles, "1
 PREVIEW = os.environ.get("PREVIEW") == "1"               # save charts to the repo instead of Telegram
 RESEND = os.environ.get("RESEND") == "1"                 # ignore the memory: send everything found now
 STATE_FILE = os.environ.get("STATE_FILE", "deck_pattern_state.json")
-MAX_CHARTS = 30           # chart messages per run; anything beyond goes in the summary only
+MAX_CHARTS = 40           # chart messages per run; the rest are listed and get their chart next run
 CHART_BARS = 110          # candles shown on a chart (more if the pattern is longer)
 
 # What each pattern sends: "chart" = its own message with the chart, "list" = only a line in the
@@ -376,9 +376,11 @@ def main():
             if ok:
                 state["sent"][k] = today.isoformat()
             new_lines.append(line)
-        else:
-            new_lines.append(line + ("" if mode_of(p) == "list" else "  (no chart: limit reached)"))
+        elif mode_of(p) == "list":
+            new_lines.append(line)
             state["sent"][k] = today.isoformat()
+        else:                                              # over the chart limit: chart comes next run
+            new_lines.append(line + "  (chart next run)")
 
     # summary message: everything found this run, new first
     n_brk = sum(1 for _, _, p in found if p["stage"] == "breakout")
