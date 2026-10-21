@@ -47,8 +47,8 @@ ALERTS = {
     "multi": "chart",                 # double/triple tops & bottoms, rectangles, triangles, wedges, H&S, cup
     "short": "chart",                 # flags, pennants, gaps, pipe bottom/top
     "candle": "chart",                # doji, harami, hammer, shooting star, engulfing, dark cloud/piercing
-    "Narrow range (NR4)": "list",     # very frequent (about 1 candle in 4): summary only
-    "Inside bar": "list",             # very frequent: summary only
+    "Narrow range (NR4)": "off",      # about 1 candle in 4 is one: ~50 a day on the S&P 100 ("list" to see them)
+    "Inside bar": "off",              # very frequent too ("list" to see them in the summary)
     "Doji": "list",                   # "extremely common" (deck): summary only
 }
 STAGES = {"forming": "🟡 forming", "breakout": "breakout"}
@@ -172,25 +172,26 @@ def draw(ticker, df, p):
             ax.annotate(lab, (i, price), textcoords="offset points", xytext=(0, -14 if low else 8),
                         ha="center", fontsize=8, color="white", fontweight="bold", zorder=7)
 
+    labels = []                                          # right-hand price labels, spread apart below
+
     def level(val, colr, text, ls="--"):
         nonlocal lo_y, hi_y
         if val is None or not np.isfinite(val):
             return
         x0 = brk["bar"] if brk else max(start, p["end"])
         ax.plot([x0, right + 12], [val, val], color=colr, ls=ls, lw=1.0, zorder=4)
-        pct = (val / c[-1] - 1) * 100
-        ax.text(right + 12.3, val, f" {text} {px(val)} ({pct:+.1f}%)", color=colr, va="center", fontsize=8,
-                bbox=dict(facecolor="black", edgecolor="none", pad=1), zorder=8)
+        labels.append([val, val, colr, f" {text} {px(val)} ({(val / c[-1] - 1) * 100:+.1f}%)"])
         lo_y, hi_y = min(lo_y, val), max(hi_y, val)
 
     if brk:
         b = brk["bar"]
         long = brk["dir"] == "LONG"
         yb = float(df["Low"].values[b]) if long else float(df["High"].values[b])
-        ax.annotate("", xy=(b, yb), xytext=(b, yb - (1 if long else -1) * 0.07 * span), zorder=8,
-                    arrowprops=dict(arrowstyle="-|>", color=UP if long else DOWN, lw=2.2))
-        ax.annotate("breakout", (b, yb), textcoords="offset points", xytext=(0, -26 if long else 22),
-                    ha="center", fontsize=8, color=UP if long else DOWN, fontweight="bold", zorder=8)
+        tail = yb - (1 if long else -1) * 0.12 * span
+        ax.annotate("breakout", xy=(b, yb), xytext=(b, tail), ha="center", va="top" if long else "bottom",
+                    fontsize=8, color=UP if long else DOWN, fontweight="bold", zorder=8,
+                    arrowprops=dict(arrowstyle="-|>", color=UP if long else DOWN, lw=2.0))
+        lo_y, hi_y = min(lo_y, tail - 0.04 * span), max(hi_y, tail + 0.04 * span)
         level(brk["level"], BLUE, "breakout")
         level(brk.get("target"), UP if long else DOWN, "target")
         level(brk["stop"], DOWN if long else UP, "stop")
@@ -203,6 +204,14 @@ def draw(ticker, df, p):
             level(p["targets"].get("SHORT"), DOWN, "target if down", ls=":")
         if p.get("stop") is not None:
             level(p["stop"], GREY, "stop")
+    gap = 0.045 * ((hi_y - lo_y) or 1)                    # keep labels at least this far apart
+    labels.sort(key=lambda z: z[0])
+    for k in range(1, len(labels)):
+        labels[k][1] = max(labels[k][1], labels[k - 1][1] + gap)
+    for val, y, colr, text in labels:
+        ax.text(right + 12.3, y, text, color=colr, va="center", fontsize=8,
+                bbox=dict(facecolor="black", edgecolor="none", pad=1), zorder=8)
+        hi_y = max(hi_y, y)
 
     pad = 0.05 * (hi_y - lo_y or 1)
     ax.set_ylim(lo_y - pad, hi_y + pad)

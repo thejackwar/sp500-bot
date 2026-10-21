@@ -29,7 +29,8 @@ TOL = 0.75                # "roughly the same price" = within TOL x ATR
 BREAK_FILTER = 0.2        # breakout close must clear the line by this many ATRs (slide 10)
 MIN_HEIGHT = 2.5          # a multi-bar pattern must be at least this many ATRs tall
 MIN_BARS = 10             # ... and at least this many candles long
-MAX_BARS = 200            # ... and at most this many
+MIN_BARS_LINES = 15       # rectangles, triangles, wedges: at least this many candles
+MAX_BARS = 150            # ... and at most this many (about 7 months of daily candles)
 MIN_GAP = 4               # candles between two peaks (or troughs) of the same pattern
 MAX_AGE = 40              # forming: the last swing of the pattern must be this recent (candles)
 RECENT = 3                # breakout: must have happened in the last RECENT candles
@@ -251,7 +252,7 @@ def _lines_patterns(df, a, piv, out):
                 continue
             x0, x1 = seq[0][0], seq[-1][0]
             span = x1 - x0
-            if not (MIN_BARS <= span <= MAX_BARS):
+            if not (MIN_BARS_LINES <= span <= MAX_BARS):
                 continue
             atr = a[x1]
             tol = TOL * atr
@@ -305,7 +306,7 @@ def _lines_patterns(df, a, piv, out):
             else:
                 tgt = lambda d, lvl, x: lvl + height if d == "LONG" else lvl - height
             pts = [(x, y, "") for x, y in highs + lows]
-            lines = [(up, x0, None), (lo, x0, None)]
+            lines = [(up, highs[0][0], None), (lo, lows[0][0], None)]   # each line from its first touch
             common = dict(points=pts, lines=lines, kind_lines=("res", "sup"))
             if b is not None:
                 lvl_fn = up if bd == "LONG" else lo
