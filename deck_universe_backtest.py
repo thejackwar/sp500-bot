@@ -1,0 +1,286 @@
+"""
+Version 6 of the deck pattern trader (deck_trader.py, EXIT "trail") on a whole universe of stocks:
+the S&P 100 and the S&P 500, with the same daily-candle engine, compared with buying and holding SPY.
+
+Rules (like the live trader):
+    signal  a charted deck pattern (deck_patterns.py; pattern_scan ALERTS) breaks UP at a day's close
+            (the detector sees the last 290 daily candles each day) -> buy at the next day's open
+    stop    the deck's protective stop; a day opening below it sells at the open, a low below it at the stop
+    exit    a close below the 20-day low (lowest low of the 20 days before) sells at that close
+            (the live trader checks it in the last 20 minutes before the close)
+    money   1% of equity at risk, max 10% of equity per stock, max 100% invested, max 25 positions,
+            max 8 new trades a day (multi-bar patterns first, then short-term, then candlesticks, ties random)
+Daily candles only (500 stocks of 15-minute candles would not fit in the time limit), so stops are judged
+on daily lows. Each universe from 10 start dates a week apart; the report shows the middle run.
+
+    UNIVERSES="sp100 sp500" YEARS=8 python deck_universe_backtest.py      (needs ALPACA keys)
+Results: reports/backtest/universe-deck-v6-<years>y/
+"""
+import datetime as dt
+import io
+import os
+import time
+from concurrent.futures import ProcessPoolExecutor
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+import requests
+
+import deck_patterns as dp
+import pattern_scan
+import scanner
+
+YEARS = float(os.environ.get("YEARS", "8"))
+UNIVERSES = os.environ.get("UNIVERSES", "sp100 sp500").split()
+RUNS, STEP = 10, 5
+WINDOW, TRAIL = 290, 20
+RISK, MAX_POS_PCT, MAX_GROSS, MAX_POS, MAX_NEW = 0.01, 0.10, 1.0, 25, 8
+SLIP = 0.0002
+START_EQ = 100_000.0
+FAM = {"multi": 0, "short": 1, "candle": 2}
+SP500_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+
+
+def sp500():
+    html = requests.get(SP500_URL, timeout=30, headers={"User-Agent": "Mozilla/5.0 (sp100-alert-bot)"}).text
+    for t in pd.read_html(io.StringIO(html)):
+        if "Symbol" in t.columns and len(t) > 400:
+            return [str(x).strip().replace(".", "-") for x in t["Symbol"]]
+    raise SystemExit("Couldn't read the S&P 500 list from Wikipedia")
+
+
+def _signals(args):
+    """Up breakouts of one stock: [(date, stop, family rank, pattern)] - each pattern once."""
+    sym, d = args
+    d = dp.add_atr(d)
+    out, seen = [], set()
+    for i in range(150, len(d) - 1):
+        w = d.iloc[max(0, i - WINDOW + 1):i + 1]
+        try:
+            pats = dp.detect(w, families=("multi", "short", "candle"))
+        except Exception:
+            continue
+        for p in pats:
+            b = p.get("brk")
+            if (p["stage"] != "breakout" or not b or b["bar"] != len(w) - 1 or b["dir"] != "LONG"
+                    or pattern_scan.mode_of(p) != "chart"):
+                continue
+            key = (p["name"], w.index[p["start"]])
+            if key in seen:
+                continue
+            seen.add(key)
+            out.append((d.index[i], float(b["stop"]), FAM.get(p["family"], 1), p["name"].split(" (")[0]))
+    return sym, out
+
+
+def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed):
+    """sigs: {day index: [(col, stop, fam, name)]} signals at that day's close -> buy next open."""
+    rng = np.random.default_rng(seed)
+    cash, pos, trades = START_EQ, {}, []
+    curve = np.full(len(days), np.nan)
+    for t in range(d0, len(days)):
+        # 1. exits during day t (positions opened before today, or at today's open)
+        for col in list(pos):
+            p = pos[col]
+            o, l, c = O[t, col], L[t, col], C[t, col]
+            if not np.isfinite(o):
+                continue
+            x, why = None, None
+            if o <= p["stop"] and t > p["t"]:
+                x, why = o * (1 - SLIP), "stop (gap)"
+            elif l <= p["stop"]:
+                x, why = p["stop"] * (1 - SLIP), "stop"
+            elif np.isfinite(low20[t, col]) and c < low20[t, col]:
+                x, why = c * (1 - SLIP), "trend exit"
+            if x is not None:
+                cash += p["qty"] * x
+                trades.append({"symbol": syms[col], "pattern": p["name"], "entry_date": days[p["t"]],
+                               "exit_date": days[t], "entry": p["fill"], "stop": p["stop"], "exit": x, "result": why,
+                               "pnl": p["qty"] * (x - p["fill"]), "R": (x - p["fill"]) / p["risk"],
+                               "days": (days[t] - days[p["t"]]).days})
+                del pos[col]
+        value = sum(p["qty"] * (C[t, c] if np.isfinite(C[t, c]) else p["fill"]) for c, p in pos.items())
+        curve[t] = cash + value
+        # 2. yesterday's breakouts are bought at today's open - handled at the start of the next day:
+        #    here we queue today's signals for tomorrow
+        if t + 1 >= len(days):
+            continue
+        todays = sigs.get(t, [])
+        if not todays:
+            continue
+        equity = curve[t]
+        gross = value
+        order = sorted(todays, key=lambda s: (s[2], rng.random()))
+        placed = 0
+        for col, stop, fam, name in order:
+            if col in pos or len(pos) >= MAX_POS or placed >= MAX_NEW:
+                continue
+            o = O[t + 1, col]
+            if not np.isfinite(o):
+                continue
+            fill = o * (1 + SLIP)
+            risk = fill - stop
+            if risk <= 0:
+                continue
+            room = MAX_GROSS * equity - gross
+            qty = min(equity * RISK / risk, equity * MAX_POS_PCT / fill, room * 0.95 / fill)
+            qty = np.floor(qty)
+            if qty < 1:
+                continue
+            cash -= qty * fill
+            gross += qty * fill
+            pos[col] = {"t": t + 1, "fill": fill, "stop": stop, "qty": qty, "risk": risk, "name": name}
+            placed += 1
+    for col, p in pos.items():                                 # still open at the end
+        x = C[len(days) - 1, col]
+        trades.append({"symbol": syms[col], "pattern": p["name"], "entry_date": days[p["t"]], "exit_date": days[-1],
+                       "entry": p["fill"], "stop": p["stop"], "exit": x, "result": "still open",
+                       "pnl": p["qty"] * (x - p["fill"]), "R": (x - p["fill"]) / p["risk"],
+                       "days": (days[-1] - days[p["t"]]).days})
+    eq = pd.Series(curve, index=days).iloc[d0:].ffill()
+    return pd.DataFrame(trades), eq
+
+
+def summarize(eq, tr):
+    yrs = (eq.index[-1] - eq.index[0]).days / 365.25
+    cagr = (eq.iat[-1] / START_EQ) ** (1 / yrs) - 1
+    done = tr[tr.result != "still open"]
+    gl = -done.loc[done.pnl < 0, "pnl"].sum()
+    return {"cagr": cagr, "dd": (eq / eq.cummax() - 1).min(), "final": eq.iat[-1], "trades": len(done),
+            "win": (done.pnl > 0).mean() if len(done) else 0, "avgR": done.R.mean() if len(done) else 0,
+            "pf": done.loc[done.pnl > 0, "pnl"].sum() / gl if gl else np.inf,
+            "hold": done.days.mean() if len(done) else 0}
+
+
+def main():
+    t00 = time.time()
+    end = dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=20)
+    start = end - dt.timedelta(days=round(365.25 * YEARS))
+    lists = {"sp100": scanner.get_tickers(), "sp500": None}
+    if "sp500" in UNIVERSES:
+        lists["sp500"] = sp500()
+    every = sorted(set(sum((lists[u] for u in UNIVERSES), [])) | {"SPY"})
+    print(f"{len(every)} symbols, {start:%Y-%m-%d} → {end:%Y-%m-%d}", flush=True)
+    raw = scanner.alpaca_bars(every, "1Day", start - dt.timedelta(days=450), end, chunk=50, workers=6)
+    daily = {}
+    for s, d in raw.items():
+        d = d.copy()
+        d.index = d.index.tz_convert(scanner.ET).tz_localize(None).normalize()
+        daily[s] = d[["Open", "High", "Low", "Close", "Volume"]]
+    print(f"Prices for {len(daily)} symbols ({time.time() - t00:.0f}s)", flush=True)
+    spy = daily.pop("SPY")
+
+    # breakouts of every stock (the slow part), in parallel
+    t0 = time.time()
+    found = {}
+    jobs = [(s, daily[s]) for s in sorted(daily) if len(daily[s]) > 300]
+    with ProcessPoolExecutor(max_workers=os.cpu_count() or 4) as pool:
+        for n, (s, out) in enumerate(pool.map(_signals, jobs, chunksize=4), 1):
+            found[s] = out
+            if n % 50 == 0:
+                print(f"Patterns {n}/{len(jobs)} ({time.time() - t0:.0f}s)", flush=True)
+    print(f"Breakouts found in {time.time() - t0:.0f}s", flush=True)
+
+    days = spy.index[spy.index >= pd.Timestamp(start.date()) - pd.Timedelta(days=40)]
+    out_dir = os.path.join("reports", "backtest", f"universe-deck-v6-{YEARS:g}y")
+    os.makedirs(out_dir, exist_ok=True)
+    first = int(np.searchsorted(days.values, np.datetime64(pd.Timestamp(start.date()))))
+    lines = ["📊 Deck pattern trader version 6 (up breakouts, deck stop, sell on a close below the 20-day low) "
+             "on whole universes, daily candles",
+             f"{days[first]:%d %b %Y} → {days[-1]:%d %b %Y}, $100,000, 1% risk, max 10%/stock, 25 positions, 8 new/day, "
+             f"no leverage, 0.02% slippage. 10 start dates a week apart: middle run, range in brackets.", ""]
+    curves, all_tr, rows = {}, [], []
+    spy_c = spy["Close"].reindex(days).ffill()
+    for u in UNIVERSES:
+        syms = [s for s in lists[u] if s in daily and s in found]
+        O, H, L, C = (np.column_stack([daily[s][k].reindex(days).values for s in syms]) for k in
+                      ("Open", "High", "Low", "Close"))
+        low20 = np.column_stack([daily[s]["Low"].rolling(TRAIL).min().shift(1).reindex(days).values for s in syms])
+        pos_of = {d: k for k, d in enumerate(days)}
+        sigs = {}
+        n_sig = 0
+        for col, s in enumerate(syms):
+            for date, stop, fam, name in found[s]:
+                k = pos_of.get(pd.Timestamp(date))
+                if k is not None and k >= first:
+                    sigs.setdefault(k, []).append((col, stop, fam, name))
+                    n_sig += 1
+        res = []
+        for r in range(RUNS):
+            d0 = first + r * STEP
+            tr, eq = simulate(days, O, H, L, C, low20, sigs, syms, d0, seed=r)
+            st = summarize(eq, tr)
+            b = spy_c.iloc[d0:]
+            b = b / b.iat[0] * START_EQ
+            byrs = (b.index[-1] - b.index[0]).days / 365.25
+            st["spy_cagr"] = (b.iat[-1] / START_EQ) ** (1 / byrs) - 1
+            st["beat"] = st["final"] >= b.iat[-1]
+            res.append((st, tr, eq))
+            print(f"{u} run {r + 1}: {st['cagr'] * 100:+.1f}%/yr, {st['trades']} trades", flush=True)
+        cg = [x[0]["cagr"] for x in res]
+        mid = int(np.argsort(cg)[len(cg) // 2])
+        st, tr, eq = res[mid]
+        by_year = eq.groupby(eq.index.year).last()
+        by_year = by_year / np.r_[START_EQ, by_year.values[:-1]] - 1
+        lines += [f"<b>{u.upper()} ({len(syms)} stocks, {n_sig} up breakouts)</b>",
+                  f"{st['cagr'] * 100:+.1f}%/yr ({min(cg) * 100:+.1f}% to {max(cg) * 100:+.1f}%), beat SPY in "
+                  f"{sum(x[0]['beat'] for x in res)}/{RUNS} runs · max drop {st['dd'] * 100:+.1f}% "
+                  f"(worst {min(x[0]['dd'] for x in res) * 100:+.1f}%) · final ${st['final']:,.0f}",
+                  f"~{st['trades']} trades, win {st['win']:.0%}, avg {st['avgR']:+.2f}R, profit factor {st['pf']:.2f}, "
+                  f"hold {st['hold']:.0f} days",
+                  "by year: " + "  ".join(f"{y}: {v * 100:+.0f}%" for y, v in by_year.items()), ""]
+        rows.append({"universe": u, "stocks": len(syms), "breakouts": n_sig, **{k: v for k, v in st.items()}})
+        curves[f"{u.upper()} version 6"] = eq
+        all_tr.append(tr.assign(universe=u))
+        # per pattern (middle run)
+        g = tr[tr.result != "still open"].groupby("pattern")["R"].agg(["size", "mean"]).sort_values("mean", ascending=False)
+        lines.append(f"  per pattern ({u}, middle run): " + ", ".join(f"{p} {int(r['size'])}× {r['mean']:+.2f}R"
+                                                                    for p, r in g.iterrows()))
+        lines.append("")
+    b = spy_c.iloc[first:]
+    b = b / b.iat[0] * START_EQ
+    byrs = (b.index[-1] - b.index[0]).days / 365.25
+    sy = b.groupby(b.index.year).last()
+    sy = sy / np.r_[START_EQ, sy.values[:-1]] - 1
+    lines += [f"<b>Buy & hold SPY</b>: {((b.iat[-1] / START_EQ) ** (1 / byrs) - 1) * 100:+.1f}%/yr, max drop "
+              f"{(b / b.cummax() - 1).min() * 100:+.1f}%, final ${b.iat[-1]:,.0f}",
+              "by year: " + "  ".join(f"{y}: {v * 100:+.0f}%" for y, v in sy.items()), "",
+              "<i>Today's index members only (stocks that left the index are missing, which flatters results - more "
+              "so for the S&P 500); daily candles: stops judged on daily lows, 20-day-low exit at the close. "
+              "Past results don't guarantee future ones.</i>"]
+    text = "\n".join(lines)
+    plain = text.replace("<b>", "").replace("</b>", "").replace("<i>", "").replace("</i>", "")
+    print("\n" + plain)
+    with open(os.path.join(out_dir, "summary.txt"), "w") as f:
+        f.write(plain + "\n")
+    pd.concat(all_tr).to_csv(os.path.join(out_dir, "trades.csv"), index=False)
+    curves["Buy & hold SPY"] = b
+    pd.DataFrame(curves).round(0).to_csv(os.path.join(out_dir, "equity.csv"), index_label="date")
+    pd.DataFrame(rows).to_csv(os.path.join(out_dir, "results.csv"), index=False)
+
+    fig, (ax, ax2) = plt.subplots(2, 1, figsize=(12, 7.5), dpi=110, sharex=True, gridspec_kw={"height_ratios": [3, 1]})
+    fig.patch.set_facecolor("black")
+    cols = {"SP100 version 6": "#42a5f5", "SP500 version 6": "#ffd54f", "Buy & hold SPY": "#bbbbbb"}
+    for a_ in (ax, ax2):
+        a_.set_facecolor("black"); a_.grid(color="#222"); a_.tick_params(colors="#bbbbbb")
+        for s in a_.spines.values():
+            s.set_color("#444")
+    for name, s in curves.items():
+        ls = "--" if name.startswith("Buy") else "-"
+        ax.plot(s.index, s.values, color=cols.get(name, "#fff"), lw=1.6, ls=ls, label=name)
+        ax2.plot(s.index, (s / s.cummax() - 1) * 100, color=cols.get(name, "#fff"), lw=1.0, ls=ls)
+    ax.set_title("Deck patterns version 6: S&P 100 vs S&P 500 stocks vs SPY", color="white")
+    ax.set_ylabel("Account value ($)", color="#bbbbbb"); ax2.set_ylabel("Drawdown (%)", color="#bbbbbb")
+    leg = ax.legend(facecolor="black", edgecolor="#444")
+    for x in leg.get_texts():
+        x.set_color("#ddd")
+    fig.tight_layout()
+    fig.savefig(os.path.join(out_dir, "chart.png"), facecolor="black")
+    print(f"Done in {time.time() - t00:.0f}s, saved in {out_dir}")
+
+
+if __name__ == "__main__":
+    main()
