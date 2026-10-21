@@ -1,7 +1,7 @@
 # Pattern scan preview 2026-10-21 (daily)
 
 ```
-🧩 Pattern scan — S&P 100, daily candles, 21 Oct 09:06 NY
+🧩 Pattern scan — S&P 100, daily candles, 21 Oct 09:08 NY
 24 breakouts, 72 forming · 30 charts sent
 
 New
@@ -35,7 +35,7 @@ New
 🟡 AMZN Rectangle (↑265.38 / ↓249.15, now 262.63)
 🟡 BKNG Rectangle (↑169.02 / ↓152.27, now 163.92)
 🟡 BLK Double bottom (↑1181.11, now 1128.68)
-🟡 BMY Inverse head &amp; shoulders (↑61.92, now 61.68)
+🟡 BMY Double top (↓56.15, now 61.68)
 🟡 COF Inverse head &amp; shoulders (↑202.85, now 201.56)  (no chart: limit reached)
 🟡 CSCO Triple bottom (↑124.23, now 106.71)  (no chart: limit reached)
 🟡 DE Falling wedge (↑651.86 / ↓606.41, now 632.20)  (no chart: limit reached)
@@ -81,7 +81,7 @@ New
 🟡 INTC Bear flag (↓88.77, now 91.69)  (no chart: limit reached)
 🟡 INTU Pipe top (↓320.86, now 335.29)  (no chart: limit reached)
 🟡 KO Bull pennant (↑94.00, now 93.49)  (no chart: limit reached)
-🟡 MDLZ Bull pennant (↑64.47, now 63.99)  (no chart: limit reached)
+🟡 MDLZ Bull pennant (↑64.46, now 63.99)  (no chart: limit reached)
 🟡 MDT Bull flag (↑95.37, now 94.63)  (no chart: limit reached)
 🟡 MO Bull flag (↑75.52, now 74.64)  (no chart: limit reached)
 🟡 MS Gap down (explosion gap pivot) (↓176.44, now 180.40)  (no chart: limit reached)
@@ -104,7 +104,7 @@ New
 🟡 NVDA Doji (↑218.46 / ↓212.77, now 216.47)
 🟡 RTX Doji (↑197.00 / ↓188.08, now 193.34)
 
-✅ scan done in 7s
+✅ scan done in 11s
 ```
 
 ### 01-AVGO-Triple_top-breakout.png
@@ -403,12 +403,12 @@ Price now 1128.68
 📖 Two troughs at about the same price; completes on a close above the peak between them.
 <a href="https://www.tradingview.com/chart/?symbol=BLK">TradingView</a>
 
-### 30-BMY-Inverse_head_and_shoulders-forming.png
+### 30-BMY-Double_top-forming.png
 
-![](30-BMY-Inverse_head_and_shoulders-forming.png)
+![](30-BMY-Double_top-forming.png)
 
-🟡 <b>BMY</b> — Inverse head &amp; shoulders ↑ forming (daily)
+🟡 <b>BMY</b> — Double top ↓ forming (daily)
 Price now 61.68
-↑ completes on a close above 61.92 (+0.4%) → target 68.24
-📖 Same as the top pattern, upside down; less profitable than the top.*
+↓ completes on a close below 56.15 (-9.0%) → target 48.83
+📖 Two peaks at about the same price; completes on a close below the trough between them.
 <a href="https://www.tradingview.com/chart/?symbol=BMY">TradingView</a>
