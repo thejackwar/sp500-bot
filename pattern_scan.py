@@ -110,9 +110,11 @@ def _date(df, i):
     return ts.strftime("%d %b") if TIMEFRAME == "1d" else ts.strftime("%d %b %H:%M")
 
 
-def draw(ticker, df, p):
+def draw(ticker, df, p, trade=None):
     """Candles on black with the pattern drawn: its trend lines, swing points, breakout candle,
-    breakout level, target and protective stop (or, while forming, both breakout lines)."""
+    breakout level, target and protective stop (or, while forming, both breakout lines).
+    trade (deck_trades.py): the paper trade opened on it - {"bar", "side", "qty", "entry", "stop",
+    "target", "now", "pnl", "status"}; its own entry / stop / target replace the pattern's levels."""
     n = len(df)
     brk = p.get("brk")
     start = max(0, min(n - CHART_BARS, p["start"] - 15))
@@ -193,8 +195,25 @@ def draw(ticker, df, p):
                     arrowprops=dict(arrowstyle="-|>", color=UP if long else DOWN, lw=2.0))
         lo_y, hi_y = min(lo_y, tail - 0.04 * span), max(hi_y, tail + 0.04 * span)
         level(brk["level"], BLUE, "breakout")
-        level(brk.get("target"), UP if long else DOWN, "target")
-        level(brk["stop"], DOWN if long else UP, "stop")
+        if trade:                                        # the order's real levels
+            tl = trade["side"] == "LONG"
+            level(trade["entry"], "#ffffff", "entry", ls="-")
+            level(trade.get("target"), UP if tl else DOWN, "take profit")
+            level(trade.get("stop"), DOWN if tl else UP, "stop loss")
+            tb = trade["bar"]
+            ax.scatter([tb], [trade["entry"]], marker="^" if tl else "v", s=140, color=UP if tl else DOWN,
+                       edgecolor="white", lw=1.0, zorder=10)
+            info = [f"PAPER TRADE ({trade['status']})",
+                    f"{'BUY' if tl else 'SELL SHORT'} {trade['qty']} @ {px(trade['entry'])}  {trade.get('when', '')}",
+                    f"Stop {px(trade['stop'])}" + (f" · Target {px(trade['target'])}" if trade.get("target") else ""),
+                    f"Now {px(trade['now'])} · P&L {'+' if trade['pnl'] >= 0 else '−'}${abs(trade['pnl']):,.2f}"
+                    f" ({trade['pnl_pct']:+.2f}%)"]
+            ax.text(0.01, 0.03, "\n".join(info), transform=ax.transAxes, va="bottom", ha="left", fontsize=8.5,
+                    color="white", fontweight="bold", zorder=11, linespacing=1.5,
+                    bbox=dict(facecolor="#0d2b26" if trade["pnl"] >= 0 else "#3a1414", edgecolor="#666", pad=6))
+        else:
+            level(brk.get("target"), UP if long else DOWN, "target")
+            level(brk["stop"], DOWN if long else UP, "stop")
     else:
         if p.get("up") is not None:
             level(p["up"], UP, "breaks up above")
@@ -222,6 +241,8 @@ def draw(ticker, df, p):
     ax.set_xticklabels([_date(df, i) for i in ticks])
     arrow = {"LONG": " ↑", "SHORT": " ↓"}.get(p["dir"], "")
     stage = "BREAKOUT" if brk else "forming"
+    if trade:
+        stage = "PAPER TRADE"
     ax.set_title(f"{ticker}  ·  {p['name']}{arrow}  ·  {stage}  ·  {TF_NAME}", color="white", fontsize=12)
     ax.text(0.01, 0.98, "\n".join(_wrap(p["note"], 70)), transform=ax.transAxes, va="top", ha="left",
             fontsize=7.5, color="#cfcfcf", zorder=9,

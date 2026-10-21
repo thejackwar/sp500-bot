@@ -1,0 +1,42 @@
+name: Deck trades
+
+# Pictures of the deck pattern trader's paper trades opened on a day (deck_trades.py): the pattern chart
+# with the fill, stop, take profit, current price and P&L. Saved to reports/paper/deck-trades/<date>/.
+on:
+  workflow_dispatch:
+    inputs:
+      date:
+        description: "New York date of the entries (YYYY-MM-DD); empty = today"
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  charts:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Draw the trades
+        run: python deck_trades.py
+        env:
+          PYTHONUNBUFFERED: "1"
+          DATE: ${{ inputs.date }}
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          ALPACA_PATTERN_KEY_ID: ${{ secrets.ALPACA_PATTERN_KEY_ID }}
+          ALPACA_PATTERN_SECRET_KEY: ${{ secrets.ALPACA_PATTERN_SECRET_KEY }}
+      - name: Commit the pictures
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add reports/paper/deck-trades
+          git commit -m "Deck trades: ${{ inputs.date || 'today' }}" || exit 0
+          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done
