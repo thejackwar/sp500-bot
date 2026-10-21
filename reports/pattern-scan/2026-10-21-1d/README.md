@@ -1,8 +1,8 @@
 # Pattern scan preview 2026-10-21 (daily)
 
 ```
-🧩 Pattern scan — S&P 100, daily candles, 21 Oct 09:08 NY
-24 breakouts, 72 forming · 30 charts sent
+🧩 Pattern scan — S&P 100, daily candles, 21 Oct 09:09 NY
+23 breakouts, 57 forming · 40 charts sent
 
 New
 🔴 AVGO Triple top ↓ @ 335.20 → 294.49
@@ -20,7 +20,6 @@ New
 🟢 WFC Descending triangle ↑ @ 83.21 → 97.20 ⚠️
 🟢 ACN Gap up (explosion gap pivot) ↑ @ 226.27
 🟢 AMT Gap up (explosion gap pivot) ↑ @ 182.52
-🔴 DE Bear flag ↓ @ 655.39 → 571.88
 🟢 LLY Gap up (explosion gap pivot) ↑ @ 1275.88
 🔴 LRCX Gap down (explosion gap pivot) ↓ @ 266.12
 🔴 AMGN Shooting star ↓ @ 433.42
@@ -36,75 +35,60 @@ New
 🟡 BKNG Rectangle (↑169.02 / ↓152.27, now 163.92)
 🟡 BLK Double bottom (↑1181.11, now 1128.68)
 🟡 BMY Double top (↓56.15, now 61.68)
-🟡 COF Inverse head &amp; shoulders (↑202.85, now 201.56)  (no chart: limit reached)
-🟡 CSCO Triple bottom (↑124.23, now 106.71)  (no chart: limit reached)
-🟡 DE Falling wedge (↑651.86 / ↓606.41, now 632.20)  (no chart: limit reached)
-🟡 DHR Triple top (↓211.18, now 224.24)  (no chart: limit reached)
-🟡 DIS Cup and handle (↑112.69, now 111.67)  (no chart: limit reached)
-🟡 EMR Cup and handle (↑165.79, now 160.46)  (no chart: limit reached)
-🟡 GEV Head &amp; shoulders top (↓871.53, now 890.33)  (no chart: limit reached)
-🟡 GEV Triple bottom (↑1195.94, now 890.33)  (no chart: limit reached)
-🟡 GM Head &amp; shoulders top (↓76.93, now 77.09)  (no chart: limit reached)
-🟡 GS Falling wedge (↑909.49 / ↓854.28, now 884.81)  (no chart: limit reached)
-🟡 INTU Symmetrical triangle (↑341.61 / ↓263.58, now 335.29)  (no chart: limit reached)
-🟡 JPM Descending triangle (↑341.86 / ↓327.35, now 335.26)  (no chart: limit reached)
-🟡 LLY Double bottom (↑1292.65, now 1283.66)  (no chart: limit reached)
-🟡 MDLZ Double bottom (↑66.07, now 63.99)  (no chart: limit reached)
-🟡 MDT Triple top (↓85.22, now 94.63)  (no chart: limit reached)
-🟡 MO Head &amp; shoulders top (↓60.12, now 74.64)  (no chart: limit reached)
-🟡 MS Falling wedge (↑184.06 / ↓175.18, now 180.40)  (no chart: limit reached)
-🟡 MU Head &amp; shoulders top (↓539.33, now 896.07)  (no chart: limit reached)
-🟡 NFLX Double top (↓66.54, now 68.69)  (no chart: limit reached)
-🟡 NOW Cup and handle (↑154.20, now 149.54)  (no chart: limit reached)
-🟡 TMO Triple top (↓635.32, now 687.37)  (no chart: limit reached)
-🟡 WMT Cup and handle (↑122.65, now 117.85)  (no chart: limit reached)
-🟡 ABBV Bull flag (↑291.41, now 289.08)  (no chart: limit reached)
-🟡 ABT Bull flag (↑105.78, now 102.45)  (no chart: limit reached)
-🟡 AMD Bear pennant (↓524.60, now 534.74)  (no chart: limit reached)
-🟡 AMGN Bull flag (↑439.05, now 438.94)  (no chart: limit reached)
-🟡 ANET Bear pennant (↓176.54, now 181.19)  (no chart: limit reached)
-🟡 ANET Gap down (explosion gap pivot) (↓178.47, now 181.19)  (no chart: limit reached)
-🟡 BAC Bear flag (↓49.50, now 50.64)  (no chart: limit reached)
-🟡 BAC Gap down (explosion gap pivot) (↓49.26, now 50.64)  (no chart: limit reached)
-🟡 BKNG Bear flag (↓154.99, now 163.92)  (no chart: limit reached)
-🟡 CAT Bear flag (↓705.20, now 725.24)  (no chart: limit reached)
-🟡 CMCSA Bear flag (↓20.34, now 22.36)  (no chart: limit reached)
-🟡 COST Bull pennant (↑1004.81, now 994.61)  (no chart: limit reached)
+🟡 COF Inverse head &amp; shoulders (↑202.85, now 201.56)
+🟡 CSCO Triple bottom (↑124.23, now 106.71)
+🟡 DE Falling wedge (↑651.86 / ↓606.41, now 632.20)
+🟡 DHR Triple top (↓211.18, now 224.24)
+🟡 DIS Cup and handle (↑112.69, now 111.67)
+🟡 EMR Cup and handle (↑165.79, now 160.46)
+🟡 GEV Head &amp; shoulders top (↓871.53, now 890.33)
+🟡 GEV Triple bottom (↑1195.94, now 890.33)
+🟡 GM Head &amp; shoulders top (↓76.93, now 77.09)
+🟡 GS Falling wedge (↑909.49 / ↓854.28, now 884.81)
+🟡 INTU Symmetrical triangle (↑341.61 / ↓263.58, now 335.29)
+🟡 JPM Descending triangle (↑341.86 / ↓327.35, now 335.26)  (chart next run)
+🟡 LLY Double bottom (↑1292.65, now 1283.66)  (chart next run)
+🟡 MDLZ Double bottom (↑66.07, now 63.99)  (chart next run)
+🟡 MDT Triple top (↓85.22, now 94.63)  (chart next run)
+🟡 MO Head &amp; shoulders top (↓60.12, now 74.64)  (chart next run)
+🟡 MS Falling wedge (↑184.06 / ↓175.18, now 180.40)  (chart next run)
+🟡 MU Head &amp; shoulders top (↓539.33, now 896.07)  (chart next run)
+🟡 NFLX Double top (↓66.54, now 68.69)  (chart next run)
+🟡 NOW Cup and handle (↑154.20, now 149.54)  (chart next run)
+🟡 TMO Triple top (↓635.32, now 687.37)  (chart next run)
+🟡 WMT Cup and handle (↑122.65, now 117.85)  (chart next run)
+🟡 ABBV Bull flag (↑291.41, now 289.08)  (chart next run)
+🟡 AMD Bear pennant (↓524.60, now 534.74)  (chart next run)
+🟡 ANET Bear pennant (↓176.54, now 181.19)  (chart next run)
+🟡 ANET Gap down (explosion gap pivot) (↓178.47, now 181.19)  (chart next run)
+🟡 BAC Gap down (explosion gap pivot) (↓49.26, now 50.64)  (chart next run)
+🟡 CAT Bear flag (↓705.20, now 725.24)  (chart next run)
+🟡 COST Bull pennant (↑1004.81, now 994.61)  (chart next run)
+🟡 DELL Gap down (explosion gap pivot) (↓451.79, now 461.56)  (chart next run)
+🟡 INTC Bear flag (↓88.77, now 91.69)  (chart next run)
+🟡 INTU Pipe top (↓320.86, now 335.29)  (chart next run)
+🟡 KO Bull pennant (↑94.00, now 93.49)  (chart next run)
+🟡 MDLZ Bull pennant (↑64.46, now 63.99)  (chart next run)
+🟡 MDT Bull flag (↑95.37, now 94.63)  (chart next run)
+🟡 MO Bull flag (↑75.52, now 74.64)  (chart next run)
+🟡 MS Gap down (explosion gap pivot) (↓176.44, now 180.40)  (chart next run)
+🟡 MU Bear pennant (↓881.52, now 896.07)  (chart next run)
+🟡 NVDA Bear flag (↓212.77, now 216.47)  (chart next run)
+🟡 PG Bull pennant (↑159.47, now 159.32)  (chart next run)
+🟡 SNDK Bear pennant (↓1330.00, now 1365.38)  (chart next run)
+🟡 T Gap down (explosion gap pivot) (↓21.96, now 23.42)  (chart next run)
 
 
-🟡 DELL Gap down (explosion gap pivot) (↓451.79, now 461.56)  (no chart: limit reached)
-🟡 DIS Bull flag (↑112.34, now 111.67)  (no chart: limit reached)
-🟡 DUK Bull flag (↑121.50, now 121.33)  (no chart: limit reached)
-🟡 EMR Bull flag (↑164.38, now 160.46)  (no chart: limit reached)
-🟡 GEV Bear flag (↓873.19, now 890.33)  (no chart: limit reached)
-🟡 GILD Bull flag (↑157.68, now 156.51)  (no chart: limit reached)
-🟡 INTC Bear flag (↓88.77, now 91.69)  (no chart: limit reached)
-🟡 INTU Pipe top (↓320.86, now 335.29)  (no chart: limit reached)
-🟡 KO Bull pennant (↑94.00, now 93.49)  (no chart: limit reached)
-🟡 MDLZ Bull pennant (↑64.46, now 63.99)  (no chart: limit reached)
-🟡 MDT Bull flag (↑95.37, now 94.63)  (no chart: limit reached)
-🟡 MO Bull flag (↑75.52, now 74.64)  (no chart: limit reached)
-🟡 MS Gap down (explosion gap pivot) (↓176.44, now 180.40)  (no chart: limit reached)
-🟡 MSFT Bull flag (↑537.39, now 531.87)  (no chart: limit reached)
-🟡 MU Bear pennant (↓881.52, now 896.07)  (no chart: limit reached)
-🟡 NVDA Bear flag (↓212.77, now 216.47)  (no chart: limit reached)
-🟡 PG Bull pennant (↑159.47, now 159.32)  (no chart: limit reached)
-🟡 PM Bull pennant (↑203.03, now 199.90)  (no chart: limit reached)
-🟡 QCOM Bear flag (↓168.75, now 175.71)  (no chart: limit reached)
-🟡 SNDK Bear pennant (↓1330.00, now 1365.38)  (no chart: limit reached)
-🟡 SO Bull flag (↑91.18, now 90.71)  (no chart: limit reached)
-🟡 T Gap down (explosion gap pivot) (↓21.96, now 23.42)  (no chart: limit reached)
-🟡 TMUS Gap down (explosion gap pivot) (↓147.90, now 157.75)  (no chart: limit reached)
-🟡 UNP Bull flag (↑291.08, now 287.61)  (no chart: limit reached)
-🟡 WMT Bull flag (↑120.53, now 117.85)  (no chart: limit reached)
-🟡 WMT Gap up (explosion gap pivot) (↑121.38, now 117.85)  (no chart: limit reached)
+🟡 TMUS Gap down (explosion gap pivot) (↓147.90, now 157.75)  (chart next run)
+🟡 WMT Bull flag (↑120.53, now 117.85)  (chart next run)
+🟡 WMT Gap up (explosion gap pivot) (↑121.38, now 117.85)  (chart next run)
 🟡 AMAT Doji (↑412.46 / ↓399.02, now 404.98)
 🟡 COP Hanging man (↑147.15 / ↓142.80, now 145.95)
 🟡 GM Doji (↑78.97 / ↓75.08, now 77.09)
 🟡 NVDA Doji (↑218.46 / ↓212.77, now 216.47)
 🟡 RTX Doji (↑197.00 / ↓188.08, now 193.34)
 
-✅ scan done in 11s
+✅ scan done in 13s
 ```
 
 ### 01-AVGO-Triple_top-breakout.png
@@ -260,19 +244,9 @@ Close 183.56 on 20 Oct; broke above 182.52 on 16 Oct
 📖 Gap on a breakout; the throwback did not cover the gap. Buy above the gap candle&#x27;s high, stop under the pivot low.
 <a href="https://www.tradingview.com/chart/?symbol=AMT">TradingView</a>
 
-### 16-DE-Bear_flag-breakout.png
+### 16-LLY-Gap_up-breakout.png
 
-![](16-DE-Bear_flag-breakout.png)
-
-🔴 <b>DE</b> — Bear flag ↓ <b>BREAKOUT</b> (daily)
-Close 632.20 on 20 Oct; broke below 655.39 on 16 Oct
-🎯 target 571.88 (-9.5%) · 🛑 stop 658.92 (+4.2%) · R:R 2.3
-📖 Steep fall, then a short consolidation sloping against the trend (a &#x27;best&#x27; down signal).
-<a href="https://www.tradingview.com/chart/?symbol=DE">TradingView</a>
-
-### 17-LLY-Gap_up-breakout.png
-
-![](17-LLY-Gap_up-breakout.png)
+![](16-LLY-Gap_up-breakout.png)
 
 🟢 <b>LLY</b> — Gap up (explosion gap pivot) ↑ <b>BREAKOUT</b> (daily)
 Close 1283.66 on 20 Oct; broke above 1275.88 on 20 Oct
@@ -280,9 +254,9 @@ Close 1283.66 on 20 Oct; broke above 1275.88 on 20 Oct
 📖 Gap on a breakout; the throwback did not cover the gap. Buy above the gap candle&#x27;s high, stop under the pivot low.
 <a href="https://www.tradingview.com/chart/?symbol=LLY">TradingView</a>
 
-### 18-LRCX-Gap_down-breakout.png
+### 17-LRCX-Gap_down-breakout.png
 
-![](18-LRCX-Gap_down-breakout.png)
+![](17-LRCX-Gap_down-breakout.png)
 
 🔴 <b>LRCX</b> — Gap down (explosion gap pivot) ↓ <b>BREAKOUT</b> (daily)
 Close 263.45 on 20 Oct; broke below 266.12 on 20 Oct
@@ -290,9 +264,9 @@ Close 263.45 on 20 Oct; broke below 266.12 on 20 Oct
 📖 Gap on a breakdown; the bounce did not cover the gap. Sell below the gap candle&#x27;s low, stop above the pivot high.
 <a href="https://www.tradingview.com/chart/?symbol=LRCX">TradingView</a>
 
-### 19-AMGN-Shooting_star-breakout.png
+### 18-AMGN-Shooting_star-breakout.png
 
-![](19-AMGN-Shooting_star-breakout.png)
+![](18-AMGN-Shooting_star-breakout.png)
 
 🔴 <b>AMGN</b> — Shooting star ↓ <b>BREAKOUT</b> (daily)
 Close 438.94 on 20 Oct; broke below 433.42 on 16 Oct
@@ -300,9 +274,9 @@ Close 438.94 on 20 Oct; broke below 433.42 on 16 Oct
 📖 Long upper shadow after a rise. Average performance.*
 <a href="https://www.tradingview.com/chart/?symbol=AMGN">TradingView</a>
 
-### 20-BNY-Hammer-breakout.png
+### 19-BNY-Hammer-breakout.png
 
-![](20-BNY-Hammer-breakout.png)
+![](19-BNY-Hammer-breakout.png)
 
 🟢 <b>BNY</b> — Hammer ↑ <b>BREAKOUT</b> (daily)
 Close 144.25 on 20 Oct; broke above 142.63 on 16 Oct
@@ -310,9 +284,9 @@ Close 144.25 on 20 Oct; broke above 142.63 on 16 Oct
 📖 Long lower shadow after a decline. Frequent, below-average performance.*
 <a href="https://www.tradingview.com/chart/?symbol=BNY">TradingView</a>
 
-### 21-C-Hammer-breakout.png
+### 20-C-Hammer-breakout.png
 
-![](21-C-Hammer-breakout.png)
+![](20-C-Hammer-breakout.png)
 
 🟢 <b>C</b> — Hammer ↑ <b>BREAKOUT</b> (daily)
 Close 122.51 on 20 Oct; broke above 123.45 on 16 Oct
@@ -320,9 +294,9 @@ Close 122.51 on 20 Oct; broke above 123.45 on 16 Oct
 📖 Long lower shadow after a decline. Frequent, below-average performance.*
 <a href="https://www.tradingview.com/chart/?symbol=C">TradingView</a>
 
-### 22-GE-Shooting_star-breakout.png
+### 21-GE-Shooting_star-breakout.png
 
-![](22-GE-Shooting_star-breakout.png)
+![](21-GE-Shooting_star-breakout.png)
 
 🔴 <b>GE</b> — Shooting star ↓ <b>BREAKOUT</b> (daily)
 Close 299.87 on 20 Oct; broke below 313.20 on 19 Oct
@@ -330,9 +304,9 @@ Close 299.87 on 20 Oct; broke below 313.20 on 19 Oct
 📖 Long upper shadow after a rise. Average performance.*
 <a href="https://www.tradingview.com/chart/?symbol=GE">TradingView</a>
 
-### 23-GILD-Shooting_star-breakout.png
+### 22-GILD-Shooting_star-breakout.png
 
-![](23-GILD-Shooting_star-breakout.png)
+![](22-GILD-Shooting_star-breakout.png)
 
 🔴 <b>GILD</b> — Shooting star ↓ <b>BREAKOUT</b> (daily)
 Close 156.51 on 20 Oct; broke below 156.02 on 19 Oct
@@ -340,9 +314,9 @@ Close 156.51 on 20 Oct; broke below 156.02 on 19 Oct
 📖 Long upper shadow after a rise. Average performance.*
 <a href="https://www.tradingview.com/chart/?symbol=GILD">TradingView</a>
 
-### 24-AAPL-Triple_top-forming.png
+### 23-AAPL-Triple_top-forming.png
 
-![](24-AAPL-Triple_top-forming.png)
+![](23-AAPL-Triple_top-forming.png)
 
 🟡 <b>AAPL</b> — Triple top ↓ forming (daily)
 Price now 339.50
@@ -350,9 +324,9 @@ Price now 339.50
 📖 Three peaks at about the same price; completes below the lowest of the two troughs.
 <a href="https://www.tradingview.com/chart/?symbol=AAPL">TradingView</a>
 
-### 25-ADBE-Rising_wedge-forming.png
+### 24-ADBE-Rising_wedge-forming.png
 
-![](25-ADBE-Rising_wedge-forming.png)
+![](24-ADBE-Rising_wedge-forming.png)
 
 🟡 <b>ADBE</b> — Rising wedge forming (daily)
 Price now 256.73
@@ -361,9 +335,9 @@ Price now 256.73
 📖 Both lines rising and converging (often after a bubble). Below-average performance; retracements are very common.*
 <a href="https://www.tradingview.com/chart/?symbol=ADBE">TradingView</a>
 
-### 26-AMGN-Cup_and_handle-forming.png
+### 25-AMGN-Cup_and_handle-forming.png
 
-![](26-AMGN-Cup_and_handle-forming.png)
+![](25-AMGN-Cup_and_handle-forming.png)
 
 🟡 <b>AMGN</b> — Cup and handle ↑ forming (daily)
 Price now 438.94
@@ -371,9 +345,9 @@ Price now 438.94
 📖 Rounded bottom, two lips, a small handle. Complete on a close above both lips; often throws back.
 <a href="https://www.tradingview.com/chart/?symbol=AMGN">TradingView</a>
 
-### 27-AMZN-Rectangle-forming.png
+### 26-AMZN-Rectangle-forming.png
 
-![](27-AMZN-Rectangle-forming.png)
+![](26-AMZN-Rectangle-forming.png)
 
 🟡 <b>AMZN</b> — Rectangle forming (daily)
 Price now 262.63
@@ -382,9 +356,9 @@ Price now 262.63
 📖 Trading range between support and resistance. Many false breakouts: confirm the breakout. Best: bottom breaking upward.*
 <a href="https://www.tradingview.com/chart/?symbol=AMZN">TradingView</a>
 
-### 28-BKNG-Rectangle-forming.png
+### 27-BKNG-Rectangle-forming.png
 
-![](28-BKNG-Rectangle-forming.png)
+![](27-BKNG-Rectangle-forming.png)
 
 🟡 <b>BKNG</b> — Rectangle forming (daily)
 Price now 163.92
@@ -393,9 +367,9 @@ Price now 163.92
 📖 Trading range between support and resistance. Many false breakouts: confirm the breakout. Best: bottom breaking upward.*
 <a href="https://www.tradingview.com/chart/?symbol=BKNG">TradingView</a>
 
-### 29-BLK-Double_bottom-forming.png
+### 28-BLK-Double_bottom-forming.png
 
-![](29-BLK-Double_bottom-forming.png)
+![](28-BLK-Double_bottom-forming.png)
 
 🟡 <b>BLK</b> — Double bottom ↑ forming (daily)
 Price now 1128.68
@@ -403,12 +377,125 @@ Price now 1128.68
 📖 Two troughs at about the same price; completes on a close above the peak between them.
 <a href="https://www.tradingview.com/chart/?symbol=BLK">TradingView</a>
 
-### 30-BMY-Double_top-forming.png
+### 29-BMY-Double_top-forming.png
 
-![](30-BMY-Double_top-forming.png)
+![](29-BMY-Double_top-forming.png)
 
 🟡 <b>BMY</b> — Double top ↓ forming (daily)
 Price now 61.68
 ↓ completes on a close below 56.15 (-9.0%) → target 48.83
 📖 Two peaks at about the same price; completes on a close below the trough between them.
 <a href="https://www.tradingview.com/chart/?symbol=BMY">TradingView</a>
+
+### 30-COF-Inverse_head_and_shoulders-forming.png
+
+![](30-COF-Inverse_head_and_shoulders-forming.png)
+
+🟡 <b>COF</b> — Inverse head &amp; shoulders ↑ forming (daily)
+Price now 201.56
+↑ completes on a close above 202.85 (+0.6%) → target 215.03
+📖 Same as the top pattern, upside down; less profitable than the top.*
+<a href="https://www.tradingview.com/chart/?symbol=COF">TradingView</a>
+
+### 31-CSCO-Triple_bottom-forming.png
+
+![](31-CSCO-Triple_bottom-forming.png)
+
+🟡 <b>CSCO</b> — Triple bottom ↑ forming (daily)
+Price now 106.71
+↑ completes on a close above 124.23 (+16.4%) → target 144.35
+📖 Three troughs at about the same price. Best after a long decline; average performance, watch for failures.*
+<a href="https://www.tradingview.com/chart/?symbol=CSCO">TradingView</a>
+
+### 32-DE-Falling_wedge-forming.png
+
+![](32-DE-Falling_wedge-forming.png)
+
+🟡 <b>DE</b> — Falling wedge forming (daily)
+Price now 632.20
+↑ completes on a close above 651.86 (+3.1%) → target 753.36
+↓ completes on a close below 606.41 (-4.1%) → target 618.00
+📖 Both lines falling and converging (often after a panic). Below-average performance; retracements are very common.*
+<a href="https://www.tradingview.com/chart/?symbol=DE">TradingView</a>
+
+### 33-DHR-Triple_top-forming.png
+
+![](33-DHR-Triple_top-forming.png)
+
+🟡 <b>DHR</b> — Triple top ↓ forming (daily)
+Price now 224.24
+↓ completes on a close below 211.18 (-5.8%) → target 189.34
+📖 Three peaks at about the same price; completes below the lowest of the two troughs.
+<a href="https://www.tradingview.com/chart/?symbol=DHR">TradingView</a>
+
+### 34-DIS-Cup_and_handle-forming.png
+
+![](34-DIS-Cup_and_handle-forming.png)
+
+🟡 <b>DIS</b> — Cup and handle ↑ forming (daily)
+Price now 111.67
+↑ completes on a close above 112.69 (+0.9%) → target 124.23
+📖 Rounded bottom, two lips, a small handle. Complete on a close above both lips; often throws back.
+<a href="https://www.tradingview.com/chart/?symbol=DIS">TradingView</a>
+
+### 35-EMR-Cup_and_handle-forming.png
+
+![](35-EMR-Cup_and_handle-forming.png)
+
+🟡 <b>EMR</b> — Cup and handle ↑ forming (daily)
+Price now 160.46
+↑ completes on a close above 165.79 (+3.3%) → target 186.63
+📖 Rounded bottom, two lips, a small handle. Complete on a close above both lips; often throws back.
+<a href="https://www.tradingview.com/chart/?symbol=EMR">TradingView</a>
+
+### 36-GEV-Head_and_shoulders_top-forming.png
+
+![](36-GEV-Head_and_shoulders_top-forming.png)
+
+🟡 <b>GEV</b> — Head &amp; shoulders top ↓ forming (daily)
+Price now 890.33
+↓ completes on a close below 871.53 (-2.1%) → target 689.02
+📖 The standard top pattern, one of the lowest failure rates. Complete only on a close below the neckline.
+<a href="https://www.tradingview.com/chart/?symbol=GEV">TradingView</a>
+
+### 37-GEV-Triple_bottom-forming.png
+
+![](37-GEV-Triple_bottom-forming.png)
+
+🟡 <b>GEV</b> — Triple bottom ↑ forming (daily)
+Price now 890.33
+↑ completes on a close above 1195.94 (+34.3%) → target 1536.31
+📖 Three troughs at about the same price. Best after a long decline; average performance, watch for failures.*
+<a href="https://www.tradingview.com/chart/?symbol=GEV">TradingView</a>
+
+### 38-GM-Head_and_shoulders_top-forming.png
+
+![](38-GM-Head_and_shoulders_top-forming.png)
+
+🟡 <b>GM</b> — Head &amp; shoulders top ↓ forming (daily)
+Price now 77.09
+↓ completes on a close below 76.93 (-0.2%) → target 60.02
+📖 The standard top pattern, one of the lowest failure rates. Complete only on a close below the neckline.
+<a href="https://www.tradingview.com/chart/?symbol=GM">TradingView</a>
+
+### 39-GS-Falling_wedge-forming.png
+
+![](39-GS-Falling_wedge-forming.png)
+
+🟡 <b>GS</b> — Falling wedge forming (daily)
+Price now 884.81
+↑ completes on a close above 909.49 (+2.8%) → target 1018.22
+↓ completes on a close below 854.28 (-3.4%) → target 859.03
+📖 Both lines falling and converging (often after a panic). Below-average performance; retracements are very common.*
+<a href="https://www.tradingview.com/chart/?symbol=GS">TradingView</a>
+
+### 40-INTU-Symmetrical_triangle-forming.png
+
+![](40-INTU-Symmetrical_triangle-forming.png)
+
+🟡 <b>INTU</b> — Symmetrical triangle forming (daily)
+Price now 335.29
+↑ completes on a close above 341.61 (+1.9%) → target 511.21
+↓ completes on a close below 263.58 (-21.4%) → target 93.98
+📖 Falling upper and rising lower line. Many false breakouts; upward breakouts are above average.*
+<a href="https://www.tradingview.com/chart/?symbol=INTU">TradingView</a>
