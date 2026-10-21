@@ -47,7 +47,7 @@ NOTES = {
     "Ascending triangle": "Flat top, rising bottom. Usually breaks up; downside breaks perform above average.*",
     "Descending triangle": "Flat bottom, falling top. Usually breaks down; upside breaks perform above average (a 'best' up signal).*",
     "Rising wedge": "Both lines rising and converging (often after a bubble). Below-average performance; retracements are very common.*",
-    "Falling wedge": "Both lines falling and converging (often after a panic). Below-average performance; retracements are very common.*",
+    "Falling wedge": "Both lines falling and converging (often after a panic). Below-average performance; retracements are very common.* Target up = highest peak (rising-wedge rule mirrored).",
     "Head & shoulders top": "The standard top pattern, one of the lowest failure rates. Complete only on a close below the neckline.",
     "Inverse head & shoulders": "Same as the top pattern, upside down; less profitable than the top.*",
     "Cup and handle": "Rounded bottom, two lips, a small handle. Complete on a close above both lips; often throws back.",
@@ -305,8 +305,8 @@ def _lines_patterns(df, a, piv, out):
                 tgt = lambda d, lvl, x: (lvl + (up(x) - lo(x))) if d == "LONG" else (lvl - (up(x) - lo(x)))
             elif name == "Rising wedge":
                 tgt = lambda d, lvl, x: lvl + height if d == "LONG" else lo_trough
-            elif name == "Falling wedge":
-                tgt = lambda d, lvl, x: lvl + height if d == "LONG" else lo_trough
+            elif name == "Falling wedge":                   # the rising-wedge rule, upside down
+                tgt = lambda d, lvl, x: hi_peak if d == "LONG" else lvl - height
             else:
                 tgt = lambda d, lvl, x: lvl + height if d == "LONG" else lvl - height
             pts = [(x, y, "") for x, y in highs + lows]

@@ -12,6 +12,7 @@ message with a chart whenever a signal appears. ⭐ Strong LONG signals are also
 | `trader.py` | Paper trading with Alpaca (switch: `TRADING_ENABLED`) |
 | `pine.py` | Writes the TradingView Pine Script for each trade |
 | `patterns.py` | Chart-pattern recognition (switch: `PATTERNS_ENABLED` in `scanner.py`) |
+| `pattern_scan.py` + `deck_patterns.py` + `.github/workflows/pattern-scan.yml` | **Pattern scan**: Fidelity-deck chart patterns on the S&P 100, daily after the close, chart with the pattern drawn (section *Pattern scan*) |
 | `.github/workflows/scan.yml` | The schedule that runs it on GitHub for free |
 | `backtest.py` + `.github/workflows/backtest.yml` | Tests the strategy on past years (run by hand) |
 | `strategies/` | Other strategies to compare in the backtest (one file each, `_template.py` to start) |
@@ -146,6 +147,35 @@ Every alert comes with a **candlestick chart on a black background** (green = up
 - **Pattern breakout:** the chart switches to the pattern's timeframe (daily or hourly) and draws the pattern in yellow: lines, labelled swing points (LS/Head/RS, 1-2-3, X-A-B-C-D…), plus entry, stop and target.
 - If a stock gets a strategy alert while a pattern is still **forming** on that chart, the forming pattern is drawn too.
 
+
+## Pattern scan (`pattern_scan.py` + `deck_patterns.py`), new 21 Oct 2026
+Finds the chart patterns of Fidelity's **"Identifying Chart Patterns with Technical Analysis"** deck (Kirkpatrick; statistics from the CMT textbook) on every S&P 100 stock and sends each one to the Telegram pattern group with **its chart and the pattern drawn on it** (trend lines, swing points, breakout candle, breakout level, target and stop). It never trades. It is separate from the older `patterns.py` (still used by the pattern trader).
+
+**When:** by itself every weekday after the US close on daily candles (GitHub starts it at 20:40 and 21:40 UTC; only the run between 16:15 and 17:30 New York scans → about 22:40–23:10 Milan). By hand: **Actions → Pattern scan → Run workflow** (daily or hourly candles).
+
+**Two stages** (deck: "a pattern is not complete until an actual breakout occurs"):
+- 🟡 **forming**: the shape is there, price still inside → chart with both breakout lines and the target each way. Sent once.
+- 🟢 / 🔴 **breakout**: a candle *closed* beyond the breakout line by 0.2×ATR (the deck's point filter) in the last 3 candles → chart with breakout, target (deck formula), protective stop (just outside the breakout candle, slide 14). ⚠️ when price is already back through the line (possible false breakout, slide 12).
+Each run ends with one summary: new patterns, then those still there from earlier runs. Memory of what was sent: Actions cache `deck-pattern-state-<tf>`.
+
+**Patterns and the deck rules used** (settings at the top of `deck_patterns.py`; swings from a zigzag of 1.5 and 3 ATR; "same price" = within 0.75 ATR):
+| Pattern | Shape | Breakout | Target |
+|---|---|---|---|
+| Double top / bottom | 2 peaks (troughs) at about the same price | close beyond the middle reversal point | height peak→trough from the breakout |
+| Triple top / bottom | 3 peaks (troughs), troughs (peaks) at any level | beyond the extreme intermittent trough (peak) | height from the lowest trough / highest peak |
+| Rectangle | ≥2 touches of flat support and resistance | either way | height from the broken line |
+| Symmetrical / ascending / descending triangle | 2 straight lines, each touched ≥2 times, converging | either way | highest peak − lowest trough, from the breakout |
+| Rising / falling wedge | both lines the same way, converging, ≥5 touches | either way | rising: down = lowest trough, up = +height (falling: mirrored) |
+| Head & shoulders top / inverse | head beyond 2 shoulders of about the same level | close through the neckline | head→neckline, from the neckline |
+| Cup and handle | rounded (not V) bottom, 2 lips, handle | close above both lips | right lip → cup bottom, from the breakout |
+| Bull / bear flag & pennant | pole ≥5 ATR in ≤10 candles, 4–15 candle consolidation against the trend | close out of the consolidation | pole start → peak, from the pennant bottom |
+| Gap (explosion gap pivot) | gap out of the 20-candle range, throwback that doesn't cover it | close above the gap candle's high | none (stop under the pivot low) |
+| Pipe bottom / top | 2 wide bars at the end of a trend | through the second bar | height from the taller bar |
+| Doji, harami, hammer / hanging man, shooting star / inverted hammer, engulfing, dark cloud / piercing | only after a short decline (bottoms) or rise (tops) | a later candle closes beyond the pattern (activation) | none |
+| Narrow range NR4, inside bar | | | switched **off** (≈50 a day) |
+
+**Settings in `pattern_scan.py`:** `ALERTS` (per family or pattern: `"chart"`, `"list"` = summary line only, `"off"`; candlestick patterns only get a chart once activated, doji is list-only), `MAX_CHARTS` = 40 chart messages per run (the rest get their chart next run). The first run sends everything currently on the charts (~80 patterns); later runs only what is new.
+**Preview:** the *preview* box saves the charts and the summary to `reports/pattern-scan/<date>-<tf>/` in the repo instead of Telegram. *Resend* sends everything again.
 
 ## Chart patterns (`patterns.py`)
 Recognised automatically on the **daily and hourly** charts:
