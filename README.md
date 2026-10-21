@@ -16,7 +16,8 @@ message with a chart whenever a signal appears. ⭐ Strong LONG signals are also
 | `.github/workflows/scan.yml` | The schedule that runs it on GitHub for free |
 | `backtest.py` + `.github/workflows/backtest.yml` | Tests the strategy on past years (run by hand) |
 | `strategies/` | Other strategies to compare in the backtest (one file each, `_template.py` to start) |
-| `pattern_trader.py` + `.github/workflows/pattern-trade.yml` | Paper trades your selected chart patterns in a second Alpaca paper account (section *Pattern paper trader*) |
+| `pattern_trader.py` + `.github/workflows/pattern-trade.yml` | Old pattern paper trader: since 21 Oct 2026 only manages its open positions (section *Pattern paper trader*) |
+| `deck_trader.py` | Paper trades the deck-pattern breakouts (long and short) in the pattern account (section *Pattern scan*) |
 | `paper_report.py` + `.github/workflows/paper-report.yml` | Daily report of both paper accounts, saved in `reports/paper/` (section *Paper report*) |
 | `btc_bot.py` + `.github/workflows/crypto-scan.yml` | **Bitcoin bot**: trades only Bitcoin with the 50-day rule, once a day after 00:00 UTC (section *Crypto*) |
 | `crypto_scanner.py` | Chart-pattern alerts on the top 10 cryptocurrencies (*Crypto scan* → patterns only); its top-10 breakout trading was replaced by the Bitcoin bot |
@@ -173,6 +174,8 @@ Each run ends with one summary: new patterns, then those still there from earlie
 | Pipe bottom / top | 2 wide bars at the end of a trend | through the second bar | height from the taller bar |
 | Doji, harami, hammer / hanging man, shooting star / inverted hammer, engulfing, dark cloud / piercing | only after a short decline (bottoms) or rise (tops) | a later candle closes beyond the pattern (activation) | none |
 | Narrow range NR4, inside bar | | | switched **off** (≈50 a day) |
+
+**Paper trading (`deck_trader.py`, since 21 Oct 2026):** the breakouts are traded in the *pattern* Alpaca paper account (it replaced the old pattern trader's entries; `pattern_trader.py` now only manages the positions it already had, `NEW_ENTRIES = False`). Every charted pattern (not doji / NR4 / inside bar) that broke out at yesterday's daily close is traded at the next open in the first stock scan after 9:30 New York: **up breakouts bought, down breakouts sold short**. Bracket order with the deck's protective stop and the deck's target (patterns without a deck target: 2× the risk). 1% risk, max 10% of equity per stock, longs + shorts ≤ 100% of equity, max 25 positions, 8 new a day. Every scan reports stops and targets hit. Orders are tagged `pat-deck_<pattern>_<up|down>-…`, so the daily paper report shows each pattern and direction separately. Dry run by hand: *Actions → Pattern trader*.
 
 **Settings in `pattern_scan.py`:** `ALERTS` (per family or pattern: `"chart"`, `"list"` = summary line only, `"off"`; candlestick patterns only get a chart once activated, doji is list-only), `MAX_CHARTS` = 40 chart messages per run (the rest get their chart next run). The first run sends everything currently on the charts (~80 patterns); later runs only what is new.
 **Preview:** the *preview* box saves the charts and the summary to `reports/pattern-scan/<date>-<tf>/` in the repo instead of Telegram. *Resend* sends everything again.
