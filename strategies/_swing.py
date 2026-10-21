@@ -37,6 +37,8 @@ breaks with a LOWER LOW. Shared by the swing_*.py strategy files (starts with "_
                exit_pull (e.g. 0.02): a second, smaller swing size for the SELL. Long only while the big swings
                (pull_min) say UP and the small swings say UP too: a small lower high or lower low sells, even when
                the pullback was too small for the big swings to notice (the user's March 2022 example).
+    atr_k      swing size from volatility instead of a fixed %: a turn counts once the price moved atr_k x the
+               14-day ATR away from the high / low (in calm markets smaller dips count, in wild ones only big ones)
     above200   the buy also needs the close above the 200-day average (the sell rule is unchanged).
                True = that close only; "rising" = and the 200-day higher than 20 days ago; an int N = the last N
                closes all above the 200-day (no buying on a one-day poke above it).
@@ -47,6 +49,15 @@ import pandas as pd
 from strategies import tools
 
 _cache = {}
+
+
+def swing_size(d, pull_min=0.0, atr_k=None):
+    """The swing size the rule uses: a fixed fraction (pull_min, default 0.5%) or, with atr_k, a per-day fraction
+    atr_k x ATR(14) / close (the first days without an ATR use 2%)."""
+    if not atr_k:
+        return pull_min or 0.005
+    z = (atr_k * tools.atr(d) / d["Close"]).values.astype(float)
+    return np.where(np.isfinite(z), z, 0.02)
 
 
 def zigzag(h, l, c, zz):
@@ -60,6 +71,7 @@ def zigzag(h, l, c, zz):
                  high or a close below the last swing low
         last_sh, last_sl  the last confirmed swing high / low at each day's close"""
     n = len(c)
+    zzv = np.full(n, zz, float) if np.ndim(zz) == 0 else np.asarray(zz, float)   # a size per day (ATR) or fixed
     swings, events = [], []
     last_sh, last_sl = np.full(n, np.nan), np.full(n, np.nan)
     trend_up = np.zeros(n, bool)
@@ -68,7 +80,7 @@ def zigzag(h, l, c, zz):
         if leg == "up":
             if h[i] > ch:
                 ch, chi = h[i], i
-            elif l[i] <= ch * (1 - zz):              # fell zz from the high: that high is a swing high
+            elif l[i] <= ch * (1 - zzv[i]):          # fell zz from the high: that high is a swing high
                 lab = "H" if not np.isfinite(sh) else ("HH" if ch > sh else "LH")
                 if np.isfinite(sh) and ch < sh:
                     if up:
@@ -79,7 +91,7 @@ def zigzag(h, l, c, zz):
         else:
             if l[i] < cl:
                 cl, cli = l[i], i
-            elif h[i] >= cl * (1 + zz):              # rose zz from the low: that low is a swing low
+            elif h[i] >= cl * (1 + zzv[i]):          # rose zz from the low: that low is a swing low
                 lab = "L" if not np.isfinite(sl) else ("HL" if cl > sl else "LL")
                 if np.isfinite(sl) and cl > sl:
                     if not up:
@@ -100,10 +112,10 @@ def zigzag(h, l, c, zz):
 
 
 def run(d, pivot=5, mode="close", trail="pivot", pull_min=0.0, hh_entry=False, trend_entry=False, above200=False,
-        structure_only=False, strict=False, exit_pull=None):
+        structure_only=False, strict=False, exit_pull=None, atr_k=None):
     """Daily candles -> DataFrame: entry (signal on that close), exit (signal on that close; mode "close"
     only), stop (the low to hold after that day's close, while in a trade), reason."""
-    key = (pivot, mode, trail, pull_min, hh_entry, trend_entry, above200, structure_only, strict, exit_pull, d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
+    key = (pivot, mode, trail, pull_min, hh_entry, trend_entry, above200, structure_only, strict, exit_pull, atr_k, d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
     if key in _cache:
         return _cache[key]
     o, h, l, c = (d[k].values.astype(float) for k in ("Open", "High", "Low", "Close"))
@@ -116,7 +128,7 @@ def run(d, pivot=5, mode="close", trail="pivot", pull_min=0.0, hh_entry=False, t
             piv[j] = True
 
     # zigzag swing highs / lows (turns of at least zz), as known at each close (hh_entry / trend_entry)
-    swings, _, trend_up, last_sh, last_sl = zigzag(h, l, c, pull_min or 0.005)
+    swings, _, trend_up, last_sh, last_sl = zigzag(h, l, c, swing_size(d, pull_min, atr_k))
     if structure_only:
         up = trend_up.copy()
         if strict:                                   # both: last high a HH (or broken) and last low a HL

@@ -319,9 +319,10 @@ def structure_pages(d, mod, folder, title, years=None):
     red = DOWN), its buys / sells and the low to hold."""
     from strategies import _swing
     kw = mod.KW
-    zz = kw.get("pull_min") or 0.005
+    zz = _swing.swing_size(d[["Open", "High", "Low", "Close"]], kw.get("pull_min", 0.0), kw.get("atr_k"))
     st = _swing.run(d[["Open", "High", "Low", "Close"]], **kw)
     swings, events, trend_up, _, _ = _swing.zigzag(d["High"].values, d["Low"].values, d["Close"].values, zz)
+    size_txt = f"{kw['atr_k']:g}x ATR(14)" if kw.get("atr_k") else f"{zz:.0%}"
     c = d["Close"]
     s200 = d["SMA200"]
     a200 = kw.get("above200")
@@ -402,7 +403,7 @@ def structure_pages(d, mod, folder, title, years=None):
                    plt.Line2D([], [], color=STOP_C, lw=1.6, ls=(0, (4, 2)), label="Low to hold (close below = sell)"),
                    plt.Line2D([], [], color=INK2, ls=":", lw=1, label="Swing → day the rule knew it")]
         ax.legend(handles=handles, loc="upper left", fontsize=8, frameon=True, framealpha=0.9, ncol=2)
-        ax.set_title(f"{title} — what the rule sees in {yr}\nSwings = turns of at least {zz:.0%}: HH higher high, HL higher low "
+        ax.set_title(f"{title} — what the rule sees in {yr}\nSwings = turns of at least {size_txt}: HH higher high, HL higher low "
                      f"(green), LH lower high, LL lower low (red). Trend turns UP on a HL or a close above the last high, "
                      f"DOWN on a LH or a close below the last low.", loc="left", fontsize=10, color=INK)
         fig.tight_layout()
