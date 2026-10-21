@@ -127,3 +127,32 @@ jobs:
         with:
           path: pattern_trader_state.json
           key: pattern-trader-${{ github.run_id }}-${{ github.run_attempt }}
+
+      # Deck pattern trader (deck_trader.py, same pattern account; replaces the old trader's entries since
+      # 21 Oct 2026): every scan reports stops/targets hit; the first scan after 9:30 New York opens trades.
+      - name: Restore deck-trader memory
+        if: always() && steps.window.outputs.run == 'true' && env.STRATEGY == 'bot'
+        uses: actions/cache/restore@v4
+        with:
+          path: deck_trader_state.json
+          key: deck-trader-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: deck-trader-
+
+      - name: Deck pattern trader
+        if: always() && steps.window.outputs.run == 'true' && env.STRATEGY == 'bot'
+        run: python deck_trader.py
+        env:
+          PYTHONUNBUFFERED: "1"
+          TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID_PATTERNS || secrets.TELEGRAM_CHAT_ID }}
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+          ALPACA_PATTERN_KEY_ID: ${{ secrets.ALPACA_PATTERN_KEY_ID }}
+          ALPACA_PATTERN_SECRET_KEY: ${{ secrets.ALPACA_PATTERN_SECRET_KEY }}
+
+      - name: Save deck-trader memory
+        if: always() && steps.window.outputs.run == 'true' && env.STRATEGY == 'bot' && hashFiles('deck_trader_state.json') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: deck_trader_state.json
+          key: deck-trader-${{ github.run_id }}-${{ github.run_attempt }}

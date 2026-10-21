@@ -100,8 +100,7 @@ def round_trips(orders):
     Per symbol, a trade starts when the position leaves 0 and ends when it is back to (about) 0."""
     fills = [o for o in orders if o.get("filled_at") and float(o.get("filled_qty") or 0) > 0]
     fills.sort(key=lambda o: o["filled_at"])
-    stops = [o for o in orders if o.get("side") == "sell" and o.get("type") in ("stop", "stop_limit")
-             and o.get("stop_price")]
+    stops = [o for o in orders if o.get("type") in ("stop", "stop_limit") and o.get("stop_price")]
     trades, open_ = [], {}
     for o in fills:
         s = sym_key(o["symbol"])
@@ -110,7 +109,7 @@ def round_trips(orders):
         t = open_.get(s)
         if t is None:
             stop = next((float(x["stop_price"]) for x in stops if sym_key(x["symbol"]) == s
-                         and x["submitted_at"] >= o["submitted_at"]), None)
+                         and x["side"] != o["side"] and x["submitted_at"] >= o["submitted_at"]), None)
             t = open_[s] = {"symbol": s, "dir": "LONG" if q > 0 else "SHORT", "opened": o["filled_at"], "qty": 0.0,
                             "max_qty": 0.0, "cost": 0.0, "proceeds": 0.0, "bought": 0.0, "sold": 0.0,
                             "stop": stop, "source": source(o.get("client_order_id")), "first_px": p}

@@ -37,6 +37,9 @@ import trader
 from fmt import px
 
 ENABLED = True               # False = never trade (the scan step then does nothing)
+# 21 Oct 2026: replaced by deck_trader.py (Fidelity-deck patterns) in the same account. This trader no
+# longer opens trades; it only manages the positions it already opened (stops are in Alpaca, trend exits here).
+NEW_ENTRIES = False
 MARKET = "stocks"            # which selection in patterns.SELECTED to trade
 EXIT_BY_PATTERN = {"ABCD": "target"}   # pattern name -> "target"; every other pattern -> "trail"
 TRAIL_DAYS = 20              # trailing exit: sell when yesterday's close is below the 20-day low
@@ -138,7 +141,9 @@ def trend_exits(a, book, positions, daily, send, dry_run, today=False):
     for p in positions:
         sym = p["symbol"]
         t = book.get(sym)
-        if t and t.get("exit") == "target":
+        if not t or t.get("status") != "open":
+            continue                                   # not this trader's position (deck_trader shares the account)
+        if t.get("exit") == "target":
             continue                                   # bracket order: stop and target handle it
         qty = int(float(p["qty"]))
         d = daily.get(sym.replace(".", "-"))
@@ -226,7 +231,7 @@ def run(now=None, force=False, dry_run=False, send=None):
     positions = a.get("/positions")
     log += trend_exits(a, book, positions, daily, send, not live)
 
-    found = find_breakouts(daily, state)
+    found = find_breakouts(daily, state) if NEW_ENTRIES else []
     log.append(f"{len(found)} selected pattern breakouts at the last close")
     positions = a.get("/positions")
     held = {p["symbol"] for p in positions}
@@ -309,6 +314,8 @@ def run(now=None, force=False, dry_run=False, send=None):
         state["last_run"] = today
     save_state(state)
     n_pos = len(a.get("/positions"))
+    if not NEW_ENTRIES:
+        return log + ["Pattern trader: entries off (replaced by deck_trader.py), exits only"]
     send(f"🧩 <b>Pattern trader</b>{' (dry run)' if not live else ''}: {len(found)} selected breakouts at "
          f"yesterday's close ({patterns.selection_text(MARKET)}), {placed} {'trades' if live else 'would-be trades'}. "
          f"Account ${equity:,.0f}, {n_pos} positions." + ("\n" + "\n".join(lines) if lines else ""))
