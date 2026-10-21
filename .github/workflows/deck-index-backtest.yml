@@ -1,0 +1,51 @@
+name: Deck index backtest
+
+# Fidelity-deck patterns on ONE symbol (default OEF = S&P 100 index ETF) on daily, 4-hour and 2-hour candles,
+# vs buy & hold (deck_index_backtest.py). Results committed to reports/backtest/index-deck-<symbol>-<years>y/.
+on:
+  workflow_dispatch:
+    inputs:
+      symbol:
+        description: "Symbol (OEF = S&P 100 index ETF, SPY = S&P 500)"
+        type: string
+        default: "OEF"
+      years:
+        description: "Years to test"
+        type: choice
+        options: ["8", "5", "3", "10"]
+        default: "8"
+      timeframes:
+        description: "Candles to compare"
+        type: string
+        default: "1d 4h 2h"
+
+permissions:
+  contents: write
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - name: Backtest
+        run: python deck_index_backtest.py
+        env:
+          PYTHONUNBUFFERED: "1"
+          SYMBOL: ${{ inputs.symbol }}
+          YEARS: ${{ inputs.years }}
+          TIMEFRAMES: ${{ inputs.timeframes }}
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+      - name: Commit the results
+        run: |
+          git config user.name "backtest bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/backtest
+          git commit -m "Deck index backtest: ${{ inputs.symbol }} ${{ inputs.years }}y" || exit 0
+          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done
