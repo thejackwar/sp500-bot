@@ -9,6 +9,10 @@ on:
         description: "Which stocks (space-separated): sp100 sp500"
         type: string
         default: "sp100 sp500"
+      leverages:
+        description: "Leverage levels to compare (1 = none), e.g. 1 1.5 2 3"
+        type: string
+        default: "1"
       years:
         description: "Years to test"
         type: choice
@@ -35,6 +39,7 @@ jobs:
           PYTHONUNBUFFERED: "1"
           UNIVERSES: ${{ inputs.universes }}
           YEARS: ${{ inputs.years }}
+          LEVERAGES: ${{ inputs.leverages }}
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
       - name: Commit the results
