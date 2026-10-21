@@ -184,6 +184,8 @@ def main():
     t00 = time.time()
     end = dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=20)
     start = end - dt.timedelta(days=round(365.25 * YEARS))
+    if os.environ.get("START"):                        # a fixed start date, e.g. 2020-06-01
+        start = dt.datetime.fromisoformat(os.environ["START"]).replace(tzinfo=dt.timezone.utc)
     lists = {"sp100": scanner.get_tickers(), "sp500": None}
     if "sp500" in UNIVERSES:
         lists["sp500"] = sp500()
@@ -211,7 +213,8 @@ def main():
 
     days = spy.index[spy.index >= pd.Timestamp(start.date()) - pd.Timedelta(days=40)]
     lev_tag = "" if LEVERAGES == [1.0] else "-lev-" + "-".join(f"{x:g}" for x in LEVERAGES)
-    out_dir = os.path.join("reports", "backtest", f"universe-deck-v6{lev_tag}-{'-'.join(UNIVERSES)}-{YEARS:g}y")
+    out_dir = os.path.join("reports", "backtest", f"universe-deck-v6{lev_tag}-{'-'.join(UNIVERSES)}-"
+                           + (f"from{os.environ['START']}" if os.environ.get("START") else f"{YEARS:g}y"))
     os.makedirs(out_dir, exist_ok=True)
     first = int(np.searchsorted(days.values, np.datetime64(pd.Timestamp(start.date()))))
     lines = ["📊 Deck pattern trader version 6 (up breakouts, deck stop, sell on a close below the 20-day low) "
