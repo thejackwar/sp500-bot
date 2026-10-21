@@ -1,0 +1,32 @@
+📊 Deck pattern trader version 6 (up breakouts, deck stop, sell on a close below the 20-day low) on whole universes, daily candles
+01 Jun 2020 → 21 Oct 2026, $100,000, 1% risk, max 10%/stock, 25 positions, 8 new/day, leverage as named (limits x L, borrowed money 6.5%/yr, margin call below 25%), 0.02% slippage. 10 start dates a week apart: middle run, range in brackets.
+
+SP100 1x leverage (100 stocks, 8226 up breakouts)
++22.8%/yr (+15.5% to +28.8%), beat SPY in 9/10 runs · max drop -23.2% (worst -24.7%) · final $370,770
+~1387 trades, win 25%, avg +0.43R, profit factor 1.90, hold 33 days
+by year: 2020: +26%  2021: +30%  2022: -5%  2023: +44%  2024: +15%  2025: +12%  2026: +28%
+
+SP100 1.5x leverage (100 stocks, 8226 up breakouts)
++33.0%/yr (+22.2% to +40.5%), beat SPY in 10/10 runs · max drop -30.9% (worst -35.4%) · final $595,155
+~1473 trades, win 26%, avg +0.52R, profit factor 1.96, hold 34 days, interest paid $50,425, margin calls in all runs: 0
+by year: 2020: +30%  2021: +63%  2022: -27%  2023: +59%  2024: +28%  2025: +32%  2026: +44%
+
+SP100 2x leverage (100 stocks, 8226 up breakouts)
++41.5%/yr (+31.6% to +54.2%), beat SPY in 10/10 runs · max drop -42.4% (worst -42.4%) · final $904,761
+~1471 trades, win 25%, avg +0.54R, profit factor 1.98, hold 34 days, interest paid $117,639, margin calls in all runs: 0
+by year: 2020: +43%  2021: +53%  2022: -31%  2023: +56%  2024: +58%  2025: +30%  2026: +86%
+
+SP100 2.5x leverage (100 stocks, 8226 up breakouts)
++44.1%/yr (+33.2% to +61.2%), beat SPY in 10/10 runs · max drop -45.9% (worst -52.8%) · final $981,249
+~1473 trades, win 25%, avg +0.48R, profit factor 1.71, hold 34 days, interest paid $224,642, margin calls in all runs: 0
+by year: 2020: +51%  2021: +96%  2022: -37%  2023: +83%  2024: +24%  2025: +52%  2026: +54%
+
+SP100 3x leverage (100 stocks, 8226 up breakouts)
++53.3%/yr (+33.5% to +71.2%), beat SPY in 10/10 runs · max drop -57.7% (worst -59.7%) · final $1,504,614
+~1488 trades, win 26%, avg +0.55R, profit factor 1.68, hold 34 days, interest paid $391,025, margin calls in all runs: 0
+by year: 2020: +63%  2021: +75%  2022: -41%  2023: +92%  2024: +85%  2025: +59%  2026: +58%
+
+Buy & hold SPY: +17.3%/yr, max drop -24.5%, final $276,746
+by year: 2020: +24%  2021: +29%  2022: -18%  2023: +26%  2024: +25%  2025: +18%  2026: +14%
+
+Today's index members only (stocks that left the index are missing, which flatters results - more so for the S&P 500); daily candles: stops judged on daily lows, 20-day-low exit at the close. Past results don't guarantee future ones.
