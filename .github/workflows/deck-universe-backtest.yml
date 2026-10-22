@@ -21,6 +21,11 @@ on:
         description: "Leverage levels to compare (1 = none), e.g. 1 1.5 2 3"
         type: string
         default: "1"
+      source:
+        description: "Prices: alpaca (from 2016) or yahoo (from 2000 or earlier, use with start)"
+        type: choice
+        options: ["alpaca", "yahoo"]
+        default: "alpaca"
       years:
         description: "Years to test"
         type: choice
@@ -33,7 +38,7 @@ permissions:
 jobs:
   backtest:
     runs-on: ubuntu-latest
-    timeout-minutes: 180
+    timeout-minutes: 350
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -50,6 +55,7 @@ jobs:
           LEVERAGES: ${{ inputs.leverages }}
           START: ${{ inputs.start }}
           FILTERS: ${{ inputs.filters }}
+          SOURCE: ${{ inputs.source }}
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
       - name: Commit the results

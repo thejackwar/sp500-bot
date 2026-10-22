@@ -36,6 +36,8 @@ import scanner
 
 YEARS = float(os.environ.get("YEARS", "8"))
 UNIVERSES = os.environ.get("UNIVERSES", "sp100 sp500").split()
+# price source: "alpaca" (from 2016) or "yahoo" (decades back, split/dividend adjusted; for START=2000-01-01 etc.)
+SOURCE = os.environ.get("SOURCE", "alpaca").strip() or "alpaca"
 # leverage test: every money limit (risk per trade, max per stock, max invested) x L, borrowed money pays
 # MARGIN_RATE a year, and the whole account is sold at the close if equity falls below 25% of the positions
 LEVERAGES = [float(x) for x in os.environ.get("LEVERAGES", "1").split()]
@@ -64,6 +66,7 @@ FILTER_NAMES = {"none": "no MA filter",
 # rules applied inside simulate (sizing / exits)
 SIM_RULES = {"reg50": "leverage only while SPY is above its 50-day MA (else 1x, trimmed at the close)",
              "reg200": "leverage only while SPY is above its 200-day MA (else 1x, trimmed at the close)",
+             "reg200h": "leverage only while SPY is above its 200-day MA, else 0.5x (trimmed at the close)",
              "dd15": "1x after a 15% drop from the account high (trimmed at the close), back to full on a new high",
              "time10": "sell at the close after 10 days if not up at least 0.5R",
              "pos15": "max 7.5% of equity per stock x leverage (15% at 2x) instead of 10%",
@@ -221,9 +224,9 @@ def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None,
             curve[t:] = 0.0
             break
         lev_t = lev                                         # leverage allowed for today (regime / drawdown rules)
-        for rg in ("reg50", "reg200"):
-            if rg in rules and spy_up is not None and not spy_up[rg][t]:
-                lev_t = min(lev_t, 1.0)
+        for rg in ("reg50", "reg200", "reg200h"):
+            if rg in rules and spy_up is not None and not spy_up[rg[:6]][t]:
+                lev_t = min(lev_t, 0.5 if rg == "reg200h" else 1.0)
         if "dd15" in rules:
             peak = max(peak, curve[t])
             if curve[t] < 0.85 * peak:
@@ -329,12 +332,20 @@ def main():
         lists["sp500"] = sp500()
     every = sorted(set(sum((lists[u] for u in UNIVERSES), [])) | {"SPY"})
     print(f"{len(every)} symbols, {start:%Y-%m-%d} → {end:%Y-%m-%d}", flush=True)
-    raw = scanner.alpaca_bars(every, "1Day", start - dt.timedelta(days=450), end, chunk=50, workers=6)
+    first_day = pd.Timestamp((start - dt.timedelta(days=450)).date())
+    if SOURCE == "yahoo":
+        raw = scanner.download(every, "max", "1d")
+    else:
+        raw = scanner.alpaca_bars(every, "1Day", start - dt.timedelta(days=450), end, chunk=50, workers=6)
     daily = {}
     for s, d in raw.items():
         d = d.copy()
-        d.index = d.index.tz_convert(scanner.ET).tz_localize(None).normalize()
-        daily[s] = d[["Open", "High", "Low", "Close", "Volume"]]
+        if d.index.tz is not None:
+            d.index = d.index.tz_convert(scanner.ET).tz_localize(None)
+        d.index = pd.DatetimeIndex(d.index).normalize()
+        d = d[d.index >= first_day]
+        if len(d):
+            daily[s] = d[["Open", "High", "Low", "Close", "Volume"]]
     print(f"Prices for {len(daily)} symbols ({time.time() - t00:.0f}s)", flush=True)
     spy = daily.pop("SPY")
     global SPY_TREND
@@ -361,6 +372,8 @@ def main():
         lev_tag += "-f-" + "-".join(f.replace("+", "_") for f in FILTERS)
     if len(lev_tag) > 90:                               # many variants: keep the folder name short
         lev_tag = lev_tag[:lev_tag.find("-f-")] + f"-f-{len(FILTERS)}variants-{dt.date.today():%Y%m%d}"
+    if SOURCE != "alpaca":
+        lev_tag += f"-{SOURCE}"
     out_dir = os.path.join("reports", "backtest", f"universe-deck-v6{lev_tag}-{'-'.join(UNIVERSES)}-"
                            + (f"from{os.environ['START']}" if os.environ.get("START") else f"{YEARS:g}y"))
     os.makedirs(out_dir, exist_ok=True)
