@@ -1,0 +1,18 @@
+📊 Fidelity-deck patterns on BTC alone daily candles (Yahoo/Coinbase)
+01 Jan 2021 → 22 Oct 2026 (5.8 years), $100,000, whole account in the trade, one trade at a time, next-candle open fills, 0.05% fee + 0.05% slippage per side, no leverage.
+Buy & hold BTC: +19.2%/yr, max drop -76.6%, final $277,467
+
+━━ 1d candles ━━ (194 pattern breakouts in the test period)
+   B. Long, deck stop + trailing exit (20 candles): +17.9%/yr, max drop -54.5%, final $259,435
+     43 trades, win 28%, avg +0.31R, profit factor 1.44, in the market 55% of the time
+     by year: 2021: +70%  2022: -45%  2023: +113%  2024: +114%  2025: -31%  2026: -13%
+   D. Long, deck stop + trailing exit + 50-day filter (= live stock trader, no leverage): +16.2%/yr, max drop -41.4%, final $239,284
+     27 trades, win 33%, avg +0.97R, profit factor 1.80, in the market 39% of the time
+     by year: 2021: +62%  2022: -23%  2023: +53%  2024: +58%  2025: -17%  2026: -5%
+✅ R. Reference: the live Bitcoin bot's 50-day rule (btc50_uprise_ma_f1): +24.2%/yr, max drop -16.8%, final $351,249
+     22 trades, win 32%, profit factor 5.70, in the market 14% of the time
+     by year: 2021: +11%  2022: -4%  2023: +12%  2024: +145%  2025: +3%  2026: +17%
+
+BTC buy & hold by year: 2021: +58%  2022: -64%  2023: +155%  2024: +121%  2025: -6%  2026: -7%
+
+Caveat: one symbol, so few trades per version: a handful of trades can change the result. Past results don't guarantee future ones.
