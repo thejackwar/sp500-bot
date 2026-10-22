@@ -16,8 +16,10 @@ effectiveness can be measured on real prices. Started 21 Oct 2026; replaces patt
             EXIT = "target" (21 Oct only): the deck's measured move as take profit (NO_TARGET_R x the
             risk for patterns without a deck target)
     orders  "trail": market entry + stop order (OTO, good till cancelled); "target": bracket order
-    size    1% of equity at risk, max 10% of equity per stock, long + short value at most 100% of
-            equity (no leverage), max 25 positions in the account, max 8 new trades a day
+    filter  (since 22 Oct 2026) only if the breakout day's close is above the stock's 50-day average
+    size    (since 22 Oct 2026, 2x leverage) 2% of equity at risk, max 20% of equity per stock, all
+            positions at most 200% of equity (Alpaca's overnight margin limit), max 25 positions, max 8
+            new trades a day
 Every order is tagged pat-deck_<pattern>_<up|down>-..., so the daily paper report shows the result of
 each pattern and direction separately.
 
@@ -40,9 +42,13 @@ import trader
 from fmt import px
 
 ENABLED = True
-RISK_PER_TRADE = 0.01        # 1% of equity at risk per trade
-MAX_POSITION_PCT = 0.10      # max 10% of equity in one stock
-MAX_GROSS = 1.0              # longs + shorts together at most 1 x equity (no leverage)
+# 22 Oct 2026 (user): 2x leverage + 50-day MA filter. LEVERAGE multiplies the three limits below, like the
+# backtest (8y, S&P 100: +33.0%/yr, worst drop -39.5%, vs 1x no filter +23.0%/yr, -25.5%; SPY +15.4%, -33.8%)
+LEVERAGE = 2.0               # 1.0 = no borrowing
+RISK_PER_TRADE = 0.01        # x LEVERAGE: % of equity at risk per trade
+MAX_POSITION_PCT = 0.10      # x LEVERAGE: max share of equity in one stock
+MAX_GROSS = 1.0              # x LEVERAGE: all positions together at most this x equity
+MA_FILTER = 50               # only buy if the breakout day's close is above its 50-day average (0 = off)
 MAX_OPEN_POSITIONS = 25      # whole account (old pattern trader's positions count too)
 MAX_NEW_PER_DAY = 8
 EXIT = "trail"               # "trail" = backtest version 6 (+20.8%/yr, 8y); "target" = version 2 (+13.4%/yr)
@@ -82,6 +88,12 @@ def find_signals(daily):
                     continue
                 if pattern_scan.mode_of(p) != "chart" or (brk["dir"] == "SHORT" and not SHORTS):
                     continue
+                if MA_FILTER and brk["dir"] == "LONG":
+                    ma = float(df["Close"].tail(MA_FILTER).mean())
+                    if len(df) < MA_FILTER or not float(df["Close"].iat[-1]) > ma:
+                        print(f"{t}: {p['name']} breakout skipped, close below the {MA_FILTER}-day MA {ma:.2f}",
+                              flush=True)
+                        continue
                 out.append({"t": t, "df": df, "p": p, "close": float(df["Close"].iat[-1])})
         except Exception as e:
             print(f"{t}: {e!r}", flush=True)
@@ -152,7 +164,8 @@ def run(now=None, force=False, dry_run=False, send=None):
     pending = {o["symbol"] for o in a.get("/orders", status="open", limit=500)}   # entries not filled yet
     equity = float(acct["equity"])
     gross = sum(abs(float(p.get("market_value") or 0)) for p in positions)
-    room = max(0.0, min(MAX_GROSS * equity - gross, float(acct.get("buying_power") or acct["cash"])))
+    bp = float(acct.get("regt_buying_power") or acct.get("buying_power") or acct["cash"])   # overnight (2x) limit
+    room = max(0.0, min(MAX_GROSS * LEVERAGE * equity - gross, bp))
     slots = max(0, MAX_OPEN_POSITIONS - len(held | pending))
     placed, lines = 0, []
     for f in found:
@@ -194,7 +207,8 @@ def run(now=None, force=False, dry_run=False, send=None):
         if EXIT == "target" and sign * (target - price) <= 0.1 * dist:
             lines.append(f"• {sym}: {what}, skipped (opened at or beyond the target)")
             continue
-        qty = min(int(equity * RISK_PER_TRADE / dist), int(equity * MAX_POSITION_PCT / price), int(room * 0.95 / price))
+        qty = min(int(equity * RISK_PER_TRADE * LEVERAGE / dist), int(equity * MAX_POSITION_PCT * LEVERAGE / price),
+                  int(room * 0.95 / price))
         if qty < 1:
             lines.append(f"• {sym}: {what}, skipped (too small or no room left)")
             continue
@@ -244,7 +258,8 @@ def run(now=None, force=False, dry_run=False, send=None):
         state["last_run"] = today
     save_state(state)
     n_pos = len(a.get("/positions"))
-    send(f"🧩 <b>Deck pattern trader</b>{' (dry run)' if not live else ''}: {len(found)} breakouts at yesterday's "
+    send(f"🧩 <b>Deck pattern trader</b>{' (dry run)' if not live else ''} ({LEVERAGE:g}x"
+         f"{f', {MA_FILTER}-day MA filter' if MA_FILTER else ''}): {len(found)} breakouts at yesterday's "
          f"close, {placed} {'trades' if live else 'would-be trades'}. Account ${equity:,.0f}, {n_pos} positions."
          + ("\n" + "\n".join(lines) if lines else ""))
     return lines
