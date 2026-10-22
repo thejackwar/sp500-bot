@@ -17,7 +17,8 @@ effectiveness can be measured on real prices. Started 21 Oct 2026; replaces patt
             risk for patterns without a deck target)
     orders  "trail": market entry + stop order (OTO, good till cancelled); "target": bracket order
     filter  (since 22 Oct 2026) only if the breakout day's close is above the stock's 50-day average,
-            and not if the price at the open is more than 2% above the breakout close (MAX_GAP)
+            and not if the price at the open is more than 2% above the breakout close (MAX_GAP);
+            Double bottom, Cup and handle, Pipe bottom and Hanging man aren't traded (SKIP_PATTERNS)
     size    (since 22 Oct 2026, 2x leverage) 2% of equity at risk, max 20% of equity per stock, all
             positions at most 200% of equity (Alpaca's overnight margin limit), max 25 positions, max 8
             new trades a day
@@ -52,6 +53,9 @@ MAX_GROSS = 1.0              # x LEVERAGE: all positions together at most this x
 MA_FILTER = 50               # only buy if the breakout day's close is above its 50-day average (0 = off)
 MAX_GAP = 0.02               # 22 Oct 2026: skip if the price at the open is more than 2% above the breakout close
                              # (backtest 8y, 2x + MA filter: +38.5%/yr vs +33.1% without; None = off)
+# 22 Oct 2026 (user): these patterns aren't traded - they lost money in both halves of the 8-year S&P 100
+# backtest (2x + MA filter: +34.4%/yr, max drop -37.4% without them vs +33.1%, -39.5% with them)
+SKIP_PATTERNS = {"Double bottom", "Cup and handle", "Pipe bottom", "Hanging man"}
 MAX_OPEN_POSITIONS = 25      # whole account (old pattern trader's positions count too)
 MAX_NEW_PER_DAY = 8
 EXIT = "trail"               # "trail" = backtest version 6 (+20.8%/yr, 8y); "target" = version 2 (+13.4%/yr)
@@ -90,6 +94,9 @@ def find_signals(daily):
                 if p["stage"] != "breakout" or not brk or brk["bar"] != len(df) - 1:
                     continue
                 if pattern_scan.mode_of(p) != "chart" or (brk["dir"] == "SHORT" and not SHORTS):
+                    continue
+                if p["name"].split(" (")[0] in SKIP_PATTERNS:
+                    print(f"{t}: {p['name']} breakout skipped, pattern not traded (SKIP_PATTERNS)", flush=True)
                     continue
                 if MA_FILTER and brk["dir"] == "LONG":
                     ma = float(df["Close"].tail(MA_FILTER).mean())
