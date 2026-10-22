@@ -29,7 +29,10 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt lxml
       - name: Features
-        run: python deck_trade_features.py
+        run: |
+          mkdir -p reports/analysis
+          python deck_trade_features.py 2>&1 | tee reports/analysis/deck-trade-features.log
+          exit ${PIPESTATUS[0]}
         env:
           PYTHONUNBUFFERED: "1"
           FILTER: ${{ inputs.filter }}
@@ -37,6 +40,7 @@ jobs:
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
       - name: Commit the results
+        if: always()
         run: |
           git config user.name "backtest bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
