@@ -1,0 +1,17 @@
+📊 Deck pattern trader version 6 (up breakouts, deck stop, sell on a close below the 20-day low) on whole universes, daily candles
+22 Oct 2018 → 22 Oct 2026, $100,000, 1% risk, max 10%/stock, 25 positions, 8 new/day, leverage as named (limits x L, borrowed money 6.5%/yr, margin call below 25%), 0.02% slippage. 10 start dates a week apart: middle run, range in brackets.
+
+SP100 2x leverage · close above its 50-day MA + skip if it opens more than 2% above the breakout close (100 stocks, 7450 up breakouts)
++38.5%/yr (+26.3% to +41.5%), beat SPY in 10/10 runs · max drop -38.1% (worst -43.6%) · final $1,300,681
+~1590 trades, win 27%, avg +0.57R, profit factor 2.00, hold 36 days, interest paid $177,157, margin calls in all runs: 0
+by year: 2018: +0%  2019: +38%  2020: +44%  2021: +85%  2022: -24%  2023: +29%  2024: +36%  2025: +39%  2026: +90%
+
+SP100 2x leverage · close above its 50-day MA + skip if it opens more than 2% above the breakout close + without the losing patterns (Cup and handle, Double bottom, Hanging man, Pipe bottom) (100 stocks, 6468 up breakouts)
++41.3%/yr (+29.4% to +44.0%), beat SPY in 10/10 runs · max drop -45.4% (worst -45.4%) · final $1,535,919
+~1606 trades, win 26%, avg +0.58R, profit factor 2.10, hold 35 days, interest paid $185,551, margin calls in all runs: 0
+by year: 2018: -6%  2019: +50%  2020: +52%  2021: +81%  2022: -34%  2023: +26%  2024: +62%  2025: +41%  2026: +110%
+
+Buy & hold SPY: +15.3%/yr, max drop -33.8%, final $312,160
+by year: 2018: -9%  2019: +31%  2020: +18%  2021: +29%  2022: -18%  2023: +26%  2024: +25%  2025: +18%  2026: +13%
+
+Today's index members only (stocks that left the index are missing, which flatters results - more so for the S&P 500); daily candles: stops judged on daily lows, 20-day-low exit at the close. Past results don't guarantee future ones.
