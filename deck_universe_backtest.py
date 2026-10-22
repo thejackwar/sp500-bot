@@ -39,6 +39,34 @@ UNIVERSES = os.environ.get("UNIVERSES", "sp100 sp500").split()
 # leverage test: every money limit (risk per trade, max per stock, max invested) x L, borrowed money pays
 # MARGIN_RATE a year, and the whole account is sold at the close if equity falls below 25% of the positions
 LEVERAGES = [float(x) for x in os.environ.get("LEVERAGES", "1").split()]
+# moving-average confirmation (judged on the breakout day's close): only buy if ...
+FILTERS = os.environ.get("FILTERS", "none").split()
+FILTER_NAMES = {"none": "no MA filter",
+                "ma50": "close above its 50-day MA",
+                "ma200": "close above its 200-day MA",
+                "ma50_200": "50-day MA above the 200-day MA",
+                "both": "close above the 50- and 200-day MA",
+                "ma50_rising": "close above a rising 50-day MA (higher than 10 days ago)"}
+
+
+def ma_ok(flt, tt, date):
+    if flt == "none":
+        return True
+    try:
+        r = tt.loc[date]
+    except KeyError:
+        return False
+    if flt == "ma50":
+        return r.c > r.m50
+    if flt == "ma200":
+        return r.c > r.m200
+    if flt == "ma50_200":
+        return r.m50 > r.m200
+    if flt == "both":
+        return r.c > r.m50 and r.c > r.m200
+    if flt == "ma50_rising":
+        return r.c > r.m50 and r.m50 > r.m50_10
+    raise ValueError(flt)
 MARGIN_RATE = float(os.environ.get("MARGIN_RATE", "0.065"))
 MAINTENANCE = 0.25
 RUNS, STEP = 10, 5
@@ -213,6 +241,8 @@ def main():
 
     days = spy.index[spy.index >= pd.Timestamp(start.date()) - pd.Timedelta(days=40)]
     lev_tag = "" if LEVERAGES == [1.0] else "-lev-" + "-".join(f"{x:g}" for x in LEVERAGES)
+    if FILTERS != ["none"]:
+        lev_tag += "-ma-" + "-".join(FILTERS)
     out_dir = os.path.join("reports", "backtest", f"universe-deck-v6{lev_tag}-{'-'.join(UNIVERSES)}-"
                            + (f"from{os.environ['START']}" if os.environ.get("START") else f"{YEARS:g}y"))
     os.makedirs(out_dir, exist_ok=True)
@@ -229,56 +259,67 @@ def main():
                       ("Open", "High", "Low", "Close"))
         low20 = np.column_stack([daily[s]["Low"].rolling(TRAIL).min().shift(1).reindex(days).values for s in syms])
         pos_of = {d: k for k, d in enumerate(days)}
-        sigs = {}
-        n_sig = 0
-        for col, s in enumerate(syms):
-            for date, stop, fam, name in found[s]:
-                k = pos_of.get(pd.Timestamp(date))
-                if k is not None and k >= first:
+        trend = {}                                      # each stock's moving averages (closes up to that day)
+        for s_ in syms:
+            c_ = daily[s_]["Close"]
+            m50, m200 = c_.rolling(50).mean(), c_.rolling(200).mean()
+            trend[s_] = pd.DataFrame({"c": c_, "m50": m50, "m200": m200, "m50_10": m50.shift(10)})
+        sigs_by = {}
+        for flt in FILTERS:
+            sigs, n_sig = {}, 0
+            for col, s_ in enumerate(syms):
+                tt = trend[s_]
+                for date, stop, fam, name in found[s_]:
+                    k = pos_of.get(pd.Timestamp(date))
+                    if k is None or k < first or not ma_ok(flt, tt, pd.Timestamp(date)):
+                        continue
                     sigs.setdefault(k, []).append((col, stop, fam, name))
                     n_sig += 1
-        for lev in LEVERAGES:
-            tag = u.upper() + (f" {lev:g}x leverage" if len(LEVERAGES) > 1 or lev != 1 else "")
-            res = []
-            for r in range(RUNS):
-                d0 = first + r * STEP
-                tr, eq, info = simulate(days, O, H, L, C, low20, sigs, syms, d0, seed=r, lev=lev)
-                st = summarize(eq, tr)
-                st.update(info)
-                b = spy_c.iloc[d0:]
-                b = b / b.iat[0] * START_EQ
-                byrs = (b.index[-1] - b.index[0]).days / 365.25
-                st["spy_cagr"] = (b.iat[-1] / START_EQ) ** (1 / byrs) - 1
-                st["beat"] = st["final"] >= b.iat[-1]
-                res.append((st, tr, eq))
-                print(f"{tag} run {r + 1}: {st['cagr'] * 100:+.1f}%/yr, {st['trades']} trades, "
-                      f"drop {st['dd'] * 100:+.1f}%", flush=True)
-            cg = [x[0]["cagr"] for x in res]
-            mid = int(np.argsort(cg)[len(cg) // 2])
-            st, tr, eq = res[mid]
-            by_year = eq.groupby(eq.index.year).last()
-            by_year = by_year / np.r_[START_EQ, by_year.values[:-1]] - 1
-            calls = sum(x[0]["margin_calls"] for x in res)
-            lines += [f"<b>{tag} ({len(syms)} stocks, {n_sig} up breakouts)</b>",
-                      f"{st['cagr'] * 100:+.1f}%/yr ({min(cg) * 100:+.1f}% to {max(cg) * 100:+.1f}%), beat SPY in "
-                      f"{sum(x[0]['beat'] for x in res)}/{RUNS} runs · max drop {st['dd'] * 100:+.1f}% "
-                      f"(worst {min(x[0]['dd'] for x in res) * 100:+.1f}%) · final ${st['final']:,.0f}",
-                      f"~{st['trades']} trades, win {st['win']:.0%}, avg {st['avgR']:+.2f}R, profit factor {st['pf']:.2f}, "
-                      f"hold {st['hold']:.0f} days" + (f", interest paid ${st['interest']:,.0f}" if st["interest"] else "")
-                      + (f", margin calls in all runs: {calls}" if lev > 1 else ""),
-                      "by year: " + "  ".join(f"{y}: {v * 100:+.0f}%" for y, v in by_year.items()), ""]
-            rows.append({"universe": u, "leverage": lev, "stocks": len(syms), "breakouts": n_sig,
-                         "cagr_min": min(cg), "cagr_max": max(cg), "dd_worst": min(x[0]["dd"] for x in res),
-                         "beat": sum(x[0]["beat"] for x in res), "calls_all_runs": calls,
-                         **{k: v for k, v in st.items()}})
-            curves[f"{tag} version 6"] = eq
-            all_tr.append(tr.assign(universe=u, leverage=lev))
-            if len(LEVERAGES) == 1:                    # per pattern (middle run)
-                g = tr[tr.result != "still open"].groupby("pattern")["R"].agg(["size", "mean"]).sort_values(
-                    "mean", ascending=False)
-                lines.append(f"  per pattern ({u}, middle run): " + ", ".join(
-                    f"{p} {int(r['size'])}× {r['mean']:+.2f}R" for p, r in g.iterrows()))
-                lines.append("")
+            sigs_by[flt] = (sigs, n_sig)
+        for flt, (sigs, n_sig) in sigs_by.items():
+            for lev in LEVERAGES:
+                tag = u.upper() + (f" {lev:g}x leverage" if len(LEVERAGES) > 1 or lev != 1 else "") + \
+                ("" if FILTERS == ["none"] else f" · {FILTER_NAMES[flt]}")
+                res = []
+                for r in range(RUNS):
+                    d0 = first + r * STEP
+                    tr, eq, info = simulate(days, O, H, L, C, low20, sigs, syms, d0, seed=r, lev=lev)
+                    st = summarize(eq, tr)
+                    st.update(info)
+                    b = spy_c.iloc[d0:]
+                    b = b / b.iat[0] * START_EQ
+                    byrs = (b.index[-1] - b.index[0]).days / 365.25
+                    st["spy_cagr"] = (b.iat[-1] / START_EQ) ** (1 / byrs) - 1
+                    st["beat"] = st["final"] >= b.iat[-1]
+                    res.append((st, tr, eq))
+                    print(f"{tag} run {r + 1}: {st['cagr'] * 100:+.1f}%/yr, {st['trades']} trades, "
+                          f"drop {st['dd'] * 100:+.1f}%", flush=True)
+                cg = [x[0]["cagr"] for x in res]
+                mid = int(np.argsort(cg)[len(cg) // 2])
+                st, tr, eq = res[mid]
+                by_year = eq.groupby(eq.index.year).last()
+                by_year = by_year / np.r_[START_EQ, by_year.values[:-1]] - 1
+                calls = sum(x[0]["margin_calls"] for x in res)
+                lines += [f"<b>{tag} ({len(syms)} stocks, {n_sig} up breakouts)</b>",
+                          f"{st['cagr'] * 100:+.1f}%/yr ({min(cg) * 100:+.1f}% to {max(cg) * 100:+.1f}%), beat SPY in "
+                          f"{sum(x[0]['beat'] for x in res)}/{RUNS} runs · max drop {st['dd'] * 100:+.1f}% "
+                          f"(worst {min(x[0]['dd'] for x in res) * 100:+.1f}%) · final ${st['final']:,.0f}",
+                          f"~{st['trades']} trades, win {st['win']:.0%}, avg {st['avgR']:+.2f}R, profit factor {st['pf']:.2f}, "
+                          f"hold {st['hold']:.0f} days" + (f", interest paid ${st['interest']:,.0f}" if st["interest"] else "")
+                          + (f", margin calls in all runs: {calls}" if lev > 1 else ""),
+                          "by year: " + "  ".join(f"{y}: {v * 100:+.0f}%" for y, v in by_year.items()), ""]
+                rows.append({"universe": u, "filter": flt, "leverage": lev, "stocks": len(syms), "breakouts": n_sig,
+                             "cagr_min": min(cg), "cagr_max": max(cg), "dd_worst": min(x[0]["dd"] for x in res),
+                             "beat": sum(x[0]["beat"] for x in res), "calls_all_runs": calls,
+                             **{k: v for k, v in st.items()}})
+                curves[f"{tag}"] = eq
+                all_tr.append(tr.assign(universe=u, filter=flt, leverage=lev))
+                if len(LEVERAGES) == 1 and len(FILTERS) == 1:   # per pattern (middle run)
+                    g = tr[tr.result != "still open"].groupby("pattern")["R"].agg(["size", "mean"]).sort_values(
+                        "mean", ascending=False)
+                    lines.append(f"  per pattern ({u}, middle run): " + ", ".join(
+                        f"{p} {int(r['size'])}× {r['mean']:+.2f}R" for p, r in g.iterrows()))
+                    lines.append("")
     b = spy_c.iloc[first:]
     b = b / b.iat[0] * START_EQ
     byrs = (b.index[-1] - b.index[0]).days / 365.25

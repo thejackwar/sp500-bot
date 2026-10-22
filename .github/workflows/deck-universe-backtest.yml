@@ -13,6 +13,10 @@ on:
         description: "Optional fixed start date (YYYY-MM-DD); overrides years"
         type: string
         default: ""
+      filters:
+        description: "Moving-average filters to compare: none ma50 ma200 ma50_200 both ma50_rising"
+        type: string
+        default: "none"
       leverages:
         description: "Leverage levels to compare (1 = none), e.g. 1 1.5 2 3"
         type: string
@@ -45,6 +49,7 @@ jobs:
           YEARS: ${{ inputs.years }}
           LEVERAGES: ${{ inputs.leverages }}
           START: ${{ inputs.start }}
+          FILTERS: ${{ inputs.filters }}
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
       - name: Commit the results
