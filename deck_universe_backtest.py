@@ -45,6 +45,8 @@ ENTRY_RULES = {"gap1atr": "skip if it opens more than 1 ATR above the breakout c
                "gap2pct": "skip if it opens more than 2% above the breakout close",
                "risk2x": "skip if the risk at the open is more than 2x the planned risk",
                "limit05": "limit order at the breakout close +0.5%"}
+# patterns that lost money in both halves of the 8-year S&P 100 test (2x, ma50): skipped by the "noweak" filter
+WEAK = {"Double bottom", "Cup and handle", "Pipe bottom", "Hanging man"}
 FILTER_NAMES = {"none": "no MA filter",
                 "ma50": "close above its 50-day MA",
                 "ma200": "close above its 200-day MA",
@@ -54,13 +56,14 @@ FILTER_NAMES = {"none": "no MA filter",
                 "vol12": "breakout volume >= 1.2x its 50-day average",
                 "vol15": "breakout volume >= 1.5x its 50-day average",
                 "vol20": "breakout volume >= 2x its 50-day average",
-                "dry": "quiet volume for 10 days, then an above-average breakout day"}
+                "dry": "quiet volume for 10 days, then an above-average breakout day",
+                "noweak": "without the losing patterns (" + ", ".join(sorted(WEAK)) + ")"}
 
 
 def ma_ok(flt, tt, date):
     if "+" in flt:                                      # combined filters, e.g. ma50+vol15
         return all(ma_ok(f, tt, date) for f in flt.split("+"))
-    if flt == "none":
+    if flt in ("none", "noweak"):                       # noweak is applied to the pattern name (main)
         return True
     if flt in ENTRY_RULES:                              # entry rules are applied at the open (simulate)
         return True
@@ -312,6 +315,8 @@ def main():
                 for date, stop, fam, name, bclose, batr in found[s_]:
                     k = pos_of.get(pd.Timestamp(date))
                     if k is None or k < first or not ma_ok(flt, tt, pd.Timestamp(date)):
+                        continue
+                    if "noweak" in flt.split("+") and name in WEAK:
                         continue
                     sigs.setdefault(k, []).append((col, stop, fam, name, bclose, batr))
                     n_sig += 1

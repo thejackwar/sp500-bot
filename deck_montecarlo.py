@@ -41,6 +41,7 @@ N_BOOT = int(os.environ.get("N_BOOT", "10000"))
 N_RANDOM = int(os.environ.get("N_RANDOM", "200"))
 N_JITTER = int(os.environ.get("N_JITTER", "40"))
 BLOCK = int(os.environ.get("BLOCK", "20"))
+NOWEAK = os.environ.get("NOWEAK", "") not in ("", "0")   # skip the losing patterns (deck_universe_backtest.WEAK)
 OFFLINE = os.environ.get("OFFLINE", "") not in ("", "0")
 START_EQ = dub.START_EQ
 rng = np.random.default_rng(42)
@@ -165,6 +166,8 @@ class Market:
                 k = self.pos_of.get(pd.Timestamp(date))
                 if k is None or k < self.first or not (self.C[k, col] > M[k, col]):
                     continue
+                if NOWEAK and name in dub.WEAK:
+                    continue
                 sigs.setdefault(k, []).append((col, stop, fam, name, bclose, batr))
         return sigs
 
@@ -192,11 +195,12 @@ class Market:
 
 def main():
     t00 = time.time()
-    tag = f"{LEV:g}x-ma{MA}-sp100-{YEARS:g}y"
+    tag = f"{LEV:g}x-ma{MA}{'-noweak' if NOWEAK else ''}-sp100-{YEARS:g}y"
     out_dir = os.path.join("reports", "backtest", f"montecarlo-deck-v6-{tag}")
     os.makedirs(out_dir, exist_ok=True)
     lines = [f"🎲 Monte Carlo tests of the deck pattern trader version 6 (S&P 100, close above the {MA}-day MA, "
-             f"{LEV:g}x leverage, sell on a close below the 20-day low)", ""]
+             f"{LEV:g}x leverage, sell on a close below the 20-day low"
+             + (", without " + ", ".join(sorted(dub.WEAK)) if NOWEAK else "") + ")", ""]
     extra = {}
 
     if OFFLINE:                       # newest saved universe backtest of this setup

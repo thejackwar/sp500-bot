@@ -13,6 +13,10 @@ on:
         description: "Moving-average filter length (live trader: 50)"
         type: string
         default: "50"
+      noweak:
+        description: "Skip the losing patterns (Double bottom, Cup and handle, Pipe bottom, Hanging man)"
+        type: boolean
+        default: false
       n_random:
         description: "Random-entry runs"
         type: string
@@ -48,6 +52,7 @@ jobs:
           LEVERAGE: ${{ inputs.leverage }}
           MA: ${{ inputs.ma }}
           N_RANDOM: ${{ inputs.n_random }}
+          NOWEAK: ${{ inputs.noweak && '1' || '' }}
           N_JITTER: ${{ inputs.n_jitter }}
           YEARS: ${{ inputs.years }}
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
