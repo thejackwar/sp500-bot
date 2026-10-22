@@ -1,0 +1,61 @@
+name: Deck Monte Carlo
+
+# Monte Carlo tests of the live deck pattern trader (deck_montecarlo.py): drawdown range, edge range,
+# random entries and parameter jitter. Results committed to reports/backtest/montecarlo-deck-v6-.../
+on:
+  workflow_dispatch:
+    inputs:
+      leverage:
+        description: "Leverage (live trader: 2)"
+        type: string
+        default: "2"
+      ma:
+        description: "Moving-average filter length (live trader: 50)"
+        type: string
+        default: "50"
+      n_random:
+        description: "Random-entry runs"
+        type: string
+        default: "200"
+      n_jitter:
+        description: "Parameter-jitter runs"
+        type: string
+        default: "40"
+      years:
+        description: "Years to test"
+        type: choice
+        options: ["8", "5", "3"]
+        default: "8"
+
+permissions:
+  contents: write
+
+jobs:
+  montecarlo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt lxml
+      - name: Monte Carlo
+        run: python deck_montecarlo.py
+        env:
+          PYTHONUNBUFFERED: "1"
+          LEVERAGE: ${{ inputs.leverage }}
+          MA: ${{ inputs.ma }}
+          N_RANDOM: ${{ inputs.n_random }}
+          N_JITTER: ${{ inputs.n_jitter }}
+          YEARS: ${{ inputs.years }}
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+      - name: Commit the results
+        run: |
+          git config user.name "backtest bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/backtest
+          git commit -m "Deck Monte Carlo: ${{ inputs.leverage }}x ma${{ inputs.ma }} ${{ inputs.years }}y" || exit 0
+          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done

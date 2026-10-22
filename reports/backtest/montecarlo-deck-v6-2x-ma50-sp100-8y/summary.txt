@@ -1,0 +1,17 @@
+🎲 Monte Carlo tests of the deck pattern trader version 6 (S&P 100, close above the 50-day MA, 2x leverage, sell on a close below the 20-day low)
+
+From the saved middle run in reports/backtest/universe-deck-v6-lev-2-f-ma50-ma50_vol12-ma50_vol15-ma50_vol20-ma50_dry-sp100-8y (22 Oct 2018 → 22 Oct 2026).
+
+1. Drawdown range (10,000 reshuffled histories, 20-day blocks of real daily returns)
+real: +33.2%/yr, max drop -39.5%
+yearly return: 5% +10.9% · median +33.5% · 95% +61.2%; losing money over the period: 0.6%
+max drop: median -41.5% · 1 in 20 worse than -61.2% · 1 in 100 worse than -70.9%
+chance of a drop worse than -30%: 93% · -50%: 22% · -70%: 1%
+
+2. Edge range (10,000 resamples of the 1663 closed trades)
+avg R: real +0.47 · 5% +0.29 · 95% +0.66; chance avg R <= 0: 0.00%
+win rate: 5% 24% - 95% 28% · profit factor: 5% 1.29 - 95% 2.60
+how much rides on the biggest winners: without the top 1% of trades avg R is +0.15, without the top 5% -0.29
+
+Tests 3-4 (random entries, parameter jitter) need prices: run the Monte Carlo workflow.
+Bootstraps assume the future looks like a reshuffled past; today's index members only (survivorship flatters results). Past results don't guarantee future ones.
