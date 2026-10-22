@@ -40,6 +40,11 @@ exit, lh_right sets how many lower days after a high confirm it (default PIVOT =
     rise_min     with trend="rising50": the 50-day must be at least this much higher than 10 days ago (0.005 = 0.5%)
     turn         also buy when the 50-day TURNS rising (rising today, not yesterday) while the close is already
                  above the line - the cross that came while the average still fell is otherwise lost
+    vol          volume filter on the cross day (None = off; needs a Volume column): a number, e.g. 1.2 = buy the
+                 cross only if that day's volume is at least 1.2x its 50-day average volume (the average of the
+                 50 days BEFORE the cross day); "dry" = volume dry-up: the 10 days before the cross averaged
+                 below the 50-day average AND the cross day is above it. A cross that fails the filter is
+                 skipped (no buy until the next fresh cross). Same definitions as deck_universe_backtest.py
     side         "long" (default) or "short": the short rule is the long rule run on the chart turned
                  upside down (every price x -1), so it is the exact mirror: sell short when the close
                  crosses BELOW the 50-day while the 50-day is FALLING; cover on a higher low (a low below
@@ -57,7 +62,7 @@ _cache = {}
 
 def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False, line="50", ma_exit=False,
         start_stop=True, trend=None, lh_right=None, side="long", structure=None, cross_atr=None, cross_window=5,
-        rise_min=0.0, turn=False):
+        rise_min=0.0, turn=False, vol=None):
     """Replays the rule on daily candles. Returns a DataFrame indexed like d with columns
     entry (signal on that close), exit (signal on that close), stop (starting/trailing stop while in a
     trade), peak (highest high since entry), lh (a lower high was confirmed that day), reason.
@@ -66,9 +71,11 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
     if side == "short":
         m = pd.DataFrame({"Open": -d["Open"], "High": -d["Low"], "Low": -d["High"], "Close": -d["Close"]},
                          index=d.index)
+        if "Volume" in d:
+            m["Volume"] = d["Volume"]
         out = run(m, exit_mode, tp_r, stretch, reentry, above200, line, ma_exit, start_stop, trend, lh_right,
                   structure=structure, cross_atr=cross_atr, cross_window=cross_window, rise_min=rise_min,
-                  turn=turn).copy()
+                  turn=turn, vol=vol).copy()
         out["stop"], out["peak"] = -out["stop"], -out["peak"]
         flip = {"lower high": "higher low", "close below the 50-day": "close above the 50-day",
                 "close below the line": "close above the line", "came back to the 50-day": "came back up to the 50-day",
@@ -77,7 +84,7 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
         out["reason"] = out["reason"].map(lambda r: flip.get(r, r))
         return out
     key = (exit_mode, tp_r, stretch, reentry, above200, line, ma_exit, start_stop, trend, lh_right, structure,
-           cross_atr, cross_window, rise_min, turn,
+           cross_atr, cross_window, rise_min, turn, vol,
            d.index[0], d.index[-1], len(d), float(d["Close"].iat[-1]))
     if key in _cache:
         return _cache[key]
@@ -86,6 +93,13 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
     sma50 = tools.sma(d["Close"], 50).values
     sma200 = tools.sma(d["Close"], 200).values
     atr = tools.atr(d).values
+    if vol is not None:                              # volume filter: averages of the days BEFORE each day
+        if "Volume" not in d:
+            raise ValueError("vol filter needs a Volume column (strategy files set VOLUME = True)")
+        v_s = d["Volume"].astype(float)
+        v_now = v_s.values
+        v50 = v_s.rolling(50).mean().shift(1).values
+        v10 = v_s.rolling(10).mean().shift(1).values
     # the line to cross: the 50-day average, or "both" = the higher of the 50- and 200-day averages
     ln = sma50 if line == "50" else np.where(np.isfinite(sma200), np.maximum(sma50, sma200), np.nan)
     P = PIVOT
@@ -164,6 +178,13 @@ def run(d, exit_mode="lh", tp_r=None, stretch=None, reentry=True, above200=False
                          and bool(np.any(c[lo_k:i] <= ln[lo_k:i])))
             if turn and not cross and trend == "rising50" and c[i] > ln[i] and not rising(i - 1):
                 cross = True                         # the 50-day just turned up with price already above it
+            if cross and vol is not None:            # volume on the cross day
+                if not (np.isfinite(v50[i]) and v50[i] > 0 and np.isfinite(v_now[i])):
+                    cross = False
+                elif vol == "dry":
+                    cross = v10[i] < v50[i] and v_now[i] > v50[i]
+                else:
+                    cross = v_now[i] >= float(vol) * v50[i]
             resume = reentry and failed_high is not None and c[i] > failed_high and c[i] > ln[i]
             if cross or resume:
                 entry[i] = True

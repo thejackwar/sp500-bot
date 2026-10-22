@@ -11,7 +11,7 @@ on:
       years:
         description: "How many years to test"
         type: choice
-        options: ["1", "3", "5", "8", "from 2018", "from 2021"]
+        options: ["1", "3", "5", "8", "from 2015", "from 2018", "from 2021"]
         default: "5"
       test:
         description: "What to compare"

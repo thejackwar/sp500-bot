@@ -955,7 +955,12 @@ def strategy_signals(mod, daily, syms, days, first_slot, intraday=None, slots=No
     slot_exit_cols, slot_short_exit_cols = [], []          # TF strategies: exits per 15-min slot
     stop_cols = []                                         # strategies with stops(): stop level per day
     for col, sym in enumerate(syms):
-        d = daily[sym][["Open", "High", "Low", "Close"]].copy()
+        cols_in = ["Open", "High", "Low", "Close"]
+        if getattr(mod, "VOLUME", False):              # strategies with a volume filter get the daily volume
+            if "Volume" not in daily[sym]:
+                raise ValueError(f"{sym}: no daily volume in this price source")
+            cols_in.append("Volume")
+        d = daily[sym][cols_in].copy()
         atr = tools.atr(d)
         score = pd.Series(mod.rank(d), index=d.index) if hasattr(mod, "rank") else pd.Series(0.0, index=d.index)
         if hasattr(mod, "entry_level"):

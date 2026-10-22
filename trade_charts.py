@@ -496,7 +496,8 @@ def main():
         folder = os.path.join(folder, rule)
     elif mod is not None:
         from strategies import _structure
-        RULE["name"], RULE["st"] = rule, _structure.run(d[["Open", "High", "Low", "Close"]], **mod.KW)
+        RULE["name"], RULE["st"] = rule, _structure.run(
+            d[[c for c in ("Open", "High", "Low", "Close", "Volume") if c in d]], **mod.KW)
         RULE["right"] = mod.KW.get("lh_right")
         folder = os.path.join(folder, rule)
     os.makedirs(folder, exist_ok=True)
