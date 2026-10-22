@@ -74,6 +74,11 @@ SIM_RULES = {"reg50": "leverage only while SPY is above its 50-day MA (else 1x, 
              "pos8": "max 4% of equity per stock x leverage (8% at 2x: up to 25 positions)",
              "pos10": "max 5% of equity per stock x leverage (10% at 2x: up to 20 positions)",
              "pos12": "max 6% of equity per stock x leverage (12% at 2x: up to 16 positions)",
+             "gapconf": "only buy if it opens at least 0.5% above the breakout close",
+             "skipstop3": "skip if the stop is less than 3% below the entry",
+             "minatr25": "skip if the stock's ATR is under 2.5% of its price",
+             "minstop3": "stop at least 3% below the entry (deck stop moved down if tighter)",
+             "minstop15atr": "stop at least 1.5 ATR below the entry (deck stop moved down if tighter)",
              "risk05": "sized by risk: 0.25% x leverage (0.5% at 2x) per trade, cap 15% x leverage per stock",
              "risk075": "sized by risk: 0.375% x leverage (0.75% at 2x) per trade, cap 15% x leverage per stock"}
 # note (22 Oct 2026): with 1% risk and a 10%-per-stock cap, ~98% of trades are sized by the cap, not the risk
@@ -275,6 +280,16 @@ def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None,
                 continue
             fill = o * (1 + SLIP)
             # no-chase entry rules (ENTRY_RULES): don't buy when the open is already too high
+            if "gapconf" in rules and o < bclose * 1.005:
+                continue
+            if "minatr25" in rules and batr < 0.025 * bclose:
+                continue
+            if "skipstop3" in rules and fill - stop < 0.03 * fill:
+                continue
+            if "minstop3" in rules:
+                stop = min(stop, fill * 0.97)
+            if "minstop15atr" in rules:
+                stop = min(stop, fill - 1.5 * batr)
             if entry == "gap1atr" and o > bclose + batr:
                 continue
             if entry == "gap2pct" and o > bclose * 1.02:
