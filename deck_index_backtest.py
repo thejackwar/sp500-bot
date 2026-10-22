@@ -45,7 +45,7 @@ SYMBOL = os.environ.get("SYMBOL", "OEF").upper().replace("/USD", "")
 CRYPTO = SYMBOL in ("BTC", "ETH")
 START = os.environ.get("START", "").strip()       # fixed first test day (YYYY-MM-DD); overrides YEARS
 YEARS = float(os.environ.get("YEARS", "8"))
-TIMEFRAMES = ["1d"] if CRYPTO else os.environ.get("TIMEFRAMES", "1d 4h 2h").split()
+TIMEFRAMES = os.environ.get("TIMEFRAMES", "1d" if CRYPTO else "1d 4h 2h").split()
 WINDOW = 290            # candles the detector sees each time (like the live scan on daily candles)
 TRAIL = 20              # trailing exit: lowest low of the last 20 candles of that timeframe
 NO_TARGET_R = 2.0
@@ -57,7 +57,39 @@ VERSIONS = {"A": ("Long, deck stop + deck target", False, "target"),
             "C": ("Long + short, deck stop + deck target", True, "target"),
             "D": ("Long, deck stop + trailing exit + 50-day filter (= live stock trader, no leverage)", False, "trail50"),
             "R": ("Reference: the live Bitcoin bot's 50-day rule (btc50_uprise_ma_f1)", False, "rule")}
-RUN_VERSIONS = ["B", "D", "R"] if CRYPTO else ["A", "B", "C"]
+CRYPTO_INTRADAY = CRYPTO and TIMEFRAMES != ["1d"]
+
+
+def run_versions(tf):
+    if not CRYPTO:
+        return ["A", "B", "C"]
+    if CRYPTO_INTRADAY:                              # timeframe test: version 6, + the 50-day rule on 1d for reference
+        return ["B", "R"] if tf == "1d" else ["B"]
+    return ["B", "D", "R"]
+
+
+def crypto_candles(h, tf):
+    """Crypto trades 24/7: candles of tf built from 15-min candles, aligned to 00:00 UTC (45 min divides a day)."""
+    if tf == "15m":
+        return h.copy()
+    rule = tf.replace("m", "min").replace("h", "h")
+    agg = {"Open": "first", "High": "max", "Low": "min", "Close": "last", "Volume": "sum"}
+    return h.resample(rule, origin="start_day").agg(agg).dropna()
+
+
+def clean_spikes(h, limit=0.05):
+    """Alpaca's crypto history has a few bad ticks (a wick far outside every price around it). A 15-min high
+    (low) more than `limit` above (below) the candle's open/close AND the neighbours' closes and opens is cut back
+    to that range, so a bad tick can't set off a stop. Returns the cleaned candles and how many were cut."""
+    o, c = h["Open"], h["Close"]
+    near = pd.concat([o, c, c.shift(1), o.shift(-1)], axis=1)
+    top, bot = near.max(axis=1), near.min(axis=1)
+    hi_bad = h["High"] > top * (1 + limit)
+    lo_bad = h["Low"] < bot * (1 - limit)
+    h = h.copy()
+    h.loc[hi_bad, "High"] = top[hi_bad]
+    h.loc[lo_bad, "Low"] = bot[lo_bad]
+    return h, int(hi_bad.sum() + lo_bad.sum())
 
 
 def candles(h, tf):
@@ -229,6 +261,15 @@ def main():
         h15 = None
         t_start = max(pd.Timestamp(start.date()), d1.index[0] + pd.Timedelta(days=21))
         print(f"{SYMBOL}: {len(d1)} daily candles from {d1.index[0]:%Y-%m-%d}, test from {t_start:%Y-%m-%d}", flush=True)
+        if CRYPTO_INTRADAY:                          # Alpaca's 15-min candles (from 2021) for the shorter candles
+            h15 = crypto.bars([f"{SYMBOL}/USD"], "15Min", start - dt.timedelta(days=60), end)[f"{SYMBOL}/USD"]
+            h15 = h15[["Open", "High", "Low", "Close", "Volume"]].astype(float)
+            h15.index = h15.index.tz_convert("UTC").tz_localize(None)
+            h15, n_cut = clean_spikes(h15)
+            print(f"{SYMBOL}: {len(h15)} 15-min candles from {h15.index[0]:%Y-%m-%d %H:%M} (Alpaca), "
+                  f"{n_cut} bad wicks cut", flush=True)
+            # every timeframe starts on the same day: 4h needs 150 candles (25 days) before the first test day
+            t_start = max(t_start, (h15.index[0] + pd.Timedelta(days=30)).normalize())
     else:
         headers = backtest._headers()
         d1 = backtest.fetch(SYMBOL, "1Day", start - dt.timedelta(days=500), end, headers)
@@ -245,9 +286,12 @@ def main():
     b_year = b_year / pd.concat([pd.Series([100_000.0]), b_year.iloc[:-1]]).values - 1
 
     span = f"from{START}" if START else f"{YEARS:g}y"
+    if CRYPTO_INTRADAY:
+        span += "-" + "-".join(TIMEFRAMES)
     out = os.path.join("reports", "backtest", f"index-deck-{SYMBOL.lower()}-{span}")
     os.makedirs(out, exist_ok=True)
-    what = ("daily candles (Yahoo/Coinbase)" if CRYPTO else
+    what = (f"candles {' / '.join(TIMEFRAMES)} (1d: Yahoo/Coinbase; shorter: Alpaca 15-min, built 00:00 UTC-aligned, "
+            f"{n_cut} bad wicks cut)" if CRYPTO_INTRADAY else "daily candles (Yahoo/Coinbase)" if CRYPTO else
             "(S&P 100 index ETF): daily vs 4-hour vs 2-hour candles")
     cost = "0.05% fee + 0.05% slippage per side" if CRYPTO else "0.02% slippage per side"
     lines = [f"📊 Fidelity-deck patterns on {SYMBOL} alone {what}",
@@ -256,13 +300,13 @@ def main():
              f"Buy & hold {SYMBOL}: {backtest.pct(b_cagr)}/yr, max drop {backtest.pct(b_dd)}, final ${bh.iat[-1]:,.0f}", ""]
     all_trades, curves, rows = [], {f"Buy & hold {SYMBOL}": bh}, []
     for tf in TIMEFRAMES:
-        df = d1.copy() if tf == "1d" else candles(h15, tf)
+        df = d1.copy() if tf == "1d" else crypto_candles(h15, tf) if CRYPTO else candles(h15, tf)
         df = df[df.index >= t_start - pd.Timedelta(days=400 if tf == "1d" else 120)]
         start_bar = int(np.searchsorted(df.index.values, np.datetime64(t_start)))
         print(f"{tf}: {len(df)} candles, test from candle {start_bar}", flush=True)
         sigs = signals(df)
         lines.append(f"━━ {tf} candles ━━ ({sum(1 for s in sigs if s[0] >= start_bar)} pattern breakouts in the test period)")
-        for key in RUN_VERSIONS:
+        for key in run_versions(tf):
             name, shorts, mode = VERSIONS[key]
             tr, eq = simulate(df, sigs, shorts, mode, start_bar)
             st = stats(tr, eq, bh)
@@ -292,7 +336,7 @@ def main():
     if all_trades:
         t = pd.concat(all_trades, ignore_index=True)
         t.to_csv(os.path.join(out, "trades.csv"), index=False)
-    if all_trades and "C" in RUN_VERSIONS:
+    if all_trades and not CRYPTO:
         lines += ["", "Per pattern (version C: every breakout taken, both directions): trades / avg R"]
         c = t[t.version == "C"]
         g = c.groupby(["pattern", "timeframe"])["R"].agg(["size", "mean"]).unstack("timeframe")
@@ -317,7 +361,8 @@ def main():
     for s in ax.spines.values():
         s.set_color("#444")
     ax.tick_params(colors="#bbbbbb"); ax.grid(color="#222")
-    cols = {"1d": "#ffd54f", "4h": "#42a5f5", "2h": "#ef5350"}
+    cols = {"1d": "#ffd54f", "4h": "#42a5f5", "2h": "#ef5350", "1h": "#66bb6a", "45m": "#ab47bc",
+            "30m": "#ff7043", "15m": "#26c6da"}
     ls = {"A": "-", "B": "--", "C": ":", "D": "-.", "R": "-"}
     for name, s in curves.items():
         if name.startswith("Buy"):

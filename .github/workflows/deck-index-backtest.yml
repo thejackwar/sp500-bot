@@ -19,7 +19,7 @@ on:
         type: string
         default: ""
       timeframes:
-        description: "Candles to compare"
+        description: "Candles to compare (BTC: 1d 4h 2h 1h 45m 30m 15m; shorter than 1d = Alpaca 15-min prices, from 2021)"
         type: string
         default: "1d 4h 2h"
 
@@ -29,7 +29,7 @@ permissions:
 jobs:
   backtest:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -52,5 +52,5 @@ jobs:
           git config user.name "backtest bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add reports/backtest
-          git commit -m "Deck index backtest: ${{ inputs.symbol }} ${{ inputs.start && format('from {0}', inputs.start) || format('{0}y', inputs.years) }}" || exit 0
+          git commit -m "Deck index backtest: ${{ inputs.symbol }} ${{ inputs.start && format('from {0}', inputs.start) || format('{0}y', inputs.years) }} ${{ inputs.timeframes }}" || exit 0
           for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done
