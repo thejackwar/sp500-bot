@@ -1,6 +1,6 @@
 🎲 Monte Carlo tests of the deck pattern trader version 6 (S&P 100, close above the 50-day MA, 2x leverage, sell on a close below the 20-day low)
 
-From the saved middle run in reports/backtest/universe-deck-v6-lev-2-f-ma50-ma50_vol12-ma50_vol15-ma50_vol20-ma50_dry-sp100-8y (22 Oct 2018 → 22 Oct 2026).
+Real strategy, middle of 10 start dates: +33.1%/yr, max drop -39.5%, 1663 trades, avg +0.47R.
 
 1. Drawdown range (10,000 reshuffled histories, 20-day blocks of real daily returns)
 real: +33.2%/yr, max drop -39.5%
@@ -13,5 +13,14 @@ avg R: real +0.47 · 5% +0.29 · 95% +0.66; chance avg R <= 0: 0.00%
 win rate: 5% 24% - 95% 28% · profit factor: 5% 1.29 - 95% 2.60
 how much rides on the biggest winners: without the top 1% of trades avg R is +0.15, without the top 5% -0.29
 
-Tests 3-4 (random entries, parameter jitter) need prices: run the Monte Carlo workflow.
+3. Random entries (200 runs: same days, buys per day, MA filter, stop distance, exits, sizing)
+real (median of 10 starts) +32.2%/yr vs random: median +22.4% · 95% +37.8% · best +49.4%
+real beats 88% of random runs (p = 0.129) · avg R real +0.47 vs random median +0.45 · max drop random median -45.9%
+→ NOT clearly better than random stocks with the same rules: most of the result comes from the exit rule, the trend filter and leverage, not the patterns
+
+4. Parameter jitter (40 runs, trail 15-25 days, MA 40-60 days, 7s)
+yearly return: worst +19.7% · 5% +23.9% · median +31.6% · best +42.9%; beat SPY (+15.3%/yr) in 100%
+max drop: median -41.0% · worst -48.0%
+worst settings: trail 23/MA 43 +19.7%, trail 24/MA 48 +22.9%, trail 23/MA 45 +23.9%
+
 Bootstraps assume the future looks like a reshuffled past; today's index members only (survivorship flatters results). Past results don't guarantee future ones.
