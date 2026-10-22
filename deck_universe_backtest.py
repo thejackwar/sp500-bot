@@ -46,12 +46,28 @@ FILTER_NAMES = {"none": "no MA filter",
                 "ma200": "close above its 200-day MA",
                 "ma50_200": "50-day MA above the 200-day MA",
                 "both": "close above the 50- and 200-day MA",
-                "ma50_rising": "close above a rising 50-day MA (higher than 10 days ago)"}
+                "ma50_rising": "close above a rising 50-day MA (higher than 10 days ago)",
+                "vol12": "breakout volume >= 1.2x its 50-day average",
+                "vol15": "breakout volume >= 1.5x its 50-day average",
+                "vol20": "breakout volume >= 2x its 50-day average",
+                "dry": "quiet volume for 10 days, then an above-average breakout day"}
 
 
 def ma_ok(flt, tt, date):
+    if "+" in flt:                                      # combined filters, e.g. ma50+vol15
+        return all(ma_ok(f, tt, date) for f in flt.split("+"))
     if flt == "none":
         return True
+    if flt.startswith("vol") or flt == "dry":
+        try:
+            r = tt.loc[date]
+        except KeyError:
+            return False
+        if not (r.v50 > 0):
+            return False
+        if flt == "dry":                                # quiet 10 days before, then above-average breakout day
+            return r.v10 < r.v50 and r.v > r.v50
+        return r.v >= int(flt[3:]) / 10 * r.v50        # vol15 = breakout volume >= 1.5 x the 50-day average
     try:
         r = tt.loc[date]
     except KeyError:
@@ -194,7 +210,8 @@ def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0):
                        "pnl": p["qty"] * (x - p["fill"]), "R": (x - p["fill"]) / p["risk"],
                        "days": (days[-1] - days[p["t"]]).days})
     eq = pd.Series(curve, index=days).iloc[d0:].ffill()
-    return pd.DataFrame(trades), eq, info
+    cols = ["symbol", "pattern", "entry_date", "exit_date", "entry", "stop", "exit", "result", "pnl", "R", "days"]
+    return pd.DataFrame(trades, columns=cols), eq, info
 
 
 def summarize(eq, tr):
@@ -242,7 +259,7 @@ def main():
     days = spy.index[spy.index >= pd.Timestamp(start.date()) - pd.Timedelta(days=40)]
     lev_tag = "" if LEVERAGES == [1.0] else "-lev-" + "-".join(f"{x:g}" for x in LEVERAGES)
     if FILTERS != ["none"]:
-        lev_tag += "-ma-" + "-".join(FILTERS)
+        lev_tag += "-f-" + "-".join(f.replace("+", "_") for f in FILTERS)
     out_dir = os.path.join("reports", "backtest", f"universe-deck-v6{lev_tag}-{'-'.join(UNIVERSES)}-"
                            + (f"from{os.environ['START']}" if os.environ.get("START") else f"{YEARS:g}y"))
     os.makedirs(out_dir, exist_ok=True)
@@ -263,7 +280,10 @@ def main():
         for s_ in syms:
             c_ = daily[s_]["Close"]
             m50, m200 = c_.rolling(50).mean(), c_.rolling(200).mean()
-            trend[s_] = pd.DataFrame({"c": c_, "m50": m50, "m200": m200, "m50_10": m50.shift(10)})
+            v_ = daily[s_]["Volume"]
+            v50 = v_.rolling(50).mean().shift(1)          # average of the 50 days BEFORE that day
+            trend[s_] = pd.DataFrame({"c": c_, "m50": m50, "m200": m200, "m50_10": m50.shift(10),
+                                      "v": v_, "v50": v50, "v10": v_.rolling(10).mean().shift(1)})
         sigs_by = {}
         for flt in FILTERS:
             sigs, n_sig = {}, 0
@@ -279,7 +299,7 @@ def main():
         for flt, (sigs, n_sig) in sigs_by.items():
             for lev in LEVERAGES:
                 tag = u.upper() + (f" {lev:g}x leverage" if len(LEVERAGES) > 1 or lev != 1 else "") + \
-                ("" if FILTERS == ["none"] else f" · {FILTER_NAMES[flt]}")
+                ("" if FILTERS == ["none"] else " · " + " + ".join(FILTER_NAMES[f] for f in flt.split("+")))
                 res = []
                 for r in range(RUNS):
                     d0 = first + r * STEP

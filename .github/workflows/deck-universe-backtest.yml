@@ -14,7 +14,7 @@ on:
         type: string
         default: ""
       filters:
-        description: "Moving-average filters to compare: none ma50 ma200 ma50_200 both ma50_rising"
+        description: "Filters to compare (combine with +): none ma50 ma200 ma50_200 both ma50_rising vol12 vol15 vol20 dry"
         type: string
         default: "none"
       leverages:
