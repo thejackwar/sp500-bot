@@ -1,0 +1,3 @@
+symbol,pattern,side,qty,entry,stop,target,now,pnl,pnl_pct,status,time
+COF,Inverse head shoulders up,LONG,49,207.71,204.24,,204.13,-175.42,-1.72,closed: stop hit,09:32 NY
+MS,Falling wedge up,LONG,55,185.094727,179.83,,183.69,-77.26,-0.76,open,09:34 NY
