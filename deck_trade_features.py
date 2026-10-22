@@ -54,11 +54,15 @@ def main():
     path = TRADES
     if not path:                                       # newest backtest that has this filter
         import glob
-        for f in sorted(glob.glob("reports/backtest/universe-deck-v6-*/trades.csv"), key=os.path.getmtime,
-                        reverse=True):
-            if FILTER in set(pd.read_csv(f, usecols=["filter"])["filter"]):
-                path = f
-                break
+        for f in sorted(glob.glob("reports/backtest/universe-deck-v6-*/trades.csv")):   # (checkout: same mtimes)
+            try:
+                tf = pd.read_csv(f, usecols=["filter", "leverage"])
+            except ValueError:                         # older reports without these columns
+                continue
+            if ((tf["filter"] == FILTER) & (tf["leverage"] == LEVERAGE)).any():
+                path = f                               # the last match in name order: the newest dated folder
+        if not path:
+            raise SystemExit(f"No backtest trades with filter {FILTER} at {LEVERAGE:g}x")
     tr = pd.read_csv(path)
     tr = tr[(tr["filter"] == FILTER) & (tr["leverage"] == LEVERAGE) & ~tr.result.isin(["still open", "de-lever"])]
     if "universe" in tr:
