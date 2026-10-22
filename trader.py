@@ -185,6 +185,10 @@ def check_closed(api, book, send):
                 leg = o["legs"][0]
                 if leg.get("filled_avg_price"):
                     exit_px, how = float(leg["filled_avg_price"]), "🛑 Stop hit"
+            if exit_px is None and t.get("stop_order_id"):       # stop re-placed after a partial sale
+                so = api.get(f"/orders/{t['stop_order_id']}")
+                if so.get("filled_avg_price"):
+                    exit_px, how = float(so["filled_avg_price"]), "🛑 Stop hit"
             entry = float(o["filled_avg_price"]) if o.get("filled_avg_price") else t["entry"]
         except Exception:
             entry = t["entry"]

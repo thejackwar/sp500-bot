@@ -19,9 +19,13 @@ effectiveness can be measured on real prices. Started 21 Oct 2026; replaces patt
     filter  (since 22 Oct 2026) only if the breakout day's close is above the stock's 50-day average,
             and not if the price at the open is more than 2% above the breakout close (MAX_GAP);
             Double bottom, Cup and handle, Pipe bottom and Hanging man aren't traded (SKIP_PATTERNS)
-    size    (since 22 Oct 2026, 2x leverage) 2% of equity at risk, max 20% of equity per stock, all
-            positions at most 200% of equity (Alpaca's overnight margin limit), max 25 positions, max 8
-            new trades a day
+    size    (since 22 Oct 2026, 2x leverage) max 20% of equity per stock - with the deck's tight stops this cap
+            sizes ~98% of trades (the 2%-risk rule rarely binds; actual risk is ~0.5% of equity), all
+            positions at most 200% of equity (Alpaca's overnight margin limit), so ~10 positions at a time;
+            max 25 positions, max 8 new trades a day
+    regime  (since 22 Oct 2026) leverage only while SPY is above its 200-day MA (REGIME_MA): below it new
+            trades are sized at 1x, and at the afternoon check every deck position is trimmed until the
+            whole account is at most 100% invested (backtest 8y: same return, max drop -33% vs -45%)
 Every order is tagged pat-deck_<pattern>_<up|down>-..., so the daily paper report shows the result of
 each pattern and direction separately.
 
@@ -30,8 +34,10 @@ By hand: Actions -> Pattern trader -> Run workflow (dry run = show what it would
 """
 import datetime as dt
 import json
+import math
 import os
 import re
+import time
 import uuid
 
 import pandas as pd
@@ -56,6 +62,7 @@ MAX_GAP = 0.02               # 22 Oct 2026: skip if the price at the open is mor
 # 22 Oct 2026 (user): these patterns aren't traded - they lost money in both halves of the 8-year S&P 100
 # backtest (2x + MA filter: +34.4%/yr, max drop -37.4% without them vs +33.1%, -39.5% with them)
 SKIP_PATTERNS = {"Double bottom", "Cup and handle", "Pipe bottom", "Hanging man"}
+REGIME_MA = 200             # 22 Oct 2026: LEVERAGE only while SPY is above its 200-day MA, else 1x (0 = off)
 MAX_OPEN_POSITIONS = 25      # whole account (old pattern trader's positions count too)
 MAX_NEW_PER_DAY = 8
 EXIT = "trail"               # "trail" = backtest version 6 (+20.8%/yr, 8y); "target" = version 2 (+13.4%/yr)
@@ -111,6 +118,72 @@ def find_signals(daily):
     return out
 
 
+def regime(a, now, live=False):
+    """Is SPY above its REGIME_MA-day average? live=False: yesterday's close (morning, like the backtest's
+    signal day); live=True: the current price (afternoon check, near the close). Returns (on, price, ma)."""
+    if not REGIME_MA:
+        return True, None, None
+    try:
+        c = pattern_trader.daily_prices(["SPY"], now)["SPY"]["Close"]
+        if live:
+            price = float(a.live_price("SPY"))
+            ma = (float(c.tail(REGIME_MA - 1).sum()) + price) / REGIME_MA
+        else:
+            price, ma = float(c.iat[-1]), float(c.tail(REGIME_MA).mean())
+        return price > ma, price, ma
+    except Exception as e:                              # no data: be careful, no leverage
+        print(f"Regime check failed ({e!r}): 1x", flush=True)
+        return False, None, None
+
+
+def trim_to_1x(a, book, send, dry_run):
+    """Regime off: sell part of every deck position (stop orders re-placed for the rest) so the whole
+    account is at most MAX_GROSS x equity."""
+    acct, positions = a.get("/account"), a.get("/positions")
+    equity = float(acct["equity"])
+    gross = sum(abs(float(p.get("market_value") or 0)) for p in positions)
+    cap = MAX_GROSS * equity
+    mine = [p for p in positions if book.get(p["symbol"], {}).get("status") == "open" and float(p["qty"]) > 0]
+    mine_value = sum(float(p["market_value"]) for p in mine)
+    if gross <= cap * 1.01 or mine_value <= 0:
+        return [f"Regime off: {gross / equity:.0%} invested, nothing to trim"]
+    frac = min(1.0, (gross - cap) / mine_value)
+    lines = []
+    for p in mine:
+        sym, qty = p["symbol"], int(float(p["qty"]))
+        q = min(qty, math.ceil(qty * frac))
+        if q <= 0:
+            continue
+        t = book[sym]
+        if dry_run:
+            lines.append(f"• {sym}: would sell {q} of {qty}")
+            continue
+        try:
+            for o in a.get("/orders", status="open", symbols=sym, limit=50):
+                a.delete(f"/orders/{o['id']}")         # the stop order holds the shares
+            for _ in range(10):
+                if not a.get("/orders", status="open", symbols=sym, limit=50):
+                    break
+                time.sleep(1)
+            a.post("/orders", {"symbol": sym, "qty": str(q), "side": "sell", "type": "market", "time_in_force": "day",
+                               "client_order_id": f"pat-deck_delever-{uuid.uuid4().hex[:10]}"})
+            left = qty - q
+            if left > 0:
+                so = a.post("/orders", {"symbol": sym, "qty": str(left), "side": "sell", "type": "stop",
+                                        "stop_price": f"{t['stop']:.2f}", "time_in_force": "gtc",
+                                        "client_order_id": f"pat-deck_stop-{uuid.uuid4().hex[:10]}"})
+                t["qty"], t["stop_order_id"] = left, so["id"]      # check_closed reads this stop's fill
+            else:
+                t["status"] = "closed"
+            lines.append(f"• {sym}: sold {q} of {qty}")
+        except Exception as e:
+            send(f"⚠️ Deck trader: trimming {sym} failed: {e}")
+            lines.append(f"• {sym}: trim failed")
+    send(f"🧩⚖️ <b>{'Would de-lever' if dry_run else 'De-levered'} to 1x</b>: SPY is below its {REGIME_MA}-day MA. "
+         f"Account {gross / equity:.0%} invested → ~{MAX_GROSS:.0%}.\n" + "\n".join(lines))
+    return lines
+
+
 def slug(p):
     return re.sub(r"[^A-Za-z0-9]+", "_", p["name"].split(" (")[0]).strip("_") + \
         ("_up" if p["brk"]["dir"] == "LONG" else "_down")
@@ -155,6 +228,9 @@ def run(now=None, force=False, dry_run=False, send=None):
             if trail:
                 daily = pattern_trader.daily_prices([s.replace(".", "-") for s in trail], now)
                 lines = pattern_trader.trend_exits(a, book, a.get("/positions"), daily, send, dry_run, today=True)
+            on, spy, ma = regime(a, now, live=True)
+            if not on and LEVERAGE > 1:
+                lines += trim_to_1x(a, book, send, dry_run)
             state["last_exit_run"] = today
             save_state(state)
             return ["Deck trader: 20-day-low check"] + lines
@@ -175,7 +251,9 @@ def run(now=None, force=False, dry_run=False, send=None):
     equity = float(acct["equity"])
     gross = sum(abs(float(p.get("market_value") or 0)) for p in positions)
     bp = float(acct.get("regt_buying_power") or acct.get("buying_power") or acct["cash"])   # overnight (2x) limit
-    room = max(0.0, min(MAX_GROSS * LEVERAGE * equity - gross, bp))
+    on, spy, ma = regime(a, now)
+    lev = LEVERAGE if on else min(LEVERAGE, 1.0)
+    room = max(0.0, min(MAX_GROSS * lev * equity - gross, bp))
     slots = max(0, MAX_OPEN_POSITIONS - len(held | pending))
     placed, lines = 0, []
     for f in found:
@@ -221,7 +299,7 @@ def run(now=None, force=False, dry_run=False, send=None):
         if EXIT == "target" and sign * (target - price) <= 0.1 * dist:
             lines.append(f"• {sym}: {what}, skipped (opened at or beyond the target)")
             continue
-        qty = min(int(equity * RISK_PER_TRADE * LEVERAGE / dist), int(equity * MAX_POSITION_PCT * LEVERAGE / price),
+        qty = min(int(equity * RISK_PER_TRADE * lev / dist), int(equity * MAX_POSITION_PCT * lev / price),
                   int(room * 0.95 / price))
         if qty < 1:
             lines.append(f"• {sym}: {what}, skipped (too small or no room left)")
@@ -272,7 +350,9 @@ def run(now=None, force=False, dry_run=False, send=None):
         state["last_run"] = today
     save_state(state)
     n_pos = len(a.get("/positions"))
-    send(f"🧩 <b>Deck pattern trader</b>{' (dry run)' if not live else ''} ({LEVERAGE:g}x"
+    reg = ("" if not REGIME_MA else f", SPY {'above' if on else 'BELOW'} its {REGIME_MA}-day MA"
+           + (f" ({px(spy)} vs {px(ma)})" if spy else "") + ("" if on else ": 1x"))
+    send(f"🧩 <b>Deck pattern trader</b>{' (dry run)' if not live else ''} ({LEVERAGE:g}x{reg}"
          f"{f', {MA_FILTER}-day MA filter' if MA_FILTER else ''}"
          f"{f', no entry >{MAX_GAP:.0%} above the breakout' if MAX_GAP is not None else ''}): "
          f"{len(found)} breakouts at yesterday's "
