@@ -1,0 +1,37 @@
+📊 Deck pattern trader version 6 (up breakouts, deck stop, sell on a close below the 20-day low) on whole universes, daily candles
+22 Oct 2018 → 22 Oct 2026, $100,000, 1% risk, max 10%/stock, 25 positions, 8 new/day, no leverage, 0.02% slippage. 10 start dates a week apart: middle run, range in brackets.
+
+SP100 · no MA filter (100 stocks, 10098 up breakouts)
++23.0%/yr (+18.4% to +27.3%), beat SPY in 10/10 runs · max drop -25.5% (worst -28.9%) · final $512,640
+~1617 trades, win 27%, avg +0.56R, profit factor 1.91, hold 36 days
+by year: 2018: +2%  2019: +34%  2020: +35%  2021: +37%  2022: -7%  2023: +39%  2024: +13%  2025: +14%  2026: +22%
+
+SP100 · close above its 50-day MA (100 stocks, 7450 up breakouts)
++22.8%/yr (+16.4% to +24.4%), beat SPY in 10/10 runs · max drop -19.9% (worst -22.1%) · final $514,247
+~1481 trades, win 26%, avg +0.51R, profit factor 2.06, hold 35 days
+by year: 2018: -6%  2019: +23%  2020: +30%  2021: +44%  2022: -8%  2023: +31%  2024: +24%  2025: +14%  2026: +37%
+
+SP100 · close above its 200-day MA (100 stocks, 7330 up breakouts)
++21.1%/yr (+14.9% to +22.5%), beat SPY in 9/10 runs · max drop -24.6% (worst -24.7%) · final $447,715
+~1459 trades, win 26%, avg +0.52R, profit factor 1.99, hold 36 days
+by year: 2018: +0%  2019: +30%  2020: +20%  2021: +34%  2022: -14%  2023: +32%  2024: +16%  2025: +20%  2026: +37%
+
+SP100 · 50-day MA above the 200-day MA (100 stocks, 6494 up breakouts)
++14.9%/yr (+12.2% to +16.9%), beat SPY in 2/10 runs · max drop -26.3% (worst -28.1%) · final $304,175
+~1475 trades, win 25%, avg +0.40R, profit factor 1.54, hold 35 days
+by year: 2018: -2%  2019: +29%  2020: +19%  2021: +32%  2022: -10%  2023: +24%  2024: +26%  2025: +6%  2026: +3%
+
+SP100 · close above the 50- and 200-day MA (100 stocks, 6292 up breakouts)
++20.7%/yr (+11.8% to +22.9%), beat SPY in 9/10 runs · max drop -19.2% (worst -25.1%) · final $438,230
+~1361 trades, win 26%, avg +0.52R, profit factor 2.12, hold 36 days
+by year: 2018: +0%  2019: +19%  2020: +23%  2021: +30%  2022: -11%  2023: +18%  2024: +21%  2025: +26%  2026: +43%
+
+SP100 · close above a rising 50-day MA (higher than 10 days ago) (100 stocks, 5490 up breakouts)
++15.3%/yr (+10.6% to +16.6%), beat SPY in 2/10 runs · max drop -21.9% (worst -23.6%) · final $305,097
+~1310 trades, win 25%, avg +0.43R, profit factor 1.72, hold 36 days
+by year: 2018: +0%  2019: +15%  2020: +27%  2021: +25%  2022: -6%  2023: +14%  2024: +15%  2025: +2%  2026: +32%
+
+Buy & hold SPY: +15.4%/yr, max drop -33.8%, final $314,447
+by year: 2018: -9%  2019: +31%  2020: +18%  2021: +29%  2022: -18%  2023: +26%  2024: +25%  2025: +18%  2026: +13%
+
+Today's index members only (stocks that left the index are missing, which flatters results - more so for the S&P 500); daily candles: stops judged on daily lows, 20-day-low exit at the close. Past results don't guarantee future ones.
