@@ -41,6 +41,10 @@ UNIVERSES = os.environ.get("UNIVERSES", "sp100 sp500").split()
 LEVERAGES = [float(x) for x in os.environ.get("LEVERAGES", "1").split()]
 # moving-average confirmation (judged on the breakout day's close): only buy if ...
 FILTERS = os.environ.get("FILTERS", "none").split()
+ENTRY_RULES = {"gap1atr": "skip if it opens more than 1 ATR above the breakout close",
+               "gap2pct": "skip if it opens more than 2% above the breakout close",
+               "risk2x": "skip if the risk at the open is more than 2x the planned risk",
+               "limit05": "limit order at the breakout close +0.5%"}
 FILTER_NAMES = {"none": "no MA filter",
                 "ma50": "close above its 50-day MA",
                 "ma200": "close above its 200-day MA",
@@ -57,6 +61,8 @@ def ma_ok(flt, tt, date):
     if "+" in flt:                                      # combined filters, e.g. ma50+vol15
         return all(ma_ok(f, tt, date) for f in flt.split("+"))
     if flt == "none":
+        return True
+    if flt in ENTRY_RULES:                              # entry rules are applied at the open (simulate)
         return True
     if flt.startswith("vol") or flt == "dry":
         try:
@@ -122,11 +128,12 @@ def _signals(args):
             if key in seen:
                 continue
             seen.add(key)
-            out.append((d.index[i], float(b["stop"]), FAM.get(p["family"], 1), p["name"].split(" (")[0]))
+            out.append((d.index[i], float(b["stop"]), FAM.get(p["family"], 1), p["name"].split(" (")[0],
+                        float(d["Close"].iat[i]), float(d["ATR"].iat[i])))
     return sym, out
 
 
-def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0):
+def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None):
     """sigs: {day index: [(col, stop, fam, name)]} signals at that day's close -> buy next open."""
     rng = np.random.default_rng(seed)
     cash, pos, trades = START_EQ, {}, []
@@ -184,13 +191,26 @@ def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0):
         gross = value
         order = sorted(todays, key=lambda s: (s[2], rng.random()))
         placed = 0
-        for col, stop, fam, name in order:
+        for col, stop, fam, name, bclose, batr in order:
             if col in pos or len(pos) >= MAX_POS or placed >= MAX_NEW:
                 continue
             o = O[t + 1, col]
             if not np.isfinite(o):
                 continue
             fill = o * (1 + SLIP)
+            # no-chase entry rules (ENTRY_RULES): don't buy when the open is already too high
+            if entry == "gap1atr" and o > bclose + batr:
+                continue
+            if entry == "gap2pct" and o > bclose * 1.02:
+                continue
+            if entry == "risk2x" and (o - stop) > 2 * (bclose - stop):
+                continue
+            if entry == "limit05":                           # limit order at the breakout close + 0.5%
+                lim = bclose * 1.005
+                if o > lim:
+                    if not (L[t + 1, col] <= lim):
+                        continue
+                    fill = lim                               # filled when the price came back down
             risk = fill - stop
             if risk <= 0:
                 continue
@@ -289,21 +309,23 @@ def main():
             sigs, n_sig = {}, 0
             for col, s_ in enumerate(syms):
                 tt = trend[s_]
-                for date, stop, fam, name in found[s_]:
+                for date, stop, fam, name, bclose, batr in found[s_]:
                     k = pos_of.get(pd.Timestamp(date))
                     if k is None or k < first or not ma_ok(flt, tt, pd.Timestamp(date)):
                         continue
-                    sigs.setdefault(k, []).append((col, stop, fam, name))
+                    sigs.setdefault(k, []).append((col, stop, fam, name, bclose, batr))
                     n_sig += 1
             sigs_by[flt] = (sigs, n_sig)
         for flt, (sigs, n_sig) in sigs_by.items():
             for lev in LEVERAGES:
                 tag = u.upper() + (f" {lev:g}x leverage" if len(LEVERAGES) > 1 or lev != 1 else "") + \
-                ("" if FILTERS == ["none"] else " · " + " + ".join(FILTER_NAMES[f] for f in flt.split("+")))
+                ("" if FILTERS == ["none"] else " · " + " + ".join({**FILTER_NAMES, **ENTRY_RULES}[f]
+                                                                    for f in flt.split("+")))
                 res = []
                 for r in range(RUNS):
                     d0 = first + r * STEP
-                    tr, eq, info = simulate(days, O, H, L, C, low20, sigs, syms, d0, seed=r, lev=lev)
+                    ent = next((f for f in flt.split("+") if f in ENTRY_RULES), None)
+                    tr, eq, info = simulate(days, O, H, L, C, low20, sigs, syms, d0, seed=r, lev=lev, entry=ent)
                     st = summarize(eq, tr)
                     st.update(info)
                     b = spy_c.iloc[d0:]

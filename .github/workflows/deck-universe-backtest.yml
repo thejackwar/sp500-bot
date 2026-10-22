@@ -14,7 +14,7 @@ on:
         type: string
         default: ""
       filters:
-        description: "Filters to compare (combine with +): none ma50 ma200 ma50_200 both ma50_rising vol12 vol15 vol20 dry"
+        description: "Filters to compare (combine with +): none ma50 ma200 ma50_200 both ma50_rising vol12 vol15 vol20 dry; entry rules gap1atr gap2pct risk2x limit05"
         type: string
         default: "none"
       leverages:
