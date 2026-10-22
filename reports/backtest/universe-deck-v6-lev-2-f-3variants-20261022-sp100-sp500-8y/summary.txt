@@ -1,0 +1,37 @@
+📊 Deck pattern trader version 6 (up breakouts, deck stop, sell on a close below the 20-day low) on whole universes, daily candles
+22 Oct 2018 → 22 Oct 2026, $100,000, 1% risk, max 10%/stock, 25 positions, 8 new/day, leverage as named (limits x L, borrowed money 6.5%/yr, margin call below 25%), 0.02% slippage. 10 start dates a week apart: middle run, range in brackets.
+
+SP100 2x leverage · close above its 50-day MA + skip if it opens more than 2% above the breakout close + without the losing patterns (Cup and handle, Double bottom, Hanging man, Pipe bottom) + leverage only while SPY is above its 200-day MA (else 1x, trimmed at the close) (100 stocks, 6468 up breakouts)
++41.1%/yr (+26.0% to +45.1%), beat SPY in 10/10 runs · max drop -33.4% (worst -35.3%) · final $1,557,286
+~1599 trades, win 25%, avg +0.52R, profit factor 2.14, hold 35 days, interest paid $168,489, margin calls in all runs: 0
+by year: 2018: -6%  2019: +31%  2020: +60%  2021: +69%  2022: -28%  2023: +53%  2024: +31%  2025: +61%  2026: +104%
+
+SP100 2x leverage · close above its 50-day MA + skip if it opens more than 2% above the breakout close + without the losing patterns (Cup and handle, Double bottom, Hanging man, Pipe bottom) + leverage only while SPY is above its 200-day MA (else 1x, trimmed at the close) + no new buys when SPY closes below its 200-day MA (100 stocks, 5691 up breakouts)
++37.0%/yr (+27.6% to +41.7%), beat SPY in 10/10 runs · max drop -36.1% (worst -37.7%) · final $1,235,753
+~1441 trades, win 25%, avg +0.65R, profit factor 2.05, hold 35 days, interest paid $142,868, margin calls in all runs: 0
+by year: 2018: -6%  2019: +21%  2020: +70%  2021: +67%  2022: -29%  2023: +20%  2024: +46%  2025: +74%  2026: +77%
+
+SP100 2x leverage · close above its 50-day MA + skip if it opens more than 2% above the breakout close + without the losing patterns (Cup and handle, Double bottom, Hanging man, Pipe bottom) + leverage only while SPY is above its 200-day MA, else 0.5x (trimmed at the close) (100 stocks, 6468 up breakouts)
++40.5%/yr (+31.7% to +44.8%), beat SPY in 10/10 runs · max drop -29.7% (worst -33.4%) · final $1,450,398
+~1583 trades, win 25%, avg +0.49R, profit factor 1.75, hold 34 days, interest paid $179,171, margin calls in all runs: 0
+by year: 2018: +0%  2019: +14%  2020: +70%  2021: +71%  2022: -23%  2023: +38%  2024: +60%  2025: +65%  2026: +57%
+
+SP500 2x leverage · close above its 50-day MA + skip if it opens more than 2% above the breakout close + without the losing patterns (Cup and handle, Double bottom, Hanging man, Pipe bottom) + leverage only while SPY is above its 200-day MA (else 1x, trimmed at the close) (498 stocks, 31482 up breakouts)
++19.1%/yr (+7.7% to +28.2%), beat SPY in 8/10 runs · max drop -35.2% (worst -42.8%) · final $403,854
+~1902 trades, win 23%, avg +0.30R, profit factor 1.23, hold 33 days, interest paid $108,052, margin calls in all runs: 0
+by year: 2018: -5%  2019: +29%  2020: +23%  2021: +87%  2022: -13%  2023: +21%  2024: +34%  2025: -0%  2026: +3%
+
+SP500 2x leverage · close above its 50-day MA + skip if it opens more than 2% above the breakout close + without the losing patterns (Cup and handle, Double bottom, Hanging man, Pipe bottom) + leverage only while SPY is above its 200-day MA (else 1x, trimmed at the close) + no new buys when SPY closes below its 200-day MA (498 stocks, 27402 up breakouts)
++19.5%/yr (+10.6% to +25.1%), beat SPY in 7/10 runs · max drop -40.7% (worst -45.5%) · final $403,943
+~1722 trades, win 21%, avg +0.41R, profit factor 1.19, hold 31 days, interest paid $83,024, margin calls in all runs: 0
+by year: 2018: +0%  2019: +28%  2020: -3%  2021: +59%  2022: -18%  2023: -4%  2024: +95%  2025: +9%  2026: +22%
+
+SP500 2x leverage · close above its 50-day MA + skip if it opens more than 2% above the breakout close + without the losing patterns (Cup and handle, Double bottom, Hanging man, Pipe bottom) + leverage only while SPY is above its 200-day MA, else 0.5x (trimmed at the close) (498 stocks, 31482 up breakouts)
++21.4%/yr (+11.3% to +26.5%), beat SPY in 8/10 runs · max drop -31.5% (worst -39.1%) · final $465,070
+~1973 trades, win 21%, avg +0.22R, profit factor 1.18, hold 30 days, interest paid $91,029, margin calls in all runs: 0
+by year: 2018: -3%  2019: +19%  2020: +13%  2021: +78%  2022: -10%  2023: -3%  2024: +56%  2025: +13%  2026: +30%
+
+Buy & hold SPY: +15.3%/yr, max drop -33.8%, final $313,111
+by year: 2018: -9%  2019: +31%  2020: +18%  2021: +29%  2022: -18%  2023: +26%  2024: +25%  2025: +18%  2026: +13%
+
+Today's index members only (stocks that left the index are missing, which flatters results - more so for the S&P 500); daily candles: stops judged on daily lows, 20-day-low exit at the close. Past results don't guarantee future ones.
