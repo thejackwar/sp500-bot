@@ -21,8 +21,8 @@ effectiveness can be measured on real prices. Started 21 Oct 2026; replaces patt
             Double bottom, Cup and handle, Pipe bottom and Hanging man aren't traded (SKIP_PATTERNS)
     size    (since 22 Oct 2026, 2x leverage) max 20% of equity per stock - with the deck's tight stops this cap
             sizes ~98% of trades (the 2%-risk rule rarely binds; actual risk is ~0.5% of equity), all
-            positions at most 200% of equity (Alpaca's overnight margin limit), so ~10 positions at a time;
-            max 25 positions, max 8 new trades a day
+            positions at most 200% of equity (Alpaca's overnight margin limit); max 25 positions (backtest:
+            ~19 open on average - the last ones get the leftover room), max 8 new trades a day
     regime  (since 22 Oct 2026) leverage only while SPY is above its 200-day MA (REGIME_MA): below it new
             trades are sized at 1x, and at the afternoon check every deck position is trimmed until the
             whole account is at most 100% invested (backtest 8y: same return, max drop -33% vs -45%)
