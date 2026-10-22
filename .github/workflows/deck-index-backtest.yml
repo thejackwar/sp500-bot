@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
     inputs:
       symbol:
-        description: "Symbol (OEF = S&P 100 index ETF, SPY = S&P 500)"
+        description: "Symbol (OEF = S&P 100 index ETF, SPY = S&P 500, BTC = Bitcoin daily from Yahoo/Coinbase)"
         type: string
         default: "OEF"
       years:
@@ -14,6 +14,10 @@ on:
         type: choice
         options: ["8", "5", "3", "10"]
         default: "8"
+      start:
+        description: "Optional fixed start date (YYYY-MM-DD, e.g. 2015-01-01); overrides years"
+        type: string
+        default: ""
       timeframes:
         description: "Candles to compare"
         type: string
@@ -40,6 +44,7 @@ jobs:
           SYMBOL: ${{ inputs.symbol }}
           YEARS: ${{ inputs.years }}
           TIMEFRAMES: ${{ inputs.timeframes }}
+          START: ${{ inputs.start }}
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
       - name: Commit the results
@@ -47,5 +52,5 @@ jobs:
           git config user.name "backtest bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add reports/backtest
-          git commit -m "Deck index backtest: ${{ inputs.symbol }} ${{ inputs.years }}y" || exit 0
+          git commit -m "Deck index backtest: ${{ inputs.symbol }} ${{ inputs.start && format('from {0}', inputs.start) || format('{0}y', inputs.years) }}" || exit 0
           for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done

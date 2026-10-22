@@ -18,6 +18,13 @@ Rules (same as the daily S&P 100 test, on that timeframe's candles):
 Versions: A long, deck target · B long, trailing exit (= daily version 6) · C long + short, deck target.
 
     python deck_index_backtest.py      (SYMBOL=OEF YEARS=8 TIMEFRAMES="1d 4h 2h"; needs ALPACA keys)
+
+Bitcoin (SYMBOL=BTC, 22 Oct 2026): daily candles only, from Yahoo/Coinbase like the main backtest's "daily (from
+2015)" source (crypto.daily_long), START = first test day (e.g. 2015-01-01 or 2021-01-01). Costs 0.05% fee +
+0.05% slippage per side (like the BTC strategy tests). Versions: B (= daily version 6), D = B + the live stock
+trader's 50-day filter (buy only if the breakout candle closes above its 50-day average), and R = the live
+Bitcoin bot's 50-day rule (strategies/btc50_uprise_ma_f1.py) in the same simulator, for reference. With a
+START before 2021, the summary also splits each version into before / from 2021.
 Results: reports/backtest/index-deck-<symbol>-<years>y/ (summary.txt, trades.csv, equity.csv, chart.png)
 """
 import datetime as dt
@@ -34,18 +41,23 @@ import backtest
 import deck_patterns as dp
 import pattern_scan
 
-SYMBOL = os.environ.get("SYMBOL", "OEF").upper()
+SYMBOL = os.environ.get("SYMBOL", "OEF").upper().replace("/USD", "")
+CRYPTO = SYMBOL in ("BTC", "ETH")
+START = os.environ.get("START", "").strip()       # fixed first test day (YYYY-MM-DD); overrides YEARS
 YEARS = float(os.environ.get("YEARS", "8"))
-TIMEFRAMES = os.environ.get("TIMEFRAMES", "1d 4h 2h").split()
+TIMEFRAMES = ["1d"] if CRYPTO else os.environ.get("TIMEFRAMES", "1d 4h 2h").split()
 WINDOW = 290            # candles the detector sees each time (like the live scan on daily candles)
 TRAIL = 20              # trailing exit: lowest low of the last 20 candles of that timeframe
 NO_TARGET_R = 2.0
-SLIP = 0.0002
+SLIP = 0.001 if CRYPTO else 0.0002     # crypto: 0.05% fee + 0.05% slippage per side
 OFFSET = {"4h": "90min", "2h": "90min"}          # bins start at 9:30 New York
 MINUTES = {"4h": 240, "2h": 120}
 VERSIONS = {"A": ("Long, deck stop + deck target", False, "target"),
             "B": ("Long, deck stop + trailing exit (20 candles)", False, "trail"),
-            "C": ("Long + short, deck stop + deck target", True, "target")}
+            "C": ("Long + short, deck stop + deck target", True, "target"),
+            "D": ("Long, deck stop + trailing exit + 50-day filter (= live stock trader, no leverage)", False, "trail50"),
+            "R": ("Reference: the live Bitcoin bot's 50-day rule (btc50_uprise_ma_f1)", False, "rule")}
+RUN_VERSIONS = ["B", "D", "R"] if CRYPTO else ["A", "B", "C"]
 
 
 def candles(h, tf):
@@ -83,8 +95,38 @@ def signals(df):
     return out
 
 
+def simulate_rule(df, start_bar):
+    """The Bitcoin bot's rule: signals on daily closes, bought / sold at the next open, whole account."""
+    from strategies import btc50_uprise_ma_f1 as rule
+    from strategies import _structure
+    r = _structure.run(df[["Open", "High", "Low", "Close"]], **rule.KW)
+    ent, ex = r["entry"].values, r["exit"].values
+    o, c = df["Open"].values, df["Close"].values
+    cash, eq, trades, pos = 100_000.0, np.full(len(df), np.nan), [], None
+    for i in range(start_bar, len(df)):
+        if pos is not None and ex[i - 1] and i - 1 >= pos["j"]:
+            x = o[i] * (1 - SLIP)
+            pnl = (x - pos["entry"]) * pos["qty"]
+            cash += pnl
+            trades.append({"pattern": "50-day rule", "entry_time": df.index[pos["j"]], "exit_time": df.index[i],
+                           "entry": pos["entry"], "stop": np.nan, "target": np.nan, "exit": x, "result": "rule exit",
+                           "R": np.nan, "pct": (x / pos["entry"] - 1) * 100, "pnl": pnl, "candles": i - pos["j"]})
+            pos = None
+        if pos is None and i - 1 >= start_bar and ent[i - 1]:
+            e = o[i] * (1 + SLIP)
+            pos = dict(j=i, entry=e, qty=cash / e)
+        eq[i] = cash if pos is None else cash + (c[i] - pos["entry"]) * pos["qty"]
+    return pd.DataFrame(trades), pd.Series(eq, index=df.index).ffill().dropna()
+
+
 def simulate(df, sigs, shorts, exit_mode, start_bar):
+    if exit_mode == "rule":
+        return simulate_rule(df, start_bar)
     o, h, l, c = (df[k].values for k in ("Open", "High", "Low", "Close"))
+    ma50 = pd.Series(c).rolling(50).mean().values
+    if exit_mode == "trail50":                           # live stock trader: breakout close above its 50-day
+        sigs = [s for s in sigs if s[1] != "LONG" or (np.isfinite(ma50[s[0]]) and c[s[0]] > ma50[s[0]])]
+        exit_mode = "trail"
     low_n = pd.Series(l).rolling(TRAIL).min().values
     high_n = pd.Series(h).rolling(TRAIL).max().values
     by_bar = {}
@@ -162,15 +204,37 @@ def stats(trades, eq, bh):
                 pf=gp / gl if gl else np.inf, inv=inv, years=by_year)
 
 
+def period_text(eq, trades):
+    d = eq.groupby(eq.index.normalize()).last()
+    yrs = max((d.index[-1] - d.index[0]).days / 365.25, 1e-9)
+    cagr = (d.iat[-1] / d.iat[0]) ** (1 / yrs) - 1
+    dd = (d / d.cummax() - 1).min()
+    if trades is None:
+        return f"{backtest.pct(cagr)}/yr, max drop {backtest.pct(dd)}"
+    win = (trades["pnl"] > 0).mean() if len(trades) else 0
+    return f"{backtest.pct(cagr)}/yr, max drop {backtest.pct(dd)}, {len(trades)} trades, win {win:.0%}"
+
+
 def main():
     end = dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=20)
     start = end - dt.timedelta(days=round(365.25 * YEARS))
-    headers = backtest._headers()
+    if START:
+        start = dt.datetime.fromisoformat(START).replace(tzinfo=dt.timezone.utc)
     t0 = time.time()
-    d1 = backtest.fetch(SYMBOL, "1Day", start - dt.timedelta(days=500), end, headers)
-    h15 = backtest.fetch(SYMBOL, "15Min", start - dt.timedelta(days=200), end, headers)
-    print(f"{SYMBOL}: {len(d1)} daily, {len(h15)} 15-min candles ({time.time() - t0:.0f}s)", flush=True)
-    t_start = pd.Timestamp(start).tz_convert(backtest.ET).tz_localize(None)
+    if CRYPTO:                                       # daily candles back to 2015 (Yahoo, Coinbase as backup)
+        import crypto
+        d1 = crypto.daily_long(f"{SYMBOL}/USD", start - dt.timedelta(days=450))
+        d1.index = d1.index.tz_localize(None)
+        d1 = d1[["Open", "High", "Low", "Close", "Volume"]].astype(float)
+        h15 = None
+        t_start = max(pd.Timestamp(start.date()), d1.index[0] + pd.Timedelta(days=21))
+        print(f"{SYMBOL}: {len(d1)} daily candles from {d1.index[0]:%Y-%m-%d}, test from {t_start:%Y-%m-%d}", flush=True)
+    else:
+        headers = backtest._headers()
+        d1 = backtest.fetch(SYMBOL, "1Day", start - dt.timedelta(days=500), end, headers)
+        h15 = backtest.fetch(SYMBOL, "15Min", start - dt.timedelta(days=200), end, headers)
+        print(f"{SYMBOL}: {len(d1)} daily, {len(h15)} 15-min candles ({time.time() - t0:.0f}s)", flush=True)
+        t_start = pd.Timestamp(start).tz_convert(backtest.ET).tz_localize(None)
 
     bh_d = d1[d1.index >= t_start.normalize()]["Close"]
     bh = bh_d / bh_d.iat[0] * 100_000
@@ -180,11 +244,15 @@ def main():
     b_year = bh.groupby(bh.index.year).last()
     b_year = b_year / pd.concat([pd.Series([100_000.0]), b_year.iloc[:-1]]).values - 1
 
-    out = os.path.join("reports", "backtest", f"index-deck-{SYMBOL.lower()}-{YEARS:g}y")
+    span = f"from{START}" if START else f"{YEARS:g}y"
+    out = os.path.join("reports", "backtest", f"index-deck-{SYMBOL.lower()}-{span}")
     os.makedirs(out, exist_ok=True)
-    lines = [f"📊 Fidelity-deck patterns on {SYMBOL} alone (S&P 100 index ETF): daily vs 4-hour vs 2-hour candles",
+    what = ("daily candles (Yahoo/Coinbase)" if CRYPTO else
+            "(S&P 100 index ETF): daily vs 4-hour vs 2-hour candles")
+    cost = "0.05% fee + 0.05% slippage per side" if CRYPTO else "0.02% slippage per side"
+    lines = [f"📊 Fidelity-deck patterns on {SYMBOL} alone {what}",
              f"{bh.index[0]:%d %b %Y} → {bh.index[-1]:%d %b %Y} ({b_yrs:.1f} years), $100,000, whole account in the trade, "
-             f"one trade at a time, next-candle open fills, 0.02% slippage per side, no leverage.",
+             f"one trade at a time, next-candle open fills, {cost}, no leverage.",
              f"Buy & hold {SYMBOL}: {backtest.pct(b_cagr)}/yr, max drop {backtest.pct(b_dd)}, final ${bh.iat[-1]:,.0f}", ""]
     all_trades, curves, rows = [], {f"Buy & hold {SYMBOL}": bh}, []
     for tf in TIMEFRAMES:
@@ -194,14 +262,21 @@ def main():
         print(f"{tf}: {len(df)} candles, test from candle {start_bar}", flush=True)
         sigs = signals(df)
         lines.append(f"━━ {tf} candles ━━ ({sum(1 for s in sigs if s[0] >= start_bar)} pattern breakouts in the test period)")
-        for key, (name, shorts, mode) in VERSIONS.items():
+        for key in RUN_VERSIONS:
+            name, shorts, mode = VERSIONS[key]
             tr, eq = simulate(df, sigs, shorts, mode, start_bar)
             st = stats(tr, eq, bh)
             rows.append({"tf": tf, "version": key, **{k: v for k, v in st.items() if k != "years"}})
             mark = "✅" if st["final"] >= bh.iat[-1] else "  "
             lines.append(f"{mark} {key}. {name}: {backtest.pct(st['cagr'])}/yr, max drop {backtest.pct(st['dd'])}, "
                          f"final ${st['final']:,.0f}")
-            lines.append(f"     {st['n']} trades, win {st['win']:.0%}, avg {st['avgR']:+.2f}R, profit factor "
+            if len(tr) and t_start.year < 2021:       # before / from 2021 (is it luck?)
+                for lbl, a, b in (("before 2021", None, "2020-12-31"), ("from 2021", "2021-01-01", None)):
+                    e_ = eq.loc[a:b]
+                    t_ = tr[(tr.entry_time >= a) if a else (tr.entry_time <= b)]
+                    lines.append(f"     {lbl}: " + period_text(e_, t_))
+            avg_r = "" if mode == "rule" else f", avg {st['avgR']:+.2f}R"
+            lines.append(f"     {st['n']} trades, win {st['win']:.0%}{avg_r}, profit factor "
                          f"{st['pf']:.2f}, in the market {st['inv']:.0%} of the time")
             yr = "  ".join(f"{y}: {v * 100:+.0f}%" for y, v in st["years"].items())
             lines.append(f"     by year: {yr}")
@@ -209,11 +284,15 @@ def main():
                 all_trades.append(tr.assign(timeframe=tf, version=key))
             curves[f"{tf} {key}"] = eq.groupby(eq.index.normalize()).last()
         lines.append("")
+    if t_start.year < 2021:
+        lines.append(f"Buy & hold {SYMBOL} before 2021: " + period_text(bh.loc[:"2020-12-31"], None))
+        lines.append(f"Buy & hold {SYMBOL} from 2021: " + period_text(bh.loc["2021-01-01":], None))
     lines.append(f"{SYMBOL} buy & hold by year: " + "  ".join(f"{y}: {v * 100:+.0f}%" for y, v in b_year.items()))
     # per pattern, per timeframe (version C trades = every breakout taken, both directions)
     if all_trades:
         t = pd.concat(all_trades, ignore_index=True)
         t.to_csv(os.path.join(out, "trades.csv"), index=False)
+    if all_trades and "C" in RUN_VERSIONS:
         lines += ["", "Per pattern (version C: every breakout taken, both directions): trades / avg R"]
         c = t[t.version == "C"]
         g = c.groupby(["pattern", "timeframe"])["R"].agg(["size", "mean"]).unstack("timeframe")
@@ -239,14 +318,16 @@ def main():
         s.set_color("#444")
     ax.tick_params(colors="#bbbbbb"); ax.grid(color="#222")
     cols = {"1d": "#ffd54f", "4h": "#42a5f5", "2h": "#ef5350"}
-    ls = {"A": "-", "B": "--", "C": ":"}
+    ls = {"A": "-", "B": "--", "C": ":", "D": "-.", "R": "-"}
     for name, s in curves.items():
         if name.startswith("Buy"):
             ax.plot(s.index, s.values, color="#bbbbbb", lw=2.2, label=name)
         else:
             tf, v = name.split()
             ax.plot(s.index, s.values, color=cols.get(tf, "#fff"), ls=ls[v], lw=1.3, label=f"{tf} {v}. {VERSIONS[v][0]}")
-    ax.set_title(f"Deck patterns on {SYMBOL}: daily vs 4h vs 2h", color="white")
+    ax.set_title(f"Deck patterns on {SYMBOL}" + ("" if CRYPTO else ": daily vs 4h vs 2h"), color="white")
+    if CRYPTO:
+        ax.set_yscale("log")
     ax.set_ylabel("Account value ($)", color="#bbbbbb")
     leg = ax.legend(fontsize=7.5, facecolor="black", edgecolor="#444", ncol=2)
     for x in leg.get_texts():
