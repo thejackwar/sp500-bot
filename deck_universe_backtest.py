@@ -79,6 +79,9 @@ SIM_RULES = {"reg50": "leverage only while SPY is above its 50-day MA (else 1x, 
              "minatr25": "skip if the stock's ATR is under 2.5% of its price",
              "minstop3": "stop at least 3% below the entry (deck stop moved down if tighter)",
              "minstop15atr": "stop at least 1.5 ATR below the entry (deck stop moved down if tighter)",
+             "betrail": "stop follows the high at the starting distance until it reaches the entry (break-even)",
+             "be1r": "stop moved to the entry once the price has been 1R above it",
+             "be2r": "stop moved to the entry once the price has been 2R above it",
              "risk05": "sized by risk: 0.25% x leverage (0.5% at 2x) per trade, cap 15% x leverage per stock",
              "risk075": "sized by risk: 0.375% x leverage (0.75% at 2x) per trade, cap 15% x leverage per stock"}
 # note (22 Oct 2026): with 1% risk and a 10%-per-stock cap, ~98% of trades are sized by the cap, not the risk
@@ -200,7 +203,8 @@ def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None,
             if o <= p["stop"] and t > p["t"]:
                 x, why = o * (1 - SLIP), "stop (gap)"
             elif l <= p["stop"]:
-                x, why = p["stop"] * (1 - SLIP), "stop"
+                x, why = p["stop"] * (1 - SLIP), ("stop" if p["stop"] <= p.get("stop0", p["stop"]) else
+                                                   "break-even stop" if p["stop"] >= p["fill"] else "raised stop")
             elif np.isfinite(low20[t, col]) and c < low20[t, col]:
                 x, why = c * (1 - SLIP), "trend exit"
             elif "time10" in rules and t - p["t"] >= 10 and c < p["fill"] + 0.5 * p["risk"]:
@@ -212,6 +216,15 @@ def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None,
                                "pnl": p["qty"] * (x - p["fill"]), "R": (x - p["fill"]) / p["risk"],
                                "days": (days[t] - days[p["t"]]).days})
                 del pos[col]
+            elif np.isfinite(H[t, col]) and ("betrail" in rules or "be1r" in rules or "be2r" in rules):
+                p.setdefault("stop0", p["stop"])            # raise the stop for tomorrow, never above the entry
+                if "betrail" in rules:
+                    new = min(p["fill"], H[t, col] - p["risk"])
+                elif H[t, col] >= p["fill"] + (1 if "be1r" in rules else 2) * p["risk"]:
+                    new = p["fill"]
+                else:
+                    new = p["stop"]
+                p["stop"] = max(p["stop"], new)
         value = sum(p["qty"] * (C[t, c] if np.isfinite(C[t, c]) else p["fill"]) for c, p in pos.items())
         if pos and cash + value < MAINTENANCE * value:      # margin call: everything sold at the close
             info["margin_calls"] += 1
