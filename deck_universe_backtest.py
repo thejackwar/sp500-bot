@@ -67,7 +67,9 @@ SIM_RULES = {"reg50": "leverage only while SPY is above its 50-day MA (else 1x, 
              "dd15": "1x after a 15% drop from the account high (trimmed at the close), back to full on a new high",
              "time10": "sell at the close after 10 days if not up at least 0.5R",
              "pos15": "max 7.5% of equity per stock x leverage (15% at 2x) instead of 10%",
-             "pos25": "max 12.5% of equity per stock x leverage (25% at 2x) instead of 10%"}
+             "pos25": "max 12.5% of equity per stock x leverage (25% at 2x) instead of 10%",
+             "risk05": "sized by risk: 0.25% x leverage (0.5% at 2x) per trade, cap 15% x leverage per stock",
+             "risk075": "sized by risk: 0.375% x leverage (0.75% at 2x) per trade, cap 15% x leverage per stock"}
 # note (22 Oct 2026): with 1% risk and a 10%-per-stock cap, ~98% of trades are sized by the cap, not the risk
 SPY_TREND = None                                        # set in main: SPY close, 50/200-day MA, 6-month return
 
@@ -163,6 +165,9 @@ def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None,
     """rules: SIM_RULES names; spy_up: {"reg50"/"reg200": bool array per day, SPY above that MA at the close}."""
     rules = set(rules)
     pos_pct = 0.075 if "pos15" in rules else 0.125 if "pos25" in rules else MAX_POS_PCT
+    risk_pct = RISK
+    if "risk05" in rules or "risk075" in rules:          # true risk sizing: the per-stock cap rarely binds
+        risk_pct, pos_pct = (0.0025 if "risk05" in rules else 0.00375), 0.15
     peak, dd_off = START_EQ, False
     """sigs: {day index: [(col, stop, fam, name)]} signals at that day's close -> buy next open."""
     rng = np.random.default_rng(seed)
@@ -280,7 +285,7 @@ def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None,
             if risk <= 0:
                 continue
             room = MAX_GROSS * lev_t * equity - gross
-            qty = min(equity * RISK * lev_t / risk, equity * pos_pct * lev_t / fill, room * 0.95 / fill)
+            qty = min(equity * risk_pct * lev_t / risk, equity * pos_pct * lev_t / fill, room * 0.95 / fill)
             qty = np.floor(qty)
             if qty < 1:
                 continue
