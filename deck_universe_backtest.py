@@ -57,14 +57,37 @@ FILTER_NAMES = {"none": "no MA filter",
                 "vol15": "breakout volume >= 1.5x its 50-day average",
                 "vol20": "breakout volume >= 2x its 50-day average",
                 "dry": "quiet volume for 10 days, then an above-average breakout day",
-                "noweak": "without the losing patterns (" + ", ".join(sorted(WEAK)) + ")"}
+                "noweak": "without the losing patterns (" + ", ".join(sorted(WEAK)) + ")",
+                "mkt50": "no new buys when SPY closes below its 50-day MA",
+                "mkt200": "no new buys when SPY closes below its 200-day MA",
+                "rs126": "stock beat SPY over the last 6 months"}
+# rules applied inside simulate (sizing / exits)
+SIM_RULES = {"reg50": "leverage only while SPY is above its 50-day MA (else 1x, trimmed at the close)",
+             "reg200": "leverage only while SPY is above its 200-day MA (else 1x, trimmed at the close)",
+             "dd15": "1x after a 15% drop from the account high (trimmed at the close), back to full on a new high",
+             "time10": "sell at the close after 10 days if not up at least 0.5R",
+             "pos15": "max 7.5% of equity per stock x leverage (15% at 2x) instead of 10%",
+             "pos25": "max 12.5% of equity per stock x leverage (25% at 2x) instead of 10%"}
+# note (22 Oct 2026): with 1% risk and a 10%-per-stock cap, ~98% of trades are sized by the cap, not the risk
+SPY_TREND = None                                        # set in main: SPY close, 50/200-day MA, 6-month return
 
 
 def ma_ok(flt, tt, date):
     if "+" in flt:                                      # combined filters, e.g. ma50+vol15
         return all(ma_ok(f, tt, date) for f in flt.split("+"))
-    if flt in ("none", "noweak"):                       # noweak is applied to the pattern name (main)
+    if flt in ("none", "noweak") or flt in SIM_RULES:   # noweak: pattern name (main); SIM_RULES: simulate
         return True
+    if flt in ("mkt50", "mkt200", "rs126"):
+        try:
+            m = SPY_TREND.loc[date]
+        except KeyError:
+            return False
+        if flt == "rs126":
+            try:
+                return tt.loc[date].r126 > m.r126
+            except KeyError:
+                return False
+        return m.c > (m.m50 if flt == "mkt50" else m.m200)
     if flt in ENTRY_RULES:                              # entry rules are applied at the open (simulate)
         return True
     if flt.startswith("vol") or flt == "dry":
@@ -136,7 +159,11 @@ def _signals(args):
     return sym, out
 
 
-def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None):
+def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None, rules=(), spy_up=None):
+    """rules: SIM_RULES names; spy_up: {"reg50"/"reg200": bool array per day, SPY above that MA at the close}."""
+    rules = set(rules)
+    pos_pct = 0.075 if "pos15" in rules else 0.125 if "pos25" in rules else MAX_POS_PCT
+    peak, dd_off = START_EQ, False
     """sigs: {day index: [(col, stop, fam, name)]} signals at that day's close -> buy next open."""
     rng = np.random.default_rng(seed)
     cash, pos, trades = START_EQ, {}, []
@@ -160,6 +187,8 @@ def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None)
                 x, why = p["stop"] * (1 - SLIP), "stop"
             elif np.isfinite(low20[t, col]) and c < low20[t, col]:
                 x, why = c * (1 - SLIP), "trend exit"
+            elif "time10" in rules and t - p["t"] >= 10 and c < p["fill"] + 0.5 * p["risk"]:
+                x, why = c * (1 - SLIP), "time stop"
             if x is not None:
                 cash += p["qty"] * x
                 trades.append({"symbol": syms[col], "pattern": p["name"], "entry_date": days[p["t"]],
@@ -183,6 +212,39 @@ def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None)
         if curve[t] <= 0:                                   # account wiped out
             curve[t:] = 0.0
             break
+        lev_t = lev                                         # leverage allowed for today (regime / drawdown rules)
+        for rg in ("reg50", "reg200"):
+            if rg in rules and spy_up is not None and not spy_up[rg][t]:
+                lev_t = min(lev_t, 1.0)
+        if "dd15" in rules:
+            peak = max(peak, curve[t])
+            if curve[t] < 0.85 * peak:
+                dd_off = True
+            elif curve[t] >= peak:
+                dd_off = False
+            if dd_off:
+                lev_t = min(lev_t, 1.0)
+        cap = MAX_GROSS * lev_t * curve[t]
+        if lev_t < lev and value > cap and value > 0:       # de-lever: sell part of every position at the close
+            frac = 1 - cap / value
+            for col in list(pos):
+                p = pos[col]
+                px_ = C[t, col] if np.isfinite(C[t, col]) else p["fill"]
+                q = np.ceil(p["qty"] * frac)
+                if q <= 0:
+                    continue
+                q = min(q, p["qty"])
+                x = px_ * (1 - SLIP)
+                cash += q * x
+                trades.append({"symbol": syms[col], "pattern": p["name"], "entry_date": days[p["t"]],
+                               "exit_date": days[t], "entry": p["fill"], "stop": p["stop"], "exit": x,
+                               "result": "de-lever", "pnl": q * (x - p["fill"]), "R": (x - p["fill"]) / p["risk"],
+                               "days": (days[t] - days[p["t"]]).days})
+                p["qty"] -= q
+                if p["qty"] <= 0:
+                    del pos[col]
+            value = sum(p["qty"] * (C[t, c] if np.isfinite(C[t, c]) else p["fill"]) for c, p in pos.items())
+            curve[t] = cash + value
         # 2. yesterday's breakouts are bought at today's open - handled at the start of the next day:
         #    here we queue today's signals for tomorrow
         if t + 1 >= len(days):
@@ -217,8 +279,8 @@ def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None)
             risk = fill - stop
             if risk <= 0:
                 continue
-            room = MAX_GROSS * lev * equity - gross
-            qty = min(equity * RISK * lev / risk, equity * MAX_POS_PCT * lev / fill, room * 0.95 / fill)
+            room = MAX_GROSS * lev_t * equity - gross
+            qty = min(equity * RISK * lev_t / risk, equity * pos_pct * lev_t / fill, room * 0.95 / fill)
             qty = np.floor(qty)
             if qty < 1:
                 continue
@@ -240,7 +302,7 @@ def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None)
 def summarize(eq, tr):
     yrs = (eq.index[-1] - eq.index[0]).days / 365.25
     cagr = (eq.iat[-1] / START_EQ) ** (1 / yrs) - 1
-    done = tr[tr.result != "still open"]
+    done = tr[~tr.result.isin(["still open", "de-lever"])]   # partial de-lever sales aren't whole trades
     gl = -done.loc[done.pnl < 0, "pnl"].sum()
     return {"cagr": cagr, "dd": (eq / eq.cummax() - 1).min(), "final": eq.iat[-1], "trades": len(done),
             "win": (done.pnl > 0).mean() if len(done) else 0, "avgR": done.R.mean() if len(done) else 0,
@@ -267,6 +329,10 @@ def main():
         daily[s] = d[["Open", "High", "Low", "Close", "Volume"]]
     print(f"Prices for {len(daily)} symbols ({time.time() - t00:.0f}s)", flush=True)
     spy = daily.pop("SPY")
+    global SPY_TREND
+    sc = spy["Close"]
+    SPY_TREND = pd.DataFrame({"c": sc, "m50": sc.rolling(50).mean(), "m200": sc.rolling(200).mean(),
+                              "r126": sc / sc.shift(126) - 1})
 
     # breakouts of every stock (the slow part), in parallel
     t0 = time.time()
@@ -280,9 +346,13 @@ def main():
     print(f"Breakouts found in {time.time() - t0:.0f}s", flush=True)
 
     days = spy.index[spy.index >= pd.Timestamp(start.date()) - pd.Timedelta(days=40)]
+    st_ = SPY_TREND.reindex(days)
+    spy_up = {"reg50": (st_.c > st_.m50).values, "reg200": (st_.c > st_.m200).values}
     lev_tag = "" if LEVERAGES == [1.0] else "-lev-" + "-".join(f"{x:g}" for x in LEVERAGES)
     if FILTERS != ["none"]:
         lev_tag += "-f-" + "-".join(f.replace("+", "_") for f in FILTERS)
+    if len(lev_tag) > 90:                               # many variants: keep the folder name short
+        lev_tag = lev_tag[:lev_tag.find("-f-")] + f"-f-{len(FILTERS)}variants-{dt.date.today():%Y%m%d}"
     out_dir = os.path.join("reports", "backtest", f"universe-deck-v6{lev_tag}-{'-'.join(UNIVERSES)}-"
                            + (f"from{os.environ['START']}" if os.environ.get("START") else f"{YEARS:g}y"))
     os.makedirs(out_dir, exist_ok=True)
@@ -306,6 +376,7 @@ def main():
             v_ = daily[s_]["Volume"]
             v50 = v_.rolling(50).mean().shift(1)          # average of the 50 days BEFORE that day
             trend[s_] = pd.DataFrame({"c": c_, "m50": m50, "m200": m200, "m50_10": m50.shift(10),
+                                      "r126": c_ / c_.shift(126) - 1,
                                       "v": v_, "v50": v50, "v10": v_.rolling(10).mean().shift(1)})
         sigs_by = {}
         for flt in FILTERS:
@@ -324,13 +395,14 @@ def main():
         for flt, (sigs, n_sig) in sigs_by.items():
             for lev in LEVERAGES:
                 tag = u.upper() + (f" {lev:g}x leverage" if len(LEVERAGES) > 1 or lev != 1 else "") + \
-                ("" if FILTERS == ["none"] else " · " + " + ".join({**FILTER_NAMES, **ENTRY_RULES}[f]
+                ("" if FILTERS == ["none"] else " · " + " + ".join({**FILTER_NAMES, **ENTRY_RULES, **SIM_RULES}[f]
                                                                     for f in flt.split("+")))
                 res = []
                 for r in range(RUNS):
                     d0 = first + r * STEP
                     ent = next((f for f in flt.split("+") if f in ENTRY_RULES), None)
-                    tr, eq, info = simulate(days, O, H, L, C, low20, sigs, syms, d0, seed=r, lev=lev, entry=ent)
+                    tr, eq, info = simulate(days, O, H, L, C, low20, sigs, syms, d0, seed=r, lev=lev, entry=ent,
+                                            rules=[f for f in flt.split("+") if f in SIM_RULES], spy_up=spy_up)
                     st = summarize(eq, tr)
                     st.update(info)
                     b = spy_c.iloc[d0:]
