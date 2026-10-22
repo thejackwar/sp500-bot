@@ -136,7 +136,7 @@ def main():
     print(f"Saved {len(out)} trades with {len(out.columns)} columns to {OUT}")
     num = out.select_dtypes("number").drop(columns=["win", "pnl", "R", "exit", "entry", "stop", "days",
                                                     "leverage"], errors="ignore")
-    corr = num.corrwith(out.R, method="spearman").sort_values()
+    corr = num.rank().corrwith(out.R.rank()).sort_values()       # Spearman without scipy
     print("Spearman correlation with R:\n" + corr.round(3).to_string())
 
 
