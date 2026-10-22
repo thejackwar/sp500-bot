@@ -16,7 +16,8 @@ effectiveness can be measured on real prices. Started 21 Oct 2026; replaces patt
             EXIT = "target" (21 Oct only): the deck's measured move as take profit (NO_TARGET_R x the
             risk for patterns without a deck target)
     orders  "trail": market entry + stop order (OTO, good till cancelled); "target": bracket order
-    filter  (since 22 Oct 2026) only if the breakout day's close is above the stock's 50-day average
+    filter  (since 22 Oct 2026) only if the breakout day's close is above the stock's 50-day average,
+            and not if the price at the open is more than 2% above the breakout close (MAX_GAP)
     size    (since 22 Oct 2026, 2x leverage) 2% of equity at risk, max 20% of equity per stock, all
             positions at most 200% of equity (Alpaca's overnight margin limit), max 25 positions, max 8
             new trades a day
@@ -49,6 +50,8 @@ RISK_PER_TRADE = 0.01        # x LEVERAGE: % of equity at risk per trade
 MAX_POSITION_PCT = 0.10      # x LEVERAGE: max share of equity in one stock
 MAX_GROSS = 1.0              # x LEVERAGE: all positions together at most this x equity
 MA_FILTER = 50               # only buy if the breakout day's close is above its 50-day average (0 = off)
+MAX_GAP = 0.02               # 22 Oct 2026: skip if the price at the open is more than 2% above the breakout close
+                             # (backtest 8y, 2x + MA filter: +38.5%/yr vs +33.1% without; None = off)
 MAX_OPEN_POSITIONS = 25      # whole account (old pattern trader's positions count too)
 MAX_NEW_PER_DAY = 8
 EXIT = "trail"               # "trail" = backtest version 6 (+20.8%/yr, 8y); "target" = version 2 (+13.4%/yr)
@@ -197,6 +200,10 @@ def run(now=None, force=False, dry_run=False, send=None):
         except Exception:
             price = f["close"]
         sign = 1 if long else -1
+        if MAX_GAP is not None and long and price > f["close"] * (1 + MAX_GAP):
+            lines.append(f"• {sym}: {what}, skipped (opened {(price / f['close'] - 1) * 100:+.1f}% above the "
+                         f"breakout close {px(f['close'])}, limit +{MAX_GAP:.0%})")
+            continue
         stop = brk["stop"]
         dist = sign * (price - stop)
         if dist <= 0:
@@ -259,7 +266,9 @@ def run(now=None, force=False, dry_run=False, send=None):
     save_state(state)
     n_pos = len(a.get("/positions"))
     send(f"🧩 <b>Deck pattern trader</b>{' (dry run)' if not live else ''} ({LEVERAGE:g}x"
-         f"{f', {MA_FILTER}-day MA filter' if MA_FILTER else ''}): {len(found)} breakouts at yesterday's "
+         f"{f', {MA_FILTER}-day MA filter' if MA_FILTER else ''}"
+         f"{f', no entry >{MAX_GAP:.0%} above the breakout' if MAX_GAP is not None else ''}): "
+         f"{len(found)} breakouts at yesterday's "
          f"close, {placed} {'trades' if live else 'would-be trades'}. Account ${equity:,.0f}, {n_pos} positions."
          + ("\n" + "\n".join(lines) if lines else ""))
     return lines
