@@ -1,0 +1,26 @@
+🎲 Monte Carlo tests of the deck pattern trader version 6 (S&P 100, close above the 50-day MA, 2x leverage, sell on a close below the 20-day low, without Cup and handle, Double bottom, Hanging man, Pipe bottom)
+
+Real strategy, middle of 10 start dates: +34.4%/yr, max drop -37.4%, 1611 trades, avg +0.47R.
+
+1. Drawdown range (10,000 reshuffled histories, 20-day blocks of real daily returns)
+real: +34.5%/yr, max drop -37.4%
+yearly return: 5% +13.5% · median +36.4% · 95% +63.2%; losing money over the period: 0.3%
+max drop: median -39.2% · 1 in 20 worse than -58.4% · 1 in 100 worse than -66.8%
+chance of a drop worse than -30%: 87% · -50%: 16% · -70%: 0%
+
+2. Edge range (10,000 resamples of the 1611 closed trades)
+avg R: real +0.47 · 5% +0.28 · 95% +0.69; chance avg R <= 0: 0.00%
+win rate: 5% 24% - 95% 28% · profit factor: 5% 1.31 - 95% 2.54
+how much rides on the biggest winners: without the top 1% of trades avg R is +0.13, without the top 5% -0.29
+
+3. Random entries (200 runs: same days, buys per day, MA filter, stop distance, exits, sizing)
+real (median of 10 starts) +34.1%/yr vs random: median +21.3% · 95% +33.3% · best +41.8%
+real beats 96% of random runs (p = 0.040) · avg R real +0.47 vs random median +0.45 · max drop random median -43.6%
+→ the patterns add a real edge on top of the exit rule and trend filter
+
+4. Parameter jitter (40 runs, trail 15-25 days, MA 40-60 days, 13s)
+yearly return: worst +20.5% · 5% +22.7% · median +30.8% · best +41.7%; beat SPY (+15.3%/yr) in 100%
+max drop: median -42.1% · worst -51.2%
+worst settings: trail 20/MA 43 +20.5%, trail 25/MA 42 +20.8%, trail 25/MA 45 +22.8%
+
+Bootstraps assume the future looks like a reshuffled past; today's index members only (survivorship flatters results). Past results don't guarantee future ones.
