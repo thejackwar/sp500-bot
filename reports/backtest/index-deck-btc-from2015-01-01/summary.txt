@@ -1,0 +1,26 @@
+📊 Fidelity-deck patterns on BTC alone daily candles (Yahoo/Coinbase)
+10 Aug 2015 → 22 Oct 2026 (11.2 years), $100,000, whole account in the trade, one trade at a time, next-candle open fills, 0.05% fee + 0.05% slippage per side, no leverage.
+Buy & hold BTC: +66.8%/yr, max drop -83.8%, final $30,744,692
+
+━━ 1d candles ━━ (308 pattern breakouts in the test period)
+   B. Long, deck stop + trailing exit (20 candles): +54.3%/yr, max drop -64.8%, final $12,918,146
+     before 2021: +133.9%/yr, max drop -43.3%, 23 trades, win 57%
+     from 2021: +4.6%/yr, max drop -64.8%, 41 trades, win 29%
+     64 trades, win 39%, avg +2.76R, profit factor 1.52, in the market 57% of the time
+     by year: 2015: +0%  2016: +134%  2017: +411%  2018: -5%  2019: +111%  2020: +307%  2021: +82%  2022: -49%  2023: +43%  2024: +38%  2025: -24%  2026: -4%
+   D. Long, deck stop + trailing exit + 50-day filter (= live stock trader, no leverage): +56.6%/yr, max drop -56.8%, final $15,145,339
+     before 2021: +126.0%/yr, max drop -47.4%, 14 trades, win 64%
+     from 2021: +11.0%/yr, max drop -56.8%, 26 trades, win 31%
+     40 trades, win 42%, avg +4.39R, profit factor 2.25, in the market 43% of the time
+     by year: 2015: +0%  2016: +119%  2017: +465%  2018: -24%  2019: +116%  2020: +298%  2021: +45%  2022: -25%  2023: +30%  2024: +49%  2025: -16%  2026: +5%
+   R. Reference: the live Bitcoin bot's 50-day rule (btc50_uprise_ma_f1): +42.9%/yr, max drop -33.8%, final $5,447,276
+     before 2021: +65.6%/yr, max drop -22.9%, 15 trades, win 47%
+     from 2021: +24.6%/yr, max drop -16.8%, 22 trades, win 36%
+     37 trades, win 41%, profit factor 5.24, in the market 15% of the time
+     by year: 2015: +0%  2016: +64%  2017: +1025%  2018: -7%  2019: -8%  2020: -4%  2021: +13%  2022: -4%  2023: +12%  2024: +145%  2025: +3%  2026: +17%
+
+Buy & hold BTC before 2021: +138.8%/yr, max drop -83.8%
+Buy & hold BTC from 2021: +19.2%/yr, max drop -76.7%
+BTC buy & hold by year: 2015: +62%  2016: +126%  2017: +1324%  2018: -73%  2019: +94%  2020: +305%  2021: +59%  2022: -64%  2023: +156%  2024: +121%  2025: -6%  2026: -7%
+
+Caveat: one symbol, so few trades per version: a handful of trades can change the result. Past results don't guarantee future ones.
