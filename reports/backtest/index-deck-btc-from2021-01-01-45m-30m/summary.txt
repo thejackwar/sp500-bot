@@ -1,0 +1,17 @@
+📊 Fidelity-deck patterns on BTC alone candles 45m / 30m (1d: Yahoo/Coinbase; shorter: Alpaca 15-min, built 00:00 UTC-aligned, 101 bad wicks cut)
+31 Jan 2021 → 22 Oct 2026 (5.7 years), $100,000, whole account in the trade, one trade at a time, next-candle open fills, 0.05% fee + 0.05% slippage per side, no leverage.
+Buy & hold BTC: +17.1%/yr, max drop -76.6%, final $246,285
+
+━━ 45m candles ━━ (5629 pattern breakouts in the test period)
+   B. Long, deck stop + trailing exit (20 candles): -39.0%/yr, max drop -96.0%, final $5,845
+     1334 trades, win 21%, avg -0.11R, profit factor 0.76, in the market 52% of the time
+     by year: 2021: -50%  2022: -74%  2023: +15%  2024: +4%  2025: -33%  2026: -42%
+
+━━ 30m candles ━━ (8453 pattern breakouts in the test period)
+   B. Long, deck stop + trailing exit (20 candles): -49.1%/yr, max drop -98.5%, final $2,054
+     1967 trades, win 21%, avg -0.25R, profit factor 0.77, in the market 51% of the time
+     by year: 2021: -59%  2022: -60%  2023: -29%  2024: -7%  2025: -52%  2026: -59%
+
+BTC buy & hold by year: 2021: +40%  2022: -64%  2023: +155%  2024: +121%  2025: -6%  2026: -7%
+
+Caveat: one symbol, so few trades per version: a handful of trades can change the result. Past results don't guarantee future ones.
