@@ -142,6 +142,7 @@ jobs:
         if: always() && steps.window.outputs.run == 'true' && env.STRATEGY == 'bot'
         run: python deck_trader.py
         env:
+          BEAR_MODE: ${{ vars.BEAR_MODE }}       # repository variable: 1 = no new buys (bear market switch)
           PYTHONUNBUFFERED: "1"
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID_PATTERNS || secrets.TELEGRAM_CHAT_ID }}

@@ -67,6 +67,7 @@ jobs:
       - name: Deck pattern trader
         run: python deck_trader.py
         env:
+          BEAR_MODE: ${{ vars.BEAR_MODE }}       # repository variable: 1 = no new buys (bear market switch)
           PYTHONUNBUFFERED: "1"
           PATTERN_FORCE: "1"
           DRY_RUN: ${{ inputs.dry_run && '1' || '0' }}

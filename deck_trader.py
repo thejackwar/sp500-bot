@@ -63,6 +63,11 @@ MAX_GAP = 0.02               # 22 Oct 2026: skip if the price at the open is mor
 # backtest (2x + MA filter: +34.4%/yr, max drop -37.4% without them vs +33.1%, -39.5% with them)
 SKIP_PATTERNS = {"Double bottom", "Cup and handle", "Pipe bottom", "Hanging man"}
 REGIME_MA = 200             # 22 Oct 2026: LEVERAGE only while SPY is above its 200-day MA, else 1x (0 = off)
+# Bear-market switch, flipped by hand (23 Oct 2026, user): GitHub repo -> Settings -> Secrets and variables ->
+# Actions -> Variables -> BEAR_MODE = 1 stops new buys (open positions keep their stops and exits); 0 or
+# deleted = normal. Backtest 2000-2026: no buys below SPY's 200-day MA cut 2000-02 from -45% to -17% and 2008 from
+# -33% to -11%, but cost ~4 points a year in 2018-2026 (missed rebounds), so it is not automatic.
+BEAR_MODE = os.environ.get("BEAR_MODE", "").strip().lower() in ("1", "true", "on", "yes")
 MAX_OPEN_POSITIONS = 25      # whole account (old pattern trader's positions count too)
 MAX_NEW_PER_DAY = 8
 EXIT = "trail"               # "trail" = backtest version 6 (+20.8%/yr, 8y); "target" = version 2 (+13.4%/yr)
@@ -245,6 +250,13 @@ def run(now=None, force=False, dry_run=False, send=None):
     # a missed afternoon check: sell trail positions whose close yesterday was below the 20-day low
     pattern_trader.trend_exits(a, book, a.get("/positions"), daily, send, not live)
     found = find_signals(daily)
+    if BEAR_MODE:                                       # bear-market switch: report the breakouts, buy nothing
+        if live:
+            state["last_run"] = today                   # once a day, like a normal morning run
+        save_state(state)
+        send(f"🐻 <b>Deck pattern trader: bear-market mode ON</b> (BEAR_MODE) - no new buys. {len(found)} breakouts "
+             f"at yesterday's close skipped; open positions keep their stops and exits.")
+        return ["Deck trader: bear-market mode, no new buys"]
     positions = a.get("/positions")
     held = {p["symbol"] for p in positions}
     pending = {o["symbol"] for o in a.get("/orders", status="open", limit=500)}   # entries not filled yet
