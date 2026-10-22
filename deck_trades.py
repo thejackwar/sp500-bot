@@ -97,6 +97,9 @@ def main():
                     full = pd.concat([hist, new])
                 trade = {**row, "bar": len(df), "entry": entry or float(full["Open"].iat[-1]),
                          "when": row["time"]}
+                if exit_leg and exit_leg.get("filled_at"):    # the candle the trade was closed on
+                    xd = pd.Timestamp(exit_leg["filled_at"]).tz_convert(ET).tz_localize(None).normalize()
+                    trade["exit_bar"] = min(int(full.index.searchsorted(xd)), len(full) - 1)
                 if trade["bar"] >= len(full):
                     trade["bar"] = len(full) - 1
                 img = pattern_scan.draw(t, dp.add_atr(full), pat, trade=trade)

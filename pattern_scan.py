@@ -182,7 +182,8 @@ def draw(ticker, df, p, trade=None):
             return
         x0 = brk["bar"] if brk else max(start, p["end"])
         ax.plot([x0, right + 12], [val, val], color=colr, ls=ls, lw=1.0, zorder=4)
-        labels.append([val, val, colr, f" {text} {px(val)} ({(val / c[-1] - 1) * 100:+.1f}%)"])
+        base = trade["entry"] if trade else c[-1]        # trade charts: % from the entry price
+        labels.append([val, val, colr, f" {text} {px(val)} ({(val / base - 1) * 100:+.1f}%)"])
         lo_y, hi_y = min(lo_y, val), max(hi_y, val)
 
     if brk:
@@ -203,6 +204,13 @@ def draw(ticker, df, p, trade=None):
             tb = trade["bar"]
             ax.scatter([tb], [trade["entry"]], marker="^" if tl else "v", s=140, color=UP if tl else DOWN,
                        edgecolor="white", lw=1.0, zorder=10)
+            if trade.get("exit_bar") is not None:          # where the trade was closed
+                eb, ep = trade["exit_bar"], trade["now"]
+                ax.scatter([eb], [ep], marker="X", s=150, color="#ffffff", edgecolor="black", lw=1.0, zorder=11)
+                ax.annotate(f"exit {px(ep)}", (eb, ep), textcoords="offset points", xytext=(8, -4), ha="left",
+                            fontsize=8.5, color="white", fontweight="bold", zorder=11)
+                ax.plot([tb, eb], [trade["entry"], ep], color="#ffffff", lw=1.0, ls=":", zorder=9)
+                lo_y, hi_y = min(lo_y, ep), max(hi_y, ep)
             info = [f"PAPER TRADE ({trade['status']})",
                     f"{'BUY' if tl else 'SELL SHORT'} {trade['qty']} @ {px(trade['entry'])}  {trade.get('when', '')}",
                     f"Stop {px(trade['stop'])}" + (f" · Target {px(trade['target'])}" if trade.get("target") else ""),
