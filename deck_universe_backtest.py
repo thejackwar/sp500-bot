@@ -68,6 +68,9 @@ SIM_RULES = {"reg50": "leverage only while SPY is above its 50-day MA (else 1x, 
              "time10": "sell at the close after 10 days if not up at least 0.5R",
              "pos15": "max 7.5% of equity per stock x leverage (15% at 2x) instead of 10%",
              "pos25": "max 12.5% of equity per stock x leverage (25% at 2x) instead of 10%",
+             "pos8": "max 4% of equity per stock x leverage (8% at 2x: up to 25 positions)",
+             "pos10": "max 5% of equity per stock x leverage (10% at 2x: up to 20 positions)",
+             "pos12": "max 6% of equity per stock x leverage (12% at 2x: up to 16 positions)",
              "risk05": "sized by risk: 0.25% x leverage (0.5% at 2x) per trade, cap 15% x leverage per stock",
              "risk075": "sized by risk: 0.375% x leverage (0.75% at 2x) per trade, cap 15% x leverage per stock"}
 # note (22 Oct 2026): with 1% risk and a 10%-per-stock cap, ~98% of trades are sized by the cap, not the risk
@@ -164,7 +167,7 @@ def _signals(args):
 def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None, rules=(), spy_up=None):
     """rules: SIM_RULES names; spy_up: {"reg50"/"reg200": bool array per day, SPY above that MA at the close}."""
     rules = set(rules)
-    pos_pct = 0.075 if "pos15" in rules else 0.125 if "pos25" in rules else MAX_POS_PCT
+    pos_pct = next((int(r[3:]) / 200 for r in rules if r.startswith("pos")), MAX_POS_PCT)   # posN = N% at 2x
     risk_pct = RISK
     if "risk05" in rules or "risk075" in rules:          # true risk sizing: the per-stock cap rarely binds
         risk_pct, pos_pct = (0.0025 if "risk05" in rules else 0.00375), 0.15
