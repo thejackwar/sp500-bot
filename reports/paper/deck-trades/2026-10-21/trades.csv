@@ -1,6 +1,6 @@
 symbol,pattern,side,qty,entry,stop,target,now,pnl,pnl_pct,status,time
 CMCSA,Symmetrical triangle up,LONG,454,21.96,21.92,26.67,21.92,-18.16,-0.18,closed: stop hit,09:46 NY
-GOOGL,Symmetrical triangle down,SHORT,29,333.631379,346.48,273.14,334.37,-21.42,-0.22,open,09:46 NY
-MMM,Descending triangle up,LONG,58,170.69,161.35,179.26,171.605,53.07,0.54,open,09:46 NY
-UBER,Symmetrical triangle down,SHORT,145,68.8,70.11,54.18,68.1199,98.61,0.99,open,09:46 NY
-LRCX,Gap down down,SHORT,37,266.291081,279.92,239.99,267.68,-51.39,-0.52,open,09:46 NY
+GOOGL,Symmetrical triangle down,SHORT,29,333.631379,346.48,273.14,327.33,182.74,1.89,open,09:46 NY
+MMM,Descending triangle up,LONG,58,170.69,161.35,179.26,175.675,289.13,2.92,open,09:46 NY
+UBER,Symmetrical triangle down,SHORT,145,68.8,70.11,54.18,67.925,126.88,1.27,open,09:46 NY
+LRCX,Gap down down,SHORT,37,266.291081,279.92,239.99,235.595946,1135.72,11.53,closed: take profit hit,09:46 NY
