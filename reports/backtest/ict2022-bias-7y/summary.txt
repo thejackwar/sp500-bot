@@ -1,0 +1,372 @@
+ICT 2022 MODEL BACKTEST - SPY + QQQ, 1-minute bars (Alpaca, all exchanges)
+Data 2019-10-24 to 2026-10-22. In-sample to 2025-10-22; out-of-sample after it.
+R/order = average R per order placed, missed fills counted as 0R (the fair way to compare).
+Costs: limit fills only when price trades $0.01 through; $0.01/share slippage on stop and
+16:00 exits; entry + stop in the same minute = loss; target and fill in the same minute = no trade.
+
+=== DAILY BIAS EFFECT: R/order (missed fills = 0R), orders in brackets ===
+setup                        IS none        OOS none          IS ict         OOS ict        IS trend       OOS trend
+last/edge/liq            +0.00 (731)     -0.20 (139)     -0.18 (269)      -0.12 (62)     -0.07 (313)      -0.40 (69)
+last/edge/2R             -0.05 (941)     -0.03 (174)     -0.05 (356)      +0.06 (79)     -0.05 (411)      -0.08 (88)
+last/mid/liq             -0.02 (782)     -0.12 (149)     -0.21 (285)      -0.11 (68)     -0.03 (331)      -0.34 (72)
+last/mid/2R              -0.08 (948)     -0.02 (174)     -0.08 (357)      +0.02 (79)     -0.10 (411)      -0.14 (88)
+deepest/edge/liq         +0.01 (829)     -0.11 (150)     -0.17 (302)      +0.00 (64)     -0.11 (350)      -0.29 (74)
+deepest/edge/2R          -0.04 (950)     +0.00 (174)     -0.03 (356)      +0.13 (79)     -0.06 (411)      -0.01 (88)
+deepest/mid/liq          -0.04 (872)     -0.05 (160)     -0.19 (315)      -0.02 (71)     -0.09 (367)      -0.26 (78)
+deepest/mid/2R           -0.06 (957)     +0.00 (174)     -0.06 (357)      +0.07 (79)     -0.10 (411)      -0.09 (88)
+
+=== IN-SAMPLE: both directions, both symbols (ranked by in-sample R/order) ===
+variant                        orders  fill% trades  win%   avgR R/order  totalR    PF maxDD R
+deepest/edge/liq                  829    65%    535   22%  +0.02   +0.01    +9.3  1.02   +58.2
+last/edge/liq                     731    74%    542   23%  +0.00   +0.00    +1.4  1.00   +49.9
+last/mid/liq                      782    66%    515   21%  -0.03   -0.02   -16.1  0.96   +64.2
+deepest/edge/2R +ict              356    60%    212   33%  -0.05   -0.03   -10.4  0.93   +17.1
+last/mid/liq +trend               331    64%    213   21%  -0.05   -0.03   -10.3  0.94   +26.8
+deepest/edge/2R                   950    61%    579   32%  -0.06   -0.04   -35.0  0.91   +43.5
+deepest/mid/liq                   872    58%    502   19%  -0.06   -0.04   -32.2  0.92   +72.4
+last/edge/2R +trend               411    70%    289   33%  -0.06   -0.05   -18.6  0.90   +26.9
+last/edge/2R +ict                 356    71%    253   33%  -0.07   -0.05   -16.6  0.90   +20.9
+last/edge/2R                      941    73%    684   32%  -0.07   -0.05   -51.0  0.89   +55.9
+deepest/mid/2R                    957    50%    476   30%  -0.11   -0.06   -53.6  0.84   +65.3
+deepest/edge/2R +trend            411    59%    244   32%  -0.10   -0.06   -23.3  0.86   +27.3
+deepest/mid/2R +ict               357    48%    171   30%  -0.13   -0.06   -22.6  0.81   +23.6
+last/edge/liq +trend              313    73%    227   22%  -0.09   -0.07   -21.0  0.88   +30.4
+last/mid/2R                       948    62%    584   30%  -0.12   -0.08   -72.9  0.82   +80.9
+last/mid/2R +ict                  357    59%    211   30%  -0.14   -0.08   -29.0  0.80   +30.0
+deepest/mid/liq +trend            367    56%    207   18%  -0.16   -0.09   -33.4  0.81   +43.2
+deepest/mid/2R +trend             411    48%    199   28%  -0.20   -0.10   -39.6  0.73   +41.6
+last/mid/2R +trend                411    59%    241   29%  -0.18   -0.10   -42.8  0.75   +44.8
+deepest/edge/liq +trend           350    63%    219   20%  -0.18   -0.11   -39.6  0.78   +46.9
+deepest/edge/liq +ict             302    64%    194   20%  -0.26   -0.17   -50.0  0.68   +51.9
+last/edge/liq +ict                269    72%    195   21%  -0.25   -0.18   -49.7  0.68   +51.6
+deepest/mid/liq +ict              315    57%    179   16%  -0.34   -0.19   -60.6  0.60   +62.2
+last/mid/liq +ict                 285    64%    181   17%  -0.33   -0.21   -59.8  0.60   +61.3
+
+=== OUT-OF-SAMPLE (last 12 months): both directions, both symbols (ranked by in-sample R/order) ===
+variant                        orders  fill% trades  win%   avgR R/order  totalR    PF maxDD R
+deepest/edge/liq                  150    64%     96   25%  -0.18   -0.11   -16.9  0.77   +20.3
+last/edge/liq                     139    74%    103   23%  -0.26   -0.20   -27.3  0.65   +30.7
+last/mid/liq                      149    62%     92   21%  -0.20   -0.12   -18.3  0.75   +24.3
+deepest/edge/2R +ict               79    65%     51   45%  +0.20   +0.13   +10.3  1.37    +6.1
+last/mid/liq +trend                72    60%     43   12%  -0.58   -0.34   -24.8  0.34   +25.2
+deepest/edge/2R                   174    60%    105   38%  +0.01   +0.00    +0.8  1.01   +15.2
+deepest/mid/liq                   160    55%     88   23%  -0.09   -0.05    -8.3  0.88   +18.5
+last/edge/2R +trend                88    70%     62   32%  -0.11   -0.08    -7.1  0.83   +10.8
+last/edge/2R +ict                  79    73%     58   41%  +0.08   +0.06    +4.4  1.13    +9.0
+last/edge/2R                      174    70%    122   37%  -0.05   -0.03    -5.7  0.93   +16.2
+deepest/mid/2R                    174    52%     90   36%  +0.00   +0.00    +0.3  1.01   +17.2
+deepest/edge/2R +trend             88    57%     50   34%  -0.02   -0.01    -1.0  0.97   +11.1
+deepest/mid/2R +ict                79    51%     40   40%  +0.14   +0.07    +5.5  1.23    +6.4
+last/edge/liq +trend               69    75%     52   15%  -0.54   -0.40   -27.9  0.36   +27.9
+last/mid/2R                       174    60%    104   35%  -0.03   -0.02    -3.1  0.95   +19.2
+last/mid/2R +ict                   79    61%     48   38%  +0.04   +0.02    +1.8  1.06    +9.4
+deepest/mid/liq +trend             78    49%     38   13%  -0.53   -0.26   -20.2  0.38   +22.6
+deepest/mid/2R +trend              88    45%     40   28%  -0.19   -0.09    -7.8  0.73   +12.0
+last/mid/2R +trend                 88    58%     51   27%  -0.24   -0.14   -12.4  0.66   +14.0
+deepest/edge/liq +trend            74    61%     45   18%  -0.47   -0.29   -21.2  0.42   +21.2
+deepest/edge/liq +ict              64    69%     44   30%  +0.01   +0.00    +0.3  1.01    +9.6
+last/edge/liq +ict                 62    79%     49   24%  -0.16   -0.12    -7.7  0.79   +13.7
+deepest/mid/liq +ict               71    52%     37   22%  -0.04   -0.02    -1.4  0.95    +9.1
+last/mid/liq +ict                  68    63%     43   19%  -0.17   -0.11    -7.4  0.79   +13.1
+
+=== MONEY: 1% risk per trade, max 2x equity per position, $100k start ===
+variant                         IS total  IS /year  IS maxDD  OOS total  OOS maxDD  size capped  avg risk
+deepest/edge/liq                  -22.4%     -4.1%    -25.1%      -4.2%     -10.0%          95%     0.42%
+last/edge/liq                     -23.6%     -4.4%    -24.7%      -9.0%     -11.5%          93%     0.46%
+last/mid/liq                      -22.7%     -4.2%    -23.9%      -5.5%      -7.7%          96%     0.42%
+deepest/edge/2R +ict               -4.1%     -0.7%    -11.6%      +5.9%      -3.3%          90%     0.48%
+last/mid/liq +trend               -10.2%     -1.8%    -12.7%      -8.2%      -8.2%          94%     0.44%
+deepest/edge/2R                   -22.3%     -4.1%    -28.1%      +3.9%      -8.5%          94%     0.45%
+deepest/mid/liq                   -21.4%     -3.9%    -23.8%      -1.3%      -7.6%          98%     0.37%
+last/edge/2R +trend               -11.9%     -2.1%    -15.3%      -1.1%      -6.9%          88%     0.55%
+last/edge/2R +ict                 -10.4%     -1.8%    -14.5%      +2.5%      -3.8%          83%     0.54%
+last/edge/2R                      -35.4%     -7.0%    -37.1%      -1.7%     -11.0%          89%     0.52%
+deepest/mid/2R                    -21.0%     -3.9%    -22.9%      +2.4%      -7.3%          96%     0.40%
+deepest/edge/2R +trend            -12.6%     -2.2%    -15.9%      +3.7%      -4.6%          93%     0.49%
+deepest/mid/2R +ict                -4.3%     -0.7%     -8.5%      +3.1%      -2.7%          92%     0.43%
+last/edge/liq +trend              -16.5%     -3.0%    -16.8%      -9.8%      -9.8%          93%     0.49%
+last/mid/2R                       -35.4%     -7.0%    -36.5%      -1.5%     -10.5%          92%     0.47%
+last/mid/2R +ict                  -12.4%     -2.2%    -15.2%      +0.5%      -3.6%          85%     0.50%
+deepest/mid/liq +trend            -15.4%     -2.7%    -15.6%      -5.0%      -5.0%          97%     0.40%
+deepest/mid/2R +trend             -14.3%     -2.5%    -15.9%      -1.1%      -4.2%          94%     0.44%
+last/mid/2R +trend                -18.4%     -3.3%    -20.2%      -4.2%      -6.5%          89%     0.49%
+deepest/edge/liq +trend           -21.3%     -3.9%    -21.5%      -5.4%      -6.5%          96%     0.45%
+deepest/edge/liq +ict             -21.3%     -3.9%    -23.7%      +1.8%      -3.2%          93%     0.45%
+last/edge/liq +ict                -20.9%     -3.8%    -23.9%      -2.8%      -5.3%          91%     0.48%
+deepest/mid/liq +ict              -17.4%     -3.1%    -21.5%      -0.1%      -2.6%          96%     0.39%
+last/mid/liq +ict                 -18.6%     -3.4%    -22.9%      -3.9%      -5.3%          93%     0.43%
+'size capped' = share of in-sample trades where the 2x-equity limit cut the 1% risk
+(tight stops); 'avg risk' = what an in-sample trade really risked, as % of equity.
+
+=== IN-SAMPLE: by direction and symbol ===
+variant                        orders  fill% trades  win%   avgR R/order  totalR    PF maxDD R
+deepest/edge/liq long             361    65%    233   21%  -0.17   -0.11   -40.1  0.78   +47.0
+deepest/edge/liq short            468    65%    302   23%  +0.16   +0.11   +49.4  1.21   +27.8
+deepest/edge/liq SPY              408    65%    267   23%  +0.15   +0.10   +39.4  1.19   +26.9
+deepest/edge/liq QQQ              421    64%    268   22%  -0.11   -0.07   -30.2  0.86   +39.7
+
+last/edge/liq long                320    72%    231   23%  -0.15   -0.11   -34.5  0.81   +40.7
+last/edge/liq short               411    76%    311   24%  +0.12   +0.09   +35.9  1.15   +32.3
+last/edge/liq SPY                 358    76%    271   23%  +0.07   +0.05   +18.2  1.09   +24.2
+last/edge/liq QQQ                 373    73%    271   24%  -0.06   -0.05   -16.8  0.92   +30.3
+
+last/mid/liq long                 345    63%    219   22%  -0.14   -0.09   -30.9  0.82   +34.0
+last/mid/liq short                437    68%    296   20%  +0.05   +0.03   +14.9  1.06   +41.4
+last/mid/liq SPY                  383    67%    258   22%  +0.08   +0.06   +21.8  1.11   +28.4
+last/mid/liq QQQ                  399    64%    257   20%  -0.15   -0.09   -37.9  0.82   +45.5
+
+deepest/edge/2R +ict long         189    62%    117   37%  +0.04   +0.03    +4.9  1.07   +10.1
+deepest/edge/2R +ict short        167    57%     95   28%  -0.16   -0.09   -15.2  0.78   +15.2
+deepest/edge/2R +ict SPY          157    57%     90   32%  -0.08   -0.05    -7.4  0.88   +17.1
+deepest/edge/2R +ict QQQ          199    61%    122   34%  -0.02   -0.01    -3.0  0.96   +12.0
+
+last/mid/liq +trend long          210    63%    133   23%  -0.11   -0.07   -15.2  0.85   +23.5
+last/mid/liq +trend short         121    66%     80   18%  +0.06   +0.04    +4.9  1.07   +14.2
+last/mid/liq +trend SPY           164    67%    110   18%  -0.03   -0.02    -3.3  0.96   +23.7
+last/mid/liq +trend QQQ           167    62%    103   23%  -0.07   -0.04    -7.0  0.91   +14.8
+
+deepest/edge/2R long              428    61%    260   34%  -0.03   -0.02    -8.9  0.95   +27.1
+deepest/edge/2R short             522    61%    319   31%  -0.08   -0.05   -26.1  0.88   +35.5
+deepest/edge/2R SPY               456    61%    276   34%  +0.00   +0.00    +1.0  1.01   +31.3
+deepest/edge/2R QQQ               494    61%    303   31%  -0.12   -0.07   -36.0  0.83   +43.5
+
+deepest/mid/liq long              385    57%    219   19%  -0.20   -0.12   -44.5  0.75   +47.4
+deepest/mid/liq short             487    58%    283   19%  +0.04   +0.03   +12.4  1.05   +42.3
+deepest/mid/liq SPY               427    58%    247   20%  +0.06   +0.04   +15.1  1.08   +33.4
+deepest/mid/liq QQQ               445    57%    255   18%  -0.19   -0.11   -47.3  0.78   +57.6
+
+last/edge/2R +trend long          264    70%    184   36%  -0.02   -0.01    -3.0  0.97   +15.2
+last/edge/2R +trend short         147    71%    105   28%  -0.15   -0.11   -15.6  0.79   +18.1
+last/edge/2R +trend SPY           197    73%    143   33%  -0.09   -0.06   -12.4  0.87   +19.5
+last/edge/2R +trend QQQ           214    68%    146   33%  -0.04   -0.03    -6.1  0.94   +14.8
+
+last/edge/2R +ict long            189    71%    135   36%  +0.00   +0.00    +0.1  1.00    +9.7
+last/edge/2R +ict short           167    71%    118   29%  -0.14   -0.10   -16.7  0.79   +16.7
+last/edge/2R +ict SPY             157    69%    108   31%  -0.13   -0.09   -14.1  0.81   +20.9
+last/edge/2R +ict QQQ             199    73%    145   34%  -0.02   -0.01    -2.5  0.97   +11.0
+
+last/edge/2R long                 422    71%    301   34%  -0.05   -0.04   -16.4  0.92   +31.5
+last/edge/2R short                519    74%    383   31%  -0.09   -0.07   -34.6  0.86   +36.6
+last/edge/2R SPY                  449    73%    328   34%  -0.02   -0.01    -5.6  0.97   +26.2
+last/edge/2R QQQ                  492    72%    356   31%  -0.13   -0.09   -45.3  0.81   +49.9
+
+deepest/mid/2R long               431    50%    214   29%  -0.16   -0.08   -33.6  0.78   +36.5
+deepest/mid/2R short              526    50%    262   31%  -0.08   -0.04   -20.1  0.89   +39.9
+deepest/mid/2R SPY                458    49%    224   34%  +0.00   +0.00    +0.2  1.00   +25.4
+deepest/mid/2R QQQ                499    51%    252   27%  -0.21   -0.11   -53.8  0.71   +56.2
+
+deepest/edge/2R +trend long       264    61%    161   35%  -0.02   -0.01    -3.5  0.97   +14.7
+deepest/edge/2R +trend short      147    56%     83   25%  -0.24   -0.13   -19.8  0.68   +21.7
+deepest/edge/2R +trend SPY        197    60%    119   33%  -0.07   -0.04    -8.0  0.90   +19.7
+deepest/edge/2R +trend QQQ        214    58%    125   30%  -0.12   -0.07   -15.3  0.82   +19.5
+
+deepest/mid/2R +ict long          189    51%     96   32%  -0.09   -0.05    -9.0  0.86   +11.9
+deepest/mid/2R +ict short         168    45%     75   28%  -0.18   -0.08   -13.6  0.75   +14.1
+deepest/mid/2R +ict SPY           157    45%     71   30%  -0.17   -0.08   -12.1  0.76   +16.8
+deepest/mid/2R +ict QQQ           200    50%    100   31%  -0.10   -0.05   -10.5  0.85   +19.6
+
+last/edge/liq +trend long         195    72%    140   24%  -0.15   -0.11   -20.5  0.81   +21.5
+last/edge/liq +trend short        118    74%     87   20%  -0.01   -0.00    -0.5  0.99   +13.1
+last/edge/liq +trend SPY          156    77%    120   21%  -0.04   -0.03    -4.3  0.96   +23.9
+last/edge/liq +trend QQQ          157    68%    107   23%  -0.16   -0.11   -16.7  0.80   +18.0
+
+last/mid/2R long                  425    60%    256   32%  -0.10   -0.06   -24.8  0.86   +30.9
+last/mid/2R short                 523    63%    328   29%  -0.15   -0.09   -48.2  0.79   +56.6
+last/mid/2R SPY                   451    62%    280   33%  -0.04   -0.02   -10.8  0.94   +20.8
+last/mid/2R QQQ                   497    61%    304   28%  -0.20   -0.12   -62.1  0.71   +65.1
+
+last/mid/2R +ict long             189    61%    116   33%  -0.08   -0.05    -9.8  0.87   +14.0
+last/mid/2R +ict short            168    57%     95   26%  -0.20   -0.11   -19.2  0.72   +19.2
+last/mid/2R +ict SPY              157    56%     88   27%  -0.23   -0.13   -20.5  0.68   +23.5
+last/mid/2R +ict QQQ              200    62%    123   32%  -0.07   -0.04    -8.5  0.89   +17.5
+
+deepest/mid/liq +trend long       233    56%    131   20%  -0.18   -0.10   -23.6  0.78   +31.9
+deepest/mid/liq +trend short      134    57%     76   14%  -0.13   -0.07    -9.8  0.85   +20.2
+deepest/mid/liq +trend SPY        183    58%    107   15%  -0.15   -0.09   -16.5  0.82   +34.0
+deepest/mid/liq +trend QQQ        184    54%    100   21%  -0.17   -0.09   -16.9  0.79   +17.9
+
+deepest/mid/2R +trend long        264    50%    133   29%  -0.17   -0.08   -22.1  0.77   +25.1
+deepest/mid/2R +trend short       147    45%     66   26%  -0.26   -0.12   -17.5  0.65   +19.3
+deepest/mid/2R +trend SPY         197    47%     93   28%  -0.23   -0.11   -21.1  0.69   +23.1
+deepest/mid/2R +trend QQQ         214    50%    106   28%  -0.17   -0.09   -18.5  0.76   +22.3
+
+last/mid/2R +trend long           264    58%    154   31%  -0.12   -0.07   -18.6  0.83   +21.7
+last/mid/2R +trend short          147    59%     87   24%  -0.28   -0.16   -24.2  0.62   +24.2
+last/mid/2R +trend SPY            197    59%    116   28%  -0.23   -0.14   -26.7  0.68   +29.7
+last/mid/2R +trend QQQ            214    58%    125   30%  -0.13   -0.07   -16.0  0.81   +20.8
+
+deepest/edge/liq +trend long      219    63%    139   22%  -0.18   -0.11   -24.6  0.77   +26.7
+deepest/edge/liq +trend short     131    61%     80   16%  -0.19   -0.11   -14.9  0.78   +24.7
+deepest/edge/liq +trend SPY       176    66%    116   20%  -0.10   -0.07   -11.5  0.88   +34.0
+deepest/edge/liq +trend QQQ       174    59%    103   20%  -0.27   -0.16   -28.1  0.66   +28.1
+
+deepest/edge/liq +ict long        157    69%    108   21%  -0.25   -0.18   -27.5  0.68   +32.1
+deepest/edge/liq +ict short       145    59%     86   17%  -0.26   -0.16   -22.5  0.69   +27.4
+deepest/edge/liq +ict SPY         140    65%     91   20%  -0.20   -0.13   -18.6  0.75   +23.9
+deepest/edge/liq +ict QQQ         162    64%    103   19%  -0.30   -0.19   -31.4  0.63   +36.6
+
+last/edge/liq +ict long           138    74%    102   22%  -0.24   -0.18   -25.0  0.69   +28.4
+last/edge/liq +ict short          131    71%     93   19%  -0.27   -0.19   -24.7  0.68   +26.7
+last/edge/liq +ict SPY            122    73%     89   19%  -0.25   -0.18   -21.9  0.70   +25.9
+last/edge/liq +ict QQQ            147    72%    106   22%  -0.26   -0.19   -27.8  0.67   +31.9
+
+deepest/mid/liq +ict long         165    61%    101   19%  -0.28   -0.17   -28.6  0.66   +32.9
+deepest/mid/liq +ict short        150    52%     78   12%  -0.41   -0.21   -32.0  0.54   +35.0
+deepest/mid/liq +ict SPY          146    56%     82   16%  -0.27   -0.15   -22.3  0.68   +26.3
+deepest/mid/liq +ict QQQ          169    57%     97   15%  -0.39   -0.23   -38.3  0.54   +45.1
+
+last/mid/liq +ict long            147    67%     99   20%  -0.26   -0.17   -25.5  0.68   +28.3
+last/mid/liq +ict short           138    59%     82   13%  -0.42   -0.25   -34.2  0.52   +34.5
+last/mid/liq +ict SPY             129    64%     82   17%  -0.30   -0.19   -24.8  0.64   +28.6
+last/mid/liq +ict QQQ             156    63%     99   17%  -0.35   -0.22   -35.0  0.57   +41.8
+
+=== OUT-OF-SAMPLE (last 12 months): by direction and symbol ===
+variant                        orders  fill% trades  win%   avgR R/order  totalR    PF maxDD R
+deepest/edge/liq long              68    62%     42   24%  -0.45   -0.27   -18.7  0.41   +19.4
+deepest/edge/liq short             82    66%     54   26%  +0.03   +0.02    +1.8  1.04   +11.1
+deepest/edge/liq SPY               71    63%     45   24%  -0.15   -0.10    -6.9  0.80   +16.3
+deepest/edge/liq QQQ               79    65%     51   25%  -0.20   -0.13   -10.0  0.74   +14.3
+
+last/edge/liq long                 62    71%     44   20%  -0.54   -0.39   -23.9  0.31   +23.9
+last/edge/liq short                77    77%     59   25%  -0.06   -0.04    -3.4  0.92   +11.1
+last/edge/liq SPY                  63    75%     47   21%  -0.32   -0.24   -14.9  0.59   +17.5
+last/edge/liq QQQ                  76    74%     56   25%  -0.22   -0.16   -12.4  0.71   +16.6
+
+last/mid/liq long                  69    59%     41   17%  -0.60   -0.36   -24.6  0.27   +24.6
+last/mid/liq short                 80    64%     51   24%  +0.12   +0.08    +6.2  1.16   +10.1
+last/mid/liq SPY                   67    61%     41   15%  -0.40   -0.25   -16.6  0.52   +19.5
+last/mid/liq QQQ                   82    62%     51   25%  -0.03   -0.02    -1.8  0.95   +11.9
+
+deepest/edge/2R +ict long          44    64%     28   39%  +0.06   +0.04    +1.8  1.11    +7.1
+deepest/edge/2R +ict short         35    66%     23   52%  +0.37   +0.24    +8.5  1.77    +4.0
+deepest/edge/2R +ict SPY           37    65%     24   50%  +0.42   +0.27   +10.0  1.83    +4.1
+deepest/edge/2R +ict QQQ           42    64%     27   41%  +0.01   +0.01    +0.3  1.02    +6.1
+
+last/mid/liq +trend long           42    64%     27    7%  -0.81   -0.52   -21.9  0.09   +21.9
+last/mid/liq +trend short          30    53%     16   19%  -0.18   -0.10    -2.9  0.78    +9.1
+last/mid/liq +trend SPY            32    56%     18    6%  -0.86   -0.48   -15.5  0.06   +15.5
+last/mid/liq +trend QQQ            40    62%     25   16%  -0.37   -0.23    -9.3  0.55    +9.8
+
+deepest/edge/2R long               84    57%     48   35%  -0.09   -0.05    -4.3  0.86   +10.7
+deepest/edge/2R short              90    63%     57   40%  +0.09   +0.06    +5.1  1.15   +10.1
+deepest/edge/2R SPY                83    59%     49   37%  +0.01   +0.01    +0.5  1.02   +15.2
+deepest/edge/2R QQQ                91    62%     56   39%  +0.01   +0.00    +0.3  1.01   +11.6
+
+deepest/mid/liq long               76    51%     39   21%  -0.48   -0.25   -18.8  0.39   +18.8
+deepest/mid/liq short              84    58%     49   24%  +0.21   +0.12   +10.4  1.28   +11.1
+deepest/mid/liq SPY                75    53%     40   18%  -0.24   -0.13    -9.6  0.71   +18.5
+deepest/mid/liq QQQ                85    56%     48   27%  +0.03   +0.01    +1.2  1.04    +9.8
+
+last/edge/2R +trend long           52    77%     40   28%  -0.31   -0.24   -12.3  0.57   +13.8
+last/edge/2R +trend short          36    61%     22   41%  +0.24   +0.14    +5.2  1.40    +4.0
+last/edge/2R +trend SPY            42    74%     31   35%  -0.02   -0.01    -0.6  0.97    +9.5
+last/edge/2R +trend QQQ            46    67%     31   29%  -0.21   -0.14    -6.6  0.70    +7.7
+
+last/edge/2R +ict long             44    73%     32   34%  -0.13   -0.09    -4.1  0.81   +11.3
+last/edge/2R +ict short            35    74%     26   50%  +0.33   +0.24    +8.5  1.65    +4.1
+last/edge/2R +ict SPY              37    76%     28   46%  +0.25   +0.19    +7.1  1.47    +4.5
+last/edge/2R +ict QQQ              42    71%     30   37%  -0.09   -0.06    -2.7  0.86    +9.0
+
+last/edge/2R long                  84    65%     55   33%  -0.23   -0.15   -12.8  0.66   +16.0
+last/edge/2R short                 90    74%     67   40%  +0.11   +0.08    +7.1  1.18   +10.1
+last/edge/2R SPY                   83    70%     58   34%  -0.06   -0.04    -3.6  0.91   +16.2
+last/edge/2R QQQ                   91    70%     64   39%  -0.03   -0.02    -2.1  0.95   +10.6
+
+deepest/mid/2R long                84    49%     41   29%  -0.22   -0.11    -9.1  0.69   +12.0
+deepest/mid/2R short               90    54%     49   41%  +0.19   +0.10    +9.4  1.32   +10.1
+deepest/mid/2R SPY                 83    52%     43   30%  -0.14   -0.07    -5.8  0.81   +17.2
+deepest/mid/2R QQQ                 91    52%     47   40%  +0.13   +0.07    +6.2  1.22    +8.2
+
+deepest/edge/2R +trend long        52    62%     32   31%  -0.13   -0.08    -4.2  0.81    +8.3
+deepest/edge/2R +trend short       36    50%     18   39%  +0.18   +0.09    +3.2  1.29    +3.8
+deepest/edge/2R +trend SPY         42    57%     24   38%  +0.10   +0.06    +2.4  1.16    +7.1
+deepest/edge/2R +trend QQQ         46    57%     26   31%  -0.13   -0.07    -3.3  0.82    +8.1
+
+deepest/mid/2R +ict long           44    52%     23   30%  -0.13   -0.07    -2.9  0.82    +8.8
+deepest/mid/2R +ict short          35    49%     17   53%  +0.49   +0.24    +8.4  2.04    +3.0
+deepest/mid/2R +ict SPY            37    51%     19   42%  +0.26   +0.13    +4.9  1.44    +5.1
+deepest/mid/2R +ict QQQ            42    50%     21   38%  +0.03   +0.01    +0.6  1.05    +6.4
+
+last/edge/liq +trend long          41    80%     33   15%  -0.65   -0.52   -21.5  0.21   +21.5
+last/edge/liq +trend short         28    68%     19   16%  -0.34   -0.23    -6.5  0.60    +8.9
+last/edge/liq +trend SPY           31    81%     25   16%  -0.59   -0.47   -14.7  0.29   +14.7
+last/edge/liq +trend QQQ           38    71%     27   15%  -0.49   -0.35   -13.3  0.42   +13.3
+
+last/mid/2R long                   84    57%     48   31%  -0.18   -0.10    -8.5  0.75   +11.1
+last/mid/2R short                  90    62%     56   38%  +0.10   +0.06    +5.4  1.15   +12.1
+last/mid/2R SPY                    83    61%     51   31%  -0.09   -0.06    -4.8  0.86   +19.2
+last/mid/2R QQQ                    91    58%     53   38%  +0.03   +0.02    +1.8  1.05    +9.2
+
+last/mid/2R +ict long              44    64%     28   29%  -0.23   -0.15    -6.6  0.68   +11.9
+last/mid/2R +ict short             35    57%     20   50%  +0.42   +0.24    +8.4  1.83    +4.1
+last/mid/2R +ict SPY               37    65%     24   42%  +0.18   +0.11    +4.2  1.30    +5.3
+last/mid/2R +ict QQQ               42    57%     24   33%  -0.10   -0.06    -2.4  0.85    +9.4
+
+deepest/mid/liq +trend long        45    49%     22    9%  -0.78   -0.38   -17.2  0.12   +17.2
+deepest/mid/liq +trend short       33    48%     16   19%  -0.18   -0.09    -2.9  0.78    +9.1
+deepest/mid/liq +trend SPY         35    46%     16    6%  -0.84   -0.38   -13.5  0.07   +13.5
+deepest/mid/liq +trend QQQ         43    51%     22   18%  -0.30   -0.16    -6.7  0.63    +9.1
+
+deepest/mid/2R +trend long         52    50%     26   23%  -0.35   -0.17    -9.0  0.56   +11.0
+deepest/mid/2R +trend short        36    39%     14   36%  +0.09   +0.03    +1.2  1.14    +4.8
+deepest/mid/2R +trend SPY          42    48%     20   30%  -0.09   -0.04    -1.9  0.87    +7.1
+deepest/mid/2R +trend QQQ          46    43%     20   25%  -0.29   -0.13    -5.9  0.61    +8.1
+
+last/mid/2R +trend long            52    65%     34   26%  -0.31   -0.20   -10.6  0.57   +13.8
+last/mid/2R +trend short           36    47%     17   29%  -0.11   -0.05    -1.8  0.85    +6.8
+last/mid/2R +trend SPY             42    60%     25   32%  -0.10   -0.06    -2.5  0.85    +8.4
+last/mid/2R +trend QQQ             46    57%     26   23%  -0.38   -0.22    -9.9  0.50    +9.9
+
+deepest/edge/liq +trend long       43    65%     28   18%  -0.60   -0.39   -16.8  0.26   +16.8
+deepest/edge/liq +trend short      31    55%     17   18%  -0.26   -0.14    -4.5  0.68    +7.1
+deepest/edge/liq +trend SPY        33    64%     21   19%  -0.51   -0.32   -10.6  0.36   +10.6
+deepest/edge/liq +trend QQQ        41    59%     24   17%  -0.44   -0.26   -10.6  0.47   +10.6
+
+deepest/edge/liq +ict long         33    70%     23   22%  -0.50   -0.35   -11.5  0.34   +13.3
+deepest/edge/liq +ict short        31    68%     21   38%  +0.56   +0.38   +11.8  1.90    +4.0
+deepest/edge/liq +ict SPY          29    66%     19   32%  +0.36   +0.23    +6.8  1.54    +4.4
+deepest/edge/liq +ict QQQ          35    71%     25   28%  -0.26   -0.19    -6.5  0.64    +7.6
+
+last/edge/liq +ict long            32    81%     26   19%  -0.56   -0.45   -14.5  0.29   +15.4
+last/edge/liq +ict short           30    77%     23   30%  +0.30   +0.23    +6.9  1.42    +4.7
+last/edge/liq +ict SPY             27    78%     21   24%  +0.09   +0.07    +1.8  1.12    +5.4
+last/edge/liq +ict QQQ             35    80%     28   25%  -0.34   -0.27    -9.5  0.55   +10.6
+
+deepest/mid/liq +ict long          39    51%     20   15%  -0.62   -0.32   -12.4  0.25   +12.8
+deepest/mid/liq +ict short         32    53%     17   29%  +0.65   +0.35   +11.1  1.91    +3.0
+deepest/mid/liq +ict SPY           32    47%     15   20%  +0.24   +0.11    +3.6  1.31    +5.0
+deepest/mid/liq +ict QQQ           39    56%     22   23%  -0.23   -0.13    -5.0  0.71    +7.1
+
+last/mid/liq +ict long             37    65%     24   12%  -0.69   -0.44   -16.4  0.20   +16.8
+last/mid/liq +ict short            31    61%     19   26%  +0.48   +0.29    +9.0  1.64    +4.1
+last/mid/liq +ict SPY              29    62%     18   17%  +0.03   +0.02    +0.6  1.04    +6.0
+last/mid/liq +ict QQQ              39    64%     25   20%  -0.32   -0.20    -8.0  0.60   +10.1
+
+=== FUNNEL (whole period): how many setups survive each rule ===
+variant                               sweeps        shifts        no gap     no target target < 1.5R        orders         fills
+deepest/edge/liq                       3,904         1,968           814            29           122           979           631
+last/edge/liq                          3,910         1,967           811            28           234           870           645
+last/mid/liq                           3,908         1,964           810            28           171           931           607
+deepest/edge/2R +ict                   1,588           772           332             0             0           435           263
+last/mid/liq +trend                    1,910           917           411            21            75           403           256
+deepest/edge/2R                        3,868         1,957           809             0             0         1,124           684
+deepest/mid/liq                        3,902         1,964           812            29            67         1,032           590
+last/edge/2R +trend                    1,906           917           411             0             0           499           351
+last/edge/2R +ict                      1,585           771           331             0             0           435           311
+last/edge/2R                           3,831         1,938           799             0             0         1,115           806
+deepest/mid/2R                         3,901         1,966           811             0             0         1,131           566
+deepest/edge/2R +trend                 1,908           918           412             0             0           499           294
+deepest/mid/2R +ict                    1,591           773           332             0             0           436           211
+last/edge/liq +trend                   1,912           918           411            21            97           382           279
+last/mid/2R                            3,868         1,949           803             0             0         1,122           688
+last/mid/2R +ict                       1,587           772           331             0             0           436           259
+deepest/mid/liq +trend                 1,909           918           412            21            33           445           245
+deepest/mid/2R +trend                  1,910           918           412             0             0           499           239
+last/mid/2R +trend                     1,908           917           411             0             0           499           292
+deepest/edge/liq +trend                1,912           919           412            21            55           424           264
+deepest/edge/liq +ict                  1,587           773           333            21            48           366           238
+last/edge/liq +ict                     1,588           772           332            21            83           331           244
+deepest/mid/liq +ict                   1,585           772           332            21            28           386           216
+last/mid/liq +ict                      1,586           771           331            21            61           353           224
+
+Median risk per trade: SPY 0.77$, QQQ 0.92$ per share. With stops this tight, the $0.01 costs are a real share of 1R.
