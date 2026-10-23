@@ -9,7 +9,9 @@ Result: reports/analysis/deck-trade-features.csv (one row per closed trade) - an
 At entry (signal day = the breakout close, entry = next day's open):
     stop_pct, stop_atr, atr_pct, gap_open, brk_body_atr, brk_range_atr, brk_close_pos, vol_ratio, vol10_ratio,
     dist_ma20/50/200, ma50_slope, ma200_slope, ret5/20/60/126, rs126 (vs SPY), dist_52wh, rsi14, up_days10,
-    spy_dist_ma50/200, spy_ret20, spy_rsi14, weekday, month, family, pattern
+    spy_dist_ma50/200, spy_ret20, spy_rsi14, weekday, month, family, pattern,
+    beta_1y (252 daily returns vs SPY), beta_2y_w (104 weekly returns, Bloomberg default), beta_adj
+    (Bloomberg adjusted: 0.67 * beta_2y_w + 0.33), corr_spy_1y (correlation of daily returns with SPY)
 During the trade (day 1 = entry day; empty once the trade has ended):
     r_d{1,2,3,5,10,15,20}   close in R from the entry; mfe/mae_d{3,5,10} best/worst high/low in R;
     below_brk_d{1,2,3,5}    closed below the breakout close; below_entry_d{1,2,3,5}
@@ -27,6 +29,7 @@ TRADES = os.environ.get("TRADES", "")
 FILTER = os.environ.get("FILTER", "ma50+gap2pct+reg200+noweak")
 LEVERAGE = float(os.environ.get("LEVERAGE", "2"))
 OUT = os.environ.get("OUT", "reports/analysis/deck-trade-features.csv")
+BETA_OUT = os.environ.get("BETA_OUT", "reports/analysis/deck-beta-buckets.csv")
 DAYS = (1, 2, 3, 5, 10, 15, 20)
 
 
@@ -48,6 +51,64 @@ def indicators(d):
     d["rsi"] = rsi(c)
     d["up10"] = (c.diff() > 0).rolling(10).sum()
     return d
+
+
+def beta_series(stock_close, spy_close):
+    """Rolling betas vs SPY. Daily: value at a day uses returns up to that day's close.
+    Weekly: indexed by the week's last trading day, so .asof(day) only sees completed weeks."""
+    px = pd.concat([stock_close, spy_close], axis=1, keys=["s", "m"]).dropna()
+    r = px.pct_change()
+    cov = r["s"].rolling(252, min_periods=200).cov(r["m"])
+    var = r["m"].rolling(252, min_periods=200).var()
+    daily = pd.DataFrame({"beta_1y": cov / var,
+                          "corr_spy_1y": r["s"].rolling(252, min_periods=200).corr(r["m"])})
+    wk = px.groupby(px.index.to_period("W-FRI")).tail(1)          # last trading day of each week
+    rw = wk.pct_change()
+    wb = rw["s"].rolling(104, min_periods=80).cov(rw["m"]) / rw["m"].rolling(104, min_periods=80).var()
+    return daily, wb
+
+
+def beta_report(out):
+    """Results by beta bucket: does market sensitivity at entry matter for the deck trades?"""
+    o = out.dropna(subset=["beta_adj"]).copy()
+    if o.empty:
+        return
+    o["bucket_fixed"] = pd.cut(o.beta_adj, [-np.inf, 0.8, 1.0, 1.2, 1.4, np.inf],
+                               labels=["<0.8", "0.8-1.0", "1.0-1.2", "1.2-1.4", ">1.4"])
+    o["bucket_tercile"] = pd.qcut(o.beta_adj, 3, labels=["low third", "mid third", "high third"])
+    o["spy_trend"] = np.where(o.spy_dist_ma200 > 0, "SPY>200MA", "SPY<200MA")
+    o["year"] = pd.to_datetime(o.entry_date).dt.year
+    rows = []
+
+    def summ(g):
+        gross_win = g.R[g.R > 0].sum()
+        gross_loss = -g.R[g.R < 0].sum()
+        return pd.Series({"trades": len(g), "win_rate": g.win.mean(), "avg_R": g.R.mean(),
+                          "median_R": g.R.median(), "total_R": g.R.sum(), "total_pnl": g.pnl.sum(),
+                          "profit_factor": gross_win / gross_loss if gross_loss else np.nan,
+                          "avg_days": g.days.mean(), "beta_min": g.beta_adj.min(), "beta_max": g.beta_adj.max()})
+
+    for by in (["bucket_fixed"], ["bucket_tercile"], ["spy_trend", "bucket_tercile"],
+               ["family", "bucket_tercile"]):
+        t = o.groupby(by, observed=True).apply(summ, include_groups=False).reset_index()
+        t.insert(0, "split", "+".join(by))
+        t = t.rename(columns={by[-1]: "bucket"})
+        if len(by) == 2:
+            t["bucket"] = t[by[0]].astype(str) + " | " + t["bucket"].astype(str)
+            t = t.drop(columns=by[0])
+        rows.append(t)
+    # per-year: high third minus low third avg R (is the effect stable or one regime?)
+    y = o.groupby(["year", "bucket_tercile"], observed=True).R.agg(["mean", "count"]).unstack()
+    y.columns = [f"{a}_{b}" for a, b in y.columns]
+    res = pd.concat(rows, ignore_index=True)
+    os.makedirs(os.path.dirname(BETA_OUT), exist_ok=True)
+    res.to_csv(BETA_OUT, index=False)
+    y.to_csv(BETA_OUT.replace(".csv", "-by-year.csv"))
+    pd.set_option("display.width", 200)
+    print("\n=== Results by beta at entry (beta_adj) ===")
+    print(res.round(3).to_string(index=False))
+    print("\n=== Avg R by year and beta third ===")
+    print(y.round(3).to_string())
 
 
 def main():
@@ -72,7 +133,7 @@ def main():
     tr["entry_date"] = pd.to_datetime(tr.entry_date)
     tr["exit_date"] = pd.to_datetime(tr.exit_date)
     syms = sorted(set(tr.symbol)) + ["SPY"]
-    start = tr.entry_date.min() - pd.Timedelta(days=450)
+    start = tr.entry_date.min() - pd.Timedelta(days=800)          # 104 weeks for the weekly beta
     end = dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=20)
     raw = scanner.alpaca_bars(syms, "1Day", start.to_pydatetime().replace(tzinfo=dt.timezone.utc), end,
                               chunk=50, workers=6)
@@ -83,6 +144,7 @@ def main():
         daily[s] = indicators(d[["Open", "High", "Low", "Close", "Volume"]])
     spy = daily["SPY"]
     spy_r126 = spy["Close"] / spy["Close"].shift(126) - 1
+    betas = {}
     rows = []
     for _, t in tr.iterrows():
         d = daily.get(t.symbol)
@@ -115,6 +177,13 @@ def main():
             f.update(spy_dist_ma50=q.Close / q.ma50 - 1, spy_dist_ma200=q.Close / q.ma200 - 1,
                      spy_ret20=q.Close / spy["Close"].shift(20).loc[sd] - 1, spy_rsi14=q.rsi)
             f["rs126"] = f["ret126"] - spy_r126.loc[sd]
+        if t.symbol not in betas:
+            betas[t.symbol] = beta_series(d["Close"], spy["Close"])
+        bd, bw = betas[t.symbol]
+        if sd in bd.index:
+            f.update(beta_1y=bd.at[sd, "beta_1y"], corr_spy_1y=bd.at[sd, "corr_spy_1y"])
+        f["beta_2y_w"] = bw.asof(sd) if len(bw.dropna()) else np.nan
+        f["beta_adj"] = 0.67 * f["beta_2y_w"] + 0.33 if pd.notna(f["beta_2y_w"]) else np.nan
         # the first days of the trade (only while it was still open at that day's close)
         n_open = int(np.searchsorted(d.index.values, np.datetime64(t.exit_date), side="right")) - i
         for k in DAYS:
@@ -138,6 +207,7 @@ def main():
                                                     "leverage"], errors="ignore")
     corr = num.rank().corrwith(out.R.rank()).sort_values()       # Spearman without scipy
     print("Spearman correlation with R:\n" + corr.round(3).to_string())
+    beta_report(out)
 
 
 if __name__ == "__main__":
