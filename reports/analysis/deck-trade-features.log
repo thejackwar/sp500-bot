@@ -1,38 +1,110 @@
 1599 trades from reports/backtest/universe-deck-v6-lev-2-f-7variants-20261022-sp100-8y/trades.csv
-Saved 1595 trades with 68 columns to reports/analysis/deck-trade-features.csv
-Traceback (most recent call last):
-  File "/home/runner/work/sp500-bot/sp500-bot/deck_trade_features.py", line 144, in <module>
-    main()
-  File "/home/runner/work/sp500-bot/sp500-bot/deck_trade_features.py", line 139, in main
-    corr = num.corrwith(out.R, method="spearman").sort_values()
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/pandas/core/frame.py", line 16823, in corrwith
-    return this.apply(
-           ^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/pandas/core/frame.py", line 15427, in apply
-    return op.apply().__finalize__(self, method="apply")
-           ^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/pandas/core/apply.py", line 1106, in apply
-    return self.apply_standard()
-           ^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/pandas/core/apply.py", line 1334, in apply_standard
-    results, res_index = self.apply_series_generator()
-                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/pandas/core/apply.py", line 1350, in apply_series_generator
-    results[i] = self.func(v, *self.args, **self.kwargs)
-                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/pandas/core/frame.py", line 16824, in <lambda>
-    lambda x: other.corr(x, method=method, min_periods=min_periods),
-              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/pandas/core/series.py", line 3101, in corr
-    result = nanops.nancorr(
-             ^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/pandas/core/nanops.py", line 91, in _f
-    return f(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/pandas/core/nanops.py", line 2025, in nancorr
-    f = get_corr_func(method)
-        ^^^^^^^^^^^^^^^^^^^^^
-  File "/opt/hostedtoolcache/Python/3.12.15/x64/lib/python3.12/site-packages/pandas/core/nanops.py", line 2040, in get_corr_func
-    from scipy.stats import spearmanr
-ModuleNotFoundError: No module named 'scipy'
+/home/runner/work/sp500-bot/sp500-bot/deck_trade_features.py:59: Pandas4Warning: Sorting by default when concatenating all DatetimeIndex is deprecated.  In the future, pandas will respect the default of `sort=False`. Specify `sort=True` or `sort=False` to silence this message. If you see this warnings when not directly calling concat, report a bug to pandas.
+  px = pd.concat([stock_close, spy_close], axis=1, keys=["s", "m"]).dropna()
+/home/runner/work/sp500-bot/sp500-bot/deck_trade_features.py:59: Pandas4Warning: Sorting by default when concatenating all DatetimeIndex is deprecated.  In the future, pandas will respect the default of `sort=False`. Specify `sort=True` or `sort=False` to silence this message. If you see this warnings when not directly calling concat, report a bug to pandas.
+  px = pd.concat([stock_close, spy_close], axis=1, keys=["s", "m"]).dropna()
+/home/runner/work/sp500-bot/sp500-bot/deck_trade_features.py:59: Pandas4Warning: Sorting by default when concatenating all DatetimeIndex is deprecated.  In the future, pandas will respect the default of `sort=False`. Specify `sort=True` or `sort=False` to silence this message. If you see this warnings when not directly calling concat, report a bug to pandas.
+  px = pd.concat([stock_close, spy_close], axis=1, keys=["s", "m"]).dropna()
+/home/runner/work/sp500-bot/sp500-bot/deck_trade_features.py:59: Pandas4Warning: Sorting by default when concatenating all DatetimeIndex is deprecated.  In the future, pandas will respect the default of `sort=False`. Specify `sort=True` or `sort=False` to silence this message. If you see this warnings when not directly calling concat, report a bug to pandas.
+  px = pd.concat([stock_close, spy_close], axis=1, keys=["s", "m"]).dropna()
+/home/runner/work/sp500-bot/sp500-bot/deck_trade_features.py:59: Pandas4Warning: Sorting by default when concatenating all DatetimeIndex is deprecated.  In the future, pandas will respect the default of `sort=False`. Specify `sort=True` or `sort=False` to silence this message. If you see this warnings when not directly calling concat, report a bug to pandas.
+  px = pd.concat([stock_close, spy_close], axis=1, keys=["s", "m"]).dropna()
+/home/runner/work/sp500-bot/sp500-bot/deck_trade_features.py:59: Pandas4Warning: Sorting by default when concatenating all DatetimeIndex is deprecated.  In the future, pandas will respect the default of `sort=False`. Specify `sort=True` or `sort=False` to silence this message. If you see this warnings when not directly calling concat, report a bug to pandas.
+  px = pd.concat([stock_close, spy_close], axis=1, keys=["s", "m"]).dropna()
+Saved 1595 trades with 72 columns to reports/analysis/deck-trade-features.csv
+Spearman correlation with R:
+below_entry_d5   -0.234
+below_brk_d5     -0.227
+below_brk_d1     -0.205
+below_brk_d2     -0.202
+below_brk_d3     -0.191
+below_entry_d3   -0.182
+below_entry_d2   -0.179
+below_entry_d1   -0.145
+spy_rsi14        -0.086
+up_days10        -0.084
+spy_dist_ma50    -0.063
+spy_dist_ma200   -0.055
+spy_ret20        -0.051
+dist_52wh        -0.048
+ma50_slope       -0.046
+ret60            -0.002
+rsi14             0.004
+ma200_slope       0.008
+ret126            0.026
+dist_ma200        0.032
+month             0.040
+weekday           0.043
+vol10_ratio       0.063
+dist_ma50         0.063
+rs126             0.067
+corr_spy_1y       0.070
+mfe_d3            0.073
+ret20             0.074
+ret5              0.097
+beta_adj          0.097
+beta_2y_w         0.097
+dist_ma20         0.113
+beta_1y           0.113
+vol_ratio         0.139
+atr_pct           0.172
+mfe_d5            0.180
+r_d1              0.181
+r_d3              0.196
+brk_close_pos     0.201
+gap_open          0.212
+brk_range_atr     0.224
+r_d2              0.225
+r_d5              0.248
+brk_body_atr      0.262
+mfe_d10           0.323
+r_d10             0.335
+r_d15             0.384
+r_d20             0.416
+open_at_d3        0.424
+stop_atr          0.462
+mae_d3            0.485
+stop_pct          0.497
+open_at_d5        0.509
+mae_d5            0.568
+open_at_d10       0.632
+mae_d10           0.671
+
+=== Results by beta at entry (beta_adj) ===
+                   split                 bucket  trades  win_rate  avg_R  median_R  total_R   total_pnl  profit_factor  avg_days  beta_min  beta_max
+            bucket_fixed                   <0.8   423.0     0.243  0.384    -1.007  162.387   57302.445          1.488    33.683     0.183     0.797
+            bucket_fixed                0.8-1.0   381.0     0.220  0.057    -1.007   21.667  105358.970          1.068    31.273     0.801     1.000
+            bucket_fixed                1.0-1.2   433.0     0.270  0.547    -1.005  236.993  132394.852          1.716    36.762     1.001     1.199
+            bucket_fixed                1.2-1.4   189.0     0.265  0.529    -1.006   99.978   54012.848          1.693    33.561     1.201     1.399
+            bucket_fixed                   >1.4   159.0     0.302  1.831    -1.004  291.168  991778.234          3.537    40.465     1.413     2.230
+          bucket_tercile              low third   529.0     0.233  0.247    -1.007  130.417   78987.662          1.305    32.476     0.183     0.867
+          bucket_tercile              mid third   528.0     0.235  0.360    -1.007  190.101  108556.858          1.450    33.790     0.867     1.111
+          bucket_tercile             high third   528.0     0.294  0.931    -1.005  491.675 1153302.828          2.260    37.570     1.111     2.230
+spy_trend+bucket_tercile  SPY<200MA | low third   121.0     0.190 -0.131    -1.006  -15.890  -48321.331          0.846    27.140     0.272     0.860
+spy_trend+bucket_tercile  SPY<200MA | mid third    92.0     0.196 -0.134    -1.005  -12.303   17835.867          0.825    29.576     0.867     1.107
+spy_trend+bucket_tercile SPY<200MA | high third    75.0     0.400  1.513    -1.003  113.449  119318.595          3.287    45.520     1.111     2.116
+spy_trend+bucket_tercile  SPY>200MA | low third   408.0     0.245  0.359    -1.007  146.307  127308.993          1.451    34.059     0.183     0.867
+spy_trend+bucket_tercile  SPY>200MA | mid third   436.0     0.243  0.464    -1.007  202.405   90720.991          1.574    34.679     0.867     1.111
+spy_trend+bucket_tercile SPY>200MA | high third   453.0     0.276  0.835    -1.005  378.226 1033984.233          2.111    36.254     1.111     2.230
+   family+bucket_tercile     candle | low third    90.0     0.233 -0.005    -1.004   -0.419  -21403.036          0.994    40.867     0.241     0.866
+   family+bucket_tercile     candle | mid third    71.0     0.338  0.213    -1.002   15.124   26319.599          1.336    43.465     0.877     1.110
+   family+bucket_tercile    candle | high third    65.0     0.446  0.995    -0.744   64.695  130392.476          2.617    55.431     1.113     1.726
+   family+bucket_tercile      multi | low third   407.0     0.231  0.339    -1.008  137.899  143247.264          1.414    30.904     0.183     0.867
+   family+bucket_tercile      multi | mid third   436.0     0.225  0.437    -1.007  190.669   83700.447          1.533    33.028     0.867     1.111
+   family+bucket_tercile     multi | high third   438.0     0.267  0.850    -1.005  372.168 1018637.656          2.112    34.276     1.111     2.230
+   family+bucket_tercile      short | low third    32.0     0.250 -0.221    -1.007   -7.062  -42856.566          0.754    28.875     0.262     0.839
+   family+bucket_tercile      short | mid third    21.0     0.095 -0.747    -1.011  -15.693   -1463.188          0.209    16.905     0.869     1.074
+   family+bucket_tercile     short | high third    25.0     0.360  2.192    -1.004   54.811    4272.697          4.579    48.840     1.122     2.168
+
+=== Avg R by year and beta third ===
+      mean_low third  mean_mid third  mean_high third  count_low third  count_mid third  count_high third
+year                                                                                                     
+2018          -0.610          -0.979           -1.034                9               18                10
+2019           2.023           0.237            0.090               43               84                66
+2020           0.019           0.487            1.917               37               79                45
+2021           0.591          -0.103            0.389               51               84                71
+2022          -0.350          -0.641            0.136               80               71                64
+2023           0.582           0.332            1.198               65               66                85
+2024           1.306           0.878            0.677               56               44                53
+2025          -0.136           3.593            1.819              105               41                73
+2026          -0.610          -0.104            1.689               83               41                61
