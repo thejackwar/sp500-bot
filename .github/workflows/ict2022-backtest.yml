@@ -1,0 +1,73 @@
+name: ICT 2022 backtest
+
+on:
+  workflow_dispatch:          # run it by hand: Actions -> ICT 2022 backtest -> Run workflow
+    inputs:
+      years:
+        description: "How many years of 1-minute SPY/QQQ data (the last 12 months are kept as out-of-sample)"
+        type: choice
+        options: ["3", "5", "7", "10"]
+        default: "7"
+
+permissions:
+  contents: write              # to commit the results to reports/backtest/
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      # Own cache (separate from the bot's price-cache): only the first run downloads everything
+      - name: Restore saved 1-minute prices
+        uses: actions/cache/restore@v4
+        with:
+          path: price-cache-ict
+          key: ict-cache-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: ict-cache-
+
+      - name: Backtest
+        run: python ict2022_backtest.py
+        env:
+          PYTHONUNBUFFERED: "1"
+          YEARS: ${{ inputs.years }}
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+
+      - name: Save prices for the next run
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: price-cache-ict
+          key: ict-cache-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Save the results with this run
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ict2022-results
+          path: backtest-results/
+          if-no-files-found: ignore
+
+      - name: Commit the results to reports/backtest/
+        if: always()
+        run: |
+          [ -f backtest-results/summary.txt ] || { echo "No results"; exit 0; }
+          dir="reports/backtest/ict2022-${{ inputs.years }}y"
+          mkdir -p "$dir"
+          cp backtest-results/summary.txt backtest-results/trades.csv backtest-results/orders.csv "$dir"/
+          echo "Run ${{ github.run_id }}, $(date -u '+%Y-%m-%d %H:%M UTC')" > "$dir/run.txt"
+          git config user.name "backtest bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/backtest
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "ICT 2022 backtest results: $dir"
+          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done
