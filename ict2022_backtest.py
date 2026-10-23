@@ -64,12 +64,32 @@ RISK = 0.01                        # 1% of equity risked per trade
 MAX_NOTIONAL = 2.0                 # max position size, x equity
 START_EQUITY = 100_000.0
 
-VARIANTS = [dict(gap=g, entry=e, target=t)
+TREND_MA = 20                      # trend bias: yesterday's close vs its 20-day average
+BIASES = os.environ.get("BIASES", "none ict trend").split()
+VARIANTS = [dict(gap=g, entry=e, target=t, bias=b) for b in BIASES
             for g in ("last", "deepest") for e in ("edge", "mid") for t in ("liq", "2R")]
 
 
 def vname(v):
-    return f"{v['gap']}/{v['entry']}/{v['target']}"
+    base = f"{v['gap']}/{v['entry']}/{v['target']}"
+    return base if v.get("bias", "none") == "none" else f"{base} +{v['bias']}"
+
+
+def ict_bias(y, p):
+    """Daily bias from yesterday's candle y vs the day before p (each = (high, low, close)).
+    +1 bullish, -1 bearish, 0 none (inside day, or both sides taken)."""
+    took_h, took_l = y[0] > p[0], y[1] < p[1]
+    if took_h and took_l:
+        return 0
+    if y[2] > p[0]:
+        return 1                       # closed above the prior day's high
+    if y[2] < p[1]:
+        return -1                      # closed below the prior day's low
+    if took_h:
+        return -1                      # swept the prior high, closed back inside
+    if took_l:
+        return 1                       # swept the prior low, closed back inside
+    return 0
 
 
 # ------------------------------------------------------------------ data
@@ -199,15 +219,21 @@ def build_days(df, sym):
 
     starts = np.flatnonzero(np.r_[True, dates[1:] != dates[:-1]])
     ends = np.r_[starts[1:], len(df)]
-    days, prev = [], None
+    days, hist = [], []                 # hist = (high, low, close) of each past regular session
     for a, b in zip(starts, ends):
         r = rth[a:b]
         if not r.any():
             continue
         r0 = int(np.argmax(r))
         day_h, day_l = h[a:b], l[a:b]
-        if prev is not None:
-            pdh, pdl = prev
+        if hist:
+            pdh, pdl = hist[-1][0], hist[-1][1]
+            bias = {"none": 0,
+                    "ict": ict_bias(hist[-1], hist[-2]) if len(hist) >= 2 else 0,
+                    "trend": 0}
+            if len(hist) >= TREND_MA:
+                ma = np.mean([x[2] for x in hist[-TREND_MA:]])
+                bias["trend"] = int(np.sign(hist[-1][2] - ma))
             lows, highs = [("PDL", pdl)], [("PDH", pdh)]
             taken = []
             if r0 > 0:
@@ -221,8 +247,8 @@ def build_days(df, sym):
                     taken.append("PDH")
             days.append(dict(sym=sym, date=dates[a], o=o[a:b], h=day_h, l=day_l, c=c[a:b],
                              mins=mins[a:b], atr=atr[a:b], r0=r0, lows=lows, highs=highs,
-                             taken=taken, sw_hi=_swings(day_h), sw_lo=_swings(-day_l)))
-        prev = (day_h[r0:].max(), day_l[r0:].min())
+                             taken=taken, sw_hi=_swings(day_h), sw_lo=_swings(-day_l), bias=bias))
+        hist.append((day_h[r0:].max(), day_l[r0:].min(), c[a:b][-1]))
     return days
 
 
@@ -242,6 +268,8 @@ def simulate_day(day, var, funnel):
     taken = set(day["taken"])
     setup = order = pos = None
     orders = []
+    b = day.get("bias", {}).get(var.get("bias", "none"), 0)
+    allowed = {1, -1} if var.get("bias", "none") == "none" else ({b} if b else set())
 
     def close(pos, exit_v, why, i):
         d = pos["d"]
@@ -288,6 +316,8 @@ def simulate_day(day, var, funnel):
             L = views[d][2]
             hits[d] = [nm for nm, p in sweep_lv[d] if nm not in taken and L[i] <= p - TICK + EPS]
             taken.update(hits[d])
+            if d not in allowed:                        # against the daily bias: level is used up,
+                hits[d] = []                            # but no setup and no reset
         if hits[1] and hits[-1]:                        # one bar swept both sides: ambiguous, reset
             if order is not None:
                 order["rec"]["cancel"] = "new sweep"
@@ -440,12 +470,12 @@ def _f(x, kind):
             "pf": f"{x:.2f}", "pct1": f"{x:+.1%}"}[kind]
 
 
-R_HEAD = (f"{'variant':<18}{'orders':>7}{'fill%':>7}{'trades':>7}{'win%':>6}{'avgR':>7}"
+R_HEAD = (f"{'variant':<30}{'orders':>7}{'fill%':>7}{'trades':>7}{'win%':>6}{'avgR':>7}"
           f"{'R/order':>8}{'totalR':>8}{'PF':>6}{'maxDD R':>8}")
 
 
 def r_line(label, s):
-    return (f"{label:<18}{_f(s['orders'], 'n'):>7}{_f(s['fill'], 'pct'):>7}{_f(s['fills'], 'n'):>7}"
+    return (f"{label:<30}{_f(s['orders'], 'n'):>7}{_f(s['fill'], 'pct'):>7}{_f(s['fills'], 'n'):>7}"
             f"{_f(s['win'], 'pct'):>6}{_f(s['avgR'], 'r'):>7}{_f(s['exp'], 'r'):>8}"
             f"{_f(s['totR'], 'r1'):>8}{_f(s['pf'], 'pf'):>6}{_f(s['ddR'], 'r1'):>8}")
 
@@ -490,6 +520,21 @@ def report(orders, funnels, first, last):
     # rank on in-sample, both directions
     names = [vname(v) for v in VARIANTS]
     rank = sorted(names, key=lambda nm: -np.nan_to_num(r_stats(sub(first, split, variant=nm))["exp"], nan=-9))
+    # does the daily bias help? same setup, with and without each filter
+    bases = [vname(dict(v, bias="none")) for v in VARIANTS if v["bias"] == BIASES[0]]
+    if len(BIASES) > 1:
+        out.append("=== DAILY BIAS EFFECT: R/order (missed fills = 0R), orders in brackets ===")
+        out.append(f"{'setup':<20}" + "".join(f"{('IS ' + b):>16}{('OOS ' + b):>16}" for b in BIASES))
+        for base in bases:
+            cells = ""
+            for bias in BIASES:
+                nm = base if bias == "none" else f"{base} +{bias}"
+                for p0, p1 in [(first, split), (split + dt.timedelta(days=1), last)]:
+                    s = r_stats(sub(p0, p1, variant=nm))
+                    cells += f"{_f(s['exp'], 'r') + ' (' + str(s['orders']) + ')':>16}"
+            out.append(f"{base:<20}{cells}")
+        out.append("")
+
     for title, p0, p1 in periods:
         out.append(f"=== {title}: both directions, both symbols (ranked by in-sample R/order) ===")
         out.append(R_HEAD)
@@ -498,7 +543,7 @@ def report(orders, funnels, first, last):
         out.append("")
 
     out.append("=== MONEY: 1% risk per trade, max 2x equity per position, $100k start ===")
-    out.append(f"{'variant':<18}{'IS total':>10}{'IS /year':>10}{'IS maxDD':>10}"
+    out.append(f"{'variant':<30}{'IS total':>10}{'IS /year':>10}{'IS maxDD':>10}"
                f"{'OOS total':>11}{'OOS maxDD':>11}{'size capped':>13}{'avg risk':>10}")
     for nm in rank:
         st = []
@@ -509,7 +554,7 @@ def report(orders, funnels, first, last):
             curves.append(curve)
             st.append(s)
         avg_risk = "-" if np.isnan(st[0]["risk"]) else f"{st[0]['risk']:.2%}"
-        out.append(f"{nm:<18}{_f(st[0]['ret'], 'pct1'):>10}{_f(st[0]['ann'], 'pct1'):>10}"
+        out.append(f"{nm:<30}{_f(st[0]['ret'], 'pct1'):>10}{_f(st[0]['ann'], 'pct1'):>10}"
                    f"{_f(-st[0]['dd'], 'pct1'):>10}{_f(st[1]['ret'], 'pct1'):>11}"
                    f"{_f(-st[1]['dd'], 'pct1'):>11}{_f(st[0]['capped'], 'pct'):>13}{avg_risk:>10}")
     out.append("'size capped' = share of in-sample trades where the 2x-equity limit cut the 1% risk")
@@ -528,9 +573,9 @@ def report(orders, funnels, first, last):
 
     out.append("=== FUNNEL (whole period): how many setups survive each rule ===")
     keys = ["sweeps", "shifts", "no gap", "no target", "target < 1.5R", "orders", "fills"]
-    out.append(f"{'variant':<18}" + "".join(f"{k:>14}" for k in keys))
+    out.append(f"{'variant':<30}" + "".join(f"{k:>14}" for k in keys))
     for nm in rank:
-        out.append(f"{nm:<18}" + "".join(f"{funnels[nm].get(k, 0):>14,}" for k in keys))
+        out.append(f"{nm:<30}" + "".join(f"{funnels[nm].get(k, 0):>14,}" for k in keys))
     out.append("")
     filled = orders[orders["filled"]]
     if len(filled):

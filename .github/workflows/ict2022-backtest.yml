@@ -8,6 +8,10 @@ on:
         type: choice
         options: ["3", "5", "7", "10"]
         default: "7"
+      name:
+        description: "Results folder name (reports/backtest/ict2022-<name>-<years>y)"
+        type: string
+        default: "bias"
 
 permissions:
   contents: write              # to commit the results to reports/backtest/
@@ -61,7 +65,7 @@ jobs:
         if: always()
         run: |
           [ -f backtest-results/summary.txt ] || { echo "No results"; exit 0; }
-          dir="reports/backtest/ict2022-${{ inputs.years }}y"
+          dir="reports/backtest/ict2022-${{ inputs.name }}-${{ inputs.years }}y"
           mkdir -p "$dir"
           cp backtest-results/summary.txt backtest-results/trades.csv backtest-results/orders.csv "$dir"/
           echo "Run ${{ github.run_id }}, $(date -u '+%Y-%m-%d %H:%M UTC')" > "$dir/run.txt"
