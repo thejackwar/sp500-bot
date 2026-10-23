@@ -6,6 +6,11 @@ on:
   schedule:
     - cron: "20 21 * * 1-5"     # 21:20 UTC = 23:20 Milan in summer time, 22:20 in winter (after the 16:00 New York close)
   workflow_dispatch:
+    inputs:
+      telegram:
+        description: "Send the summary to Telegram"
+        type: boolean
+        default: true
 
 permissions:
   contents: write              # to commit the report files
@@ -32,6 +37,7 @@ jobs:
         run: python paper_report.py
         env:
           PYTHONUNBUFFERED: "1"
+          SEND_TELEGRAM: ${{ (github.event_name == 'schedule' || inputs.telegram) && '1' || '0' }}
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           TELEGRAM_CHAT_ID_PATTERNS: ${{ secrets.TELEGRAM_CHAT_ID_PATTERNS }}

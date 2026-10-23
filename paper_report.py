@@ -139,17 +139,17 @@ def round_trips(orders):
                                          "exit", "qty", "stop", "pnl", "pct", "R", "days"]), open_
 
 
-def spy_curve(index, start_value):
-    """SPY's closes on the same days, scaled to the account's starting value."""
+def spy_curve(index, start_value, symbol="SPY"):
+    """An ETF's closes on the same days (SPY; OEF = S&P 100), scaled to the account's starting value."""
     try:
-        bars = scanner.alpaca_bars(["SPY"], "1Day", pd.Timestamp(index[0]).tz_localize(scanner.ET) - pd.Timedelta(days=5),
-                                   dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=20)).get("SPY")
+        bars = scanner.alpaca_bars([symbol], "1Day", pd.Timestamp(index[0]).tz_localize(scanner.ET) - pd.Timedelta(days=5),
+                                   dt.datetime.now(dt.timezone.utc) - dt.timedelta(minutes=20)).get(symbol)
         c = bars["Close"]
         c.index = c.index.tz_localize(None).normalize()
         c = c.reindex(index, method="ffill").dropna()
         return c / c.iat[0] * start_value
     except Exception as e:
-        print(f"No SPY prices ({e})", flush=True)
+        print(f"No {symbol} prices ({e})", flush=True)
         return None
 
 
@@ -194,6 +194,9 @@ def account_report(name, title, api):
     e = pd.DataFrame({"equity": eq.round(2)})
     if spy is not None:
         e["spy_same_money"] = spy.round(2)
+    oef = spy_curve(eq.index, start_value, "OEF")       # S&P 100 ETF: the universe both bots trade
+    if oef is not None:
+        e["sp100_same_money"] = oef.round(2)
     e.index.name = "date"
     e.to_csv(os.path.join(OUT, f"{name}_equity.csv"))
 
