@@ -27,7 +27,7 @@ import requests
 
 import pine
 
-TRADING_ENABLED = True       # False = alerts only, no paper trades
+TRADING_ENABLED = False      # 23 Oct 2026 (user): switched off - the breakout bot lagged the S&P 100 since 2021. False = alerts only, no paper trades
 SEND_PINE_SCRIPT = True      # also send a TradingView Pine script that draws the trade
 ALLOW_SHORTS = False         # sell short on STRONG SHORT signals (the backtest: shorts lost money)
 RISK_PER_TRADE = 0.01        # risk 1% of equity per trade
