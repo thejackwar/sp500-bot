@@ -1,0 +1,32 @@
+📊 Deck pattern trader version 6 (up breakouts, deck stop, sell on a close below the 20-day low) on whole universes, daily candles
+03 Jan 2000 → 22 Oct 2026, $100,000, 1% risk, max 10%/stock, 25 positions, 8 new/day, leverage as named (limits x L, borrowed money 6.5%/yr, margin call below 25%), 0.02% slippage. 10 start dates a week apart: middle run, range in brackets.
+
+SP100 2x leverage · close above its 50-day MA + skip if it opens more than 2% above the breakout close + leverage only while SPY is above its 200-day MA (else 1x, trimmed at the close) + without the losing patterns (Cup and handle, Double bottom, Hanging man, Pipe bottom) (100 stocks, 20359 up breakouts)
++20.9%/yr (+18.2% to +21.4%), beat SPY in 10/10 runs · max drop -60.8% (worst -65.3%) · final $15,972,949
+~5031 trades, win 27%, avg +0.41R, profit factor 1.92, hold 37 days, interest paid $2,295,887, margin calls in all runs: 0
+by year: 2000: -11%  2001: -4%  2002: -31%  2003: +101%  2004: +10%  2005: +13%  2006: +17%  2007: +33%  2008: -32%  2009: +58%  2010: +6%  2011: -2%  2012: +15%  2013: +77%  2014: +11%  2015: -10%  2016: +31%  2017: +40%  2018: +11%  2019: +31%  2020: +46%  2021: +91%  2022: -24%  2023: +54%  2024: +41%  2025: +63%  2026: +56%
+
+SP100 2x leverage · close above its 50-day MA + skip if it opens more than 2% above the breakout close + leverage only while SPY is above its 200-day MA (else 1x, trimmed at the close) + without the losing patterns (Cup and handle, Double bottom, Hanging man, Pipe bottom) + beta vs SPY at least 0.9 (100 stocks, 13210 up breakouts)
++17.1%/yr (+14.1% to +17.9%), beat SPY in 10/10 runs · max drop -70.3% (worst -73.2%) · final $6,703,538
+~4316 trades, win 26%, avg +0.47R, profit factor 2.04, hold 37 days, interest paid $770,677, margin calls in all runs: 0
+by year: 2000: -37%  2001: -12%  2002: -33%  2003: +112%  2004: -17%  2005: -4%  2006: +4%  2007: +27%  2008: -39%  2009: +54%  2010: +1%  2011: -4%  2012: +37%  2013: +71%  2014: +12%  2015: -13%  2016: +37%  2017: +65%  2018: +19%  2019: +10%  2020: +78%  2021: +56%  2022: -35%  2023: +49%  2024: +43%  2025: +52%  2026: +116%
+
+SP100 2x leverage · close above its 50-day MA + skip if it opens more than 2% above the breakout close + leverage only while SPY is above its 200-day MA (else 1x, trimmed at the close) + without the losing patterns (Cup and handle, Double bottom, Hanging man, Pipe bottom) + beta vs SPY at least 1.0 (100 stocks, 10333 up breakouts)
++19.8%/yr (+18.4% to +22.4%), beat SPY in 10/10 runs · max drop -72.1% (worst -73.3%) · final $12,380,586
+~3789 trades, win 27%, avg +0.54R, profit factor 2.28, hold 38 days, interest paid $1,230,297, margin calls in all runs: 0
+by year: 2000: -36%  2001: -12%  2002: -32%  2003: +123%  2004: -17%  2005: +14%  2006: +41%  2007: +29%  2008: -37%  2009: +56%  2010: -12%  2011: -1%  2012: +25%  2013: +86%  2014: +6%  2015: -14%  2016: +37%  2017: +71%  2018: +14%  2019: +21%  2020: +64%  2021: +61%  2022: -31%  2023: +54%  2024: +62%  2025: +41%  2026: +122%
+
+SP100 2x leverage · close above its 50-day MA + skip if it opens more than 2% above the breakout close + leverage only while SPY is above its 200-day MA (else 1x, trimmed at the close) + without the losing patterns (Cup and handle, Double bottom, Hanging man, Pipe bottom) + skip volatile stocks that don't move with the market (ATR >= 2.7% of price and beta < 0.9) (100 stocks, 19286 up breakouts)
++18.2%/yr (+13.9% to +20.1%), beat SPY in 10/10 runs · max drop -71.6% (worst -74.9%) · final $8,746,862
+~4901 trades, win 27%, avg +0.44R, profit factor 2.02, hold 37 days, interest paid $1,090,804, margin calls in all runs: 0
+by year: 2000: -36%  2001: -13%  2002: -28%  2003: +80%  2004: +8%  2005: +12%  2006: +12%  2007: +33%  2008: -28%  2009: +48%  2010: -9%  2011: -9%  2012: +16%  2013: +65%  2014: +15%  2015: -12%  2016: +26%  2017: +48%  2018: +12%  2019: +36%  2020: +38%  2021: +83%  2022: -22%  2023: +68%  2024: +35%  2025: +65%  2026: +88%
+
+SP100 2x leverage · close above its 50-day MA + skip if it opens more than 2% above the breakout close + leverage only while SPY is above its 200-day MA (else 1x, trimmed at the close) + without the losing patterns (Cup and handle, Double bottom, Hanging man, Pipe bottom) + position size x beta (beta clipped to 0.5-1.5): more money in high-beta stocks (100 stocks, 20359 up breakouts)
++19.6%/yr (+18.0% to +20.5%), beat SPY in 10/10 runs · max drop -64.2% (worst -67.4%) · final $11,718,776
+~5020 trades, win 26%, avg +0.44R, profit factor 2.03, hold 37 days, interest paid $1,325,985, margin calls in all runs: 0
+by year: 2000: -15%  2001: -13%  2002: -39%  2003: +79%  2004: -4%  2005: +15%  2006: +7%  2007: +40%  2008: -34%  2009: +59%  2010: +4%  2011: -6%  2012: +29%  2013: +67%  2014: +3%  2015: -18%  2016: +64%  2017: +51%  2018: -13%  2019: +41%  2020: +59%  2021: +85%  2022: -28%  2023: +26%  2024: +44%  2025: +98%  2026: +105%
+
+Buy & hold SPY: +8.3%/yr, max drop -55.2%, final $840,375
+by year: 2000: -9%  2001: -12%  2002: -22%  2003: +28%  2004: +11%  2005: +5%  2006: +16%  2007: +5%  2008: -37%  2009: +26%  2010: +15%  2011: +2%  2012: +16%  2013: +32%  2014: +13%  2015: +1%  2016: +12%  2017: +22%  2018: -5%  2019: +31%  2020: +18%  2021: +29%  2022: -18%  2023: +26%  2024: +25%  2025: +18%  2026: +13%
+
+Today's index members only (stocks that left the index are missing, which flatters results - more so for the S&P 500); daily candles: stops judged on daily lows, 20-day-low exit at the close. Past results don't guarantee future ones.
