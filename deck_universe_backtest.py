@@ -62,7 +62,12 @@ FILTER_NAMES = {"none": "no MA filter",
                 "noweak": "without the losing patterns (" + ", ".join(sorted(WEAK)) + ")",
                 "mkt50": "no new buys when SPY closes below its 50-day MA",
                 "mkt200": "no new buys when SPY closes below its 200-day MA",
-                "rs126": "stock beat SPY over the last 6 months"}
+                "rs126": "stock beat SPY over the last 6 months",
+                "beta09": "beta vs SPY at least 0.9",
+                "beta1": "beta vs SPY at least 1.0",
+                "noidio": "skip volatile stocks that don't move with the market (ATR >= 2.7% of price and beta < 0.9)"}
+# beta = Bloomberg-style adjusted beta: 0.67 x (weekly returns vs SPY, last 104 weeks, min 52) + 0.33,
+# using completed weeks only (known at the breakout close)
 # rules applied inside simulate (sizing / exits)
 SIM_RULES = {"reg50": "leverage only while SPY is above its 50-day MA (else 1x, trimmed at the close)",
              "reg200": "leverage only while SPY is above its 200-day MA (else 1x, trimmed at the close)",
@@ -83,7 +88,8 @@ SIM_RULES = {"reg50": "leverage only while SPY is above its 50-day MA (else 1x, 
              "be1r": "stop moved to the entry once the price has been 1R above it",
              "be2r": "stop moved to the entry once the price has been 2R above it",
              "risk05": "sized by risk: 0.25% x leverage (0.5% at 2x) per trade, cap 15% x leverage per stock",
-             "risk075": "sized by risk: 0.375% x leverage (0.75% at 2x) per trade, cap 15% x leverage per stock"}
+             "risk075": "sized by risk: 0.375% x leverage (0.75% at 2x) per trade, cap 15% x leverage per stock",
+             "betasize": "position size x beta (beta clipped to 0.5-1.5): more money in high-beta stocks"}
 # note (22 Oct 2026): with 1% risk and a 10%-per-stock cap, ~98% of trades are sized by the cap, not the risk
 SPY_TREND = None                                        # set in main: SPY close, 50/200-day MA, 6-month return
 
@@ -106,6 +112,16 @@ def ma_ok(flt, tt, date):
         return m.c > (m.m50 if flt == "mkt50" else m.m200)
     if flt in ENTRY_RULES:                              # entry rules are applied at the open (simulate)
         return True
+    if flt in ("beta09", "beta1", "noidio"):
+        try:
+            r = tt.loc[date]
+        except KeyError:
+            return False
+        if not np.isfinite(r.beta):
+            return flt == "noidio"                      # unknown beta: beta floors skip, noidio keeps
+        if flt == "noidio":
+            return not (r.atrp >= 0.027 and r.beta < 0.9)
+        return r.beta >= (0.9 if flt == "beta09" else 1.0)
     if flt.startswith("vol") or flt == "dry":
         try:
             r = tt.loc[date]
@@ -140,6 +156,16 @@ SLIP = 0.0002
 START_EQ = 100_000.0
 FAM = {"multi": 0, "short": 1, "candle": 2}
 SP500_URL = "https://en.wikipedia.org/wiki/List_of_S%26P_500_companies"
+
+
+def adj_beta(close, spy_close):
+    """Adjusted weekly beta vs SPY per day, from completed weeks only (0.67 x raw + 0.33)."""
+    px = pd.concat([close, spy_close], axis=1, keys=["s", "m"], sort=True).dropna()
+    wk = px.groupby(px.index.to_period("W-FRI")).tail(1)          # last trading day of each week
+    r = wk.pct_change()
+    raw = r["s"].rolling(104, min_periods=52).cov(r["m"]) / r["m"].rolling(104, min_periods=52).var()
+    # a week's beta is known after its last day's close: same-day lookup is fine (signal at that close)
+    return (0.67 * raw + 0.33).reindex(close.index, method="ffill")
 
 
 def sp500():
@@ -285,7 +311,7 @@ def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None,
         gross = value
         order = sorted(todays, key=lambda s: (s[2], rng.random()))
         placed = 0
-        for col, stop, fam, name, bclose, batr in order:
+        for col, stop, fam, name, bclose, batr, sbeta in order:
             if col in pos or len(pos) >= MAX_POS or placed >= MAX_NEW:
                 continue
             o = O[t + 1, col]
@@ -319,7 +345,8 @@ def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None,
             if risk <= 0:
                 continue
             room = MAX_GROSS * lev_t * equity - gross
-            qty = min(equity * risk_pct * lev_t / risk, equity * pos_pct * lev_t / fill, room * 0.95 / fill)
+            bm = float(np.clip(sbeta, 0.5, 1.5)) if "betasize" in rules and np.isfinite(sbeta) else 1.0
+            qty = min(equity * risk_pct * lev_t * bm / risk, equity * pos_pct * lev_t * bm / fill, room * 0.95 / fill)
             qty = np.floor(qty)
             if qty < 1:
                 continue
@@ -418,6 +445,7 @@ def main():
                       ("Open", "High", "Low", "Close"))
         low20 = np.column_stack([daily[s]["Low"].rolling(TRAIL).min().shift(1).reindex(days).values for s in syms])
         pos_of = {d: k for k, d in enumerate(days)}
+        need_beta = any(x in f.split("+") for f in FILTERS for x in ("beta09", "beta1", "noidio", "betasize"))
         trend = {}                                      # each stock's moving averages (closes up to that day)
         for s_ in syms:
             c_ = daily[s_]["Close"]
@@ -427,7 +455,12 @@ def main():
             trend[s_] = pd.DataFrame({"c": c_, "m50": m50, "m200": m200, "m50_10": m50.shift(10),
                                       "r126": c_ / c_.shift(126) - 1,
                                       "v": v_, "v50": v50, "v10": v_.rolling(10).mean().shift(1)})
+            if need_beta:
+                atr_ = dp.add_atr(daily[s_].copy())["ATR"]
+                trend[s_]["beta"] = adj_beta(c_, spy["Close"])
+                trend[s_]["atrp"] = atr_ / c_
         sigs_by = {}
+        beta_of = {s_: trend[s_]["beta"] for s_ in syms} if need_beta else {}
         for flt in FILTERS:
             sigs, n_sig = {}, 0
             for col, s_ in enumerate(syms):
@@ -438,7 +471,8 @@ def main():
                         continue
                     if "noweak" in flt.split("+") and name in WEAK:
                         continue
-                    sigs.setdefault(k, []).append((col, stop, fam, name, bclose, batr))
+                    sb = float(beta_of[s_].get(pd.Timestamp(date), np.nan)) if need_beta else np.nan
+                    sigs.setdefault(k, []).append((col, stop, fam, name, bclose, batr, sb))
                     n_sig += 1
             sigs_by[flt] = (sigs, n_sig)
         for flt, (sigs, n_sig) in sigs_by.items():
