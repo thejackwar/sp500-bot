@@ -1,0 +1,54 @@
+Short strategy from a weak-stocks screen · 898 stocks (sp500 + sp400) · 2018-10-23 → 2026-10-22
+weak list: liquid ($20M+/day, $10+), below a falling-trend 200-day MA, within 10% of the 52-week low, 6-month return below SPY and in the bottom 10%
+exits: stop 2 ATR, close above the 10-day high, 15 days · 10% per short, max 5 · borrow 0.5%/yr, slippage 0.02%/side
+stocks on the weak list on an average day: 30.7
+
+breakdown below the 20-day low · no market filter
+-12.4%/yr · max drop -71.1% · final $34,694
+712 trades, win 36%, avg -0.14R (-0.02% per trade), profit factor 0.68, hold 10.6 days
+by year: 2018: +6%  2019: -18%  2020: -18%  2021: -8%  2022: -20%  2023: -10%  2024: -13%  2025: -15%  2026: +0%
+by market at entry: SPY<200 139× -0.21R win 37%  SPY>200 568× -0.12R win 35%
+exits: 10-day high 142× -0.39R  stop 240× -1.00R  stop (gap) 46× -1.34R  time 279× +0.93R
+
+breakdown below the 20-day low · only when SPY < 200-day MA
+-8.5%/yr · max drop -54.8% · final $49,090
+180 trades, win 34%, avg -0.20R (-1.59% per trade), profit factor 0.49, hold 10.6 days
+by year: 2018: +4%  2019: -12%  2020: -19%  2021: +0%  2022: -21%  2023: -9%  2024: +0%  2025: -4%  2026: -5%
+by market at entry: SPY<200 180× -0.20R win 34%
+exits: 10-day high 39× -0.29R  stop 63× -1.00R  stop (gap) 9× -1.36R  time 69× +0.73R
+
+breakdown below the 20-day low · only when SPY < 50-day MA
+-8.8%/yr · max drop -67.9% · final $47,693
+290 trades, win 39%, avg -0.03R (+2.17% per trade), profit factor 0.66, hold 10.8 days
+by year: 2018: +6%  2019: -4%  2020: -26%  2021: -12%  2022: -9%  2023: +1%  2024: -12%  2025: -7%  2026: -4%
+by market at entry: SPY<200 110× -0.20R win 33%  SPY>200 175× +0.09R win 43%
+exits: 10-day high 54× -0.45R  stop 84× -1.00R  stop (gap) 20× -1.17R  time 127× +0.98R
+
+failed rally at a falling 20-day MA · no market filter
+-5.8%/yr · max drop -44.9% · final $61,872
+747 trades, win 33%, avg -0.08R (+0.17% per trade), profit factor 0.81, hold 9.1 days
+by year: 2018: +5%  2019: -21%  2020: -3%  2021: +0%  2022: +5%  2023: -11%  2024: +1%  2025: -18%  2026: -0%
+by market at entry: SPY<200 139× -0.18R win 28%  SPY>200 603× -0.06R win 34%
+exits: 10-day high 266× -0.52R  stop 189× -1.00R  stop (gap) 24× -1.49R  time 263× +1.16R
+
+failed rally at a falling 20-day MA · only when SPY < 200-day MA
+-2.6%/yr · max drop -24.6% · final $80,811
+155 trades, win 33%, avg -0.15R (-0.19% per trade), profit factor 0.71, hold 8.9 days
+by year: 2018: +3%  2019: -6%  2020: -2%  2021: +0%  2022: +7%  2023: -10%  2024: +0%  2025: -10%  2026: -2%
+by market at entry: SPY<200 155× -0.15R win 33%
+exits: 10-day high 65× -0.50R  stop 38× -1.00R  stop (gap) 4× -1.27R  time 48× +1.08R
+
+failed rally at a falling 20-day MA · only when SPY < 50-day MA
+-1.8%/yr · max drop -27.6% · final $86,461
+259 trades, win 35%, avg -0.04R (+0.98% per trade), profit factor 0.86, hold 9.4 days
+by year: 2018: +2%  2019: -8%  2020: +16%  2021: -2%  2022: +6%  2023: -3%  2024: -6%  2025: -10%  2026: -7%
+by market at entry: SPY<200 109× -0.16R win 31%  SPY>200 148× +0.05R win 39%
+exits: 10-day high 97× -0.53R  stop 58× -1.00R  stop (gap) 9× -1.31R  time 93× +1.21R
+
+Buy & hold SPY (for reference: a short strategy should make money when this falls): +15.9%/yr, max drop -33.8%
+by year: 2018: -5%  2019: +31%  2020: +18%  2021: +29%  2022: -18%  2023: +26%  2024: +25%  2025: +18%  2026: +13%
+
+Weak list on 2026-10-22 (38 stocks, weakest first; * = trigger today):
+  CTVA -84%, MTZ -55%, FN -54%, CHTR -54%, ALB -52%, DY -46%, IPGP -44%, BWXT -43%, APP -42%, AVAV -42%, KTOS -42%, MP -39%, NRG -39%, PNR -38%, NXT -38%, CRUS -36%, ESAB -35%, CW -35%, AAON -29%, LVS -29%, SPXC -29%, WYNN -29%, NFLX -28%, MOS -28%, APTV -27%, CVNA -27%, CDE -26%, EVR -26%, STWD -26%, CRH -26%
+
+Today's index members only: stocks that fell out of the index (often the biggest losers) are missing, so the weak lists of past years are smaller than they really were. Daily candles: stops judged on daily highs. No historical borrow availability: hard-to-borrow names may not have been shortable. Past results don't guarantee future ones.
