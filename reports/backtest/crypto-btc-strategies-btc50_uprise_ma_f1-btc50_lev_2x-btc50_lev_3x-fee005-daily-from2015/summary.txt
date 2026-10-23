@@ -1,0 +1,48 @@
+📊 <b>Backtest BTC only: strategies</b>
+10 Aug 2015 → 23 Oct 2026 (11.2 years), BTC only (1 coins), $100,000 start. Strategy comparison, same money rules for all: risk 1%/trade, max 5 positions of max 20% each, max 100% invested. Daily strategies buy at the next day's open. 'Invested' = average money in the market (BTC = 100%)
+Each version is tested from 10 start dates a week apart (ties between signals in random order); figures are the middle run, with the range in brackets.
+
+<b>2x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)</b>
++69.4%/yr (+68.7% to +70.1%), beat BTC in 6/10 runs
+max drop -56.1% (worst -56.1%) · profit factor 4.50
+~37 trades, win 41%, avg +0.35R, worst streak 4, hold 16d, invested 26%, interest ~$2,888,472
+
+<b>3x leverage: your daily rule on perpetual futures (funding ~11%/yr, liquidation)</b>
++89.6%/yr (+88.6% to +90.5%), beat BTC in 10/10 runs
+max drop -71.2% (worst -71.2%) · profit factor 4.06
+~37 trades, win 41%, avg +0.53R, worst streak 4, hold 16d, invested 35%, interest ~$11,661,016
+
+<b>Your rule (50-day rising) + close below the 50-day, lower high after 1 day</b>
++43.3%/yr (+42.9% to +43.7%), beat BTC in 0/10 runs
+max drop -33.8% (worst -33.8%) · profit factor 5.24
+~37 trades, win 41%, avg +0.13R, worst streak 4, hold 16d, invested 15%, interest ~$0
+
+<b>Volume 3: your rule + dry-up (quiet 10 days, then an above-average cross day)</b>
++10.5%/yr (+10.4% to +10.6%), beat BTC in 0/10 runs
+max drop -21.5% (worst -21.5%) · profit factor 7.59
+~12 trades, win 58%, avg +0.16R, worst streak 2, hold 19d, invested 6%, interest ~$0
+
+<b>Your rule + higher lows only (judged on daily closes)</b>
++14.4%/yr (+14.3% to +14.5%), beat BTC in 0/10 runs
+max drop -21.2% (worst -21.2%) · profit factor 10.10
+~6 trades, win 50%, avg +0.26R, worst streak 1, hold 22d, invested 3%, interest ~$0
+
+<b>Your rule + higher lows only (judged on wicks (the days' lows))</b>
++13.3%/yr (+13.2% to +13.5%), beat BTC in 0/10 runs
+max drop -21.2% (worst -21.2%) · profit factor 7.82
+~8 trades, win 38%, avg +0.21R, worst streak 3, hold 20d, invested 4%, interest ~$0
+
+<b>Volume 1: your rule + cross-day volume >= 1.2x the 50-day average</b>
++12.2%/yr (+12.1% to +12.3%), beat BTC in 0/10 runs
+max drop -24.5% (worst -24.5%) · profit factor 3.86
+~15 trades, win 40%, avg +0.09R, worst streak 3, hold 17d, invested 6%, interest ~$0
+
+<b>Volume 2: your rule + cross-day volume >= 1.5x the 50-day average</b>
++1.8%/yr (+1.8% to +1.8%), beat BTC in 0/10 runs
+max drop -13.3% (worst -13.3%) · profit factor 2.00
+~6 trades, win 33%, avg +0.03R, worst streak 3, hold 11d, invested 2%, interest ~$0
+
+<b>Buy & hold BTC</b>
++30667.0% (+66.8%/yr) · max drop -83.8%
+
+<i>BTC only (no coin-picking bias); fees 0.05% per buy and sell; daily candles (Yahoo/Coinbase): fills at the next daily open, leverage liquidation judged on daily lows with 0.05% slippage. Past results don't guarantee future ones.</i>
