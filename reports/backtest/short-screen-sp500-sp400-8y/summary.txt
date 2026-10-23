@@ -1,49 +1,395 @@
 Short strategy from a weak-stocks screen · 898 stocks (sp500 + sp400) · 2018-10-23 → 2026-10-22
-weak list: liquid ($20M+/day, $10+), below a falling-trend 200-day MA, within 10% of the 52-week low, 6-month return below SPY and in the bottom 10%
-exits: stop 2 ATR, close above the 10-day high, 15 days · 10% per short, max 5 · borrow 0.5%/yr, slippage 0.02%/side
-stocks on the weak list on an average day: 30.7
+weak list: liquid ($20M+/day, $10+), below the 200-day MA with the 50-day under it, 6-month return below SPY and in the bottom 10%, + 'near low' = within X% of the 52-week low
+exits: stop X ATR (none = no stop), close above the 10-day high, 15 days · 10% per short, max 5 · borrow 0.5%/yr, slippage 0.02%/side
+R is always measured against a 2-ATR risk, so versions with different stops compare fairly
+stocks on the weak list on an average day: near low 10%: 30.7, near low off: 72.9
 
-breakdown below the 20-day low · no market filter
+Ranking (best first)
+  entry  market stop near   %/yr   drop trades  win   avgR    PF  2022
+  rally  mkt50  2    10     -1.8    -28    259  35%  -0.04  0.86    +6
+  rally  mkt200 none 10     -1.9    -24    149  36%  -0.10  0.80   +11
+  rally  mkt200 4    10     -2.0    -24    149  36%  -0.11  0.79   +11
+  rally  mkt50  3    10     -2.3    -31    252  37%  -0.04  0.84    +5
+  rally  mkt50  4    10     -2.3    -32    251  37%  -0.05  0.84    +5
+  rally  mkt50  none 10     -2.4    -32    251  37%  -0.05  0.83    +5
+  rally  mkt200 2    10     -2.6    -25    155  33%  -0.15  0.71    +7
+  rally  mkt200 3    10     -2.7    -25    149  34%  -0.16  0.72    +8
+  rally  mkt50  4    off    -3.1    -36    300  39%  -0.02  0.83   +10
+  rally  mkt50  none off    -3.1    -36    300  40%  -0.02  0.83   +10
+  rally  mkt200 none off    -3.1    -34    181  36%  -0.09  0.76    +0
+  rally  mkt200 4    off    -3.2    -34    181  36%  -0.09  0.76    +0
+  rally  mkt50  3    off    -3.4    -38    303  38%  -0.03  0.82    +9
+  rally  mkt200 2    off    -3.4    -33    189  33%  -0.13  0.76    +0
+  rally  mkt200 3    off    -4.2    -36    184  35%  -0.14  0.70    -1
+  rally  mkt50  2    off    -4.5    -43    313  36%  -0.07  0.77    +7
+  rally  none   none 10     -4.7    -39    714  35%  -0.06  0.84   +10
+  rally  none   4    10     -5.0    -41    715  35%  -0.06  0.83   +10
+  rally  none   3    10     -5.5    -44    723  35%  -0.06  0.82    +7
+  rally  none   2    10     -5.8    -45    747  33%  -0.08  0.81    +5
+  break  mkt200 none 10     -6.2    -44    165  39%  -0.12  0.61   -11
+  break  mkt200 none off    -7.0    -47    169  38%  -0.15  0.58    -9
+  break  mkt50  none 10     -7.1    -60    271  42%  -0.08  0.71    -8
+  break  mkt50  none off    -7.1    -57    287  40%  -0.09  0.70    -5
+  break  mkt50  3    10     -7.2    -61    275  42%  -0.04  0.70    -8
+  break  mkt200 4    10     -7.6    -51    165  38%  -0.13  0.55   -10
+  break  mkt200 3    10     -7.9    -52    166  37%  -0.13  0.54   -16
+  break  mkt50  4    10     -8.0    -64    271  42%  -0.06  0.68    -8
+  break  mkt200 3    off    -8.1    -53    169  38%  -0.14  0.54    -9
+  break  mkt50  3    off    -8.3    -63    291  40%  -0.09  0.66    -5
+  break  mkt200 4    off    -8.4    -54    169  38%  -0.16  0.52    -9
+  break  mkt50  4    off    -8.5    -63    287  40%  -0.10  0.65    -5
+  break  mkt200 2    10     -8.5    -55    180  34%  -0.20  0.49   -21
+  break  mkt50  2    10     -8.8    -68    290  39%  -0.03  0.66    -9
+  break  mkt200 2    off    -9.2    -58    185  34%  -0.21  0.48   -21
+  break  none   none off   -10.0    -63    709  41%  -0.15  0.75   +11
+  break  none   4    off   -10.3    -64    710  41%  -0.14  0.75   +11
+  break  mkt50  2    off   -10.3    -70    308  37%  -0.10  0.61    -4
+  break  none   3    off   -10.5    -64    720  41%  -0.11  0.74    +9
+  break  none   4    10    -10.8    -65    641  40%  -0.11  0.72   +10
+  break  none   none 10    -11.1    -66    640  40%  -0.14  0.72   +10
+  rally  none   2    off   -11.4    -67    938  33%  -0.12  0.71    -1
+  break  none   2    10    -12.4    -71    712  36%  -0.14  0.68   -20
+  break  none   3    10    -12.4    -70    659  40%  -0.13  0.70    -7
+  rally  none   4    off   -13.7    -74    906  33%  -0.15  0.63    -1
+  rally  none   none off   -13.9    -74    905  33%  -0.15  0.63    -1
+  rally  none   3    off   -14.2    -74    908  33%  -0.14  0.63    -3
+  break  none   2    off   -14.5    -76    793  36%  -0.16  0.69   -17
+
+breakdown below the 20-day low · no market filter · stop 2 ATR · near low 10
 -12.4%/yr · max drop -71.1% · final $34,694
-712 trades, win 36%, avg -0.14R (-0.02% per trade), profit factor 0.68, hold 10.6 days
+712 trades, win 36%, avg -0.14R (-1.39% per trade), profit factor 0.68, hold 10.6 days
 by year: 2018: +6%  2019: -18%  2020: -18%  2021: -8%  2022: -20%  2023: -10%  2024: -13%  2025: -15%  2026: +0%
 by market at entry: SPY<200 139× -0.21R win 37%  SPY>200 568× -0.12R win 35%
 exits: 10-day high 142× -0.39R  stop 240× -1.00R  stop (gap) 46× -1.34R  time 279× +0.93R
 
-breakdown below the 20-day low · only when SPY < 200-day MA
+breakdown below the 20-day low · no market filter · stop 3 ATR · near low 10
+-12.4%/yr · max drop -69.8% · final $34,603
+659 trades, win 40%, avg -0.13R (-1.44% per trade), profit factor 0.70, hold 11.8 days
+by year: 2018: +6%  2019: -23%  2020: -17%  2021: -8%  2022: -7%  2023: -13%  2024: -12%  2025: -2%  2026: -21%
+by market at entry: SPY<200 134× -0.27R win 37%  SPY>200 520× -0.10R win 40%
+exits: 10-day high 231× -0.74R  stop 82× -1.50R  stop (gap) 20× -1.95R  time 321× +0.76R
+
+breakdown below the 20-day low · no market filter · stop 4 ATR · near low 10
+-10.8%/yr · max drop -65.4% · final $40,145
+641 trades, win 40%, avg -0.11R (-1.29% per trade), profit factor 0.72, hold 12.3 days
+by year: 2018: +6%  2019: -27%  2020: -15%  2021: -6%  2022: +10%  2023: -15%  2024: -12%  2025: -3%  2026: -18%
+by market at entry: SPY<200 131× -0.23R win 39%  SPY>200 505× -0.08R win 41%
+exits: 10-day high 262× -0.85R  stop 35× -2.00R  stop (gap) 7× -2.35R  time 332× +0.71R
+
+breakdown below the 20-day low · no market filter · stop none · near low 10
+-11.1%/yr · max drop -66.1% · final $38,989
+640 trades, win 40%, avg -0.14R (-1.34% per trade), profit factor 0.72, hold 12.3 days
+by year: 2018: +5%  2019: -29%  2020: -7%  2021: -6%  2022: +10%  2023: -21%  2024: -12%  2025: -4%  2026: -18%
+by market at entry: SPY<200 132× -0.22R win 39%  SPY>200 503× -0.12R win 40%
+exits: 10-day high 301× -1.06R  time 334× +0.68R
+
+breakdown below the 20-day low · only when SPY < 200-day MA · stop 2 ATR · near low 10
 -8.5%/yr · max drop -54.8% · final $49,090
-180 trades, win 34%, avg -0.20R (-1.59% per trade), profit factor 0.49, hold 10.6 days
+180 trades, win 34%, avg -0.20R (-3.64% per trade), profit factor 0.49, hold 10.6 days
 by year: 2018: +4%  2019: -12%  2020: -19%  2021: +0%  2022: -21%  2023: -9%  2024: +0%  2025: -4%  2026: -5%
 by market at entry: SPY<200 180× -0.20R win 34%
 exits: 10-day high 39× -0.29R  stop 63× -1.00R  stop (gap) 9× -1.36R  time 69× +0.73R
 
-breakdown below the 20-day low · only when SPY < 50-day MA
+breakdown below the 20-day low · only when SPY < 200-day MA · stop 3 ATR · near low 10
+-7.9%/yr · max drop -51.8% · final $52,015
+166 trades, win 37%, avg -0.13R (-3.44% per trade), profit factor 0.54, hold 12.1 days
+by year: 2018: +4%  2019: -15%  2020: -19%  2021: +0%  2022: -16%  2023: -8%  2024: +0%  2025: -0%  2026: -6%
+by market at entry: SPY<200 166× -0.13R win 37%
+exits: 10-day high 59× -0.65R  stop 20× -1.50R  stop (gap) 3× -2.07R  time 84× +0.62R
+
+breakdown below the 20-day low · only when SPY < 200-day MA · stop 4 ATR · near low 10
+-7.6%/yr · max drop -50.6% · final $52,970
+165 trades, win 38%, avg -0.13R (-3.34% per trade), profit factor 0.55, hold 12.2 days
+by year: 2018: +3%  2019: -16%  2020: -20%  2021: +0%  2022: -10%  2023: -8%  2024: +0%  2025: -0%  2026: -8%
+by market at entry: SPY<200 165× -0.13R win 38%
+exits: 10-day high 73× -0.79R  stop 7× -2.00R  stop (gap) 2× -2.28R  time 83× +0.67R
+
+breakdown below the 20-day low · only when SPY < 200-day MA · stop none · near low 10
+-6.2%/yr · max drop -43.6% · final $59,934
+165 trades, win 39%, avg -0.12R (-2.63% per trade), profit factor 0.61, hold 12.3 days
+by year: 2018: +2%  2019: -16%  2020: -10%  2021: +0%  2022: -11%  2023: -7%  2024: +0%  2025: -0%  2026: -7%
+by market at entry: SPY<200 165× -0.12R win 39%
+exits: 10-day high 81× -0.93R  time 84× +0.67R
+
+breakdown below the 20-day low · only when SPY < 50-day MA · stop 2 ATR · near low 10
 -8.8%/yr · max drop -67.9% · final $47,693
-290 trades, win 39%, avg -0.03R (+2.17% per trade), profit factor 0.66, hold 10.8 days
+290 trades, win 39%, avg -0.03R (-2.10% per trade), profit factor 0.66, hold 10.8 days
 by year: 2018: +6%  2019: -4%  2020: -26%  2021: -12%  2022: -9%  2023: +1%  2024: -12%  2025: -7%  2026: -4%
 by market at entry: SPY<200 110× -0.20R win 33%  SPY>200 175× +0.09R win 43%
 exits: 10-day high 54× -0.45R  stop 84× -1.00R  stop (gap) 20× -1.17R  time 127× +0.98R
 
-failed rally at a falling 20-day MA · no market filter
+breakdown below the 20-day low · only when SPY < 50-day MA · stop 3 ATR · near low 10
+-7.2%/yr · max drop -61.4% · final $55,115
+275 trades, win 42%, avg -0.04R (-1.79% per trade), profit factor 0.70, hold 12.1 days
+by year: 2018: +6%  2019: -8%  2020: -11%  2021: -12%  2022: -8%  2023: -3%  2024: -12%  2025: -6%  2026: -2%
+by market at entry: SPY<200 105× -0.19R win 36%  SPY>200 165× +0.06R win 46%
+exits: 10-day high 87× -0.71R  stop 35× -1.50R  stop (gap) 4× -2.18R  time 144× +0.79R
+
+breakdown below the 20-day low · only when SPY < 50-day MA · stop 4 ATR · near low 10
+-8.0%/yr · max drop -63.8% · final $51,161
+271 trades, win 42%, avg -0.06R (-2.08% per trade), profit factor 0.68, hold 12.4 days
+by year: 2018: +6%  2019: -8%  2020: -14%  2021: -11%  2022: -8%  2023: -4%  2024: -13%  2025: -6%  2026: -6%
+by market at entry: SPY<200 104× -0.23R win 35%  SPY>200 162× +0.05R win 47%
+exits: 10-day high 105× -0.87R  stop 13× -2.00R  stop (gap) 4× -2.61R  time 144× +0.77R
+
+breakdown below the 20-day low · only when SPY < 50-day MA · stop none · near low 10
+-7.1%/yr · max drop -60.4% · final $55,460
+271 trades, win 42%, avg -0.08R (-1.79% per trade), profit factor 0.71, hold 12.4 days
+by year: 2018: +5%  2019: -8%  2020: -7%  2021: -11%  2022: -8%  2023: -3%  2024: -13%  2025: -6%  2026: -6%
+by market at entry: SPY<200 104× -0.22R win 36%  SPY>200 162× +0.01R win 47%
+exits: 10-day high 121× -1.10R  time 145× +0.77R
+
+breakdown below the 20-day low · no market filter · stop 2 ATR · near low off
+-14.5%/yr · max drop -75.7% · final $28,592
+793 trades, win 36%, avg -0.16R (-1.46% per trade), profit factor 0.69, hold 10.5 days
+by year: 2018: +6%  2019: -23%  2020: -14%  2021: -15%  2022: -17%  2023: -7%  2024: -12%  2025: -18%  2026: -15%
+by market at entry: SPY<200 145× -0.23R win 35%  SPY>200 643× -0.14R win 36%
+exits: 10-day high 157× -0.45R  stop 264× -1.00R  stop (gap) 47× -1.38R  time 320× +0.87R
+
+breakdown below the 20-day low · no market filter · stop 3 ATR · near low off
+-10.5%/yr · max drop -64.2% · final $41,090
+720 trades, win 41%, avg -0.11R (-1.08% per trade), profit factor 0.74, hold 11.9 days
+by year: 2018: +6%  2019: -24%  2020: -18%  2021: -19%  2022: +9%  2023: -2%  2024: -9%  2025: -7%  2026: -16%
+by market at entry: SPY<200 130× -0.19R win 40%  SPY>200 585× -0.10R win 42%
+exits: 10-day high 259× -0.72R  stop 86× -1.50R  stop (gap) 18× -1.94R  time 352× +0.77R
+
+breakdown below the 20-day low · no market filter · stop 4 ATR · near low off
+-10.3%/yr · max drop -63.9% · final $41,846
+710 trades, win 41%, avg -0.14R (-1.09% per trade), profit factor 0.75, hold 12.1 days
+by year: 2018: +6%  2019: -26%  2020: -16%  2021: -17%  2022: +11%  2023: -6%  2024: -13%  2025: -7%  2026: -10%
+by market at entry: SPY<200 131× -0.23R win 40%  SPY>200 574× -0.12R win 41%
+exits: 10-day high 312× -0.87R  stop 32× -2.00R  stop (gap) 6× -2.61R  time 355× +0.71R
+
+breakdown below the 20-day low · no market filter · stop none · near low off
+-10.0%/yr · max drop -63.3% · final $43,139
+709 trades, win 41%, avg -0.15R (-1.07% per trade), profit factor 0.75, hold 12.1 days
+by year: 2018: +5%  2019: -30%  2020: -6%  2021: -17%  2022: +11%  2023: -9%  2024: -13%  2025: -7%  2026: -8%
+by market at entry: SPY<200 132× -0.23R win 40%  SPY>200 572× -0.13R win 41%
+exits: 10-day high 352× -1.01R  time 352× +0.72R
+
+breakdown below the 20-day low · only when SPY < 200-day MA · stop 2 ATR · near low off
+-9.2%/yr · max drop -57.6% · final $46,072
+185 trades, win 34%, avg -0.21R (-3.87% per trade), profit factor 0.48, hold 10.5 days
+by year: 2018: +4%  2019: -14%  2020: -20%  2021: +0%  2022: -21%  2023: -11%  2024: +0%  2025: -4%  2026: -5%
+by market at entry: SPY<200 185× -0.21R win 34%
+exits: 10-day high 37× -0.30R  stop 67× -1.00R  stop (gap) 9× -1.38R  time 72× +0.72R
+
+breakdown below the 20-day low · only when SPY < 200-day MA · stop 3 ATR · near low off
+-8.1%/yr · max drop -52.7% · final $51,087
+169 trades, win 38%, avg -0.14R (-3.48% per trade), profit factor 0.54, hold 12.1 days
+by year: 2018: +4%  2019: -18%  2020: -20%  2021: +0%  2022: -9%  2023: -12%  2024: +0%  2025: -0%  2026: -6%
+by market at entry: SPY<200 169× -0.14R win 38%
+exits: 10-day high 62× -0.68R  stop 22× -1.50R  stop (gap) 2× -2.10R  time 83× +0.68R
+
+breakdown below the 20-day low · only when SPY < 200-day MA · stop 4 ATR · near low off
+-8.4%/yr · max drop -53.9% · final $49,455
+169 trades, win 38%, avg -0.16R (-3.66% per trade), profit factor 0.52, hold 12.1 days
+by year: 2018: +3%  2019: -17%  2020: -21%  2021: +0%  2022: -9%  2023: -12%  2024: +0%  2025: -0%  2026: -8%
+by market at entry: SPY<200 169× -0.16R win 38%
+exits: 10-day high 76× -0.83R  stop 7× -2.00R  stop (gap) 2× -2.28R  time 84× +0.66R
+
+breakdown below the 20-day low · only when SPY < 200-day MA · stop none · near low off
+-7.0%/yr · max drop -47.3% · final $55,971
+169 trades, win 38%, avg -0.15R (-2.97% per trade), profit factor 0.58, hold 12.1 days
+by year: 2018: +2%  2019: -17%  2020: -11%  2021: +0%  2022: -9%  2023: -12%  2024: +0%  2025: -0%  2026: -7%
+by market at entry: SPY<200 169× -0.15R win 38%
+exits: 10-day high 84× -0.96R  time 85× +0.66R
+
+breakdown below the 20-day low · only when SPY < 50-day MA · stop 2 ATR · near low off
+-10.3%/yr · max drop -70.2% · final $41,751
+308 trades, win 37%, avg -0.10R (-2.44% per trade), profit factor 0.61, hold 10.6 days
+by year: 2018: +6%  2019: -11%  2020: -25%  2021: -16%  2022: -4%  2023: -6%  2024: -13%  2025: -8%  2026: -3%
+by market at entry: SPY<200 115× -0.16R win 35%  SPY>200 188× -0.07R win 38%
+exits: 10-day high 55× -0.42R  stop 94× -1.00R  stop (gap) 23× -1.20R  time 131× +0.87R
+
+breakdown below the 20-day low · only when SPY < 50-day MA · stop 3 ATR · near low off
+-8.3%/yr · max drop -62.7% · final $50,042
+291 trades, win 40%, avg -0.09R (-2.05% per trade), profit factor 0.66, hold 11.9 days
+by year: 2018: +6%  2019: -15%  2020: -8%  2021: -18%  2022: -5%  2023: -5%  2024: -11%  2025: -7%  2026: -1%
+by market at entry: SPY<200 107× -0.18R win 36%  SPY>200 179× -0.04R win 41%
+exits: 10-day high 91× -0.73R  stop 41× -1.50R  stop (gap) 3× -1.85R  time 151× +0.71R
+
+breakdown below the 20-day low · only when SPY < 50-day MA · stop 4 ATR · near low off
+-8.5%/yr · max drop -62.7% · final $49,288
+287 trades, win 40%, avg -0.10R (-2.14% per trade), profit factor 0.65, hold 12.2 days
+by year: 2018: +6%  2019: -16%  2020: -9%  2021: -17%  2022: -5%  2023: -5%  2024: -10%  2025: -7%  2026: -2%
+by market at entry: SPY<200 106× -0.21R win 35%  SPY>200 176× -0.03R win 43%
+exits: 10-day high 117× -0.91R  stop 11× -2.00R  stop (gap) 1× -2.27R  time 153× +0.68R
+
+breakdown below the 20-day low · only when SPY < 50-day MA · stop none · near low off
+-7.1%/yr · max drop -57.5% · final $55,383
+287 trades, win 40%, avg -0.09R (-1.75% per trade), profit factor 0.70, hold 12.2 days
+by year: 2018: +5%  2019: -17%  2020: +2%  2021: -17%  2022: -5%  2023: -4%  2024: -10%  2025: -7%  2026: -3%
+by market at entry: SPY<200 106× -0.20R win 36%  SPY>200 176× -0.02R win 43%
+exits: 10-day high 128× -1.02R  time 154× +0.68R
+
+failed rally at a falling 20-day MA · no market filter · stop 2 ATR · near low 10
 -5.8%/yr · max drop -44.9% · final $61,872
-747 trades, win 33%, avg -0.08R (+0.17% per trade), profit factor 0.81, hold 9.1 days
+747 trades, win 33%, avg -0.08R (-0.58% per trade), profit factor 0.81, hold 9.1 days
 by year: 2018: +5%  2019: -21%  2020: -3%  2021: +0%  2022: +5%  2023: -11%  2024: +1%  2025: -18%  2026: -0%
 by market at entry: SPY<200 139× -0.18R win 28%  SPY>200 603× -0.06R win 34%
 exits: 10-day high 266× -0.52R  stop 189× -1.00R  stop (gap) 24× -1.49R  time 263× +1.16R
 
-failed rally at a falling 20-day MA · only when SPY < 200-day MA
+failed rally at a falling 20-day MA · no market filter · stop 3 ATR · near low 10
+-5.5%/yr · max drop -43.8% · final $63,887
+723 trades, win 35%, avg -0.06R (-0.54% per trade), profit factor 0.82, hold 9.6 days
+by year: 2018: +4%  2019: -24%  2020: -2%  2021: -3%  2022: +7%  2023: -7%  2024: -1%  2025: -15%  2026: +1%
+by market at entry: SPY<200 133× -0.17R win 29%  SPY>200 585× -0.04R win 36%
+exits: 10-day high 381× -0.69R  stop 48× -1.50R  stop (gap) 10× -2.19R  time 279× +1.12R
+
+failed rally at a falling 20-day MA · no market filter · stop 4 ATR · near low 10
+-5.0%/yr · max drop -40.7% · final $66,309
+715 trades, win 35%, avg -0.06R (-0.50% per trade), profit factor 0.83, hold 9.7 days
+by year: 2018: +4%  2019: -24%  2020: -3%  2021: -3%  2022: +10%  2023: -7%  2024: -1%  2025: -11%  2026: -2%
+by market at entry: SPY<200 133× -0.14R win 31%  SPY>200 577× -0.04R win 36%
+exits: 10-day high 411× -0.76R  stop 12× -2.00R  stop (gap) 3× -3.34R  time 284× +1.07R
+
+failed rally at a falling 20-day MA · no market filter · stop none · near low 10
+-4.7%/yr · max drop -39.3% · final $67,969
+714 trades, win 35%, avg -0.06R (-0.46% per trade), profit factor 0.84, hold 9.8 days
+by year: 2018: +4%  2019: -23%  2020: -3%  2021: -3%  2022: +10%  2023: -7%  2024: -1%  2025: -10%  2026: -1%
+by market at entry: SPY<200 133× -0.14R win 31%  SPY>200 576× -0.04R win 36%
+exits: 10-day high 424× -0.81R  time 285× +1.06R
+
+failed rally at a falling 20-day MA · only when SPY < 200-day MA · stop 2 ATR · near low 10
 -2.6%/yr · max drop -24.6% · final $80,811
-155 trades, win 33%, avg -0.15R (-0.19% per trade), profit factor 0.71, hold 8.9 days
+155 trades, win 33%, avg -0.15R (-1.25% per trade), profit factor 0.71, hold 8.9 days
 by year: 2018: +3%  2019: -6%  2020: -2%  2021: +0%  2022: +7%  2023: -10%  2024: +0%  2025: -10%  2026: -2%
 by market at entry: SPY<200 155× -0.15R win 33%
 exits: 10-day high 65× -0.50R  stop 38× -1.00R  stop (gap) 4× -1.27R  time 48× +1.08R
 
-failed rally at a falling 20-day MA · only when SPY < 50-day MA
+failed rally at a falling 20-day MA · only when SPY < 200-day MA · stop 3 ATR · near low 10
+-2.7%/yr · max drop -25.5% · final $80,216
+149 trades, win 34%, avg -0.16R (-1.34% per trade), profit factor 0.72, hold 9.5 days
+by year: 2018: +3%  2019: -7%  2020: -3%  2021: +0%  2022: +8%  2023: -10%  2024: +0%  2025: -9%  2026: -3%
+by market at entry: SPY<200 149× -0.16R win 34%
+exits: 10-day high 80× -0.63R  stop 14× -1.50R  stop (gap) 3× -1.77R  time 52× +1.03R
+
+failed rally at a falling 20-day MA · only when SPY < 200-day MA · stop 4 ATR · near low 10
+-2.0%/yr · max drop -24.5% · final $85,219
+149 trades, win 36%, avg -0.11R (-0.93% per trade), profit factor 0.79, hold 9.6 days
+by year: 2018: +3%  2019: -7%  2020: -1%  2021: +0%  2022: +11%  2023: -11%  2024: +0%  2025: -7%  2026: -3%
+by market at entry: SPY<200 149× -0.11R win 36%
+exits: 10-day high 90× -0.72R  stop 2× -2.00R  stop (gap) 1× -2.06R  time 56× +0.98R
+
+failed rally at a falling 20-day MA · only when SPY < 200-day MA · stop none · near low 10
+-1.9%/yr · max drop -24.3% · final $86,024
+149 trades, win 36%, avg -0.10R (-0.87% per trade), profit factor 0.80, hold 9.6 days
+by year: 2018: +3%  2019: -6%  2020: -1%  2021: +0%  2022: +11%  2023: -11%  2024: +0%  2025: -7%  2026: -3%
+by market at entry: SPY<200 149× -0.10R win 36%
+exits: 10-day high 93× -0.75R  time 56× +0.98R
+
+failed rally at a falling 20-day MA · only when SPY < 50-day MA · stop 2 ATR · near low 10
 -1.8%/yr · max drop -27.6% · final $86,461
-259 trades, win 35%, avg -0.04R (+0.98% per trade), profit factor 0.86, hold 9.4 days
+259 trades, win 35%, avg -0.04R (-0.44% per trade), profit factor 0.86, hold 9.4 days
 by year: 2018: +2%  2019: -8%  2020: +16%  2021: -2%  2022: +6%  2023: -3%  2024: -6%  2025: -10%  2026: -7%
 by market at entry: SPY<200 109× -0.16R win 31%  SPY>200 148× +0.05R win 39%
 exits: 10-day high 97× -0.53R  stop 58× -1.00R  stop (gap) 9× -1.31R  time 93× +1.21R
+
+failed rally at a falling 20-day MA · only when SPY < 50-day MA · stop 3 ATR · near low 10
+-2.3%/yr · max drop -31.0% · final $83,020
+252 trades, win 37%, avg -0.04R (-0.60% per trade), profit factor 0.84, hold 10.0 days
+by year: 2018: +3%  2019: -8%  2020: +15%  2021: -2%  2022: +5%  2023: -4%  2024: -7%  2025: -11%  2026: -6%
+by market at entry: SPY<200 105× -0.17R win 32%  SPY>200 145× +0.05R win 41%
+exits: 10-day high 127× -0.68R  stop 21× -1.50R  stop (gap) 3× -2.03R  time 99× +1.15R
+
+failed rally at a falling 20-day MA · only when SPY < 50-day MA · stop 4 ATR · near low 10
+-2.3%/yr · max drop -31.5% · final $82,839
+251 trades, win 37%, avg -0.05R (-0.61% per trade), profit factor 0.84, hold 10.0 days
+by year: 2018: +3%  2019: -8%  2020: +15%  2021: -2%  2022: +5%  2023: -5%  2024: -8%  2025: -9%  2026: -7%
+by market at entry: SPY<200 105× -0.17R win 32%  SPY>200 144× +0.04R win 40%
+exits: 10-day high 146× -0.77R  stop 2× -2.00R  stop (gap) 2× -3.31R  time 99× +1.13R
+
+failed rally at a falling 20-day MA · only when SPY < 50-day MA · stop none · near low 10
+-2.4%/yr · max drop -31.8% · final $82,672
+251 trades, win 37%, avg -0.05R (-0.62% per trade), profit factor 0.83, hold 10.0 days
+by year: 2018: +3%  2019: -8%  2020: +15%  2021: -2%  2022: +5%  2023: -5%  2024: -9%  2025: -9%  2026: -7%
+by market at entry: SPY<200 105× -0.16R win 32%  SPY>200 144× +0.03R win 40%
+exits: 10-day high 150× -0.83R  time 99× +1.13R
+
+failed rally at a falling 20-day MA · no market filter · stop 2 ATR · near low off
+-11.4%/yr · max drop -66.8% · final $37,886
+938 trades, win 33%, avg -0.12R (-0.97% per trade), profit factor 0.71, hold 9.0 days
+by year: 2018: +6%  2019: -23%  2020: -22%  2021: -21%  2022: -1%  2023: -7%  2024: +1%  2025: -16%  2026: -3%
+by market at entry: SPY<200 166× -0.17R win 30%  SPY>200 767× -0.11R win 34%
+exits: 10-day high 378× -0.50R  stop 211× -1.00R  stop (gap) 29× -1.63R  time 315× +1.07R
+
+failed rally at a falling 20-day MA · no market filter · stop 3 ATR · near low off
+-14.2%/yr · max drop -73.8% · final $29,500
+908 trades, win 33%, avg -0.14R (-1.26% per trade), profit factor 0.63, hold 9.3 days
+by year: 2018: +5%  2019: -32%  2020: -24%  2021: -23%  2022: -3%  2023: -12%  2024: +1%  2025: -15%  2026: -4%
+by market at entry: SPY<200 159× -0.18R win 31%  SPY>200 744× -0.14R win 33%
+exits: 10-day high 506× -0.66R  stop 59× -1.50R  stop (gap) 15× -2.15R  time 323× +1.01R
+
+failed rally at a falling 20-day MA · no market filter · stop 4 ATR · near low off
+-13.7%/yr · max drop -74.0% · final $30,794
+906 trades, win 33%, avg -0.15R (-1.22% per trade), profit factor 0.63, hold 9.3 days
+by year: 2018: +5%  2019: -32%  2020: -25%  2021: -24%  2022: -1%  2023: -14%  2024: +1%  2025: -15%  2026: +5%
+by market at entry: SPY<200 159× -0.15R win 33%  SPY>200 742× -0.14R win 34%
+exits: 10-day high 543× -0.70R  stop 23× -2.00R  stop (gap) 7× -2.74R  time 328× +0.95R
+
+failed rally at a falling 20-day MA · no market filter · stop none · near low off
+-13.9%/yr · max drop -74.4% · final $30,154
+905 trades, win 33%, avg -0.15R (-1.24% per trade), profit factor 0.63, hold 9.4 days
+by year: 2018: +5%  2019: -32%  2020: -29%  2021: -24%  2022: -1%  2023: -13%  2024: +1%  2025: -13%  2026: +4%
+by market at entry: SPY<200 159× -0.15R win 33%  SPY>200 741× -0.14R win 34%
+exits: 10-day high 571× -0.77R  time 329× +0.94R
+
+failed rally at a falling 20-day MA · only when SPY < 200-day MA · stop 2 ATR · near low off
+-3.4%/yr · max drop -33.2% · final $75,925
+189 trades, win 33%, avg -0.13R (-1.25% per trade), profit factor 0.76, hold 9.1 days
+by year: 2018: +8%  2019: -8%  2020: -5%  2021: +0%  2022: +0%  2023: -11%  2024: +0%  2025: -9%  2026: -1%
+by market at entry: SPY<200 189× -0.13R win 33%
+exits: 10-day high 89× -0.47R  stop 34× -1.00R  stop (gap) 7× -1.48R  time 59× +1.05R
+
+failed rally at a falling 20-day MA · only when SPY < 200-day MA · stop 3 ATR · near low off
+-4.2%/yr · max drop -36.2% · final $71,086
+184 trades, win 35%, avg -0.14R (-1.62% per trade), profit factor 0.70, hold 9.5 days
+by year: 2018: +8%  2019: -9%  2020: -10%  2021: +0%  2022: -1%  2023: -12%  2024: +0%  2025: -8%  2026: -1%
+by market at entry: SPY<200 184× -0.14R win 35%
+exits: 10-day high 107× -0.58R  stop 13× -1.50R  stop (gap) 3× -2.03R  time 61× +1.01R
+
+failed rally at a falling 20-day MA · only when SPY < 200-day MA · stop 4 ATR · near low off
+-3.2%/yr · max drop -34.1% · final $77,315
+181 trades, win 36%, avg -0.09R (-1.20% per trade), profit factor 0.76, hold 9.7 days
+by year: 2018: +8%  2019: -9%  2020: -4%  2021: +0%  2022: +0%  2023: -12%  2024: +0%  2025: -6%  2026: -1%
+by market at entry: SPY<200 181× -0.09R win 36%
+exits: 10-day high 111× -0.63R  stop 3× -2.00R  stop (gap) 2× -2.28R  time 65× +0.98R
+
+failed rally at a falling 20-day MA · only when SPY < 200-day MA · stop none · near low off
+-3.1%/yr · max drop -34.1% · final $77,739
+181 trades, win 36%, avg -0.09R (-1.17% per trade), profit factor 0.76, hold 9.7 days
+by year: 2018: +8%  2019: -9%  2020: -4%  2021: +0%  2022: +0%  2023: -12%  2024: +0%  2025: -6%  2026: -1%
+by market at entry: SPY<200 181× -0.09R win 36%
+exits: 10-day high 116× -0.68R  time 65× +0.98R
+
+failed rally at a falling 20-day MA · only when SPY < 50-day MA · stop 2 ATR · near low off
+-4.5%/yr · max drop -43.1% · final $69,457
+313 trades, win 36%, avg -0.07R (-1.03% per trade), profit factor 0.77, hold 9.4 days
+by year: 2018: +3%  2019: -8%  2020: -0%  2021: -6%  2022: +7%  2023: -0%  2024: -10%  2025: -10%  2026: -10%
+by market at entry: SPY<200 123× -0.12R win 33%  SPY>200 186× -0.04R win 38%
+exits: 10-day high 109× -0.51R  stop 72× -1.00R  stop (gap) 19× -1.51R  time 109× +1.23R
+
+failed rally at a falling 20-day MA · only when SPY < 50-day MA · stop 3 ATR · near low off
+-3.4%/yr · max drop -37.8% · final $75,960
+303 trades, win 38%, avg -0.03R (-0.76% per trade), profit factor 0.82, hold 10.0 days
+by year: 2018: +4%  2019: -8%  2020: -3%  2021: -6%  2022: +9%  2023: +0%  2024: -11%  2025: -8%  2026: -3%
+by market at entry: SPY<200 120× -0.11R win 34%  SPY>200 179× +0.02R win 41%
+exits: 10-day high 147× -0.66R  stop 27× -1.50R  stop (gap) 6× -2.04R  time 119× +1.18R
+
+failed rally at a falling 20-day MA · only when SPY < 50-day MA · stop 4 ATR · near low off
+-3.1%/yr · max drop -35.5% · final $78,033
+300 trades, win 39%, avg -0.02R (-0.68% per trade), profit factor 0.83, hold 10.2 days
+by year: 2018: +4%  2019: -9%  2020: -2%  2021: -6%  2022: +10%  2023: -0%  2024: -11%  2025: -6%  2026: -3%
+by market at entry: SPY<200 119× -0.09R win 35%  SPY>200 177× +0.02R win 42%
+exits: 10-day high 164× -0.74R  stop 5× -2.00R  stop (gap) 4× -2.81R  time 123× +1.11R
+
+failed rally at a falling 20-day MA · only when SPY < 50-day MA · stop none · near low off
+-3.1%/yr · max drop -35.8% · final $77,825
+300 trades, win 40%, avg -0.02R (-0.68% per trade), profit factor 0.83, hold 10.2 days
+by year: 2018: +4%  2019: -9%  2020: -4%  2021: -4%  2022: +10%  2023: +0%  2024: -11%  2025: -6%  2026: -3%
+by market at entry: SPY<200 119× -0.09R win 35%  SPY>200 177× +0.03R win 42%
+exits: 10-day high 172× -0.83R  time 124× +1.10R
 
 Buy & hold SPY (for reference: a short strategy should make money when this falls): +15.9%/yr, max drop -33.8%
 by year: 2018: -5%  2019: +31%  2020: +18%  2021: +29%  2022: -18%  2023: +26%  2024: +25%  2025: +18%  2026: +13%
