@@ -17,6 +17,14 @@ on:
         description: "Market filters to compare: none mkt200 (SPY below 200-day MA) mkt50"
         type: string
         default: "none mkt200 mkt50"
+      stops:
+        description: "Stops to compare, in ATR (none = no stop, only the 10-day-high and 15-day exits)"
+        type: string
+        default: "2 3 4 none"
+      nears:
+        description: "'Near 52-week low' rule to compare: max % above the low (off = not used)"
+        type: string
+        default: "10 off"
       start:
         description: "Optional fixed start date (YYYY-MM-DD); overrides years. Use with yahoo for 2008"
         type: string
@@ -53,6 +61,8 @@ jobs:
           UNIVERSES: ${{ inputs.universes }}
           ENTRIES: ${{ inputs.entries }}
           MARKETS: ${{ inputs.markets }}
+          STOPS: ${{ inputs.stops }}
+          NEARS: ${{ inputs.nears }}
           YEARS: ${{ inputs.years }}
           START: ${{ inputs.start }}
           SOURCE: ${{ inputs.source }}

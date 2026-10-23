@@ -23,7 +23,7 @@ Money: 10% of equity per short, max 5 shorts (50% short), most-negative 6-month 
 Costs: 0.02% slippage per side, borrow fee 0.5%/yr on the short value. Prices are dividend-adjusted, so
 dividends owed while short are already in the P&L.
 
-    YEARS=8 ENTRIES="break rally" MARKETS="none mkt200 mkt50" python short_screen_backtest.py   (ALPACA keys)
+    YEARS=8 ENTRIES="break rally" MARKETS="none mkt200 mkt50" STOPS="2 3 4 none" NEARS="10 off" python short_screen_backtest.py   (ALPACA keys)
     SOURCE=yahoo START=2005-01-01 ...   (decades back, includes 2008)
 Results: reports/backtest/short-screen-<universes>-<years>y/
 """
@@ -44,14 +44,16 @@ UNIVERSES = os.environ.get("UNIVERSES", "sp500 sp400").split()
 SOURCE = os.environ.get("SOURCE", "alpaca").strip() or "alpaca"
 ENTRIES = os.environ.get("ENTRIES", "break rally").split()
 MARKETS = os.environ.get("MARKETS", "none mkt200 mkt50").split()
+# stop distances to compare, in ATR ("none" = no stop, only the trailing and time exits)
+STOPS = os.environ.get("STOPS", os.environ.get("ATR_STOP", "2")).split()
+# "near 52-week low" rule: max % above the low ("off" = rule not used)
+NEARS = os.environ.get("NEARS", "10").split()
 
 MIN_DVOL = float(os.environ.get("MIN_DVOL", "20e6"))
 MIN_PRICE = 10.0
 WEAK_PCT = float(os.environ.get("WEAK_PCT", "0.10"))
-NEAR_LOW = 0.10
 POS_PCT = float(os.environ.get("POS_PCT", "0.10"))
 MAX_POS = int(os.environ.get("MAX_POS", "5"))
-ATR_STOP = float(os.environ.get("ATR_STOP", "2"))
 TRAIL = int(os.environ.get("TRAIL", "10"))
 TIME_STOP = int(os.environ.get("TIME_STOP", "15"))
 SLIP = 0.0002
@@ -115,12 +117,12 @@ def features(daily, days):
     return syms, {k: np.column_stack(v).astype(float) for k, v in f.items()}
 
 
-def weak_list(F, spy_r126):
+def weak_list(F, spy_r126, near_low=0.10):
     """Boolean day x stock: on the weak list at that day's close."""
     with np.errstate(invalid="ignore"):
         liquid = (F["dvol"] >= MIN_DVOL) & (F["C"] >= MIN_PRICE)
         trend = (F["C"] < F["ma200"]) & (F["ma50"] < F["ma200"])
-        near = F["C"] <= F["low252"] * (1 + NEAR_LOW)
+        near = np.ones_like(liquid) if near_low is None else F["C"] <= F["low252"] * (1 + near_low)
         r = np.where(liquid, F["r126"], np.nan)
         cut = np.nanquantile(np.where(np.isfinite(r).sum(1, keepdims=True) > 20, r, np.nan), WEAK_PCT, axis=1)
         weakest = (r <= cut[:, None]) & (r < spy_r126[:, None])
@@ -136,7 +138,7 @@ def triggers(F, kind):
     raise SystemExit(f"Unknown entry {kind}")
 
 
-def simulate(days, syms, F, signal, allowed, spy_above200, k0):
+def simulate(days, syms, F, signal, allowed, spy_above200, k0, atr_stop=2.0):
     """Short at the next open after a signal. Returns trades and the daily equity curve."""
     O, H, C, atr, high_tr, r126 = F["O"], F["H"], F["C"], F["atr"], F["high_tr"], F["r126"]
     realized, fees, pos, trades, eq = 0.0, 0.0, {}, [], []
@@ -148,9 +150,9 @@ def simulate(days, syms, F, signal, allowed, spy_above200, k0):
         pnl = p["qty"] * (p["entry"] - px)
         realized += pnl
         trades.append({"symbol": syms[col], "entry_date": days[p["k"]].date(), "exit_date": days[k].date(),
-                       "entry": round(p["entry"], 2), "exit": round(px, 2), "stop": round(p["stop"], 2),
-                       "days": k - p["k"], "pnl": round(pnl, 2), "ret": p["entry"] / px - 1,
-                       "R": (p["entry"] - px) / (p["stop"] - p["entry"]), "result": why,
+                       "entry": round(p["entry"], 2), "exit": round(px, 2), "stop": round(p["stop"], 2) if np.isfinite(p["stop"]) else None,
+                       "days": k - p["k"], "pnl": round(pnl, 2), "ret": (p["entry"] - px) / p["entry"],
+                       "R": (p["entry"] - px) / (p["risk_stop"] - p["entry"]), "result": why,
                        "regime": "SPY>200" if p["bull"] else "SPY<200"})
 
     equity = START_EQ
@@ -163,8 +165,10 @@ def simulate(days, syms, F, signal, allowed, spy_above200, k0):
             cand.sort(key=lambda c: r126[y, c])          # weakest first
             for c in cand[:MAX_POS - len(pos)]:
                 entry = O[k, c] * (1 - SLIP)
-                stop = O[k, c] + ATR_STOP * atr[y, c]
+                # R is always measured against a 2-ATR risk, so versions with other stops compare fairly
+                stop = O[k, c] + atr_stop * atr[y, c] if atr_stop else np.inf
                 pos[c] = {"qty": POS_PCT * equity / entry, "entry": entry, "stop": stop, "k": k,
+                          "risk_stop": O[k, c] + 2 * atr[y, c],
                           "bull": bool(spy_above200[y])}
         # 2) exits
         for c in list(pos):
@@ -223,44 +227,66 @@ def run(daily, spy, start, out_dir, members=None):
     below = {"none": np.ones(len(full), bool), "mkt200": (sc < m200).reindex(full).fillna(False).values,
              "mkt50": (sc < m50).reindex(full).fillna(False).values}
     above200 = (sc > m200).reindex(full).fillna(True).values
-    weak = weak_list(F, spy_r126)
+    nears = {n: None if n == "off" else float(n) / 100 for n in NEARS}
+    weaks = {n: weak_list(F, spy_r126, v) for n, v in nears.items()}
+    weak = weak_list(F, spy_r126)                        # the screener list at the end: within 10% of the low
     k0 = int(np.searchsorted(full, days[0])) + 1
     os.makedirs(out_dir, exist_ok=True)
 
     lines = [f"Short strategy from a weak-stocks screen · {len(syms)} stocks ({' + '.join(UNIVERSES)}) · "
              f"{days[0]:%Y-%m-%d} → {days[-1]:%Y-%m-%d}",
-             f"weak list: liquid (${MIN_DVOL / 1e6:.0f}M+/day, $10+), below a falling-trend 200-day MA, within "
-             f"{NEAR_LOW:.0%} of the 52-week low, 6-month return below SPY and in the bottom {WEAK_PCT:.0%}",
-             f"exits: stop {ATR_STOP:g} ATR, close above the {TRAIL}-day high, {TIME_STOP} days · "
+             f"weak list: liquid (${MIN_DVOL / 1e6:.0f}M+/day, $10+), below the 200-day MA with the 50-day under it, "
+             f"6-month return below SPY and in the bottom {WEAK_PCT:.0%}, + 'near low' = within X% of the 52-week low",
+             f"exits: stop X ATR (none = no stop), close above the {TRAIL}-day high, {TIME_STOP} days · "
              f"{POS_PCT:.0%} per short, max {MAX_POS} · borrow {BORROW:.1%}/yr, slippage {SLIP:.2%}/side",
-             f"stocks on the weak list on an average day: {weak[k0:].sum(1).mean():.1f}", ""]
-    curves, rows, all_tr = {}, [], []
+             "R is always measured against a 2-ATR risk, so versions with different stops compare fairly",
+             "stocks on the weak list on an average day: " + ", ".join(
+                 f"near low {n}{'' if n == 'off' else '%'}: {w[k0:].sum(1).mean():.1f}" for n, w in weaks.items()), ""]
+    curves, rows, all_tr, detail = {}, [], [], []
     for ent in ENTRIES:
-        signal = weak & triggers(F, ent)
-        for mk in MARKETS:
-            tag = f"{ent} · {mk}"
-            tr, eq = simulate(full, syms, F, signal, below[mk], above200, k0)
-            st = stats(eq, tr)
-            yr = eq.groupby(eq.index.year).last()
-            yr = yr / np.r_[START_EQ, yr.values[:-1]] - 1
-            lines += [f"<b>{ENTRY_NAMES[ent]} · {MARKET_NAMES[mk]}</b>",
-                      f"{st['cagr'] * 100:+.1f}%/yr · max drop {st['dd'] * 100:+.1f}% · final ${st['final']:,.0f}",
-                      f"{st['trades']} trades, win {st['win']:.0%}, avg {st['avgR']:+.2f}R "
-                      f"({st['avg_ret'] * 100:+.2f}% per trade), profit factor {st['pf']:.2f}, hold {st['hold']:.1f} days",
-                      "by year: " + "  ".join(f"{y}: {v * 100:+.0f}%" for y, v in yr.items())]
-            if len(tr):
-                done = tr[tr.result != "still open"]
-                g = done.groupby("regime").agg(n=("R", "size"), R=("R", "mean"), win=("pnl", lambda x: (x > 0).mean()))
-                lines.append("by market at entry: " + "  ".join(
-                    f"{i} {int(r.n)}× {r.R:+.2f}R win {r.win:.0%}" for i, r in g.iterrows()))
-                g = done.groupby("result")["R"].agg(["size", "mean"])
-                lines.append("exits: " + "  ".join(f"{i} {int(r['size'])}× {r['mean']:+.2f}R" for i, r in g.iterrows()))
-            lines.append("")
-            rows.append({"entry": ent, "market": mk, **st})
-            curves[tag] = eq
-            all_tr.append(tr.assign(entry_rule=ent, market=mk))
-            print(f"{tag}: {st['cagr'] * 100:+.1f}%/yr, {st['trades']} trades, drop {st['dd'] * 100:+.1f}%", flush=True)
-
+        trig_ = triggers(F, ent)
+        for near, wk in weaks.items():
+            signal = wk & trig_
+            for mk in MARKETS:
+                for stp in STOPS:
+                    atr_stop = None if stp == "none" else float(stp)
+                    tag = f"{ent} · {mk} · stop {stp} · near {near}"
+                    tr, eq = simulate(full, syms, F, signal, below[mk], above200, k0, atr_stop)
+                    st = stats(eq, tr)
+                    yr = eq.groupby(eq.index.year).last()
+                    yr = yr / np.r_[START_EQ, yr.values[:-1]] - 1
+                    detail += [f"<b>{ENTRY_NAMES[ent]} · {MARKET_NAMES[mk]} · stop "
+                               f"{'none' if atr_stop is None else f'{atr_stop:g} ATR'} · near low {near}</b>",
+                               f"{st['cagr'] * 100:+.1f}%/yr · max drop {st['dd'] * 100:+.1f}% · final ${st['final']:,.0f}",
+                               f"{st['trades']} trades, win {st['win']:.0%}, avg {st['avgR']:+.2f}R "
+                               f"({st['avg_ret'] * 100:+.2f}% per trade), profit factor {st['pf']:.2f}, "
+                               f"hold {st['hold']:.1f} days",
+                               "by year: " + "  ".join(f"{y}: {v * 100:+.0f}%" for y, v in yr.items())]
+                    if len(tr):
+                        done = tr[tr.result != "still open"]
+                        g = done.groupby("regime").agg(n=("R", "size"), R=("R", "mean"),
+                                                       win=("pnl", lambda x: (x > 0).mean()))
+                        detail.append("by market at entry: " + "  ".join(
+                            f"{i} {int(r.n)}× {r.R:+.2f}R win {r.win:.0%}" for i, r in g.iterrows()))
+                        g = done.groupby("result")["R"].agg(["size", "mean"])
+                        detail.append("exits: " + "  ".join(f"{i} {int(r['size'])}× {r['mean']:+.2f}R"
+                                                             for i, r in g.iterrows()))
+                    detail.append("")
+                    y22 = yr.get(2022, np.nan)
+                    rows.append({"entry": ent, "market": mk, "stop": stp, "near_low": near, "y2022": y22, **st})
+                    curves[tag] = eq
+                    all_tr.append(tr.assign(entry_rule=ent, market=mk, stop_atr=stp, near_low=near))
+                    print(f"{tag}: {st['cagr'] * 100:+.1f}%/yr, {st['trades']} trades, drop {st['dd'] * 100:+.1f}%",
+                          flush=True)
+    rk = pd.DataFrame(rows).sort_values("cagr", ascending=False)
+    lines.append("<b>Ranking (best first)</b>")
+    lines.append(f"  {'entry':6} {'market':6} {'stop':4} {'near':4} {'%/yr':>6} {'drop':>6} {'trades':>6} "
+                 f"{'win':>4} {'avgR':>6} {'PF':>5} {'2022':>5}")
+    for _, r in rk.iterrows():
+        lines.append(f"  {r.entry:6} {r.market:6} {r.stop:4} {r.near_low:4} {r.cagr * 100:+6.1f} {r.dd * 100:+6.0f} "
+                     f"{r.trades:6d} {r.win:4.0%} {r.avgR:+6.2f} {r.pf:5.2f} {r.y2022 * 100:+5.0f}")
+    lines += [""] + detail
+    best = list(rk.head(6).apply(lambda r: f"{r.entry} · {r.market} · stop {r.stop} · near {r.near_low}", axis=1))
     b = spy["Close"].reindex(curves[next(iter(curves))].index).ffill()
     b = b / b.iat[0] * START_EQ
     byrs = (b.index[-1] - b.index[0]).days / 365.25
@@ -293,7 +319,7 @@ def run(daily, spy, start, out_dir, members=None):
     fig, (ax, ax2) = plt.subplots(2, 1, figsize=(12, 7.5), dpi=110, sharex=True, gridspec_kw={"height_ratios": [3, 1]})
     fig.patch.set_facecolor("black")
     palette = ["#42a5f5", "#ffd54f", "#66bb6a", "#ef5350", "#ab47bc", "#26c6da", "#ffa726", "#ec407a"]
-    allc = {**curves, "Buy & hold SPY": b}
+    allc = {**{k: curves[k] for k in best}, "Buy & hold SPY": b}     # chart: the 6 best + SPY
     for a_ in (ax, ax2):
         a_.set_facecolor("black"); a_.grid(color="#222"); a_.tick_params(colors="#bbbbbb")
         for s in a_.spines.values():
@@ -303,7 +329,7 @@ def run(daily, spy, start, out_dir, members=None):
         col = "#bbbbbb" if spy_line else palette[n % len(palette)]
         ax.plot(s.index, s.values, color=col, lw=1.6, ls="--" if spy_line else "-", label=name)
         ax2.plot(s.index, (s / s.cummax() - 1) * 100, color=col, lw=1.0, ls="--" if spy_line else "-")
-    ax.set_title("Short strategy (weak-stocks screen) vs SPY", color="white")
+    ax.set_title("Short strategy (weak-stocks screen): best 6 versions vs SPY", color="white")
     ax.set_ylabel("Account value ($)", color="#bbbbbb"); ax2.set_ylabel("Drawdown (%)", color="#bbbbbb")
     leg = ax.legend(facecolor="black", edgecolor="#444", fontsize=8)
     for x in leg.get_texts():
