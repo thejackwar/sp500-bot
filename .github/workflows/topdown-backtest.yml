@@ -1,0 +1,77 @@
+name: Top-down backtest
+
+on:
+  workflow_dispatch:          # run it by hand: Actions -> Top-down backtest -> Run workflow
+    inputs:
+      years:
+        description: "Years of 5-minute S&P 100 data (the last 12 months are kept as out-of-sample)"
+        type: choice
+        options: ["3", "5", "8"]
+        default: "8"
+      name:
+        description: "Results folder name (reports/backtest/topdown-<name>-<years>y)"
+        type: string
+        default: "v1"
+
+permissions:
+  contents: write              # to commit the results to reports/backtest/
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt lxml
+
+      # Own cache: only the first run downloads everything
+      - name: Restore saved 5-minute prices
+        uses: actions/cache/restore@v4
+        with:
+          path: price-cache-topdown
+          key: topdown-cache-${{ github.run_id }}-${{ github.run_attempt }}
+          restore-keys: topdown-cache-
+
+      - name: Backtest
+        run: python topdown_backtest.py
+        env:
+          PYTHONUNBUFFERED: "1"
+          YEARS: ${{ inputs.years }}
+          ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
+          ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
+
+      - name: Save prices for the next run
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: price-cache-topdown
+          key: topdown-cache-${{ github.run_id }}-${{ github.run_attempt }}
+
+      - name: Save the results with this run
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: topdown-results
+          path: backtest-results/
+          if-no-files-found: ignore
+
+      - name: Commit the results to reports/backtest/
+        if: always()
+        run: |
+          [ -f backtest-results/summary.txt ] || { echo "No results"; exit 0; }
+          dir="reports/backtest/topdown-${{ inputs.name }}-${{ inputs.years }}y"
+          mkdir -p "$dir"
+          cp backtest-results/summary.txt backtest-results/trades.csv backtest-results/equity.csv "$dir"/ 2>/dev/null || true
+          echo "Run ${{ github.run_id }}, $(date -u '+%Y-%m-%d %H:%M UTC')" > "$dir/run.txt"
+          git config user.name "backtest bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add reports/backtest
+          if git diff --cached --quiet; then echo "No changes"; exit 0; fi
+          git commit -m "Top-down backtest results: $dir"
+          for i in 1 2 3; do git pull --rebase -q && git push -q && break; sleep 5; done
