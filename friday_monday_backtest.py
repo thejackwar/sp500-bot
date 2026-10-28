@@ -58,6 +58,7 @@ C CAT CMCSA COF COP COST CRM CSCO CVS CVX DE DELL DHR DIS DUK EMR FDX GD GE GEV 
 IBM INTC INTU ISRG JNJ JPM KO LIN LLY LMT LOW LRCX MA MCD MDLZ MDT META MMM MO MRK MS MSFT MU NEE
 NFLX NOW NVDA ORCL PANW PEP PFE PG PLTR PM QCOM RTX SBUX SCHW SNDK SO T TMO TMUS TSLA TXN UBER UNH
 UNP UPS USB V VZ WFC WMT XOM""".split()
+SP100 = [x.replace(".", "-") for x in SP100]          # BRK.B -> BRK-B (the name the downloader returns)
 SYMBOLS = os.environ.get("SYMBOLS", "").split() or SP100
 START = pd.Timestamp(os.environ.get("START", "2021-01-01")).date()
 OOS_START = pd.Timestamp(os.environ.get("OOS_START", "2025-01-01")).date()

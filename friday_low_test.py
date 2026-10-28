@@ -31,12 +31,15 @@ def load():
     data = {}
     for s in fm.SYMBOLS:
         try:
-            data[s] = pd.read_pickle(os.path.join(fm.CACHE_DIR, f"{s}_5min.pkl.gz"))
+            df = pd.read_pickle(os.path.join(fm.CACHE_DIR, f"{s}_5min.pkl.gz"))
+            if len(df):
+                data[s] = df
         except Exception:
             pass
     missing = [s for s in fm.SYMBOLS if s not in data]
     if missing:                                   # not saved yet: download (needs Alpaca keys)
         end = pd.Timestamp.now(tz=fm.ET) - pd.Timedelta(minutes=20)
+        print("Downloading", " ".join(missing), flush=True)
         data.update(fm.fetch(missing, pd.Timestamp(fm.START, tz=fm.ET) - pd.Timedelta(days=40), end, fm._headers()))
     return data
 
@@ -77,6 +80,8 @@ def main():
     data = load()
     rows = []
     for sym, df in data.items():
+        if not len(df):
+            continue
         days, daily = fm.split_days(df)
         dates = sorted(days)
         for k in range(2, len(dates)):
@@ -160,7 +165,7 @@ def main():
           f"{rc.get('target', 0):>8.0%}{rc.get('stop', 0):>6.0%}{rc.get('close', 0):>7.0%}")
     if len(tr):
         w(f"Median target distance {tr['target_atr'].median():.2f} ATR vs stop distance {tr['risk_atr'].median():.2f} ATR "
-          "(so a 'hit' usually earns less than 1R).")
+          "(target / stop > 1 means a hit earns more than 1R).")
 
     os.makedirs(OUT, exist_ok=True)
     text = "\n".join(out)
