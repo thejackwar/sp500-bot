@@ -28,6 +28,10 @@ import pandas as pd
 import friday_monday_backtest as fm
 import trendlines as tl
 
+TRENDLINE = os.environ.get("TRENDLINE", "0") == "1"   # section 5 (daily down trendline), off by default
+MIN_RR = float(os.environ.get("MIN_RR", "2"))         # section 6: only trades with target >= MIN_RR x risk
+STOPS = ["fri_high", "thu_high", "atr_0.25", "atr_0.5", "forced"]
+
 OUT = os.environ.get("OUT_DIR", "backtest-results")
 
 
@@ -116,9 +120,37 @@ def trade(mon, fri_low, fri_high, atr):
                 target_atr=(entry - fri_low) / atr)
 
 
+def trade_stop(mon, fri_low, fri_high, thu_high, atr, kind):
+    """Short Monday open, target Friday's low, stop by `kind`. Returns R, gross R, reward/risk, reason."""
+    m, o, h, l, c = mon
+    entry = o[0]
+    reward = entry - fri_low
+    if reward <= 0:
+        return None
+    stop = {"fri_high": fri_high + fm.STOP_BUFFER, "thu_high": thu_high + fm.STOP_BUFFER,
+            "atr_0.25": entry + 0.25 * atr, "atr_0.5": entry + 0.5 * atr,
+            "forced": entry + reward / MIN_RR}[kind]
+    risk = stop - entry
+    if risk < 0.02 * atr:                         # stop at/below the entry or a few cents away: skip
+        return None
+    s = np.flatnonzero(h >= stop)
+    t = np.flatnonzero(l <= fri_low - fm.TICK)
+    s = s[0] if len(s) else 10 ** 9
+    t = t[0] if len(t) else 10 ** 9
+    if s <= t and s < len(h):
+        px, why = max(stop, o[s]), "stop"
+    elif t < len(h):
+        px, why = min(fri_low, o[t]) if t > 0 else fri_low, "target"
+    else:
+        px, why = c[-1], "close"
+    gross = entry - px
+    net = gross - fm.costs(entry, px, "mkt", why)
+    return {"R": net / risk, "Rg": gross / risk, "rr": reward / risk, "why": why, "risk_atr": risk / atr}
+
+
 def main():
     data = load()
-    dailies = load_daily(sorted(data), data)
+    dailies = load_daily(sorted(data), data) if TRENDLINE else {}
     rows = []
     for sym, df in data.items():
         if not len(df):
@@ -142,6 +174,10 @@ def main():
                      dist_atr=(mon[1][0] - low1) / atr)
             if monday:
                 r["downtl"] = down_trendline(dailies[sym], d1) if sym in dailies else np.nan
+                for st in STOPS:
+                    x = trade_stop(mon, low1, high1, high2, atr, st)
+                    for k, v in (x or {}).items():
+                        r[f"{st}:{k}"] = v
                 tr = trade(mon, low1, high1, atr)
                 if tr:
                     r.update(tr)
@@ -209,6 +245,44 @@ def main():
         w(f"Median target distance {tr['target_atr'].median():.2f} ATR vs stop distance {tr['risk_atr'].median():.2f} ATR "
           "(target / stop > 1 means a hit earns more than 1R).")
 
+    w("")
+    w(f"=== 6. STOP-LOSS CHOICES, ONLY TRADES WITH TARGET >= {MIN_RR:g}x RISK (rule Mondays only) ===")
+    w("short Monday open, target = Friday's low, out at 16:00 if neither is hit; same costs as before")
+    w("fri_high / thu_high = $0.02 above that day's high | atr_x = x ATR above the entry |")
+    w(f"forced = stop placed at exactly 1/{MIN_RR:g} of the distance to the target (every trade is {MIN_RR:g}:1)")
+    w(f"{'stop':<10}{'filter':>8}{'period':>7}{'trades':>8}{'win':>6}{'target':>8}{'stop':>6}{'16:00':>7}"
+      f"{'gross R':>9}{'net R':>8}{'PF':>6}{'t':>6}{'avg RR':>8}")
+    rule = mon[mon.cond]
+    for st in STOPS:
+        col = f"{st}:R"
+        if col not in rule:
+            continue
+        base = rule[rule[col].notna()]
+        for flt in (["all", f">={MIN_RR:g}:1"] if st != "forced" else [f"={MIN_RR:g}:1"]):
+            x = base if flt == "all" or st == "forced" else base[base[f"{st}:rr"] >= MIN_RR - 1e-9]
+            for per, xm in (("IS", x[~x.oos]), ("OOS", x[x.oos])):
+                if len(xm) < 3:
+                    w(f"{st:<10}{flt:>8}{per:>7}{len(xm):>8}")
+                    continue
+                R = xm[col].to_numpy(float)
+                pf = R[R > 0].sum() / -R[R < 0].sum() if (R < 0).any() else np.nan
+                wk = xm.groupby("date")[col].mean()
+                ts = wk.mean() / (wk.std(ddof=1) / np.sqrt(len(wk))) if len(wk) > 2 and wk.std() > 0 else np.nan
+                rc = xm[f"{st}:why"].value_counts(normalize=True)
+                w(f"{st:<10}{flt:>8}{per:>7}{len(xm):>8,}{(R > 0).mean():>6.0%}{rc.get('target', 0):>8.0%}"
+                  f"{rc.get('stop', 0):>6.0%}{rc.get('close', 0):>7.0%}{xm[f'{st}:Rg'].mean():>+9.3f}{R.mean():>+8.3f}"
+                  f"{pf:>6.2f}{ts:>+6.1f}{xm[f'{st}:rr'].median():>8.2f}")
+        w("")
+    w(f"With {MIN_RR:g}:1 trades you break even before costs at a {1 / (1 + MIN_RR):.0%} win rate (if every trade")
+    w("ends at the target or the stop). 16:00 exits sit in between.")
+
+    if not TRENDLINE:
+        os.makedirs(OUT, exist_ok=True)
+        text = "\n".join(out)
+        open(os.path.join(OUT, "summary.txt"), "w").write(text + "\n")
+        t.to_csv(os.path.join(OUT, "days.csv.gz"), index=False)
+        print(text)
+        return
     w("")
     w("=== 5. ONLY WHEN THE STOCK IS UNDER A DAILY DOWN TRENDLINE (at Friday's close) ===")
     mon = mon.assign(dtl=mon["downtl"] == True)  # noqa: E712
