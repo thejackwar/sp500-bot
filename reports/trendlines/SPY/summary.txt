@@ -1,0 +1,9 @@
+SPY trendlines
+TF   up line     down line   bias
+W        broken           –   -
+D        760.52           –   Up
+4H       760.99      771.14   Squeeze
+1H       760.17      771.14   Squeeze
+30m      761.61      771.14   Squeeze
+15m      broken      771.14   Down
+5m       769.61      771.12   Squeeze
