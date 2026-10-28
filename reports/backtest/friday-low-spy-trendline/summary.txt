@@ -1,0 +1,61 @@
+RULE: Friday high < Thursday high  ->  Monday visits Friday's low   SPY
+Mondays 2021-01-04 to 2026-10-26; regular hours only; out-of-sample from 2025-01-01.
+
+=== 1. HOW OFTEN DOES THE NEXT DAY TRADE AT OR BELOW THE PREVIOUS DAY'S LOW? ===
+                                                  days    hit  IS hit  OOS hit  opens below  hit, not opening below
+Monday, Fri high < Thu high  (YOUR RULE)           133    49%     50%      47%          24%                     33%
+Monday, Fri high >= Thu high                       171    30%     29%      35%          11%                     22%
+Monday, all                                        304    38%     38%      40%          16%                     26%
+Other days, prev high < the high before it         499    56%     56%      54%          20%                     44%
+Other days, prev high >= the high before it        658    39%     39%      38%          12%                     30%
+
+A rule is only useful if YOUR RULE's hit rate is clearly above the other rows.
+
+=== 2. SAME, BY HOW FAR MONDAY OPENS ABOVE FRIDAY'S LOW (in ATRs) ===
+(a low that is closer is hit more often anyway; this compares like with like)
+distance        rule n  rule hit  other n  other hit
+opens below         32      100%       18       100%
+0-0.25              11       91%       21        76%
+0.25-0.5            29       52%       31        26%
+0.5-0.75            20       10%       41        12%
+0.75-1              16       19%       25        16%
+1-1.5               19       11%       27         4%
+>1.5                 6       17%        8         0%
+
+=== 3. YEAR BY YEAR (hit rate, Mondays) ===
+year      rule n  rule hit  other hit
+2021          18       44%        35%
+2022          26       69%        27%
+2023          23       43%        21%
+2024          23       39%        30%
+2025          23       43%        31%
+2026          20       50%        39%
+
+=== 4. AS A TRADE: short Monday open, target Friday's low, stop Friday's high, out at 16:00 ===
+                                    trades   win  gross R   net R    PF     t  target  stop  16:00
+Rule, in-sample                         66   39%   -0.026  -0.174  0.72  -0.9     26%   48%    26%
+Rule, out-of-sample                     35   37%   -0.087  -0.233  0.67  -0.8     31%   57%    11%
+Fri high >= Thu high, in-sample        109   35%   -0.045  -0.197  0.70  -1.3     20%   49%    31%
+Fri high >= Thu high, out-of-sample      44   34%   -0.122  -0.276  0.56  -1.5     20%   48%    32%
+Median target distance 0.62 ATR vs stop distance 0.25 ATR (target / stop > 1 means a hit earns more than 1R).
+
+=== 5. ONLY WHEN THE STOCK IS UNDER A DAILY DOWN TRENDLINE (at Friday's close) ===
+Share of Mondays under a down trendline: 47% (rule Mondays: 47%)
+hit rate                                           n    hit    IS   OOS  not opening below
+Rule + under down trendline                       63    54%   56%   50%                33%
+Rule, NOT under a down trendline                  70    44%   45%   42%                33%
+No rule (Fri high >= Thu) + down trendline        79    33%   28%   45%                25%
+Same distance buckets as section 2 (rule + trendline vs rule without):
+distance        with n  with hit  without n  without hit
+opens below         20      100%         12         100%
+0-0.25               4       75%          7         100%
+0.25-0.5            10       80%         19          37%
+0.5-0.75            10       10%         10          10%
+0.75-1               9       22%          7          14%
+1-1.5                8        0%         11          18%
+>1.5                 2        0%          4          25%
+trade (same as section 4)                     trades   win  gross R   net R     t
+Rule + down trendline, in-sample                  25   52%   +0.068  -0.019  -0.1
+Rule + down trendline, out-of-sample              18   28%   -0.291  -0.418  -1.5
+Rule, no trendline, in-sample                     41   32%   -0.083  -0.268  -1.0
+Rule, no trendline, out-of-sample                 17   47%   +0.130  -0.037  -0.1
