@@ -79,6 +79,9 @@ A_STOP_ATR = 0.25                  # stop distance for A and the control
 MIN_RISK_ATR = 0.10                # stops closer than this are widened to it
 SWING_N = 2
 ATR_N = 14
+TREND_MA = 20                      # downtrend filters, measured at Friday's close
+TREND_SLOPE = 5                    # "falling" = lower than 5 trading days earlier
+FILTERS = ["none", "below_ma", "ma_down", "down_week", "both_ma"]
 RACE_ATR = 0.5                     # reversal question: which comes first, FH -/+ 0.5 ATR
 
 COMMISSION = 0.005                 # $ per share per side
@@ -233,6 +236,10 @@ def split_days(df):
     tr = pd.concat([daily["High"] - daily["Low"], (daily["High"] - pc).abs(),
                     (daily["Low"] - pc).abs()], axis=1).max(axis=1)
     daily["atr"] = tr.rolling(ATR_N).mean()               # known at that day's close
+    ma = daily["Close"].rolling(TREND_MA).mean()
+    daily["below_ma"] = daily["Close"] < ma                 # trend features, all known at the close
+    daily["ma_down"] = ma < ma.shift(TREND_SLOPE)
+    daily["down_week"] = daily["Close"] < daily["Close"].shift(TREND_SLOPE)
     return days, daily
 
 
@@ -381,6 +388,8 @@ def run(data):
             atr, FH = daily.at[fri_d, "atr"], daily.at[fri_d, "High"]
             if not atr > 0:
                 continue
+            tr_f = (bool(daily.at[fri_d, "below_ma"]), bool(daily.at[fri_d, "ma_down"]),
+                    bool(daily.at[fri_d, "down_week"]))
             for tf in TIMEFRAMES:
                 fri, mon = resample(days[fri_d], tf), resample(days[mon_d], tf)
                 for ent, (e, entry, stop, kind) in signals(fri, mon, FH, atr).items():
@@ -392,10 +401,12 @@ def run(data):
                         net = gross - costs(entry, px, kind, why)
                         trades.append((mon_d, sym, tf, ent, rr, _hhmm(mon[0][e]), round(entry, 4),
                                        round(stop, 4), round(entry - rr * risk, 4), round(px, 4), why,
-                                       _hhmm(mon[0][xb]), risk, risk / atr, gross / risk, net / risk))
+                                       _hhmm(mon[0][xb]), risk, risk / atr, gross / risk, net / risk) + tr_f)
     cols = ["date", "sym", "tf", "entry_type", "rr", "entry_time", "entry", "stop", "target", "exit",
-            "reason", "exit_time", "risk", "risk_atr", "R_gross", "R"]
+            "reason", "exit_time", "risk", "risk_atr", "R_gross", "R", "below_ma", "ma_down", "down_week"]
     t = pd.DataFrame(trades, columns=cols)
+    t["none"] = True
+    t["both_ma"] = t["below_ma"] & t["ma_down"]
     return t, pd.DataFrame(pattern), pd.DataFrame(control)
 
 
@@ -578,7 +589,48 @@ def report(t, pat, ctl, first, last):
     w("")
 
     # ---------- 6. exits
-    w("=== 6. HOW TRADES END (whole period, share of trades) ===")
+    # ---------- 6. downtrend filters
+    w("=== 6. DOWNTREND FILTER: only short when the stock is in a small downtrend at Friday's close ===")
+    w("below_ma = close < 20-day MA | ma_down = 20-day MA lower than 5 days ago | down_week = close < close")
+    w("5 days ago | both_ma = below_ma AND ma_down. Cells: net R/trade (t-stat), trades in brackets.")
+    w("The ctrl rows (short every Monday) show how much is just 'shorting weak stocks'.")
+    fstats = {}
+    for tf in TIMEFRAMES:
+        w("")
+        w(f"--- {tf}-minute bars ---")
+        w(f"{'variant':<16}{'filter':>11}{'IS R/trd':>10}{'t':>6}{'IS n':>7}{'OOS R/trd':>11}{'t':>6}{'OOS n':>7}{'OOS PF':>8}")
+        for ent in ENTRIES:
+            for rr in RRS:
+                v = t[(t.tf == tf) & (t.entry_type == ent) & (t.rr == rr)]
+                for fl in FILTERS:
+                    x = v[v[fl]]
+                    a, b = r_stats(x[x["date"] < OOS_START]), r_stats(x[x["date"] >= OOS_START])
+                    fstats[(tf, ent, rr, fl)] = (a, b)
+                    w(f"{vname(tf, ent, rr) if fl == 'none' else '':<16}{fl:>11}{_f(a['avg'], 'r'):>10}{_f(a['tstat'], 't'):>6}"
+                      f"{a['n']:>7}{_f(b['avg'], 'r'):>11}{_f(b['tstat'], 't'):>6}{b['n']:>7}{_f(b['pf'], 'pf'):>8}")
+    w("")
+    w("Average over all A/B/C variants (net R/trade), per filter:")
+    for fl in FILTERS:
+        ks = [k for k in fstats if k[3] == fl and k[1] != "ctrl"]
+        ia = np.nanmean([fstats[k][0]["avg"] for k in ks]); ob = np.nanmean([fstats[k][1]["avg"] for k in ks])
+        ca = np.nanmean([fstats[k][0]["avg"] for k in fstats if k[3] == fl and k[1] == "ctrl"])
+        cb = np.nanmean([fstats[k][1]["avg"] for k in fstats if k[3] == fl and k[1] == "ctrl"])
+        w(f"  {fl:>10}: strategies IS {_f(ia, 'r')}  OOS {_f(ob, 'r')}   |   control IS {_f(ca, 'r')}  OOS {_f(cb, 'r')}")
+    cand = {k: v for k, v in fstats.items() if k[1] != "ctrl" and k[3] != "none" and v[0]["n"] >= MIN_TRADES_TO_PICK}
+    if cand:
+        best = max(cand, key=lambda k: np.nan_to_num(cand[k][0]["avg"], nan=-9))
+        a, b = cand[best]
+        w(f"Best filtered variant in-sample: {vname(*best[:3])} + {best[3]}: IS {_f(a['avg'], 'r')} (t {_f(a['tstat'], 't')}, "
+          f"{a['n']}) -> OOS {_f(b['avg'], 'r')} (t {_f(b['tstat'], 't')}, {b['n']}). {len(cand)} combinations compared.")
+        best_money = best
+        v = t[(t.tf == best[0]) & (t.entry_type == best[1]) & (t.rr == best[2]) & t[best[3]]]
+        pa, _ = portfolio(v, START, split_end)
+        pb, _ = portfolio(v, OOS_START, last)
+        w(f"  account (1% risk, one trade per Monday): IS CAGR {_f(pa['cagr'], 'pct1')}, maxDD {_f(-pa['dd'], 'pct1')} | "
+          f"OOS {_f(pb['ret'], 'pct1')}, maxDD {_f(-pb['dd'], 'pct1')}")
+    w("")
+
+    w("=== 7. HOW TRADES END (whole period, share of trades) ===")
     w(f"{'variant':<16}{'target':>8}{'stop':>8}{'16:00':>8}{'med risk/ATR':>14}")
     for tf in TIMEFRAMES:
         for ent in ENTRIES:
