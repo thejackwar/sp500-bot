@@ -12,6 +12,12 @@ Regular hours only (9:30-16:00 ET), 5-minute bars from the Friday->Monday backte
               else out at 16:00; same costs
               as friday_monday_backtest.py. Mondays opening at/below Friday's low: no trade.
 
+  trendline   section 5 splits everything by the DAILY down trendline at Friday's close, drawn
+              with trendlines.py's own rules (red chain from the highest high of the last 250
+              daily bars, swing = 5 bars, newest line extended until a daily close crosses it),
+              using only bars up to Friday. "In a down trendline" = that newest red line slopes
+              down and no close has crossed it yet.
+
     SYMBOLS="SPY" python friday_low_test.py          (empty SYMBOLS = the S&P 100)
 """
 import os
@@ -20,6 +26,7 @@ import numpy as np
 import pandas as pd
 
 import friday_monday_backtest as fm
+import trendlines as tl
 
 OUT = os.environ.get("OUT_DIR", "backtest-results")
 
@@ -42,6 +49,39 @@ def load():
         print("Downloading", " ".join(missing), flush=True)
         data.update(fm.fetch(missing, pd.Timestamp(fm.START, tz=fm.ET) - pd.Timedelta(days=40), end, fm._headers()))
     return data
+
+
+def load_daily(syms, intraday):
+    """Daily bars from 2019 (so the 250-day trendline window is full by 2021)."""
+    if not fm.FAKE:
+        import scanner
+        start = pd.Timestamp(fm.START, tz=fm.ET) - pd.Timedelta(days=420)
+        end = pd.Timestamp.now(tz=fm.ET) - pd.Timedelta(minutes=20)
+        raw = scanner.alpaca_bars([s.replace("-", ".") for s in syms], "1Day", start, end, chunk=50, workers=4)
+        out = {}
+        for s, d in raw.items():
+            d = d.copy()
+            if d.index.tz is not None:
+                d.index = d.index.tz_convert(fm.ET).tz_localize(None)
+            d.index = pd.DatetimeIndex(d.index).normalize().date
+            out[s.replace(".", "-")] = d[~d.index.duplicated(keep="last")][["High", "Low", "Close"]]
+        if out:
+            return out
+    out = {}                                       # fake data / fallback: build days from 5-min bars
+    for s, df in intraday.items():
+        _, daily = fm.split_days(df)
+        out[s] = daily[["High", "Low", "Close"]]
+    return out
+
+
+def down_trendline(daily, day, lookback=250):
+    """True if, at `day`'s close, the newest daily red trendline slopes down and is unbroken."""
+    d = daily[daily.index <= day].iloc[-(lookback + tl.SWING + 1):]
+    if len(d) < 3 * tl.SWING:
+        return np.nan
+    h, l = d["High"].values, d["Low"].values
+    dn = tl.build_chain(d, tl.find_pivots(h, l, tl.SWING, "high"), False, lookback, break_by="close")
+    return bool(dn["level"] is not None and dn["slope"] is not None and dn["slope"] < 0)
 
 
 def first_hit(mon, level):
@@ -78,6 +118,7 @@ def trade(mon, fri_low, fri_high, atr):
 
 def main():
     data = load()
+    dailies = load_daily(sorted(data), data)
     rows = []
     for sym, df in data.items():
         if not len(df):
@@ -100,6 +141,7 @@ def main():
                      hit_time=fm._hhmm(mon[0][i]) if i is not None else "",
                      dist_atr=(mon[1][0] - low1) / atr)
             if monday:
+                r["downtl"] = down_trendline(dailies[sym], d1) if sym in dailies else np.nan
                 tr = trade(mon, low1, high1, atr)
                 if tr:
                     r.update(tr)
@@ -166,6 +208,35 @@ def main():
     if len(tr):
         w(f"Median target distance {tr['target_atr'].median():.2f} ATR vs stop distance {tr['risk_atr'].median():.2f} ATR "
           "(target / stop > 1 means a hit earns more than 1R).")
+
+    w("")
+    w("=== 5. ONLY WHEN THE STOCK IS UNDER A DAILY DOWN TRENDLINE (at Friday's close) ===")
+    mon = mon.assign(dtl=mon["downtl"] == True)  # noqa: E712
+    w(f"Share of Mondays under a down trendline: {mon['dtl'].mean():.0%} (rule Mondays: {mon[mon.cond]['dtl'].mean():.0%})")
+    w(f"{'hit rate':<44}{'n':>8}{'hit':>7}{'IS':>6}{'OOS':>6}{'not opening below':>19}")
+    for label, x in [("Rule + under down trendline", mon[mon.cond & mon.dtl]),
+                     ("Rule, NOT under a down trendline", mon[mon.cond & ~mon.dtl]),
+                     ("No rule (Fri high >= Thu) + down trendline", mon[~mon.cond & mon.dtl])]:
+        nb = x[~x["gap_below"]]
+        w(f"{label:<44}{len(x):>8,}{_p(x['hit'].mean()):>7}{_p(x[~x.oos]['hit'].mean()):>6}"
+          f"{_p(x[x.oos]['hit'].mean()):>6}{_p(nb['hit'].mean()):>19}")
+    w("Same distance buckets as section 2 (rule + trendline vs rule without):")
+    w(f"{'distance':<14}{'with n':>8}{'with hit':>10}{'without n':>11}{'without hit':>13}")
+    for b in labels:
+        a = mon[(mon.bucket == b) & mon.cond & mon.dtl]
+        o = mon[(mon.bucket == b) & mon.cond & ~mon.dtl]
+        w(f"{b:<14}{len(a):>8}{_p(a['hit'].mean()):>10}{len(o):>11}{_p(o['hit'].mean()):>13}")
+    tr = mon[mon["R"].notna()] if "R" in mon else mon.iloc[:0]
+    w(f"{'trade (same as section 4)':<44}{'trades':>8}{'win':>6}{'gross R':>9}{'net R':>8}{'t':>6}")
+    for label, x in [("Rule + down trendline, in-sample", tr[tr.cond & tr.dtl & ~tr.oos]),
+                     ("Rule + down trendline, out-of-sample", tr[tr.cond & tr.dtl & tr.oos]),
+                     ("Rule, no trendline, in-sample", tr[tr.cond & ~tr.dtl & ~tr.oos]),
+                     ("Rule, no trendline, out-of-sample", tr[tr.cond & ~tr.dtl & tr.oos])]:
+        if len(x) < 3:
+            continue
+        wk = x.groupby("date")["R"].mean()
+        ts = wk.mean() / (wk.std(ddof=1) / np.sqrt(len(wk))) if len(wk) > 2 and wk.std() > 0 else np.nan
+        w(f"{label:<44}{len(x):>8,}{(x['R'] > 0).mean():>6.0%}{x['R_gross'].mean():>+9.3f}{x['R'].mean():>+8.3f}{ts:>+6.1f}")
 
     os.makedirs(OUT, exist_ok=True)
     text = "\n".join(out)
