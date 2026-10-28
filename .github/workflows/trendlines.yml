@@ -25,9 +25,9 @@ on:
         options: ["close", "wick"]
         default: "close"
       higher_tf_lines:
-        description: "Also draw the higher timeframes' lines on each chart"
+        description: "Also draw the higher timeframes' lines (dashed) on each chart"
         type: boolean
-        default: true
+        default: false
       telegram:
         description: "Send the charts to Telegram"
         type: boolean

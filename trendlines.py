@@ -11,7 +11,7 @@ Rules (same on every timeframe, each computed on that timeframe's own candles):
   * Only the newest line of each chain is extended to the right, until price closes beyond it.
   * The most extreme candle of the last SWING bars counts as a swing as soon as it beats the
     SWING candles before it ("provisional"), so the newest low/high attaches a line right away.
-  * Each chart also shows the lines of every HIGHER timeframe (dashed, thinner).
+  * Optional (SHOW_HTF=1): each chart also shows every HIGHER timeframe's lines, dashed.
 
 Run on GitHub: Actions -> Trendlines -> Run workflow -> type the ticker(s).
 Run locally:   ALPACA_KEY_ID=... ALPACA_SECRET_KEY=... python trendlines.py AAPL
@@ -33,7 +33,7 @@ ET = ZoneInfo("America/New_York")
 OUT_DIR = os.environ.get("OUT_DIR", "trendlines-out")
 SWING = int(os.environ.get("SWING", "5"))                  # swing strength: bars on each side
 BREAK_BY = os.environ.get("BREAK_BY", "close")             # "close" or "wick"
-SHOW_HTF = os.environ.get("SHOW_HTF", "1") == "1"          # draw higher-timeframe lines too
+SHOW_HTF = os.environ.get("SHOW_HTF", "0") == "1"          # draw higher-timeframe lines too (dashed)
 
 # timeframe -> (label, lookback bars searched for the absolute high/low, line width)
 TFS = {
