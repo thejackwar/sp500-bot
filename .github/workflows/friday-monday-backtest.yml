@@ -7,6 +7,10 @@ on:
         description: "First Monday to test (out-of-sample starts 2025-01-01)"
         type: string
         default: "2021-01-01"
+      symbols:
+        description: "Symbols to test, space-separated (empty = the S&P 100)"
+        type: string
+        default: ""
       name:
         description: "Results folder name (reports/backtest/friday-monday-<name>)"
         type: string
@@ -42,6 +46,7 @@ jobs:
         env:
           PYTHONUNBUFFERED: "1"
           START: ${{ inputs.start }}
+          SYMBOLS: ${{ inputs.symbols }}
           ALPACA_KEY_ID: ${{ secrets.ALPACA_KEY_ID }}
           ALPACA_SECRET_KEY: ${{ secrets.ALPACA_SECRET_KEY }}
 
