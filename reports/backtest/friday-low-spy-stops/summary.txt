@@ -1,0 +1,71 @@
+RULE: Friday high < Thursday high  ->  Monday visits Friday's low   SPY
+Mondays 2021-01-04 to 2026-10-26; regular hours only; out-of-sample from 2025-01-01.
+
+=== 1. HOW OFTEN DOES THE NEXT DAY TRADE AT OR BELOW THE PREVIOUS DAY'S LOW? ===
+                                                  days    hit  IS hit  OOS hit  opens below  hit, not opening below
+Monday, Fri high < Thu high  (YOUR RULE)           133    49%     50%      47%          24%                     33%
+Monday, Fri high >= Thu high                       171    30%     29%      35%          11%                     22%
+Monday, all                                        304    38%     38%      40%          16%                     26%
+Other days, prev high < the high before it         499    56%     56%      54%          20%                     44%
+Other days, prev high >= the high before it        658    39%     39%      38%          12%                     30%
+
+A rule is only useful if YOUR RULE's hit rate is clearly above the other rows.
+
+=== 2. SAME, BY HOW FAR MONDAY OPENS ABOVE FRIDAY'S LOW (in ATRs) ===
+(a low that is closer is hit more often anyway; this compares like with like)
+distance        rule n  rule hit  other n  other hit
+opens below         32      100%       18       100%
+0-0.25              11       91%       21        76%
+0.25-0.5            29       52%       31        26%
+0.5-0.75            20       10%       41        12%
+0.75-1              16       19%       25        16%
+1-1.5               19       11%       27         4%
+>1.5                 6       17%        8         0%
+
+=== 3. YEAR BY YEAR (hit rate, Mondays) ===
+year      rule n  rule hit  other hit
+2021          18       44%        35%
+2022          26       69%        27%
+2023          23       43%        21%
+2024          23       39%        30%
+2025          23       43%        31%
+2026          20       50%        39%
+
+=== 4. AS A TRADE: short Monday open, target Friday's low, stop Friday's high, out at 16:00 ===
+                                    trades   win  gross R   net R    PF     t  target  stop  16:00
+Rule, in-sample                         66   39%   -0.026  -0.174  0.72  -0.9     26%   48%    26%
+Rule, out-of-sample                     35   37%   -0.087  -0.233  0.67  -0.8     31%   57%    11%
+Fri high >= Thu high, in-sample        109   35%   -0.045  -0.197  0.70  -1.3     20%   49%    31%
+Fri high >= Thu high, out-of-sample      44   34%   -0.122  -0.276  0.56  -1.5     20%   48%    32%
+Median target distance 0.62 ATR vs stop distance 0.25 ATR (target / stop > 1 means a hit earns more than 1R).
+
+=== 6. STOP-LOSS CHOICES, ONLY TRADES WITH TARGET >= 2x RISK (rule Mondays only) ===
+short Monday open, target = Friday's low, out at 16:00 if neither is hit; same costs as before
+fri_high / thu_high = $0.02 above that day's high | atr_x = x ATR above the entry |
+forced = stop placed at exactly 1/2 of the distance to the target (every trade is 2:1)
+stop        filter period  trades   win  target  stop  16:00  gross R   net R    PF     t  avg RR
+fri_high       all     IS      44   41%     36%   48%    16%   -0.039  -0.181  0.71  -0.7    1.35
+fri_high       all    OOS      25   44%     40%   52%     8%   -0.190  -0.408  0.43  -1.7    1.08
+fri_high     >=2:1     IS      14   21%      7%   79%    14%   -0.071  -0.385  0.64  -0.5    3.97
+fri_high     >=2:1    OOS      11   18%      9%   82%     9%   -0.426  -0.846  0.31  -1.8    6.20
+
+thu_high       all     IS      62   47%     32%   11%    56%   +0.058  -0.009  0.97  -0.1    0.85
+thu_high       all    OOS      32   50%     38%   31%    31%   +0.264  +0.097  1.18  +0.3    0.75
+thu_high     >=2:1     IS       9   56%      0%   33%    67%   +0.361  +0.146  1.30  +0.3    2.70
+thu_high     >=2:1    OOS      10   30%     10%   70%    20%   +0.862  +0.412  1.39  +0.4    7.22
+
+atr_0.25       all     IS      66   39%     26%   52%    23%   +0.027  -0.105  0.83  -0.6    2.34
+atr_0.25       all    OOS      35   31%     26%   63%    11%   +0.026  -0.115  0.85  -0.4    3.26
+atr_0.25     >=2:1     IS      39   36%     10%   54%    36%   +0.068  -0.075  0.89  -0.3    3.23
+atr_0.25     >=2:1    OOS      22   23%      9%   73%    18%   +0.052  -0.089  0.90  -0.2    4.52
+
+atr_0.5        all     IS      66   47%     30%   29%    41%   -0.043  -0.104  0.75  -1.0    1.17
+atr_0.5        all    OOS      35   40%     29%   43%    29%   -0.109  -0.176  0.68  -0.9    1.63
+atr_0.5      >=2:1     IS      12   50%     17%   25%    58%   +0.203  +0.140  1.38  +0.4    2.27
+atr_0.5      >=2:1    OOS      13   23%      8%   54%    38%   -0.223  -0.291  0.59  -0.7    2.53
+
+forced        =2:1     IS      63   33%     14%   56%    30%   -0.187  -0.372  0.51  -2.4    2.00
+forced        =2:1    OOS      34   29%     15%   53%    32%   -0.154  -0.310  0.57  -1.5    2.00
+
+With 2:1 trades you break even before costs at a 33% win rate (if every trade
+ends at the target or the stop). 16:00 exits sit in between.
