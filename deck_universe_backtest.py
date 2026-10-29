@@ -14,6 +14,7 @@ Daily candles only (500 stocks of 15-minute candles would not fit in the time li
 on daily lows. Each universe from 10 start dates a week apart; the report shows the middle run.
 
     UNIVERSES="sp100 sp500" YEARS=8 python deck_universe_backtest.py      (needs ALPACA keys)
+Take-profit variants (29 Oct 2026): add part2r / part3r / tight5r / trail30 / trail50 / chand3 / climax25 to FILTERS.
 Leverage test: LEVERAGES="1 1.5 2 3" (every money limit x L, borrowed money pays MARGIN_RATE, margin call
 below 25% equity). Results: reports/backtest/universe-deck-v6[-lev-...]-<universes>-<years>y/
 """
@@ -89,7 +90,16 @@ SIM_RULES = {"reg50": "leverage only while SPY is above its 50-day MA (else 1x, 
              "be2r": "stop moved to the entry once the price has been 2R above it",
              "risk05": "sized by risk: 0.25% x leverage (0.5% at 2x) per trade, cap 15% x leverage per stock",
              "risk075": "sized by risk: 0.375% x leverage (0.75% at 2x) per trade, cap 15% x leverage per stock",
-             "betasize": "position size x beta (beta clipped to 0.5-1.5): more money in high-beta stocks"}
+             "betasize": "position size x beta (beta clipped to 0.5-1.5): more money in high-beta stocks",
+             # take-profit variants (29 Oct 2026); the deck stop stays, the 20-day-low exit stays unless replaced
+             "part2r": "sell half at +2R, the rest on the 20-day-low exit",
+             "part3r": "sell half at +3R, the rest on the 20-day-low exit",
+             "tight5r": "after +5R, exit on a close below the 10-day low instead of the 20-day low",
+             "trail30": "exit on a close below the 30-day low instead of the 20-day low",
+             "trail50": "exit on a close below the 50-day low instead of the 20-day low",
+             "chand3": "exit on a close below the highest high since entry minus 3 ATR (instead of the 20-day low)",
+             "climax25": "also sell at the close when it is more than 25% above its 50-day MA"}
+EXIT_RULES = {"part2r", "part3r", "tight5r", "trail30", "trail50", "chand3", "climax25"}
 # note (22 Oct 2026): with 1% risk and a 10%-per-stock cap, ~98% of trades are sized by the cap, not the risk
 SPY_TREND = None                                        # set in main: SPY close, 50/200-day MA, 6-month return
 
@@ -201,9 +211,21 @@ def _signals(args):
     return sym, out
 
 
-def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None, rules=(), spy_up=None):
-    """rules: SIM_RULES names; spy_up: {"reg50"/"reg200": bool array per day, SPY above that MA at the close}."""
+def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None, rules=(), spy_up=None, ex=None):
+    """rules: SIM_RULES names; spy_up: {"reg50"/"reg200": bool array per day, SPY above that MA at the close}.
+    ex: extra arrays for the exit variants (low10/low30/low50, atr, m50), same shape as C."""
     rules = set(rules)
+    ex = ex or {}
+    part_r = 2 if "part2r" in rules else 3 if "part3r" in rules else None
+    trail_arr = ex["low30"] if "trail30" in rules else ex["low50"] if "trail50" in rules else low20
+
+    def close_row(col, p, t, x, why, qty=None):
+        """A whole trade (incl. any half already sold): pnl and R over the original size."""
+        q = p["qty"] if qty is None else qty
+        pnl = q * (x - p["fill"]) + p.get("banked", 0.0)
+        return {"symbol": syms[col], "pattern": p["name"], "entry_date": days[p["t"]], "exit_date": days[t],
+                "entry": p["fill"], "stop": p["stop"], "exit": x, "result": why, "pnl": pnl,
+                "R": pnl / (p["qty0"] * p["risk"]), "days": (days[t] - days[p["t"]]).days}
     pos_pct = next((int(r[3:]) / 200 for r in rules if r.startswith("pos")), MAX_POS_PCT)   # posN = N% at 2x
     risk_pct = RISK
     if "risk05" in rules or "risk075" in rules:          # true risk sizing: the per-stock cap rarely binds
@@ -226,21 +248,39 @@ def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None,
             if not np.isfinite(o):
                 continue
             x, why = None, None
+            h = H[t, col]
+            if np.isfinite(h):
+                p["hi"] = max(p.get("hi", p["fill"]), h)
+            # partial take profit: half sold at +NR (at the open if it gaps above), before the stop/exit checks
+            if part_r and not p.get("half") and p["qty"] >= 2 and np.isfinite(h):
+                lvl = p["fill"] + part_r * p["risk"]
+                if h >= lvl and (t > p["t"] or o < lvl):
+                    xp = (o if (t > p["t"] and o >= lvl) else lvl) * (1 - SLIP)
+                    q = np.floor(p["qty"] / 2)
+                    cash += q * xp
+                    p["banked"] = p.get("banked", 0.0) + q * (xp - p["fill"])
+                    p["qty"] -= q
+                    p["half"] = True
+            trail_lvl = trail_arr[t, col]
+            if "tight5r" in rules and p.get("hi", 0) >= p["fill"] + 5 * p["risk"]:
+                trail_lvl = ex["low10"][t, col]
+            if "chand3" in rules:
+                a_ = ex["atr"][t, col]
+                trail_lvl = p["hi"] - 3 * a_ if np.isfinite(a_) else np.nan
             if o <= p["stop"] and t > p["t"]:
                 x, why = o * (1 - SLIP), "stop (gap)"
             elif l <= p["stop"]:
                 x, why = p["stop"] * (1 - SLIP), ("stop" if p["stop"] <= p.get("stop0", p["stop"]) else
                                                    "break-even stop" if p["stop"] >= p["fill"] else "raised stop")
-            elif np.isfinite(low20[t, col]) and c < low20[t, col]:
+            elif np.isfinite(trail_lvl) and c < trail_lvl:
                 x, why = c * (1 - SLIP), "trend exit"
+            elif "climax25" in rules and np.isfinite(ex["m50"][t, col]) and c > 1.25 * ex["m50"][t, col]:
+                x, why = c * (1 - SLIP), "climax exit"
             elif "time10" in rules and t - p["t"] >= 10 and c < p["fill"] + 0.5 * p["risk"]:
                 x, why = c * (1 - SLIP), "time stop"
             if x is not None:
                 cash += p["qty"] * x
-                trades.append({"symbol": syms[col], "pattern": p["name"], "entry_date": days[p["t"]],
-                               "exit_date": days[t], "entry": p["fill"], "stop": p["stop"], "exit": x, "result": why,
-                               "pnl": p["qty"] * (x - p["fill"]), "R": (x - p["fill"]) / p["risk"],
-                               "days": (days[t] - days[p["t"]]).days})
+                trades.append(close_row(col, p, t, x, why + (" (half sold)" if p.get("half") else "")))
                 del pos[col]
             elif np.isfinite(H[t, col]) and ("betrail" in rules or "be1r" in rules or "be2r" in rules):
                 p.setdefault("stop0", p["stop"])            # raise the stop for tomorrow, never above the entry
@@ -258,10 +298,7 @@ def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None,
                 p = pos.pop(col)
                 x = (C[t, col] if np.isfinite(C[t, col]) else p["fill"]) * (1 - SLIP)
                 cash += p["qty"] * x
-                trades.append({"symbol": syms[col], "pattern": p["name"], "entry_date": days[p["t"]],
-                               "exit_date": days[t], "entry": p["fill"], "stop": p["stop"], "exit": x,
-                               "result": "margin call", "pnl": p["qty"] * (x - p["fill"]),
-                               "R": (x - p["fill"]) / p["risk"], "days": (days[t] - days[p["t"]]).days})
+                trades.append(close_row(col, p, t, x, "margin call"))
             value = 0.0
         curve[t] = cash + value
         if curve[t] <= 0:                                   # account wiped out
@@ -352,14 +389,11 @@ def simulate(days, O, H, L, C, low20, sigs, syms, d0, seed, lev=1.0, entry=None,
                 continue
             cash -= qty * fill
             gross += qty * fill
-            pos[col] = {"t": t + 1, "fill": fill, "stop": stop, "qty": qty, "risk": risk, "name": name}
+            pos[col] = {"t": t + 1, "fill": fill, "stop": stop, "qty": qty, "qty0": qty, "risk": risk, "name": name}
             placed += 1
     for col, p in pos.items():                                 # still open at the end
         x = C[len(days) - 1, col]
-        trades.append({"symbol": syms[col], "pattern": p["name"], "entry_date": days[p["t"]], "exit_date": days[-1],
-                       "entry": p["fill"], "stop": p["stop"], "exit": x, "result": "still open",
-                       "pnl": p["qty"] * (x - p["fill"]), "R": (x - p["fill"]) / p["risk"],
-                       "days": (days[-1] - days[p["t"]]).days})
+        trades.append(close_row(col, p, len(days) - 1, x, "still open"))
     eq = pd.Series(curve, index=days).iloc[d0:].ffill()
     cols = ["symbol", "pattern", "entry_date", "exit_date", "entry", "stop", "exit", "result", "pnl", "R", "days"]
     return pd.DataFrame(trades, columns=cols), eq, info
@@ -444,6 +478,14 @@ def main():
         O, H, L, C = (np.column_stack([daily[s][k].reindex(days).values for s in syms]) for k in
                       ("Open", "High", "Low", "Close"))
         low20 = np.column_stack([daily[s]["Low"].rolling(TRAIL).min().shift(1).reindex(days).values for s in syms])
+        ex = {}
+        if any(x in f.split("+") for f in FILTERS for x in EXIT_RULES):   # arrays for the take-profit variants
+            def stack(fn):
+                return np.column_stack([fn(daily[s]).reindex(days).values for s in syms])
+            for n_ in (10, 30, 50):
+                ex[f"low{n_}"] = stack(lambda d, n_=n_: d["Low"].rolling(n_).min().shift(1))
+            ex["atr"] = stack(lambda d: dp.add_atr(d.copy())["ATR"])
+            ex["m50"] = stack(lambda d: d["Close"].rolling(50).mean())
         pos_of = {d: k for k, d in enumerate(days)}
         need_beta = any(x in f.split("+") for f in FILTERS for x in ("beta09", "beta1", "noidio", "betasize"))
         trend = {}                                      # each stock's moving averages (closes up to that day)
@@ -485,7 +527,8 @@ def main():
                     d0 = first + r * STEP
                     ent = next((f for f in flt.split("+") if f in ENTRY_RULES), None)
                     tr, eq, info = simulate(days, O, H, L, C, low20, sigs, syms, d0, seed=r, lev=lev, entry=ent,
-                                            rules=[f for f in flt.split("+") if f in SIM_RULES], spy_up=spy_up)
+                                            rules=[f for f in flt.split("+") if f in SIM_RULES], spy_up=spy_up,
+                                            ex=ex)
                     st = summarize(eq, tr)
                     st.update(info)
                     b = spy_c.iloc[d0:]
