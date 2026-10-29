@@ -1,0 +1,47 @@
+📊 Deck pattern trader version 6 (up breakouts, deck stop, sell on a close below the 20-day low) on whole universes, daily candles
+04 Jan 2021 → 29 Oct 2026, $100,000, 1% risk, max 10%/stock, 25 positions, 8 new/day, leverage as named (limits x L, borrowed money 6.5%/yr, margin call below 25%), 0.02% slippage. 10 start dates a week apart: middle run, range in brackets.
+
+SP100 2x leverage · close above its 50-day MA + without the losing patterns (Cup and handle, Double bottom, Hanging man, Pipe bottom) + skip if it opens more than 2% above the breakout close + leverage only while SPY is above its 200-day MA (else 1x, trimmed at the close) (100 stocks, 4670 up breakouts)
++34.9%/yr (+25.5% to +41.0%), beat SPY in 10/10 runs · max drop -31.4% (worst -39.5%) · final $546,968
+~1193 trades, win 25%, avg +0.41R, profit factor 1.77, hold 33 days, interest paid $64,924, margin calls in all runs: 0
+by year: 2021: +39%  2022: -17%  2023: +30%  2024: +36%  2025: +54%  2026: +73%
+
+SP100 2x leverage · close above its 50-day MA + without the losing patterns (Cup and handle, Double bottom, Hanging man, Pipe bottom) + skip if it opens more than 2% above the breakout close + leverage only while SPY is above its 200-day MA (else 1x, trimmed at the close) + sell half at +2R, the rest on the 20-day-low exit (100 stocks, 4670 up breakouts)
++25.9%/yr (+16.7% to +31.7%), beat SPY in 10/10 runs · max drop -27.2% (worst -30.6%) · final $372,019
+~1236 trades, win 39%, avg +0.37R, profit factor 1.44, hold 34 days, interest paid $55,199, margin calls in all runs: 0
+by year: 2021: +59%  2022: -20%  2023: +27%  2024: +34%  2025: +38%  2026: +25%
+
+SP100 2x leverage · close above its 50-day MA + without the losing patterns (Cup and handle, Double bottom, Hanging man, Pipe bottom) + skip if it opens more than 2% above the breakout close + leverage only while SPY is above its 200-day MA (else 1x, trimmed at the close) + sell half at +3R, the rest on the 20-day-low exit (100 stocks, 4670 up breakouts)
++25.4%/yr (+9.3% to +30.9%), beat SPY in 9/10 runs · max drop -29.7% (worst -33.5%) · final $360,329
+~1244 trades, win 30%, avg +0.26R, profit factor 1.45, hold 32 days, interest paid $49,423, margin calls in all runs: 0
+by year: 2021: +37%  2022: -20%  2023: +33%  2024: +30%  2025: +31%  2026: +46%
+
+SP100 2x leverage · close above its 50-day MA + without the losing patterns (Cup and handle, Double bottom, Hanging man, Pipe bottom) + skip if it opens more than 2% above the breakout close + leverage only while SPY is above its 200-day MA (else 1x, trimmed at the close) + after +5R, exit on a close below the 10-day low instead of the 20-day low (100 stocks, 4670 up breakouts)
++33.7%/yr (+24.8% to +38.8%), beat SPY in 10/10 runs · max drop -29.3% (worst -36.2%) · final $520,297
+~1354 trades, win 26%, avg +0.29R, profit factor 1.59, hold 28 days, interest paid $69,809, margin calls in all runs: 0
+by year: 2021: +70%  2022: -20%  2023: +43%  2024: +27%  2025: +37%  2026: +54%
+
+SP100 2x leverage · close above its 50-day MA + without the losing patterns (Cup and handle, Double bottom, Hanging man, Pipe bottom) + skip if it opens more than 2% above the breakout close + leverage only while SPY is above its 200-day MA (else 1x, trimmed at the close) + exit on a close below the 30-day low instead of the 20-day low (100 stocks, 4670 up breakouts)
++24.4%/yr (+16.8% to +28.7%), beat SPY in 10/10 runs · max drop -38.5% (worst -42.3%) · final $343,163
+~983 trades, win 22%, avg +0.26R, profit factor 1.45, hold 41 days, interest paid $48,835, margin calls in all runs: 0
+by year: 2021: +31%  2022: -30%  2023: +52%  2024: +9%  2025: +63%  2026: +39%
+
+SP100 2x leverage · close above its 50-day MA + without the losing patterns (Cup and handle, Double bottom, Hanging man, Pipe bottom) + skip if it opens more than 2% above the breakout close + leverage only while SPY is above its 200-day MA (else 1x, trimmed at the close) + exit on a close below the 50-day low instead of the 20-day low (100 stocks, 4670 up breakouts)
++24.8%/yr (+12.3% to +31.0%), beat SPY in 9/10 runs · max drop -28.8% (worst -43.3%) · final $359,794
+~748 trades, win 20%, avg +0.14R, profit factor 1.17, hold 57 days, interest paid $50,150, margin calls in all runs: 0
+by year: 2021: +7%  2022: -14%  2023: +23%  2024: +61%  2025: +45%  2026: +36%
+
+SP100 2x leverage · close above its 50-day MA + without the losing patterns (Cup and handle, Double bottom, Hanging man, Pipe bottom) + skip if it opens more than 2% above the breakout close + leverage only while SPY is above its 200-day MA (else 1x, trimmed at the close) + exit on a close below the highest high since entry minus 3 ATR (instead of the 20-day low) (100 stocks, 4670 up breakouts)
++25.4%/yr (+19.0% to +31.4%), beat SPY in 10/10 runs · max drop -29.2% (worst -30.0%) · final $369,776
+~1592 trades, win 27%, avg +0.20R, profit factor 1.41, hold 23 days, interest paid $57,010, margin calls in all runs: 0
+by year: 2021: +43%  2022: -18%  2023: +31%  2024: +43%  2025: +32%  2026: +27%
+
+SP100 2x leverage · close above its 50-day MA + without the losing patterns (Cup and handle, Double bottom, Hanging man, Pipe bottom) + skip if it opens more than 2% above the breakout close + leverage only while SPY is above its 200-day MA (else 1x, trimmed at the close) + also sell at the close when it is more than 25% above its 50-day MA (100 stocks, 4670 up breakouts)
++20.5%/yr (+16.4% to +31.6%), beat SPY in 10/10 runs · max drop -29.4% (worst -34.0%) · final $287,748
+~1342 trades, win 26%, avg +0.25R, profit factor 1.32, hold 28 days, interest paid $54,844, margin calls in all runs: 0
+by year: 2021: +62%  2022: -18%  2023: +20%  2024: +40%  2025: +15%  2026: +12%
+
+Buy & hold SPY: +15.0%/yr, max drop -24.5%, final $225,277
+by year: 2021: +30%  2022: -18%  2023: +26%  2024: +25%  2025: +18%  2026: +14%
+
+Today's index members only (stocks that left the index are missing, which flatters results - more so for the S&P 500); daily candles: stops judged on daily lows, 20-day-low exit at the close. Past results don't guarantee future ones.
