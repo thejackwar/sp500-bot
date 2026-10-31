@@ -1,6 +1,6 @@
 # Paper trading report
 
-Updated 2026-10-29 21:01 New York time by `paper_report.py` (rebuilt from Alpaca every weekday after the close).
+Updated 2026-10-30 20:48 New York time by `paper_report.py` (rebuilt from Alpaca every weekday after the close).
 Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positions), `<account>_equity.csv` (account value per day vs SPY).
 
 ## Breakout bot (stocks + crypto)
@@ -8,7 +8,7 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 | | |
 |---|---|
 | Account value | $100,836.27 (+0.0% today) |
-| Since 12 Oct 2026 | +0.8% (SPY -1.1%) |
+| Since 12 Oct 2026 | +0.8% (SPY -2.9%) |
 | Worst drop from a high | -2.5% |
 | Closed trades | 29, win 66%, avg +0.21R, profit factor 1.23, $+844.92 |
 | Open positions | 0 ($+0.00 not yet realised, 0% invested) |
@@ -40,11 +40,23 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 
 | | |
 |---|---|
-| Account value | $101,717.00 (+3.1% today) |
-| Since 15 Oct 2026 | +1.7% (SPY -0.3%) |
+| Account value | $100,439.95 (-1.3% today) |
+| Since 15 Oct 2026 | +0.4% (SPY -2.1%) |
 | Worst drop from a high | -2.9% |
-| Closed trades | 25, win 44%, avg -0.32R, profit factor 1.44, $+1,719.70 |
-| Open positions | 0 ($+0.00 not yet realised, 0% invested) |
+| Closed trades | 26, win 42%, avg -0.35R, profit factor 1.31, $+1,332.58 |
+| Open positions | 7 ($-886.10 not yet realised, 140% invested) |
+
+**Open positions**
+
+| Symbol | Opened by | Since | Entry | Now | Stop | P/L | R |
+|---|---|---|---|---|---|---|---|
+| AMT | deck Gap up up | 2026-10-30 | 188.71 | 187.68 | 175.78 | $-110.21 (-0.6%) | -0.08 |
+| GM | deck Rectangle up | 2026-10-30 | 85.39 | 87.34 | 81.83 | $+464.47 (+2.3%) | +0.55 |
+| IBM | deck Bull pennant up | 2026-10-30 | 258.42 | 257.47 | 246.35 | $-74.10 (-0.4%) | -0.08 |
+| JPM | deck Symmetrical triangle up | 2026-10-30 | 341.14 | 337.64 | nan | $-206.50 (-1.0%) |  |
+| LMT | deck Harami up | 2026-10-30 | 652.77 | 636.00 | 611.27 | $-519.91 (-2.6%) | -0.40 |
+| MA | deck Bull flag up | 2026-10-30 | 642.00 | 638.02 | 614.12 | $-123.38 (-0.6%) | -0.14 |
+| MCD | deck Bull pennant up | 2026-10-30 | 262.25 | 258.14 | 252.78 | $-316.47 (-1.6%) | -0.43 |
 
 **Closed trades by what opened them**
 
@@ -65,12 +77,13 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 | deck Rising wedge up | 1 | 0% | -0.01 | $-11.70 |
 | deck Symmetrical triangle down | 2 | 100% |  | $+1,899.28 |
 | deck Symmetrical triangle up | 5 | 20% | -0.36 | $-832.18 |
-| deck Triple bottom up | 1 | 100% | +0.50 | $+411.11 |
+| deck Triple bottom up | 2 | 50% | -0.26 | $+23.99 |
 
 **Last closed trades**
 
 | Symbol | Opened by | In | Out | Entry | Exit | P/L | R |
 |---|---|---|---|---|---|---|---|
+| DHR | deck Triple bottom up | 2026-10-30 | 2026-10-30 | 236.00 | 231.45 | $-387.12 (-1.9%) | -1.02 |
 | MDT | deck Bull flag up | 2026-10-23 | 2026-10-29 | 96.15 | 95.66 | $-103.90 (-0.5%) | -0.14 |
 | ISRG | deck Rising wedge up | 2026-10-23 | 2026-10-29 | 445.54 | 445.28 | $-11.70 (-0.1%) | -0.01 |
 | TSLA | deck Triple bottom up | 2026-10-27 | 2026-10-29 | 397.80 | 406.19 | $+411.11 (+2.1%) | +0.50 |
@@ -80,4 +93,3 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 | C | ABCD | 2026-10-16 | 2026-10-29 | 124.16 | 126.47 | $+273.08 (+1.9%) |  |
 | WFC | Falling wedge | 2026-10-19 | 2026-10-29 | 82.93 | 85.08 | $+346.21 (+2.6%) | +0.37 |
 | ORCL | deck Symmetrical triangle up | 2026-10-29 | 2026-10-29 | 142.05 | 140.29 | $-67.03 (-1.2%) | -0.12 |
-| GOOGL | deck Symmetrical triangle down | 2026-10-21 | 2026-10-29 | 333.63 | 285.89 | $+1,384.53 (+14.3%) |  |
