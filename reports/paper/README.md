@@ -1,6 +1,6 @@
 # Paper trading report
 
-Updated 2026-10-30 20:48 New York time by `paper_report.py` (rebuilt from Alpaca every weekday after the close).
+Updated 2026-11-02 21:55 New York time by `paper_report.py` (rebuilt from Alpaca every weekday after the close).
 Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positions), `<account>_equity.csv` (account value per day vs SPY).
 
 ## Breakout bot (stocks + crypto)
@@ -8,7 +8,7 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 | | |
 |---|---|
 | Account value | $100,836.27 (+0.0% today) |
-| Since 12 Oct 2026 | +0.8% (SPY -2.9%) |
+| Since 12 Oct 2026 | +0.8% (SPY -3.3%) |
 | Worst drop from a high | -2.5% |
 | Closed trades | 29, win 66%, avg +0.21R, profit factor 1.23, $+844.92 |
 | Open positions | 0 ($+0.00 not yet realised, 0% invested) |
@@ -40,23 +40,26 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 
 | | |
 |---|---|
-| Account value | $100,439.95 (-1.3% today) |
-| Since 15 Oct 2026 | +0.4% (SPY -2.1%) |
+| Account value | $102,437.82 (+1.9% today) |
+| Since 15 Oct 2026 | +2.4% (SPY -2.6%) |
 | Worst drop from a high | -2.9% |
 | Closed trades | 26, win 42%, avg -0.35R, profit factor 1.31, $+1,332.58 |
-| Open positions | 7 ($-886.10 not yet realised, 140% invested) |
+| Open positions | 10 ($+1,112.19 not yet realised, 198% invested) |
 
 **Open positions**
 
 | Symbol | Opened by | Since | Entry | Now | Stop | P/L | R |
 |---|---|---|---|---|---|---|---|
-| AMT | deck Gap up up | 2026-10-30 | 188.71 | 187.68 | 175.78 | $-110.21 (-0.6%) | -0.08 |
-| GM | deck Rectangle up | 2026-10-30 | 85.39 | 87.34 | 81.83 | $+464.47 (+2.3%) | +0.55 |
-| IBM | deck Bull pennant up | 2026-10-30 | 258.42 | 257.47 | 246.35 | $-74.10 (-0.4%) | -0.08 |
-| JPM | deck Symmetrical triangle up | 2026-10-30 | 341.14 | 337.64 | nan | $-206.50 (-1.0%) |  |
-| LMT | deck Harami up | 2026-10-30 | 652.77 | 636.00 | 611.27 | $-519.91 (-2.6%) | -0.40 |
-| MA | deck Bull flag up | 2026-10-30 | 642.00 | 638.02 | 614.12 | $-123.38 (-0.6%) | -0.14 |
-| MCD | deck Bull pennant up | 2026-10-30 | 262.25 | 258.14 | 252.78 | $-316.47 (-1.6%) | -0.43 |
+| AMT | deck Gap up up | 2026-10-30 | 188.71 | 188.30 | 175.78 | $-43.87 (-0.2%) | -0.03 |
+| DE | deck Bullish engulfing up | 2026-11-02 | 672.50 | 667.60 | 625.24 | $-147.00 (-0.7%) | -0.10 |
+| FDX | deck Harami up | 2026-11-02 | 319.52 | 318.89 | 298.44 | $-39.06 (-0.2%) | -0.03 |
+| GM | deck Rectangle up | 2026-10-30 | 85.39 | 89.92 | 81.83 | $+1,078.51 (+5.3%) | +1.27 |
+| IBM | deck Bull pennant up | 2026-10-30 | 258.42 | 252.90 | 246.35 | $-430.56 (-2.1%) | -0.46 |
+| JPM | deck Symmetrical triangle up | 2026-10-30 | 341.14 | 340.39 | nan | $-44.25 (-0.2%) |  |
+| LMT | deck Harami up | 2026-10-30 | 652.77 | 643.30 | 611.27 | $-293.61 (-1.4%) | -0.23 |
+| MA | deck Bull flag up | 2026-10-30 | 642.00 | 655.81 | 614.12 | $+428.11 (+2.1%) | +0.50 |
+| MCD | deck Bull pennant up | 2026-10-30 | 262.25 | 264.48 | 252.78 | $+171.71 (+0.8%) | +0.24 |
+| WMT | deck Gap up up | 2026-11-02 | 125.12 | 127.80 | 116.63 | $+432.21 (+2.1%) | +0.32 |
 
 **Closed trades by what opened them**
 
