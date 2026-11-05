@@ -1,6 +1,6 @@
 # Paper trading report
 
-Updated 2026-11-03 20:23 New York time by `paper_report.py` (rebuilt from Alpaca every weekday after the close).
+Updated 2026-11-04 20:28 New York time by `paper_report.py` (rebuilt from Alpaca every weekday after the close).
 Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positions), `<account>_equity.csv` (account value per day vs SPY).
 
 ## Breakout bot (stocks + crypto)
@@ -8,7 +8,7 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 | | |
 |---|---|
 | Account value | $100,836.27 (+0.0% today) |
-| Since 12 Oct 2026 | +0.8% (SPY -3.1%) |
+| Since 12 Oct 2026 | +0.8% (SPY -1.5%) |
 | Worst drop from a high | -2.5% |
 | Closed trades | 29, win 66%, avg +0.21R, profit factor 1.23, $+844.92 |
 | Open positions | 0 ($+0.00 not yet realised, 0% invested) |
@@ -40,26 +40,11 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 
 | | |
 |---|---|
-| Account value | $99,893.41 (-2.6% today) |
-| Since 15 Oct 2026 | -0.1% (SPY -2.3%) |
+| Account value | $102,938.76 (+2.8% today) |
+| Since 15 Oct 2026 | +2.9% (SPY -0.6%) |
 | Worst drop from a high | -2.9% |
-| Closed trades | 27, win 41%, avg -0.38R, profit factor 1.07, $+345.27 |
-| Open positions | 10 ($-444.90 not yet realised, 182% invested) |
-
-**Open positions**
-
-| Symbol | Opened by | Since | Entry | Now | Stop | P/L | R |
-|---|---|---|---|---|---|---|---|
-| ABT | deck Triple bottom up | 2026-11-03 | 109.97 | 109.40 | 105.83 | $-5.66 (-0.5%) | -0.14 |
-| AMT | deck Gap up up | 2026-10-30 | 188.71 | 187.29 | 175.78 | $-151.94 (-0.8%) | -0.11 |
-| DE | deck Bullish engulfing up | 2026-11-02 | 672.50 | 665.83 | 625.24 | $-200.10 (-1.0%) | -0.14 |
-| FDX | deck Harami up | 2026-11-02 | 319.52 | 318.02 | 298.44 | $-93.00 (-0.5%) | -0.07 |
-| GM | deck Rectangle up | 2026-10-30 | 85.39 | 88.34 | 81.83 | $+702.47 (+3.5%) | +0.83 |
-| JPM | deck Symmetrical triangle up | 2026-10-30 | 341.14 | 337.56 | nan | $-211.22 (-1.1%) |  |
-| LMT | deck Harami up | 2026-10-30 | 652.77 | 636.00 | 611.27 | $-519.91 (-2.6%) | -0.40 |
-| MA | deck Bull flag up | 2026-10-30 | 642.00 | 646.22 | 614.12 | $+130.82 (+0.7%) | +0.15 |
-| MCD | deck Bull pennant up | 2026-10-30 | 262.25 | 262.39 | 252.78 | $+10.78 (+0.1%) | +0.01 |
-| WMT | deck Gap up up | 2026-11-02 | 125.12 | 124.45 | 116.63 | $-107.14 (-0.5%) | -0.08 |
+| Closed trades | 37, win 51%, avg -0.14R, profit factor 1.44, $+2,946.13 |
+| Open positions | 0 ($+0.00 not yet realised, 0% invested) |
 
 **Closed trades by what opened them**
 
@@ -68,31 +53,33 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 | ABCD | 1 | 100% |  | $+273.08 |
 | Falling wedge | 1 | 100% | +0.37 | $+346.21 |
 | Triple bottom | 1 | 100% | +0.72 | $+679.68 |
-| deck Bull flag up | 3 | 0% | -0.52 | $-495.03 |
-| deck Bull pennant up | 2 | 0% | -1.03 | $-1,401.58 |
-| deck Bullish engulfing up | 1 | 100% | +0.10 | $+163.08 |
+| deck Bull flag up | 4 | 25% | -0.26 | $-26.31 |
+| deck Bull pennant up | 3 | 33% | -0.32 | $-608.11 |
+| deck Bullish engulfing up | 2 | 50% | -0.02 | $-43.92 |
 | deck Descending triangle up | 1 | 100% |  | $+301.44 |
 | deck Falling wedge up | 1 | 0% | -1.01 | $-293.88 |
 | deck Gap down down | 1 | 100% |  | $+1,135.72 |
-| deck Harami up | 3 | 33% | -0.45 | $-1,250.13 |
+| deck Gap up up | 2 | 100% | +0.33 | $+899.05 |
+| deck Harami up | 5 | 40% | -0.45 | $-2,369.58 |
 | deck Inverse head shoulders up | 1 | 0% | -1.03 | $-175.42 |
 | deck Piercing line up | 1 | 0% | -0.27 | $-17.29 |
+| deck Rectangle up | 1 | 100% | +1.65 | $+1,395.05 |
 | deck Rising wedge up | 1 | 0% | -0.01 | $-11.70 |
 | deck Symmetrical triangle down | 2 | 100% |  | $+1,899.28 |
-| deck Symmetrical triangle up | 5 | 20% | -0.36 | $-832.18 |
-| deck Triple bottom up | 2 | 50% | -0.26 | $+23.99 |
+| deck Symmetrical triangle up | 6 | 33% | -0.36 | $-506.50 |
+| deck Triple bottom up | 3 | 67% | +0.19 | $+69.33 |
 
 **Last closed trades**
 
 | Symbol | Opened by | In | Out | Entry | Exit | P/L | R |
 |---|---|---|---|---|---|---|---|
-| IBM | deck Bull pennant up | 2026-10-30 | 2026-11-03 | 258.42 | 245.76 | $-987.31 (-4.9%) | -1.05 |
-| DHR | deck Triple bottom up | 2026-10-30 | 2026-10-30 | 236.00 | 231.45 | $-387.12 (-1.9%) | -1.02 |
-| MDT | deck Bull flag up | 2026-10-23 | 2026-10-29 | 96.15 | 95.66 | $-103.90 (-0.5%) | -0.14 |
-| ISRG | deck Rising wedge up | 2026-10-23 | 2026-10-29 | 445.54 | 445.28 | $-11.70 (-0.1%) | -0.01 |
-| TSLA | deck Triple bottom up | 2026-10-27 | 2026-10-29 | 397.80 | 406.19 | $+411.11 (+2.1%) | +0.50 |
-| NEE | deck Symmetrical triangle up | 2026-10-23 | 2026-10-29 | 82.25 | 82.05 | $-49.65 (-0.2%) | -0.05 |
-| EMR | deck Bullish engulfing up | 2026-10-28 | 2026-10-29 | 168.04 | 169.45 | $+163.08 (+0.8%) | +0.10 |
-| TXN | deck Symmetrical triangle up | 2026-10-27 | 2026-10-29 | 301.88 | 309.08 | $+395.90 (+2.4%) | +0.37 |
-| C | ABCD | 2026-10-16 | 2026-10-29 | 124.16 | 126.47 | $+273.08 (+1.9%) |  |
-| WFC | Falling wedge | 2026-10-19 | 2026-10-29 | 82.93 | 85.08 | $+346.21 (+2.6%) | +0.37 |
+| WMT | deck Gap up up | 2026-11-02 | 2026-11-04 | 125.12 | 127.07 | $+314.83 (+1.6%) | +0.23 |
+| DE | deck Bullish engulfing up | 2026-11-02 | 2026-11-04 | 672.50 | 665.60 | $-207.00 (-1.0%) | -0.15 |
+| ABT | deck Triple bottom up | 2026-11-03 | 2026-11-04 | 109.97 | 114.50 | $+45.34 (+4.1%) | +1.10 |
+| MCD | deck Bull pennant up | 2026-10-30 | 2026-11-04 | 262.25 | 272.55 | $+793.47 (+3.9%) | +1.09 |
+| FDX | deck Harami up | 2026-11-02 | 2026-11-04 | 319.52 | 322.31 | $+172.98 (+0.9%) | +0.13 |
+| MA | deck Bull flag up | 2026-10-30 | 2026-11-04 | 642.00 | 657.12 | $+468.72 (+2.4%) | +0.54 |
+| JPM | deck Symmetrical triangle up | 2026-10-30 | 2026-11-04 | 341.14 | 346.66 | $+325.68 (+1.6%) |  |
+| AMT | deck Gap up up | 2026-10-30 | 2026-11-04 | 188.71 | 194.17 | $+584.22 (+2.9%) | +0.42 |
+| GM | deck Rectangle up | 2026-10-30 | 2026-11-04 | 85.39 | 91.25 | $+1,395.05 (+6.9%) | +1.65 |
+| LMT | deck Harami up | 2026-10-30 | 2026-11-04 | 652.77 | 611.08 | $-1,292.43 (-6.4%) | -1.00 |
