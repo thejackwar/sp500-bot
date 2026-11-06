@@ -1,6 +1,6 @@
 # Paper trading report
 
-Updated 2026-11-04 20:28 New York time by `paper_report.py` (rebuilt from Alpaca every weekday after the close).
+Updated 2026-11-05 20:34 New York time by `paper_report.py` (rebuilt from Alpaca every weekday after the close).
 Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positions), `<account>_equity.csv` (account value per day vs SPY).
 
 ## Breakout bot (stocks + crypto)
@@ -8,7 +8,7 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 | | |
 |---|---|
 | Account value | $100,836.27 (+0.0% today) |
-| Since 12 Oct 2026 | +0.8% (SPY -1.5%) |
+| Since 12 Oct 2026 | +0.8% (SPY -5.8%) |
 | Worst drop from a high | -2.5% |
 | Closed trades | 29, win 66%, avg +0.21R, profit factor 1.23, $+844.92 |
 | Open positions | 0 ($+0.00 not yet realised, 0% invested) |
@@ -40,11 +40,21 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 
 | | |
 |---|---|
-| Account value | $102,938.76 (+2.8% today) |
-| Since 15 Oct 2026 | +2.9% (SPY -0.6%) |
-| Worst drop from a high | -2.9% |
-| Closed trades | 37, win 51%, avg -0.14R, profit factor 1.44, $+2,946.13 |
-| Open positions | 0 ($+0.00 not yet realised, 0% invested) |
+| Account value | $99,035.17 (-3.8% today) |
+| Since 15 Oct 2026 | -1.0% (SPY -5.0%) |
+| Worst drop from a high | -3.8% |
+| Closed trades | 40, win 48%, avg +0.35R, profit factor 1.05, $+443.32 |
+| Open positions | 5 ($-1,396.96 not yet realised, 102% invested) |
+
+**Open positions**
+
+| Symbol | Opened by | Since | Entry | Now | Stop | P/L | R |
+|---|---|---|---|---|---|---|---|
+| BMY | deck Ascending triangle up | 2026-11-05 | 64.46 | 63.00 | 61.91 | $-465.74 (-2.3%) | -0.57 |
+| CMCSA | deck Harami up | 2026-11-05 | 25.04 | 24.86 | 23.10 | $-149.35 (-0.7%) | -0.09 |
+| COST | deck Gap up up | 2026-11-05 | 1066.76 | 1057.57 | 1014.34 | $-174.54 (-0.9%) | -0.18 |
+| MDLZ | deck Gap up up | 2026-11-05 | 67.96 | 66.65 | 65.01 | $-396.93 (-1.9%) | -0.44 |
+| MO | deck Gap up up | 2026-11-05 | 78.09 | 77.29 | 75.73 | $-210.40 (-1.0%) | -0.34 |
 
 **Closed trades by what opened them**
 
@@ -66,20 +76,20 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 | deck Rectangle up | 1 | 100% | +1.65 | $+1,395.05 |
 | deck Rising wedge up | 1 | 0% | -0.01 | $-11.70 |
 | deck Symmetrical triangle down | 2 | 100% |  | $+1,899.28 |
-| deck Symmetrical triangle up | 6 | 33% | -0.36 | $-506.50 |
-| deck Triple bottom up | 3 | 67% | +0.19 | $+69.33 |
+| deck Symmetrical triangle up | 7 | 29% | +2.41 | $-1,045.44 |
+| deck Triple bottom up | 5 | 40% | -0.29 | $-1,894.54 |
 
 **Last closed trades**
 
 | Symbol | Opened by | In | Out | Entry | Exit | P/L | R |
 |---|---|---|---|---|---|---|---|
+| GM | deck Triple bottom up | 2026-11-05 | 2026-11-05 | 93.19 | 88.71 | $-985.60 (-4.8%) | -1.00 |
+| MSFT | deck Symmetrical triangle up | 2026-11-05 | 2026-11-05 | 553.75 | 539.18 | $-538.94 (-2.6%) | -1.01 |
+| JPM | deck Triple bottom up | 2026-11-05 | 2026-11-05 | 357.87 | 340.71 | $-978.27 (-4.8%) | -1.01 |
 | WMT | deck Gap up up | 2026-11-02 | 2026-11-04 | 125.12 | 127.07 | $+314.83 (+1.6%) | +0.23 |
 | DE | deck Bullish engulfing up | 2026-11-02 | 2026-11-04 | 672.50 | 665.60 | $-207.00 (-1.0%) | -0.15 |
 | ABT | deck Triple bottom up | 2026-11-03 | 2026-11-04 | 109.97 | 114.50 | $+45.34 (+4.1%) | +1.10 |
 | MCD | deck Bull pennant up | 2026-10-30 | 2026-11-04 | 262.25 | 272.55 | $+793.47 (+3.9%) | +1.09 |
 | FDX | deck Harami up | 2026-11-02 | 2026-11-04 | 319.52 | 322.31 | $+172.98 (+0.9%) | +0.13 |
 | MA | deck Bull flag up | 2026-10-30 | 2026-11-04 | 642.00 | 657.12 | $+468.72 (+2.4%) | +0.54 |
-| JPM | deck Symmetrical triangle up | 2026-10-30 | 2026-11-04 | 341.14 | 346.66 | $+325.68 (+1.6%) |  |
-| AMT | deck Gap up up | 2026-10-30 | 2026-11-04 | 188.71 | 194.17 | $+584.22 (+2.9%) | +0.42 |
-| GM | deck Rectangle up | 2026-10-30 | 2026-11-04 | 85.39 | 91.25 | $+1,395.05 (+6.9%) | +1.65 |
-| LMT | deck Harami up | 2026-10-30 | 2026-11-04 | 652.77 | 611.08 | $-1,292.43 (-6.4%) | -1.00 |
+| JPM | deck Symmetrical triangle up | 2026-10-30 | 2026-11-04 | 341.14 | 346.66 | $+325.68 (+1.6%) | +19.71 |
