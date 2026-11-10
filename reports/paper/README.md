@@ -1,6 +1,6 @@
 # Paper trading report
 
-Updated 2026-11-06 19:57 New York time by `paper_report.py` (rebuilt from Alpaca every weekday after the close).
+Updated 2026-11-09 22:35 New York time by `paper_report.py` (rebuilt from Alpaca every weekday after the close).
 Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positions), `<account>_equity.csv` (account value per day vs SPY).
 
 ## Breakout bot (stocks + crypto)
@@ -8,7 +8,7 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 | | |
 |---|---|
 | Account value | $100,836.27 (+0.0% today) |
-| Since 12 Oct 2026 | +0.8% (SPY -5.5%) |
+| Since 12 Oct 2026 | +0.8% (SPY -3.3%) |
 | Worst drop from a high | -2.5% |
 | Closed trades | 29, win 66%, avg +0.21R, profit factor 1.23, $+844.92 |
 | Open positions | 0 ($+0.00 not yet realised, 0% invested) |
@@ -40,18 +40,18 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 
 | | |
 |---|---|
-| Account value | $96,992.51 (-2.5% today) |
-| Since 15 Oct 2026 | -3.0% (SPY -4.7%) |
-| Worst drop from a high | -5.8% |
+| Account value | $97,274.29 (+0.2% today) |
+| Since 15 Oct 2026 | -2.7% (SPY -2.5%) |
+| Worst drop from a high | -5.7% |
 | Closed trades | 43, win 44%, avg +0.24R, profit factor 0.82, $-2,105.90 |
-| Open positions | 2 ($-889.17 not yet realised, 41% invested) |
+| Open positions | 2 ($-606.16 not yet realised, 41% invested) |
 
 **Open positions**
 
 | Symbol | Opened by | Since | Entry | Now | Stop | P/L | R |
 |---|---|---|---|---|---|---|---|
-| CMCSA | deck Harami up | 2026-11-05 | 25.04 | 24.29 | 23.10 | $-619.60 (-3.0%) | -0.39 |
-| COST | deck Gap up up | 2026-11-05 | 1066.76 | 1052.57 | 1014.34 | $-269.57 (-1.3%) | -0.27 |
+| CMCSA | deck Harami up | 2026-11-05 | 25.04 | 24.37 | 23.10 | $-553.60 (-2.7%) | -0.35 |
+| COST | deck Gap up up | 2026-11-05 | 1066.76 | 1063.99 | 1014.34 | $-52.56 (-0.3%) | -0.05 |
 
 **Closed trades by what opened them**
 
