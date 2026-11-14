@@ -1,6 +1,6 @@
 # Paper trading report
 
-Updated 2026-11-12 20:50 New York time by `paper_report.py` (rebuilt from Alpaca every weekday after the close).
+Updated 2026-11-13 20:28 New York time by `paper_report.py` (rebuilt from Alpaca every weekday after the close).
 Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positions), `<account>_equity.csv` (account value per day vs SPY).
 
 ## Breakout bot (stocks + crypto)
@@ -8,7 +8,7 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 | | |
 |---|---|
 | Account value | $100,836.27 (+0.0% today) |
-| Since 12 Oct 2026 | +0.8% (SPY -2.7%) |
+| Since 12 Oct 2026 | +0.8% (SPY -3.0%) |
 | Worst drop from a high | -2.5% |
 | Closed trades | 29, win 66%, avg +0.21R, profit factor 1.23, $+844.92 |
 | Open positions | 0 ($+0.00 not yet realised, 0% invested) |
@@ -40,28 +40,28 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 
 | | |
 |---|---|
-| Account value | $98,835.08 (-0.5% today) |
-| Since 15 Oct 2026 | -1.2% (SPY -1.9%) |
+| Account value | $99,286.94 (+0.7% today) |
+| Since 15 Oct 2026 | -0.7% (SPY -2.3%) |
 | Worst drop from a high | -5.7% |
 | Closed trades | 43, win 44%, avg +0.24R, profit factor 0.82, $-2,105.90 |
-| Open positions | 12 ($+954.65 not yet realised, 202% invested) |
+| Open positions | 12 ($+1,406.51 not yet realised, 201% invested) |
 
 **Open positions**
 
 | Symbol | Opened by | Since | Entry | Now | Stop | P/L | R |
 |---|---|---|---|---|---|---|---|
-| AAPL | deck Gap up up | 2026-11-12 | 357.03 | 355.50 | 338.04 | $-13.78 (-0.4%) | -0.08 |
-| BRK.B | deck Gap up up | 2026-11-11 | 578.73 | 589.08 | 559.61 | $+341.54 (+1.8%) | +0.54 |
-| CMCSA | deck Harami up | 2026-11-05 | 25.04 | 24.87 | 23.10 | $-141.10 (-0.7%) | -0.09 |
-| COST | deck Gap up up | 2026-11-05 | 1066.76 | 1092.63 | 1014.34 | $+491.60 (+2.4%) | +0.49 |
-| LLY | deck Gap up up | 2026-11-10 | 1412.55 | 1429.17 | 1333.22 | $+216.06 (+1.2%) | +0.21 |
-| LOW | deck Gap up up | 2026-11-10 | 231.10 | 227.46 | 220.32 | $-305.43 (-1.6%) | -0.34 |
-| MCD | deck Gap up up | 2026-11-10 | 282.55 | 273.66 | 269.11 | $-604.77 (-3.1%) | -0.66 |
-| MDLZ | deck Gap up up | 2026-11-10 | 66.34 | 66.55 | 64.69 | $+60.28 (+0.3%) | +0.12 |
-| MO | deck Gap up up | 2026-11-12 | 78.34 | 77.90 | 74.80 | $-1.75 (-0.6%) | -0.12 |
-| TMO | deck Ascending triangle up | 2026-11-10 | 716.03 | 699.44 | 687.81 | $-447.96 (-2.3%) | -0.59 |
-| TSLA | deck Harami up | 2026-11-10 | 374.80 | 401.19 | 338.15 | $+1,372.28 (+7.0%) | +0.72 |
-| WMT | deck Gap up up | 2026-11-10 | 126.04 | 125.96 | 123.03 | $-12.32 (-0.1%) | -0.03 |
+| AAPL | deck Gap up up | 2026-11-12 | 357.03 | 355.40 | 338.04 | $-14.68 (-0.5%) | -0.09 |
+| BRK.B | deck Gap up up | 2026-11-11 | 578.73 | 592.30 | 559.61 | $+447.80 (+2.3%) | +0.71 |
+| CMCSA | deck Harami up | 2026-11-05 | 25.04 | 25.28 | 23.10 | $+199.05 (+1.0%) | +0.12 |
+| COST | deck Gap up up | 2026-11-05 | 1066.76 | 1105.80 | 1014.34 | $+741.83 (+3.7%) | +0.74 |
+| LLY | deck Gap up up | 2026-11-10 | 1412.55 | 1439.99 | 1333.22 | $+356.72 (+1.9%) | +0.35 |
+| LOW | deck Gap up up | 2026-11-10 | 231.10 | 227.73 | 220.32 | $-282.75 (-1.5%) | -0.31 |
+| MCD | deck Gap up up | 2026-11-10 | 282.55 | 272.25 | 269.11 | $-700.65 (-3.6%) | -0.77 |
+| MDLZ | deck Gap up up | 2026-11-10 | 66.34 | 66.87 | 64.69 | $+154.36 (+0.8%) | +0.32 |
+| MO | deck Gap up up | 2026-11-12 | 78.34 | 78.64 | 74.80 | $+1.21 (+0.4%) | +0.09 |
+| TMO | deck Ascending triangle up | 2026-11-10 | 716.03 | 700.22 | 687.81 | $-426.90 (-2.2%) | -0.56 |
+| TSLA | deck Harami up | 2026-11-10 | 374.80 | 387.11 | 338.15 | $+640.08 (+3.3%) | +0.34 |
+| WMT | deck Gap up up | 2026-11-10 | 126.04 | 127.93 | 123.03 | $+290.44 (+1.5%) | +0.63 |
 
 **Closed trades by what opened them**
 
