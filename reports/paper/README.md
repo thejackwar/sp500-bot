@@ -1,6 +1,6 @@
 # Paper trading report
 
-Updated 2026-11-16 22:55 New York time by `paper_report.py` (rebuilt from Alpaca every weekday after the close).
+Updated 2026-11-17 21:54 New York time by `paper_report.py` (rebuilt from Alpaca every weekday after the close).
 Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positions), `<account>_equity.csv` (account value per day vs SPY).
 
 ## Breakout bot (stocks + crypto)
@@ -8,7 +8,7 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 | | |
 |---|---|
 | Account value | $100,836.27 (+0.0% today) |
-| Since 12 Oct 2026 | +0.8% (SPY -4.9%) |
+| Since 12 Oct 2026 | +0.8% (SPY -5.9%) |
 | Worst drop from a high | -2.5% |
 | Closed trades | 29, win 66%, avg +0.21R, profit factor 1.23, $+844.92 |
 | Open positions | 0 ($+0.00 not yet realised, 0% invested) |
@@ -40,29 +40,27 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 
 | | |
 |---|---|
-| Account value | $98,876.74 (-0.8% today) |
-| Since 15 Oct 2026 | -1.1% (SPY -4.1%) |
+| Account value | $97,261.22 (-1.9% today) |
+| Since 15 Oct 2026 | -2.7% (SPY -5.1%) |
 | Worst drop from a high | -5.7% |
-| Closed trades | 43, win 44%, avg +0.24R, profit factor 0.82, $-2,105.90 |
-| Open positions | 13 ($+996.32 not yet realised, 202% invested) |
+| Closed trades | 45, win 42%, avg +0.17R, profit factor 0.72, $-3,814.35 |
+| Open positions | 11 ($+1,089.26 not yet realised, 166% invested) |
 
 **Open positions**
 
 | Symbol | Opened by | Since | Entry | Now | Stop | P/L | R |
 |---|---|---|---|---|---|---|---|
-| AAPL | deck Gap up up | 2026-11-12 | 357.03 | 353.09 | 338.04 | $-35.47 (-1.1%) | -0.21 |
-| BRK.B | deck Gap up up | 2026-11-11 | 578.73 | 591.97 | 559.61 | $+436.91 (+2.3%) | +0.69 |
-| CMCSA | deck Harami up | 2026-11-05 | 25.04 | 25.60 | 23.10 | $+461.15 (+2.2%) | +0.29 |
-| COST | deck Gap up up | 2026-11-05 | 1066.76 | 1113.00 | 1014.34 | $+878.63 (+4.3%) | +0.88 |
-| KO | deck Rising wedge up | 2026-11-16 | 100.36 | 99.22 | 97.61 | $-4.55 (-1.1%) | -0.41 |
-| LLY | deck Gap up up | 2026-11-10 | 1412.55 | 1429.00 | 1333.22 | $+213.85 (+1.2%) | +0.21 |
-| LOW | deck Gap up up | 2026-11-10 | 231.10 | 222.68 | 220.32 | $-707.25 (-3.6%) | -0.78 |
-| MCD | deck Gap up up | 2026-11-10 | 282.55 | 273.59 | 269.11 | $-609.53 (-3.2%) | -0.67 |
-| MDLZ | deck Gap up up | 2026-11-10 | 66.34 | 67.79 | 64.69 | $+424.84 (+2.2%) | +0.87 |
-| MO | deck Gap up up | 2026-11-12 | 78.34 | 78.91 | 74.80 | $+2.29 (+0.7%) | +0.16 |
-| TMO | deck Ascending triangle up | 2026-11-10 | 716.03 | 691.33 | 687.81 | $-666.93 (-3.5%) | -0.88 |
-| TSLA | deck Harami up | 2026-11-10 | 374.80 | 380.55 | 338.15 | $+299.00 (+1.5%) | +0.16 |
-| WMT | deck Gap up up | 2026-11-10 | 126.04 | 128.01 | 123.03 | $+303.38 (+1.6%) | +0.65 |
+| AAPL | deck Gap up up | 2026-11-12 | 357.03 | 350.21 | 338.04 | $-61.39 (-1.9%) | -0.36 |
+| BRK.B | deck Gap up up | 2026-11-11 | 578.73 | 586.76 | 559.61 | $+264.98 (+1.4%) | +0.42 |
+| CMCSA | deck Harami up | 2026-11-05 | 25.04 | 25.18 | 23.10 | $+114.65 (+0.6%) | +0.07 |
+| COST | deck Gap up up | 2026-11-05 | 1066.76 | 1109.00 | 1014.34 | $+802.63 (+4.0%) | +0.81 |
+| KO | deck Rising wedge up | 2026-11-16 | 100.36 | 98.60 | 97.61 | $-7.03 (-1.8%) | -0.64 |
+| LLY | deck Gap up up | 2026-11-10 | 1412.55 | 1407.01 | 1333.22 | $-72.02 (-0.4%) | -0.07 |
+| MCD | deck Gap up up | 2026-11-10 | 282.55 | 275.00 | 269.11 | $-513.65 (-2.7%) | -0.56 |
+| MDLZ | deck Gap up up | 2026-11-10 | 66.34 | 66.55 | 64.69 | $+60.28 (+0.3%) | +0.12 |
+| MO | deck Gap up up | 2026-11-12 | 78.34 | 77.46 | 74.80 | $-3.51 (-1.1%) | -0.25 |
+| TSLA | deck Harami up | 2026-11-10 | 374.80 | 381.30 | 338.15 | $+338.00 (+1.7%) | +0.18 |
+| WMT | deck Gap up up | 2026-11-10 | 126.04 | 127.12 | 123.03 | $+166.32 (+0.9%) | +0.36 |
 
 **Closed trades by what opened them**
 
@@ -71,14 +69,14 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 | ABCD | 1 | 100% |  | $+273.08 |
 | Falling wedge | 1 | 100% | +0.37 | $+346.21 |
 | Triple bottom | 1 | 100% | +0.72 | $+679.68 |
-| deck Ascending triangle up | 1 | 0% | -1.03 | $-838.97 |
+| deck Ascending triangle up | 2 | 0% | -1.04 | $-1,639.82 |
 | deck Bull flag up | 4 | 25% | -0.26 | $-26.31 |
 | deck Bull pennant up | 3 | 33% | -0.32 | $-608.11 |
 | deck Bullish engulfing up | 2 | 50% | -0.02 | $-43.92 |
 | deck Descending triangle up | 1 | 100% |  | $+301.44 |
 | deck Falling wedge up | 1 | 0% | -1.01 | $-293.88 |
 | deck Gap down down | 1 | 100% |  | $+1,135.72 |
-| deck Gap up up | 4 | 50% | -0.41 | $-811.20 |
+| deck Gap up up | 5 | 40% | -0.53 | $-1,718.80 |
 | deck Harami up | 5 | 40% | -0.45 | $-2,369.58 |
 | deck Inverse head shoulders up | 1 | 0% | -1.03 | $-175.42 |
 | deck Piercing line up | 1 | 0% | -0.27 | $-17.29 |
@@ -92,6 +90,8 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 
 | Symbol | Opened by | In | Out | Entry | Exit | P/L | R |
 |---|---|---|---|---|---|---|---|
+| LOW | deck Gap up up | 2026-11-10 | 2026-11-17 | 231.10 | 220.29 | $-907.60 (-4.7%) | -1.00 |
+| TMO | deck Ascending triangle up | 2026-11-10 | 2026-11-17 | 716.03 | 686.37 | $-800.85 (-4.1%) | -1.05 |
 | BMY | deck Ascending triangle up | 2026-11-05 | 2026-11-06 | 64.46 | 61.83 | $-838.97 (-4.1%) | -1.03 |
 | MO | deck Gap up up | 2026-11-05 | 2026-11-06 | 78.09 | 75.11 | $-783.07 (-3.8%) | -1.26 |
 | MDLZ | deck Gap up up | 2026-11-05 | 2026-11-06 | 67.96 | 64.90 | $-927.18 (-4.5%) | -1.04 |
@@ -100,5 +100,3 @@ Files: `<account>_trades.csv` (closed trades), `<account>_open.csv` (open positi
 | JPM | deck Triple bottom up | 2026-11-05 | 2026-11-05 | 357.87 | 340.71 | $-978.27 (-4.8%) | -1.01 |
 | WMT | deck Gap up up | 2026-11-02 | 2026-11-04 | 125.12 | 127.07 | $+314.83 (+1.6%) | +0.23 |
 | DE | deck Bullish engulfing up | 2026-11-02 | 2026-11-04 | 672.50 | 665.60 | $-207.00 (-1.0%) | -0.15 |
-| ABT | deck Triple bottom up | 2026-11-03 | 2026-11-04 | 109.97 | 114.50 | $+45.34 (+4.1%) | +1.10 |
-| MCD | deck Bull pennant up | 2026-10-30 | 2026-11-04 | 262.25 | 272.55 | $+793.47 (+3.9%) | +1.09 |
